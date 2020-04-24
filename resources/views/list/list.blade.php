@@ -2,9 +2,9 @@
 
 @section('content')
 
-@if (session('status'))
+@if (session('success'))
     <div class="alert alert-success">
-        {{ session('status') }}
+        {{ session('success') }}
     </div>
 @endif
 
@@ -15,15 +15,21 @@
             <div class="card-body">
                 <a href="{{route('list.create')}}" class="btn btn-primary">@lang('lists.new')</a>
                 <table class="table mt-4">
-                    <thead><tr>
+                <thead>
+                    <tr>
+                        <th colspan="1">@lang('common.id')</th>
                         <th colspan="1">@lang('common.name')</th>
                         <th colspan="1">@lang('common.description')</th>
-                        <th colspan="3">@lang('lists.hierarchical')</th>
+                        <th colspan="1">@lang('lists.hierarchical')</th>
+                        <th colspan="3">@lang('common.actions')</th>
                     </tr>
                 </thead>
                 <tbody>
                 @foreach($lists as $list)
                     <tr>
+                        <td>
+                            {{$list->list_id}}
+                        </td>
                         <td>
                             {{$list->name}}
                         </td>
@@ -32,6 +38,11 @@
                         </td>
                         <td>
                             @if($list->hierarchical) @lang('common.yes') @else @lang('common.no') @endif
+                        </td>
+                        <td>
+                            <form action="{{route('list.show', $list->list_id)}}" method="GET">
+                                <button class="btn btn-primary" type="submit">@lang('common.show')</button>
+                            </form>
                         </td>
                         <td>
                             <form action="{{route('list.edit', $list->list_id)}}" method="GET">

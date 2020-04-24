@@ -13,10 +13,14 @@ return [
 
     'yes' => 'ja',
     'no' => 'nein',
+    'new' => 'neu',
+    'show' => 'anzeigen',
     'edit' => 'bearbeiten',
     'delete' => 'löschen',
     'save' => 'speichern',
 
+    'root' => 'Wurzelelement',
+    'id' => 'ID',
     'name' => 'Name',
     'description' => 'Beschreibung',
 

@@ -35,4 +35,12 @@ class Selectlist extends Model
         'hierarchical',
         'attribute_order',
     ];
+    
+    /**
+     * Get the elements of the list.
+     */
+    public function elements()
+    {
+        return $this->hasMany('App\Element', 'list_fk', 'list_id');
+    }    
 }

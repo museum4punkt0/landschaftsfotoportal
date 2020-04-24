@@ -21,4 +21,8 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 
+Route::resource('list.element', 'ElementsController')->shallow();
+Route::resource('element.value', 'ValuesController')->shallow();
+
 Route::resource('list', 'ListsController');
+Route::resource('attribute', 'AttributesController');

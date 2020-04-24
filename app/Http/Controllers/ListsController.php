@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-// added
-use Auth;
-use Redirect;
 use App\Selectlist;
+use App\Element;
+use Illuminate\Http\Request;
+use Redirect;
+use Auth;
 
 class ListsController extends Controller
 {
@@ -50,9 +50,8 @@ class ListsController extends Controller
         ]);
         
         Selectlist::create($request->all());
-    
-        return Redirect::to('list')->with('success','Great! Product created successfully.');
-
+        
+        return Redirect::to('list')->with('success', __('lists.created'));
     }
 
     /**
@@ -64,6 +63,10 @@ class ListsController extends Controller
     public function show($id)
     {
         //
+        $data['list'] = Selectlist::find($id);
+        $data['elements'] = Selectlist::find($id)->elements;
+        
+        return view('list.show', $data);
     }
 
     /**
@@ -75,9 +78,8 @@ class ListsController extends Controller
     public function edit($id)
     {
         //
-        $where = array('list_id' => $id);
-        $data['list'] = Selectlist::where($where)->first();
- 
+        $data['list'] = Selectlist::find($id);
+        
         return view('list.edit', $data);
     }
 
@@ -105,7 +107,7 @@ class ListsController extends Controller
         ];
         Selectlist::where('list_id', $id)->update($update);
         
-        return Redirect::to('list')->with('success','Great! Product updated successfully');
+        return Redirect::to('list')->with('success', __('lists.updated'));
 
     }
 
@@ -120,6 +122,8 @@ class ListsController extends Controller
         //
         Selectlist::where('list_id', $id)->delete();
         
-        return Redirect::to('list')->with('success','Product deleted successfully');
+        // TODO: delete orphaned elements and values
+        
+        return Redirect::to('list')->with('success', __('lists.deleted'));
     }
 }
