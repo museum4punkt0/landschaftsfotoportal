@@ -20,4 +20,5 @@ return [
     'deleted' => 'Listen-Eintrag wurde gelöscht.',
     
     'hierarchy_fixed' => 'Elternelement für Element ID :id wurde angepasst.',
+    'orphans_deleted' => 'Zum Element gehörige Werte wurden gelöscht.',
 ];

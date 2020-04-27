@@ -125,13 +125,25 @@ class ElementsController extends Controller
     {
         // Delete all values owned by this element
         Value::where('element_fk', $element->element_id)->delete();
-        
-        // TODO fix hierarchy
+        $success_status_msg =  __('elements.orphans_deleted');
         
         // Delete the element itself
         $element->delete();
+        $success_status_msg .= " ". __('elements.deleted');
+        
+        // Fix hierarchy of elements if necessary
+        if($element->list->hierarchical) {
+            // Check for existing descendants
+            foreach(Element::where('parent_fk', $element->element_id)->get() as $descendant) {
+                // Fix parent ID on descendant element
+                $descendant->parent_fk = $element->parent_fk;
+                $descendant->save();
+                $success_status_msg .= " ".
+                    __('elements.hierarchy_fixed', ['id'=>$descendant->element_id]);
+            }
+        }
         
         return Redirect::to('list/'.$element->list_fk)
-            ->with('success', __('elements.deleted'));
+            ->with('success', $success_status_msg);
     }
 }

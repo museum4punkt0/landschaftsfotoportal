@@ -128,9 +128,9 @@ class ValuesController extends Controller
         
             // Fix hierarchy of elements if necessary
             if($value->element->list->hierarchical) {
-                // Check for existing descendents
+                // Check for existing descendants
                 foreach(Element::where('parent_fk', $value->element_fk)->get() as $element) {
-                    // Fix parent ID on descendent element
+                    // Fix parent ID on descendant element
                     $element->parent_fk = $value->element->parent_fk;
                     $element->save();
                     $success_status_msg .= " ".
