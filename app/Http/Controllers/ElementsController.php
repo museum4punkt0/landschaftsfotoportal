@@ -90,7 +90,9 @@ class ElementsController extends Controller
     public function edit(Element $element)
     {
         $data['element'] = $element;
-        $data['elements'] = Element::where('list_fk', $element->list_fk)->get();
+        $data['elements'] = Element::where('list_fk', $element->list_fk)->get()
+                            ->except([$element->element_id]);
+        #print_r($element->childrenElements);
         
         return view('element.edit', $data);
     }

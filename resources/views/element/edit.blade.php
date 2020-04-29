@@ -16,14 +16,12 @@
             </option>
         @endif
         @foreach($elements as $el)
-            @if($element->element_id != $el->values[0]->element_fk)
             <option value="{{$el->values[0]->element_fk}}"
                 @if($element->parent_fk == $el->values[0]->element_fk) selected @endif>
                 @foreach($el->values as $value)
                     {{$value->value}}; 
                 @endforeach
             </option>
-            @endif
         @endforeach
         </select>
         <span class="text-danger">{{ $errors->first('parent_fk') }}</span>
