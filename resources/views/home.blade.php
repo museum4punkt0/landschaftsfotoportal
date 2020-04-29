@@ -14,7 +14,7 @@
                         </div>
                     @endif
 
-                    You are logged in!
+                    @lang('auth.logged_in')
                 </div>
             </div>
         </div>
