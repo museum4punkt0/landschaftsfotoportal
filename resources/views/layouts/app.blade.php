@@ -37,6 +37,9 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('list.index') }}">{{ __('lists.header') }}</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('attribute.index') }}">{{ __('attributes.header') }}</a>
+                            </li>
                         @endauth
                     </ul>
 
