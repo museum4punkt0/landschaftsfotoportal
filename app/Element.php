@@ -40,5 +40,13 @@ class Element extends Model
     public function values()
     {
         return $this->hasMany('App\Value', 'element_fk', 'element_id');
-    }    
+    }
+    
+    /**
+     * Get the children of the element.
+     */
+    public function childrenElements()
+    {
+        return $this->hasMany('App\Element', 'parent_fk', 'element_id')->with('childrenElements');
+    }
 }
