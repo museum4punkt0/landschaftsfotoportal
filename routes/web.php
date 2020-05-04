@@ -22,6 +22,13 @@ Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
 
+Route::get('/admin/import/csv/upload', 'Admin\ImportCSVController@index')->name('import.csv.upload')
+    ->middleware('auth');
+Route::post('/admin/import/csv/save', 'Admin\ImportCSVController@save')->name('import.csv.save')
+    ->middleware('auth');
+Route::post('/admin/import/csv/process', 'Admin\ImportCSVController@process')->name('import.csv.process')
+    ->middleware('auth');
+
 Route::resource('list.element', 'ElementsController')->shallow()->middleware('auth');
 Route::resource('element.value', 'ValuesController')->shallow()->middleware('auth');
 

@@ -18,6 +18,8 @@ return [
     'edit' => 'bearbeiten',
     'delete' => 'löschen',
     'save' => 'speichern',
+    'upload' => 'hochladen',
+    'ignore' => 'ignorieren',
 
     'root' => 'Wurzelelement',
     'id' => 'ID',
