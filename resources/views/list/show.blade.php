@@ -21,7 +21,7 @@
                         <th colspan="1">@lang('lists.value_summary')</th>
                         <th colspan="1">@lang('lists.attribute'): @lang('values.value')</th>
                     @if($list->hierarchical)
-                        <th colspan="1">@lang('lists.parent')</th>
+                        <th colspan="1">@lang('lists.parent') @lang('common.id')</th>
                     @endif
                         <th colspan="2">@lang('elements.element')</th>
                     </tr>
@@ -57,17 +57,13 @@
                             </td></tr>
                         </table></td>
                         @if($list->hierarchical)
-                        <td>
-                            <form action="{{route('element.edit', $element->element_id)}}" method="GET">
-                            @if($element->parent_fk)
-                                {{ csrf_field() }}
-                                <button class="btn btn-primary" type="submit">@lang('common.edit')</button>
-                            @else
-                                @lang('common.root')
-                            @endif
-                            {{$element->parent_fk}}
-                            </form>
-                        </td>
+                            <td>
+                                <form action="{{route('element.edit', $element->element_id)}}" method="GET">
+                                    {{ csrf_field() }}
+                                    <button class="btn btn-primary" type="submit">@lang('common.edit')</button>
+                                    {{$element->parent_fk}}
+                                </form>
+                            </td>
                         @endif
                         <td>
                             <form action="{{route('element.destroy', $element->element_id)}}" method="POST">

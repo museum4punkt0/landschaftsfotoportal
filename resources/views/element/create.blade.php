@@ -22,22 +22,20 @@
         <span class="text-danger">{{ $errors->first('attribute') }}</span>
     </div>
     @if($list->hierarchical)
-    <div class="form-group">
-        <span>@lang('lists.parent')</span>
-        <select name="parent_fk" class="form-control" size=1 >
-        @if(sizeof($elements) == 0)
-            <option value="0">@lang('common.root')</option>
-        @endif
-        @foreach($elements as $element)
-            <option value="{{$element->values[0]->element_fk}}">
-                @foreach($element->values as $value)
-                    {{$value->value}}; 
+        <div class="form-group">
+            <span>@lang('lists.parent')</span>
+            <select name="parent_fk" class="form-control" size=1 >
+                <option value="0">@lang('common.root')</option>
+                @foreach($elements as $element)
+                    <option value="{{$element->values[0]->element_fk}}">
+                    @foreach($element->values as $value)
+                        {{$value->value}}; 
+                    @endforeach
+                    </option>
                 @endforeach
-            </option>
-        @endforeach
-        </select>
-        <span class="text-danger">{{ $errors->first('hierarchical') }}</span>
-    </div>
+            </select>
+            <span class="text-danger">{{ $errors->first('hierarchical') }}</span>
+        </div>
     @else
         <input type="hidden" name="parent_fk" class="form-control" value=0 />
     @endif
