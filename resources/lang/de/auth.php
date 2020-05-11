@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Authentication Language Lines
@@ -13,9 +12,6 @@ return [
     |
     */
 
-    'failed' => 'Diese Anmeldedaten sind ungültig.',
-    'throttle' => 'Zu viele Anmeldeversuche. Bitte :seconds Sekunden warten und erneut versuchen.',
-    
-    'logged_in' => 'Sie haben sich erfolgreich angemeldet!',
-
+    'failed'   => 'Diese Kombination aus Zugangsdaten wurde nicht in unserer Datenbank gefunden.',
+    'throttle' => 'Zu viele Loginversuche. Versuchen Sie es bitte in :seconds Sekunden nochmal.',
 ];
