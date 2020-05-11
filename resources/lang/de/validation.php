@@ -133,6 +133,9 @@ return [
         'attribute-name' => [
             'rule-name' => 'custom-message',
         ],
+        'fileUpload' => [
+            'required' => 'Es wurde keine Datei ausgewählt.',
+        ],
     ],
 
     /*

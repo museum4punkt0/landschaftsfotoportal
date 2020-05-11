@@ -26,6 +26,8 @@ Route::get('/admin/import/csv/upload', 'Admin\ImportCSVController@index')->name(
     ->middleware('auth');
 Route::post('/admin/import/csv/save', 'Admin\ImportCSVController@save')->name('import.csv.save')
     ->middleware('auth');
+Route::get('/admin/import/csv/preview', 'Admin\ImportCSVController@preview')->name('import.csv.preview')
+    ->middleware('auth');
 Route::post('/admin/import/csv/process', 'Admin\ImportCSVController@process')->name('import.csv.process')
     ->middleware('auth');
 

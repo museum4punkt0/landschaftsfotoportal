@@ -10,6 +10,7 @@
             <form action="{{ route('import.csv.process') }}" method="POST" class="form-horizontal">
                 {{ csrf_field() }}
                 <input type="hidden" name="list" value="{{ $list->list_id }}" />
+                <input type="hidden" name="hierarchical" value="{{ $list->hierarchical }}" />
 
                 <table class="table mt-4">
                     
@@ -26,19 +27,29 @@
                             <select name="fields[{{ $key }}]">
                                 <option value="0">@lang('common.ignore')</option>
                                 @if($list->hierarchical)
-                                    <option value="-1">@lang('import.element_id')</option>
-                                    <option value="-2">@lang('import.parent_id')</option>
+                                    <option value="-1"
+                                        @if(old('fields.'.$key) == -1) selected @endif>
+                                        @lang('import.element_id')
+                                    </option>
+                                    <option value="-2"
+                                        @if(old('fields.'.$key) == -2) selected @endif>
+                                        @lang('import.parent_id')
+                                    </option>
                                 @endif
                                 @foreach ($attributes as $attr)
-                                    <option value="{{ $attr->attribute_id }}">{{ $attr->name }}</option>
+                                    <option value="{{ $attr->attribute_id }}"
+                                        @if(old('fields.'.$key) == $attr->attribute_id) selected @endif>
+                                        {{ $attr->name }}
+                                    </option>
                                 @endforeach
                             </select>
                         </td>
                     @endforeach
                     </tr>
                     <tr><td colspan={{ sizeof($csv_data[0]) }}>
-                        <span class="text-danger">{{ $errors->first('fields.*') }}</span>
-                        
+                    @if ($errors->any())
+                        <div class="alert alert-danger">{{ $errors->first('fields') }}</div>
+                    @endif
                     </td></tr>
                 </table>
 

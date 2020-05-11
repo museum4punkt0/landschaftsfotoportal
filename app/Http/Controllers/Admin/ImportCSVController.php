@@ -38,16 +38,30 @@ class ImportCSVController extends Controller
             // Save CSV file path to session
             $request->session()->put('csv_file', $csv_file);
             
-            // Parse CSV file
-            $data = array_map(function($d) {
-                return str_getcsv($d, ";");
-            }, file($csv_file));
-            $csv_data = array_slice($data, 0, 5);
-            
-            // Load attributes and selected list from database
-            $list = Selectlist::find($request->input('list'));
-            $attributes = Attribute::all();
+            return redirect()->route('import.csv.preview', ['list'=>$request->input('list')]);
         }
+        // Saving file failed
+        else
+        {
+            return redirect()->route('import.csv.upload')
+                ->with('error', __('import.save_error'));
+        }
+    }
+    
+    public function preview(Request $request)
+    {
+        // Get CSV file path from session and read file into array $data
+        $csv_file = $request->session()->get('csv_file');
+        
+        // Parse CSV file
+        $data = array_map(function($d) {
+            return str_getcsv($d, ";");
+        }, file($csv_file));
+        $csv_data = array_slice($data, 0, 5);
+        
+        // Load attributes and selected list from database
+        $list = Selectlist::find($request->list);
+        $attributes = Attribute::all();
         
         return view('admin.import.csvcontent', compact('csv_data', 'attributes', 'list'));
     }
@@ -55,12 +69,31 @@ class ImportCSVController extends Controller
     public function process(Request $request)
     {
         // Validate the form inputs
-        /* should redirect POST instead of GET
-         * see https://laravel.com/docs/7.x/validation#manually-creating-validators
         $request->validate([
-            'fields.*' => 'distinct',
+            'fields' => [
+                function ($attribute, $value, $fail) {
+                    global $request;
+                    $v = array_count_values($value);
+                    // Hierarchical lists need a column with element IDs
+                    if($request->has('hierarchical') && empty($v[-1])) {
+                        $fail(__('import.missing_id'));
+                    }
+                    // Hierarchical lists need a column with parent IDs
+                    if($request->has('hierarchical') && empty($v[-2])) {
+                        $fail(__('import.missing_parent'));
+                    }
+                    // Check for duplicate attributes but not for 'ignored' ones
+                    foreach($v as $selected_attr => $quantity) {
+                        if ($selected_attr !== 0 && $quantity > 1) {
+                            $fail(__('import.attribute_once', [
+                                'attribute' => Attribute::find($selected_attr)->name
+                            ]));
+                        }
+                    }
+                },
+            ],
         ]);
-        */
+        #dd($request);
         // Get CSV file path from session and read file into array $data
         $csv_file = $request->session()->get('csv_file');
         $data = array_map(function($d) {
