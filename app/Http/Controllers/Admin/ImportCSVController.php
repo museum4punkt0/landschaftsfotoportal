@@ -69,21 +69,11 @@ class ImportCSVController extends Controller
     public function process(Request $request)
     {
         // Validate the form inputs
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'fields' => [
                 function ($attribute, $value, $fail) {
-                    global $request;
-                    $v = array_count_values($value);
-                    // Hierarchical lists need a column with element IDs
-                    if($request->has('hierarchical') && empty($v[-1])) {
-                        $fail(__('import.missing_id'));
-                    }
-                    // Hierarchical lists need a column with parent IDs
-                    if($request->has('hierarchical') && empty($v[-2])) {
-                        $fail(__('import.missing_parent'));
-                    }
                     // Check for duplicate attributes but not for 'ignored' ones
-                    foreach($v as $selected_attr => $quantity) {
+                    foreach(array_count_values($value) as $selected_attr => $quantity) {
                         if ($selected_attr !== 0 && $quantity > 1) {
                             $fail(__('import.attribute_once', [
                                 'attribute' => Attribute::find($selected_attr)->name
@@ -91,9 +81,38 @@ class ImportCSVController extends Controller
                         }
                     }
                 },
+                function ($attribute, $value, $fail) {
+                    // Check for missing attributes, at least one (column) must be selected
+                    $a = array_filter($value, function ($v) { return $v>0; } );
+                    if(!array_sum($a))
+                        $fail(__('import.missing_attributes'));
+                },
             ],
         ]);
-        #dd($request);
+        // Conditional validation
+        $validator->sometimes('fields', [
+            function ($attribute, $value, $fail) {
+                // Hierarchical lists need a column with element IDs
+                if(empty(array_count_values($value)[-1])) {
+                    $fail(__('import.missing_id'));
+                }
+            },
+            function ($attribute, $value, $fail) {
+                // Hierarchical lists need a column with parent IDs
+                if(empty(array_count_values($value)[-2])) {
+                    $fail(__('import.missing_parent'));
+                }
+            },
+        ], function ($input) {
+            return $input->has('hierarchical'); // If closure returns true, the condition is true
+        });
+        
+        if($validator->fails()) {
+            return redirect()->route('import.csv.preview', ['list'=>$request->input('list')])
+                        ->withErrors($validator)
+                        ->withInput();
+        }
+                
         // Get CSV file path from session and read file into array $data
         $csv_file = $request->session()->get('csv_file');
         $data = array_map(function($d) {

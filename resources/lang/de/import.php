@@ -21,6 +21,7 @@ return [
     'parent_id' => 'Parent ID',
     'attribute_hint' => 'Wählen Sie für jede Tabellenspalte welche Art von Inhalt sie enthält.',
     'attribute_once' => '":attribute" darf nur für eine Spalte ausgewählt werden!',
+    'missing_attributes' => 'Für mindestens eine Spalte muss der Inahlts-Typ (Attribut) ausgewählt werden!',
     'missing_id' => 'Es muss eine Spalte mit den Element-IDs ausgewählt werden!',
     'missing_parent' => 'Es muss eine Spalte mit den Parent-IDs ausgewählt werden!',
     'contains_header' => 'CSV enthält in der ersten Zeile Spaltenüberschriften',

@@ -48,7 +48,13 @@
                     </tr>
                     <tr><td colspan={{ sizeof($csv_data[0]) }}>
                     @if ($errors->any())
-                        <div class="alert alert-danger">{{ $errors->first('fields') }}</div>
+                        <div class="alert alert-danger">
+                            <ul>
+                                @foreach ($errors->all() as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
                     @endif
                     </td></tr>
                 </table>
