@@ -31,6 +31,8 @@ Route::get('/admin/import/csv/preview', 'Admin\ImportCSVController@preview')->na
 Route::post('/admin/import/csv/process', 'Admin\ImportCSVController@process')->name('import.csv.process')
     ->middleware('auth');
 
+Route::resource('admin/column', 'Admin\ColumnsController')->middleware('auth');
+
 Route::resource('list.element', 'ElementsController')->shallow()->middleware('auth');
 Route::resource('element.value', 'ValuesController')->shallow()->middleware('auth');
 
