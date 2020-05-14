@@ -18,7 +18,7 @@
                 <thead>
                     <tr>
                         <th colspan="1">@lang('common.id')</th>
-                        <th colspan="1">@lang('lists.value_summary')</th>
+                        <th colspan="1">@lang('lists.rank')</th>
                         <th colspan="1">@lang('lists.attribute'): @lang('values.value')</th>
                     @if($list->hierarchical)
                         <th colspan="1">@lang('lists.parent') @lang('common.id')</th>
@@ -34,7 +34,7 @@
                             {{$element->element_id}}
                         </td>
                         <td>
-                            {{$element->value_summary}}
+                            {{$element->depth + 1}}
                         </td>
                         <td><table>
                         @foreach($element->values as $value)

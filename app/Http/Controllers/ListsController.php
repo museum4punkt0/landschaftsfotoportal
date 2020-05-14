@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Selectlist;
 use App\Element;
 use Illuminate\Http\Request;
+use Illuminate\Database\Eloquent\Builder;
 use Redirect;
 use Auth;
 
@@ -64,9 +65,34 @@ class ListsController extends Controller
     {
         //
         $data['list'] = Selectlist::find($id);
-        $data['elements'] = Selectlist::find($id)->elements;
+        #$data['elements'] = Selectlist::find($id)->elements;
+        $constraint = function (Builder $query) use ($id) {
+            $query->where('parent_fk', 0)->where('list_fk', $id);
+        };
+
+        $data['elements'] = Element::withRelationshipExpression('desc', $constraint, 0)->depthFirst()->get();
         
         return view('list.show', $data);
+    }
+
+    /**
+     * Display the specified resource as tree.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function tree($id)
+    {
+        //
+        $data['list'] = Selectlist::find($id);
+        
+        $constraint = function (Builder $query) use ($id) {
+            $query->where('parent_fk', 0)->where('list_fk', $id);
+        };
+
+        $data['elements'] = Element::withRelationshipExpression('desc', $constraint, 0)->depthFirst()->get();
+        
+        return view('list.tree', $data);
     }
 
     /**

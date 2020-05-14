@@ -20,7 +20,7 @@ class Element extends Model
      *
      * @var array
      */
-     protected $fillable = [
+    protected $fillable = [
         'parent_fk',
         'list_fk',
         'value_summary',
@@ -48,5 +48,32 @@ class Element extends Model
     public function childrenElements()
     {
         return $this->hasMany('App\Element', 'parent_fk', 'element_id')->with('childrenElements');
+    }
+    
+    
+    use \Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
+    
+    /**
+     * The parent key associated with the table.
+     * 
+     * (The default would be 'parent_id')
+     *
+     * @var string
+     */
+    public function getParentKeyName()
+    {
+        return 'parent_fk';
+    }
+    
+    /**
+     * The primary key associated with the table.
+     * 
+     * (The default would be 'id')
+     *
+     * @var string
+     */
+    public function getLocalKeyName()
+    {
+        return $this->primaryKey;
     }
 }
