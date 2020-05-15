@@ -20,7 +20,7 @@ class Value extends Model
      *
      * @var array
      */
-     protected $fillable = [
+    protected $fillable = [
         'element_fk',
         'attribute_fk',
         'value',

@@ -29,7 +29,7 @@ class Selectlist extends Model
      *
      * @var array
      */
-     protected $fillable = [
+    protected $fillable = [
         'name',
         'description',
         'hierarchical',
@@ -42,5 +42,5 @@ class Selectlist extends Model
     public function elements()
     {
         return $this->hasMany('App\Element', 'list_fk', 'list_id');
-    }    
+    }
 }

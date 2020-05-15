@@ -20,7 +20,7 @@ class Attribute extends Model
      *
      * @var array
      */
-     protected $fillable = [
+    protected $fillable = [
         'name',
     ];
     
@@ -30,5 +30,5 @@ class Attribute extends Model
     public function values()
     {
         return $this->hasMany('App\Value', 'element_fk', 'element_id');
-    }    
+    }
 }
