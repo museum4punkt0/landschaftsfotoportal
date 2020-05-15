@@ -61,18 +61,18 @@ class Column extends Model
     }
     
     /**
-     * Get the details of the element.
+     * Get the details of the column.
      */
     public function details()
     {
-        #return $this->hasMany('App\Detail', 'column_fk', 'column_id');
+        return $this->hasMany('App\Detail', 'column_fk', 'column_id');
     }
     
     /**
-     * Get the configs of the element.
+     * Get the configs of the column.
      */
-    public function configs()
+    public function column_mapping()
     {
-        #return $this->hasMany('App\Config', 'column_fk', 'column_id');
+        return $this->hasMany('App\ColumnMapping', 'column_fk', 'column_id');
     }
 }

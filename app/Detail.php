@@ -35,7 +35,7 @@ class Detail extends Model
      */
     public function item()
     {
-        #return $this->belongsTo('App\Item', 'item_fk', 'item_id');
+        return $this->belongsTo('App\Item', 'item_fk', 'item_id');
     }
     
     /**
