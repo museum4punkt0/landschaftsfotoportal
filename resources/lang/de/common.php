@@ -25,5 +25,5 @@ return [
     'id' => 'ID',
     'name' => 'Name',
     'description' => 'Beschreibung',
-
+    'actions' => 'Aktionen',
 ];

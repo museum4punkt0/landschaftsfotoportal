@@ -6,10 +6,9 @@ use App\Column;
 use App\Selectlist;
 use App\Element;
 use App\Value;
-use Redirect;
-
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Redirect;
 
 class ColumnsController extends Controller
 {

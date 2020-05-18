@@ -7,6 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class ColumnMapping extends Model
 {
     /**
+     * The table associated with the model.
+     * 
+     * (The default would be 'column_mappings')
+     *
+     * @var string
+     */
+    protected $table = 'column_mapping';
+    
+    /**
      * The primary key associated with the table.
      * 
      * (The default would be 'id')
