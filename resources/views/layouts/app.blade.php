@@ -43,6 +43,9 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('import.csv.upload') }}">{{ __('import.header') }}</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('column.index') }}">{{ __('columns.header') }}</a>
+                            </li>
                         @endauth
                     </ul>
 
