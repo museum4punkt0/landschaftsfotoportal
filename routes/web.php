@@ -39,6 +39,7 @@ Route::resource('admin/item', 'Admin\ItemsController')->middleware('auth');
 Route::resource('list.element', 'ElementsController')->shallow()->middleware('auth');
 Route::resource('element.value', 'ValuesController')->shallow()->middleware('auth');
 
+Route::get('/list/internal', 'ListsController@internal')->name('list.internal')->middleware('auth');
 Route::get('/list/{id}/tree', 'ListsController@tree')->name('list.tree')->middleware('auth');
 Route::resource('list', 'ListsController')->middleware('auth');
 Route::resource('attribute', 'AttributesController')->middleware('auth');

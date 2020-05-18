@@ -31,7 +31,7 @@ class ColumnsController extends Controller
      */
     public function create()
     {
-        $lists = Selectlist::orderBy('name')->get();
+        $lists = Selectlist::where('internal', false)->orderBy('name')->get();
         
         $dt_list = Selectlist::where('name', '_data_type_')->first();
         $data_types = Element::where('list_fk', $dt_list->list_id)->get();
@@ -92,7 +92,7 @@ class ColumnsController extends Controller
      */
     public function edit(Column $column)
     {
-        $lists = Selectlist::orderBy('name')->get();
+        $lists = Selectlist::where('internal', false)->orderBy('name')->get();
         
         $dt_list = Selectlist::where('name', '_data_type_')->first();
         $data_types = Element::where('list_fk', $dt_list->list_id)->get();

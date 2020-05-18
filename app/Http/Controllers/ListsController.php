@@ -12,14 +12,25 @@ use Auth;
 class ListsController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource without flag 'internal' being set.
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        //
-        $data['lists'] = Selectlist::orderBy('name')->paginate(10);
+        $data['lists'] = Selectlist::where('internal', false)->orderBy('name')->paginate(10);
+        
+        return view('list.list',$data);
+    }
+
+    /**
+     * Display a listing of the resource with flag 'internal' being set.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function internal()
+    {
+        $data['lists'] = Selectlist::where('internal', true)->orderBy('name')->paginate(10);
         
         return view('list.list',$data);
     }
@@ -31,7 +42,6 @@ class ListsController extends Controller
      */
     public function create()
     {
-        //
         return view('list.create');
     }
 
@@ -43,11 +53,11 @@ class ListsController extends Controller
      */
     public function store(Request $request)
     {
-        //
         $request->validate([
             'name' => 'required',
             'description' => 'required',
             'hierarchical' => 'boolean',
+            'internal' => 'boolean',
         ]);
         
         Selectlist::create($request->all());
@@ -63,7 +73,6 @@ class ListsController extends Controller
      */
     public function show($id)
     {
-        //
         $data['list'] = Selectlist::find($id);
         #$data['elements'] = Selectlist::find($id)->elements;
         $constraint = function (Builder $query) use ($id) {
@@ -83,7 +92,6 @@ class ListsController extends Controller
      */
     public function tree($id)
     {
-        //
         $data['list'] = Selectlist::find($id);
         
         $constraint = function (Builder $query) use ($id) {
@@ -103,7 +111,6 @@ class ListsController extends Controller
      */
     public function edit($id)
     {
-        //
         $data['list'] = Selectlist::find($id);
         
         return view('list.edit', $data);
@@ -118,17 +125,18 @@ class ListsController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
         $request->validate([
             'name' => 'required',
             'description' => 'required',
             'hierarchical' => 'boolean',
+            'internal' => 'boolean',
         ]);
          
         $update = [
             'name' => $request->input('name'),
             'description' => $request->input('description'),
             'hierarchical' => $request->boolean('hierarchical'),
+            'internal' => $request->boolean('internal'),
             'attribute_order' => $request->input('attribute_order'),
         ];
         Selectlist::where('list_id', $id)->update($update);
@@ -145,7 +153,6 @@ class ListsController extends Controller
      */
     public function destroy($id)
     {
-        //
         Selectlist::where('list_id', $id)->delete();
         
         // TODO: delete orphaned elements and values

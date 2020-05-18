@@ -20,6 +20,7 @@ return [
     'save' => 'speichern',
     'upload' => 'hochladen',
     'ignore' => 'ignorieren',
+    'internal' => 'intern',
 
     'root' => 'Wurzelelement',
     'id' => 'ID',

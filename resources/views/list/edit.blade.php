@@ -5,6 +5,10 @@
 <div class="container">
 <h1>@lang('lists.edit')</h1>
 
+@if($list->internal)
+    <div class="alert alert-warning">@lang('lists.internal_warning')</div>
+@endif
+
 <form action="{{ route('list.update', $list->list_id) }}" method="POST">
 
     <div class="form-group">
@@ -18,10 +22,20 @@
         <span class="text-danger">{{ $errors->first('description') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('lists.hierarchical')</span>
-        <input type="hidden" name="hierarchical" value=0 />
-        <input type="checkbox" name="hierarchical" class="form-control" value=1 @if($list->hierarchical) checked @endif />
-        <span class="text-danger">{{ $errors->first('hierarchical') }}</span>
+        <div class="form-check">
+            <input type="checkbox" name="hierarchical" class="form-check-input" value=1 
+                @if($list->hierarchical) checked @endif />
+            <span>@lang('lists.hierarchical')</span>
+            <span class="text-danger">{{ $errors->first('hierarchical') }}</span>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="form-check">
+            <input type="checkbox" name="internal" class="form-check-input" value=1 
+                @if($list->internal) checked @endif />
+            <span>@lang('lists.internal_list')</span>
+            <span class="text-danger">{{ $errors->first('internal') }}</span>
+        </div>
     </div>
 
     <div class="form-group">

@@ -37,8 +37,17 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('list.index') }}">{{ __('lists.header') }}</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('attribute.index') }}">{{ __('attributes.header') }}</a>
+                            <li class="nav-item dropdown">
+                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
+                                    {{ __('common.internal') }} <span class="caret"></span>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" href="{{ route('attribute.index') }}">
+                                        {{ __('attributes.header') }}
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('list.internal') }}">
+                                        {{ __('lists.internal_header') }}
+                                    </a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('import.csv.upload') }}">{{ __('import.header') }}</a>

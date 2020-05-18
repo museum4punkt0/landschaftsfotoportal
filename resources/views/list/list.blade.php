@@ -13,6 +13,10 @@
         @if (true || Auth::check())
             <div class="card-header">@lang('lists.header')</div>
             <div class="card-body">
+                @if(Route::currentRouteName() == 'list.internal')
+                    <div class="alert alert-warning">@lang('lists.internal_warning')</div>
+                @endif
+                
                 <a href="{{route('list.create')}}" class="btn btn-primary">@lang('lists.new')</a>
                 <table class="table mt-4">
                 <thead>

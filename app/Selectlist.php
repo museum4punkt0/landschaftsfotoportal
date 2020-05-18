@@ -33,6 +33,7 @@ class Selectlist extends Model
         'name',
         'description',
         'hierarchical',
+        'internal',
         'attribute_order',
     ];
     

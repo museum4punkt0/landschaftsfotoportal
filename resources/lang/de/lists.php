@@ -20,6 +20,10 @@ return [
     'deleted' => 'Liste wurde gelöscht.',
     
     'hierarchical' => 'hierarchisch',
+    'internal_header' => 'Systemlisten',
+    'internal_list' => 'interne Systemliste',
+    'internal_warning' => 'Sie bearbeiten interne Systemlisten. Falsche Handhabung führt zu Fehlern in der Anwendung!',
+    'rank' => 'Rang',
     'parent' => 'Elternelement',
     'attribute' => 'Attribut',
 ];

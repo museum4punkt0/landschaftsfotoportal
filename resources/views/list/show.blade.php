@@ -13,6 +13,10 @@
         @if (true || Auth::check())
             <div class="card-header">@lang('lists.edit'): {{$list->name}} ({{$list->description}})</div>
             <div class="card-body">
+                @if($list->internal)
+                    <div class="alert alert-warning">@lang('lists.internal_warning')</div>
+                @endif
+
                 <a href="{{route('list.element.create', $list->list_id)}}" class="btn btn-primary">@lang('elements.new')</a>
                 <table class="table mt-4">
                 <thead>
