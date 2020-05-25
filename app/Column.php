@@ -61,6 +61,15 @@ class Column extends Model
     }
     
     /**
+     * The items that belong to the column.
+     */
+    public function items()
+    {
+        return $this->belongsToMany('App\Item', 'details', 'column_fk', 'item_fk')
+            ->withPivot('element_fk', 'value_int', 'value_float', 'value_string')->withTimestamps();
+    }
+    
+    /**
      * Get the details of the column.
      */
     public function details()
@@ -74,5 +83,32 @@ class Column extends Model
     public function column_mapping()
     {
         return $this->hasMany('App\ColumnMapping', 'column_fk', 'column_id');
+    }
+    
+    /**
+     * Get the data type of the column.
+     */
+    public function getDataType()
+    {
+        return $this->data_type->attributes()->firstWhere('name', 'code')->pivot->value;
+    }
+    
+    /**
+     * Get the name of the validation rule for the column.
+     */
+    public function getValidationRule()
+    {
+        switch ($this->getDataType()) {
+            case '_list_':
+                return 'integer';
+            case '_integer_':
+                return 'integer';
+            case '_float_':
+                return 'numeric';
+            case '_string_':
+                return 'string';
+            default:
+                return '';
+        }
     }
 }

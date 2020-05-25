@@ -34,6 +34,7 @@ Route::post('/admin/import/csv/process', 'Admin\ImportCSVController@process')->n
 Route::resource('admin/colmap', 'Admin\ColumnMappingController')->middleware('auth');
 Route::resource('admin/column', 'Admin\ColumnsController')->middleware('auth');
 Route::resource('admin/detail', 'Admin\DetailsController')->middleware('auth');
+Route::get('/admin/item/new', 'Admin\ItemsController@new')->name('item.new')->middleware('auth');
 Route::resource('admin/item', 'Admin\ItemsController')->middleware('auth');
 
 Route::resource('list.element', 'ElementsController')->shallow()->middleware('auth');

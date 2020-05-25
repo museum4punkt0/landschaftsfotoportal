@@ -21,6 +21,7 @@ return [
     'upload' => 'hochladen',
     'ignore' => 'ignorieren',
     'internal' => 'intern',
+    'next' => 'weiter',
 
     'root' => 'Wurzelelement',
     'id' => 'ID',

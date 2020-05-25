@@ -35,6 +35,15 @@ class Element extends Model
     }
     
     /**
+     * The attributes that belong to the element.
+     */
+    public function attributes()
+    {
+        return $this->belongsToMany('App\Attribute', 'values', 'element_fk', 'attribute_fk')
+            ->withPivot('value')->withTimestamps();
+    }
+    
+    /**
      * Get the values of the element.
      */
     public function values()

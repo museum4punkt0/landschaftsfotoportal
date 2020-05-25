@@ -2,9 +2,15 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Http\Controllers\Controller;
 use App\Item;
+use App\Detail;
+use App\Column;
+use App\ColumnMapping;
+use App\Selectlist;
+use App\Element;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Redirect;
 
 class ItemsController extends Controller
 {
@@ -15,17 +21,45 @@ class ItemsController extends Controller
      */
     public function index()
     {
-        //
+        $items = Item::orderBy('item_id')->paginate(10);
+        
+        return view('admin.item.list', compact('items'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Show the form to select the type of the new resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
+    public function new()
     {
-        //
+        $it_list = Selectlist::where('name', '_item_type_')->first();
+        $item_types = Element::where('list_fk', $it_list->list_id)->get();
+        
+        return view('admin.item.new', compact('item_types'));
+    }
+    
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function create(Request $request)
+    {
+        $colmap = ColumnMapping::where('item_type_fk', $request->item_type)->get();
+        $lists = Selectlist::where('internal', false)->orderBy('name')->get();
+        
+        $dt_list = Selectlist::where('name', '_data_type_')->first();
+        $data_types = Element::where('list_fk', $dt_list->list_id)->with(['values', 'attributes'])->get();
+        
+        $l10n_list = Selectlist::where('name', '_translation_')->first();
+        $translations = Element::where('list_fk', $l10n_list->list_id)->get();
+        
+        // Save item_type ID to session
+        $request->session()->put('item_type', $request->item_type);
+        
+        return view('admin.item.create', compact('colmap', 'lists', 'data_types', 'translations'));
     }
 
     /**
@@ -36,7 +70,49 @@ class ItemsController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $validation_rules['fields'] = 'required|array';
+        foreach ($request->input('fields') as $column_id => $value) {
+            $validation_rules['fields.'.$column_id] = 'required|'. Column::find($column_id)->getValidationRule();
+        }
+        
+        $request->validate($validation_rules);
+        
+        // Get item_type ID from session
+        $item_type = $request->session()->get('item_type');
+        
+        // Save new item to database
+        $item_data = [
+            'item_type_fk' => $item_type,
+        ];
+        $item = Item::create($item_data);
+        
+        // Save the details for all columns that belong to the item
+        foreach ($request->input('fields') as $column_id => $value) {
+            $data_type = Column::find($column_id)->getDataType();
+            
+            $detail_data = [
+                'item_fk' => $item->item_id,
+                'column_fk' => $column_id,
+            ];
+            switch ($data_type) {
+                case '_list_':
+                    $detail_data['element_fk'] = intval($value);
+                    break;
+                case '_integer_':
+                    $detail_data['value_int'] = intval($value);
+                    break;
+                case '_float_':
+                    $detail_data['value_float'] = floatval($value);
+                    break;
+                case '_string_':
+                    $detail_data['value_string'] = $value;
+                    break;
+            }
+            Detail::create($detail_data);
+        }
+        
+        return Redirect::to('admin/item')
+            ->with('success', __('items.created'));
     }
 
     /**
@@ -58,7 +134,17 @@ class ItemsController extends Controller
      */
     public function edit(Item $item)
     {
-        //
+        $details = Detail::where('item_fk', $item->item_id)->get();
+        $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)->get();
+        $lists = Selectlist::where('internal', false)->orderBy('name')->get();
+        
+        $dt_list = Selectlist::where('name', '_data_type_')->first();
+        $data_types = Element::where('list_fk', $dt_list->list_id)->with(['values', 'attributes'])->get();
+        
+        $l10n_list = Selectlist::where('name', '_translation_')->first();
+        $translations = Element::where('list_fk', $l10n_list->list_id)->get();
+        
+        return view('admin.item.edit', compact('item', 'details', 'colmap', 'lists', 'data_types', 'translations'));
     }
 
     /**
@@ -70,7 +156,40 @@ class ItemsController extends Controller
      */
     public function update(Request $request, Item $item)
     {
-        //
+        $validation_rules['fields'] = 'required|array';
+        foreach ($request->input('fields') as $column_id => $value) {
+            $validation_rules['fields.'.$column_id] = 'required|'. Column::find($column_id)->getValidationRule();
+        }
+        
+        $request->validate($validation_rules);
+        
+        $details = Detail::where('item_fk', $item->item_id)->get();
+        
+        // Save the details for all columns that belong to the item
+        foreach ($request->input('fields') as $column_id => $value) {
+            $detail = $details->where('column_fk', $column_id)->first();
+            
+            $data_type = Column::find($column_id)->getDataType();
+            
+            switch ($data_type) {
+                case '_list_':
+                    $detail->element_fk = intval($value);
+                    break;
+                case '_integer_':
+                    $detail->value_int = intval($value);
+                    break;
+                case '_float_':
+                    $detail->value_float = floatval($value);
+                    break;
+                case '_string_':
+                    $detail->value_string = $value;
+                    break;
+            }
+            $detail->save();
+        }
+        
+        return Redirect::to('admin/item')
+            ->with('success', __('items.updated'));
     }
 
     /**
@@ -81,6 +200,9 @@ class ItemsController extends Controller
      */
     public function destroy(Item $item)
     {
-        //
+        $item->delete();
+        
+        return Redirect::to('admin/item')
+            ->with('success', __('items.deleted'));
     }
 }

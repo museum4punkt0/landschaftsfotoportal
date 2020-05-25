@@ -35,6 +35,9 @@
                     <ul class="navbar-nav mr-auto">
                         @auth
                             <li class="nav-item">
+                                <a class="nav-link" href="{{ route('item.index') }}">{{ __('items.header') }}</a>
+                            </li>
+                            <li class="nav-item">
                                 <a class="nav-link" href="{{ route('list.index') }}">{{ __('lists.header') }}</a>
                             </li>
                             <li class="nav-item dropdown">

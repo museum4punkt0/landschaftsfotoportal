@@ -42,6 +42,15 @@ class Item extends Model
     }
     
     /**
+     * The columns that belong to the item.
+     */
+    public function columns()
+    {
+        return $this->belongsToMany('App\Column', 'details', 'item_fk', 'column_fk')
+            ->withPivot('element_fk', 'value_int', 'value_float', 'value_string')->withTimestamps();
+    }
+    
+    /**
      * Get the details of the item.
      */
     public function details()
