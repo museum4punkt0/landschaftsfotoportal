@@ -108,7 +108,7 @@ class ColumnMappingController extends Controller
         $colmap->save();
         
         return Redirect::to('admin/colmap')
-            ->with('success', __('colmaps.edited'));
+            ->with('success', __('colmaps.updated'));
     }
 
     /**

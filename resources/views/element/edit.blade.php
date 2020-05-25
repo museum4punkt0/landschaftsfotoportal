@@ -10,12 +10,12 @@
     <div class="form-group">
         <span>@lang('lists.parent')</span>
         <select name="parent_fk" class="form-control" size=1 >
-            <option value="0" @if($element->parent_fk == 0) selected @endif>
+            <option value="0" @if(old('parent_fk', $element->parent_fk) == 0) selected @endif>
                 @lang('common.root')
             </option>
             @foreach($elements as $el)
                 <option value="{{$el->values[0]->element_fk}}"
-                    @if($element->parent_fk == $el->values[0]->element_fk) selected @endif>
+                    @if(old('parent_fk', $element->parent_fk) == $el->values[0]->element_fk) selected @endif >
                     @foreach($el->values as $value)
                         {{$value->value}}; 
                     @endforeach

@@ -17,7 +17,7 @@
         <select name="attribute" class="form-control" size=1 >
         @foreach($attributes as $attribute)
             <option value="{{$attribute->attribute_id}}"
-                @if($value->attribute_fk == $attribute->attribute_id) selected @endif>
+                @if(old('attribute', $value->attribute_fk) == $attribute->attribute_id) selected @endif >
                 {{$attribute->name}}
             </option>
         @endforeach

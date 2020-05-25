@@ -9,7 +9,9 @@
     
     <div class="form-group">
         <span>@lang('common.description')</span>
-        <input type="text" name="description" class="form-control" value="{{$column->description}}" />
+        <input type="text" name="description" class="form-control" 
+            value="{{ old('description', $column->description) }}"
+        />
         <span class="text-danger">{{ $errors->first('description') }}</span>
     </div>
     <div class="form-group">
@@ -17,7 +19,7 @@
         <select name="translation" class="form-control" size=1 >
             @foreach($translations as $trans)
                 <option value="{{$trans->element_id}}"
-                    @if($column->translation_fk == $trans->element_id) selected @endif>
+                    @if(old('translation', $column->translation_fk) == $trans->element_id) selected @endif >
                     @foreach($trans->values as $v)
                         {{$v->value}}, 
                     @endforeach
@@ -31,7 +33,7 @@
         <select name="data_type" class="form-control" size=1 >
             @foreach($data_types as $type)
                 <option value="{{$type->element_id}}"
-                    @if($column->data_type_fk == $type->element_id) selected @endif>
+                    @if(old('data_type', $column->data_type_fk) == $type->element_id) selected @endif >
                     @foreach($type->values as $v)
                         {{$v->value}}, 
                     @endforeach
@@ -46,7 +48,7 @@
             <option value="">@lang('common.ignore')</option>
             @foreach($lists as $list)
                 <option value="{{$list->list_id}}"
-                    @if($column->list_fk == $list->list_id) selected @endif>
+                    @if(old('list', $column->list_fk) == $list->list_id) selected @endif>
                     {{$list->name}} ({{$list->description}})
                 </option>
             @endforeach

@@ -12,7 +12,7 @@
         <select name="item_type" class="form-control" size=1 >
             @foreach($item_types as $type)
                 <option value="{{$type->element_id}}"
-                    @if($colmap->item_type->fk == $type->element_id) selected @endif>
+                    @if(old('item_type', $colmap->item_type_fk) == $type->element_id) selected @endif >
                     @foreach($type->values as $v)
                         {{$v->value}}, 
                     @endforeach
@@ -26,7 +26,7 @@
         <select name="column" class="form-control" size=1 >
             @foreach($columns as $column)
                 <option value="{{$column->column_id}}"
-                    @if($colmap->column_fk == $column->column_id) selected @endif>
+                    @if(old('column', $colmap->column_fk) == $column->column_id) selected @endif >
                     @foreach($column->translation->values as $t)
                         {{$t->value}}, 
                     @endforeach

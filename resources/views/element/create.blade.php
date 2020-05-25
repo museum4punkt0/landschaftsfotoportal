@@ -16,7 +16,10 @@
         <span>@lang('lists.attribute')</span>
         <select name="attribute" class="form-control" size=1 >
         @foreach($attributes as $attribute)
-            <option value="{{$attribute->attribute_id}}">{{$attribute->name}}</option>
+            <option value="{{$attribute->attribute_id}}"
+            @if(old('attribute') == $attribute->attribute_id) selected @endif >
+                {{$attribute->name}}
+            </option>
         @endforeach
         </select>
         <span class="text-danger">{{ $errors->first('attribute') }}</span>
@@ -27,14 +30,15 @@
             <select name="parent_fk" class="form-control" size=1 >
                 <option value="0">@lang('common.root')</option>
                 @foreach($elements as $element)
-                    <option value="{{$element->values[0]->element_fk}}">
+                    <option value="{{$element->values[0]->element_fk}}"
+                    @if(old('parent_fk') == $element->values[0]->element_fk) selected @endif >
                     @foreach($element->values as $value)
                         {{$value->value}}; 
                     @endforeach
                     </option>
                 @endforeach
             </select>
-            <span class="text-danger">{{ $errors->first('hierarchical') }}</span>
+            <span class="text-danger">{{ $errors->first('parent_fk') }}</span>
         </div>
     @else
         <input type="hidden" name="parent_fk" class="form-control" value=0 />

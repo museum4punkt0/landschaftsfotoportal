@@ -16,7 +16,10 @@
         <span>@lang('lists.attribute')</span>
         <select name="attribute" class="form-control" size=1 >
         @foreach($attributes as $attribute)
-            <option value="{{$attribute->attribute_id}}">{{$attribute->name}}</option>
+            <option value="{{$attribute->attribute_id}}"
+            @if(old('attribute') == $attribute->attribute_id) selected @endif >
+                {{$attribute->name}}
+            </option>
         @endforeach
         </select>
         <span class="text-danger">{{ $errors->first('attribute') }}</span>

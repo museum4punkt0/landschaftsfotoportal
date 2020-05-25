@@ -23,15 +23,10 @@
                     <select name="fields[{{ $cm->column->column_id }}]" class="form-control" size=1 >
                         @foreach($lists->firstWhere('list_id', $cm->column->list_fk)->elements as $element)
                             <option value="{{$element->element_id}}"
-                                @if(old('fields.'. $cm->column->column_id))
-                                    @if(old('fields.'. $cm->column->column_id) == $element->element_id)
+                                @if(old('fields.'. $cm->column->column_id, 
+                                    $details->firstWhere('column_fk', $cm->column->column_id)->element_fk) == 
+                                     $element->element_id)
                                         selected
-                                    @endif
-                                @else
-                                    @if($details->firstWhere('column_fk', $cm->column->column_id)->element_fk == 
-                                        $element->element_id)
-                                        selected
-                                    @endif
                                 @endif
                             >
                                 @foreach($element->values as $v)
