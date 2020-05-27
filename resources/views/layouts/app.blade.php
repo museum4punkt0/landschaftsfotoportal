@@ -51,6 +51,7 @@
                                     <a class="dropdown-item" href="{{ route('list.internal') }}">
                                         {{ __('lists.internal_header') }}
                                     </a>
+                                </div>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('import.csv.upload') }}">{{ __('import.header') }}</a>
@@ -62,6 +63,18 @@
                                 <a class="nav-link" href="{{ route('colmap.index') }}">{{ __('colmaps.header') }}</a>
                             </li>
                         @endauth
+                            <li class="nav-item dropdown">
+                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
+                                    {{ __('common.language') }} <span class="caret"></span>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                @foreach(Config::get('languages') as $lang => $language)
+                                    <a class="dropdown-item" href="{{ route('locale', $lang) }}">
+                                        {{ $language }}
+                                    </a>
+                                @endforeach
+                                </div>
+                            </li>
                     </ul>
 
                     <!-- Right Side Of Navbar -->

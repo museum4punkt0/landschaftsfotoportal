@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Session;
 
 class HomeController extends Controller
 {
@@ -24,5 +25,17 @@ class HomeController extends Controller
     public function index()
     {
         return view('home');
+    }
+    
+    /**
+     * Set the user's locale.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    public function locale($locale)
+    {
+        Session::put('locale', $locale);
+        
+        return back()->withInput();
     }
 }

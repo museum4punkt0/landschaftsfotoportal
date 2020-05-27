@@ -28,4 +28,5 @@ return [
     'name' => 'Name',
     'description' => 'Beschreibung',
     'actions' => 'Aktionen',
+    'language' => 'Sprache',
 ];

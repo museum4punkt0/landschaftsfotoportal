@@ -21,6 +21,7 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/locale/{locale}', 'HomeController@locale')->name('locale');
 
 Route::get('/admin/import/csv/upload', 'Admin\ImportCSVController@index')->name('import.csv.upload')
     ->middleware('auth');
