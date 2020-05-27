@@ -92,7 +92,9 @@ class ElementsController extends Controller
         $data['element'] = $element;
         $data['elements'] = Element::where('list_fk', $element->list_fk)->get()
                             ->except([$element->element_id]);
-        #print_r($element->childrenElements);
+        
+        // Remove all descendants to avoid circular dependencies
+        $data['elements'] = $data['elements']->diff($element->descendants()->get());
         
         return view('element.edit', $data);
     }
