@@ -15,10 +15,12 @@
                 {{-- dd($lists->firstWhere('list_id', $cm->column->list_fk)->elements) --}}
                 <div class="form-group">
                     <span>
-                        {{ $cm->column->translation->attributes->firstWhere('name', 'name_de')->pivot->value }} 
+                        {{ $cm->column->translation->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
                         ({{ $cm->column->description }}, 
                         @lang('columns.data_type'): 
-                        {{ $cm->column->data_type->attributes->firstWhere('name', 'name_de')->pivot->value }})
+                        {{ $cm->column->data_type->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
                     </span>
                     <select name="fields[{{ $cm->column->column_id }}]" class="form-control" size=1 >
                         @foreach($lists->firstWhere('list_id', $cm->column->list_fk)->elements as $element)
@@ -43,10 +45,12 @@
             @case('_integer_')
                 <div class="form-group">
                     <span>
-                        {{ $cm->column->translation->attributes->firstWhere('name', 'name_de')->pivot->value }} 
+                        {{ $cm->column->translation->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
                         ({{ $cm->column->description }}, 
                         @lang('columns.data_type'): 
-                        {{ $cm->column->data_type->attributes->firstWhere('name', 'name_de')->pivot->value }})
+                        {{ $cm->column->data_type->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
                     </span>
                     <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
                         value="{{ old('fields.'. $cm->column->column_id, 
@@ -58,10 +62,12 @@
             @case('_float_')
                 <div class="form-group">
                     <span>
-                        {{ $cm->column->translation->attributes->firstWhere('name', 'name_de')->pivot->value }} 
+                        {{ $cm->column->translation->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
                         ({{ $cm->column->description }}, 
                         @lang('columns.data_type'): 
-                        {{ $cm->column->data_type->attributes->firstWhere('name', 'name_de')->pivot->value }})
+                        {{ $cm->column->data_type->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
                     </span>
                     <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
                         value="{{ old('fields.'. $cm->column->column_id, 
@@ -73,10 +79,12 @@
             @case('_string_')
                 <div class="form-group">
                     <span>
-                        {{ $cm->column->translation->attributes->firstWhere('name', 'name_de')->pivot->value }} 
+                        {{ $cm->column->translation->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
                         ({{ $cm->column->description }}, 
                         @lang('columns.data_type'): 
-                        {{ $cm->column->data_type->attributes->firstWhere('name', 'name_de')->pivot->value }})
+                        {{ $cm->column->data_type->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
                     </span>
                     <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
                         value="{{ old('fields.'. $cm->column->column_id, 
