@@ -5,6 +5,8 @@
 <div class="container">
 <h2>@lang('colmaps.edit')</h2>
 
+<div class="alert alert-danger">@lang('colmaps.edit_danger')</div>
+
 <form action="{{ route('colmap.update', $colmap->colmap_id) }}" method="POST">
     
     <div class="form-group">

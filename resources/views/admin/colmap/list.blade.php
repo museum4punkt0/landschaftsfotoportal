@@ -21,7 +21,7 @@
                         <th colspan="1">@lang('common.description')</th>
                         <th colspan="1">@lang('columns.list')</th>
                         <th colspan="1">@lang('colmaps.item_type')</th>
-                        <th colspan="2">@lang('common.actions')</th>
+                        <th colspan="1">@lang('common.actions')</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -44,12 +44,6 @@
                                 {{$v->value}}<br/>
                             @endforeach
                             ID {{$colmap->item_type_fk}}
-                        </td>
-                        <td>
-                            <form action="{{route('colmap.edit', $colmap)}}" method="GET">
-                                {{ csrf_field() }}
-                                <button class="btn btn-primary" type="submit">@lang('common.edit')</button>
-                            </form>
                         </td>
                         <td>
                             <form action="{{route('colmap.destroy', $colmap)}}" method="POST">

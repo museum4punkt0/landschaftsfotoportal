@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\ColumnMapping;
 use App\Column;
+use App\Detail;
+use App\Item;
 use App\Selectlist;
 use App\Element;
 use App\Http\Controllers\Controller;
@@ -58,8 +60,20 @@ class ColumnMappingController extends Controller
         ];
         ColumnMapping::create($data);
         
+        $success_status_msg =  __('colmaps.created');
+        
+        // Create missing details for all items
+        $count = 0;
+        foreach(Item::where('item_type_fk', $data['item_type_fk'])->get() as $item) {
+            Detail::firstOrCreate(['column_fk' => $data['column_fk'], 'item_fk' => $item->item_id]);
+            $count++;
+        }
+        if($count) {
+            $success_status_msg .= " ". __('colmaps.details_added', ['count' => $count]);
+        }
+        
         return Redirect::to('admin/colmap')
-            ->with('success', __('colmaps.created'));
+            ->with('success', $success_status_msg);
     }
 
     /**
@@ -76,6 +90,9 @@ class ColumnMappingController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
+     * Danger! This should not be called by any user, not even by admins!
+     * All Links in the backend have been removed. The URL route is still available though.
+     *
      * @param  \App\ColumnMapping  $colmap
      * @return \Illuminate\Http\Response
      */
@@ -91,6 +108,9 @@ class ColumnMappingController extends Controller
 
     /**
      * Update the specified resource in storage.
+     * 
+     * Danger! This should not be called by any user, not even by admins!
+     * All Links in the backend have been removed. The URL route is still available though.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \App\ColumnMapping  $colmap
@@ -106,6 +126,8 @@ class ColumnMappingController extends Controller
         $colmap->column_fk = $request->input('column');
         $colmap->item_type_fk = $request->input('item_type');
         $colmap->save();
+        
+        // TODO: Create missing details for all items, see function store()
         
         return Redirect::to('admin/colmap')
             ->with('success', __('colmaps.updated'));
