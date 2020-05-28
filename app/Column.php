@@ -107,6 +107,10 @@ class Column extends Model
                 return 'numeric';
             case '_string_':
                 return 'string';
+            case '_date_':
+                return 'date';
+            case '_url_':
+                return 'url';
             default:
                 return '';
         }

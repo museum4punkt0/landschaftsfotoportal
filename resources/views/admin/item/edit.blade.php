@@ -75,6 +75,23 @@
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 @break
+            {{-- Data_type of form field is date --}}
+            @case('_date_')
+                <div class="form-group">
+                    <span>
+                        {{ $cm->column->translation->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        ({{ $cm->column->description }}, 
+                        @lang('columns.data_type'): 
+                        {{ $cm->column->data_type->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
+                    </span>
+                    <input type="date" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
+                        value="{{ old('fields.'. $cm->column->column_id, 
+                        $details->firstWhere('column_fk', $cm->column->column_id)->value_date) }}" />
+                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                </div>
+                @break
             {{-- Data_type of form field is string --}}
             @case('_string_')
                 <div class="form-group">
@@ -87,6 +104,23 @@
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
                     </span>
                     <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
+                        value="{{ old('fields.'. $cm->column->column_id, 
+                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}" />
+                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                </div>
+                @break
+            {{-- Data_type of form field is URL --}}
+            @case('_url_')
+                <div class="form-group">
+                    <span>
+                        {{ $cm->column->translation->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        ({{ $cm->column->description }}, 
+                        @lang('columns.data_type'): 
+                        {{ $cm->column->data_type->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
+                    </span>
+                    <input type="url" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
                         value="{{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}" />
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>

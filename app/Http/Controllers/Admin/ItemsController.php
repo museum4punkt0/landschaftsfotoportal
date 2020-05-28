@@ -104,7 +104,11 @@ class ItemsController extends Controller
                 case '_float_':
                     $detail_data['value_float'] = floatval($value);
                     break;
+                case '_date_':
+                    $detail_data['value_date'] = $value;
+                    break;
                 case '_string_':
+                case '_url_':
                     $detail_data['value_string'] = $value;
                     break;
             }
@@ -181,7 +185,11 @@ class ItemsController extends Controller
                 case '_float_':
                     $detail->value_float = floatval($value);
                     break;
+                case '_date_':
+                    $detail->value_date = $value;
+                    break;
                 case '_string_':
+                case '_url_':
                     $detail->value_string = $value;
                     break;
             }
