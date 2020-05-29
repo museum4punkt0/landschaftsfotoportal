@@ -74,6 +74,10 @@ class ItemsController extends Controller
         foreach ($request->input('fields') as $column_id => $value) {
             $validation_rules['fields.'.$column_id] = 'required|'. Column::find($column_id)->getValidationRule();
         }
+        // Validate uploaded files
+        foreach ($request->file('fields') as $column_id => $value) {
+            $validation_rules['fields.'.$column_id] = 'required|'. Column::find($column_id)->getValidationRule();
+        }
         
         $request->validate($validation_rules);
         
@@ -110,6 +114,27 @@ class ItemsController extends Controller
                 case '_string_':
                 case '_url_':
                     $detail_data['value_string'] = $value;
+                    break;
+            }
+            Detail::create($detail_data);
+        }
+        foreach ($request->file('fields') as $column_id => $value) {
+            $data_type = Column::find($column_id)->getDataType();
+            
+            $detail_data = [
+                'item_fk' => $item->item_id,
+                'column_fk' => $column_id,
+            ];
+            
+            $file = $request->file('fields.'.$column_id);
+            switch ($data_type) {
+                case '_image_':
+                    if($file->isValid()) {
+                        $path = 'public/images/';
+                        $name =  $column_id ."_". date('YmdHis') .".". $file->extension();
+                        $file->storeAs($path, $name);
+                        $detail_data['value_string']  = $name;
+                    }
                     break;
             }
             Detail::create($detail_data);
@@ -164,6 +189,10 @@ class ItemsController extends Controller
         foreach ($request->input('fields') as $column_id => $value) {
             $validation_rules['fields.'.$column_id] = 'required|'. Column::find($column_id)->getValidationRule();
         }
+        // Validate uploaded files
+        foreach ($request->file('fields') as $column_id => $value) {
+            $validation_rules['fields.'.$column_id] = Column::find($column_id)->getValidationRule();
+        }
         
         $request->validate($validation_rules);
         
@@ -191,6 +220,24 @@ class ItemsController extends Controller
                 case '_string_':
                 case '_url_':
                     $detail->value_string = $value;
+                    break;
+            }
+            $detail->save();
+        }
+        foreach ($request->file('fields') as $column_id => $value) {
+            $detail = $details->where('column_fk', $column_id)->first();
+            
+            $data_type = Column::find($column_id)->getDataType();
+            
+            $file = $request->file('fields.'.$column_id);
+            switch ($data_type) {
+                case '_image_':
+                    if($file->isValid()) {
+                        $path = 'public/images/';
+                        $name = $column_id ."_". date('YmdHis') .".". $file->extension();
+                        $file->storeAs($path, $name);
+                        $detail->value_string  = $name;
+                    }
                     break;
             }
             $detail->save();

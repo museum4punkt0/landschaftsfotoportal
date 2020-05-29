@@ -111,6 +111,8 @@ class Column extends Model
                 return 'date';
             case '_url_':
                 return 'url';
+            case '_image_':
+                return 'image|mimes:jpeg,png|max:8192';
             default:
                 return '';
         }

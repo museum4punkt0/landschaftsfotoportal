@@ -5,7 +5,7 @@
 <div class="container">
 <h2>@lang('items.new')</h2>
 
-<form action="{{ route('item.store') }}" method="POST">
+<form action="{{ route('item.store') }}" method="POST" enctype="multipart/form-data">
     
     @foreach($colmap as $cm)
         {{--
@@ -95,6 +95,23 @@
                     </span>
                     <input type="url" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
                         value="{{old('fields.'. $cm->column->column_id, 'https://')}}" />
+                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                </div>
+                @break
+            
+            {{-- Data_type of form field is image --}}
+            @case('_image_')
+                <div class="form-group">
+                    <span>
+                        {{ $cm->column->translation->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        ({{ $cm->column->description }}, 
+                        @lang('columns.data_type'): 
+                        {{ $cm->column->data_type->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
+                    </span>
+                    <input type="file" class="form-control-file" name="fields[{{ $cm->column->column_id }}]" />
+                    <span class="form-text text-muted">@lang('column.image_hint')</span>
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 @break

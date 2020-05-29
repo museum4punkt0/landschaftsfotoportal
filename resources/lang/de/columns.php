@@ -21,4 +21,5 @@ return [
     
     'data_type' => 'Datentyp',
     'translated_name' => 'Name in verschiedenen Sprachen',
+    'image_not_available' => 'Keine Bilddatei vorhanden',
 ];

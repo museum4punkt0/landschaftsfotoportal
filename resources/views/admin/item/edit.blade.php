@@ -5,7 +5,7 @@
 <div class="container">
 <h2>@lang('items.edit')</h2>
 
-<form action="{{ route('item.update', $item->item_id) }}" method="POST">
+<form action="{{ route('item.update', $item->item_id) }}" method="POST" enctype="multipart/form-data">
     
     @foreach($colmap as $cm)
         @switch($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value)
@@ -123,6 +123,37 @@
                     <input type="url" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
                         value="{{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}" />
+                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                </div>
+                @break
+            {{-- Data_type of form field is image --}}
+            @case('_image_')
+                <div class="form-group">
+                    <span>
+                        {{ $cm->column->translation->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        ({{ $cm->column->description }}, 
+                        @lang('columns.data_type'): 
+                        {{ $cm->column->data_type->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
+                    </span>
+                    <div class="form-row">
+                        <div class="col">
+                            <input type="file" class="form-control-file" name="fields[{{ $cm->column->column_id }}]" />
+                            <span class="form-text text-muted">@lang('column.image_hint')</span>
+                        </div>
+                        <div class="col">
+                            @if(Storage::exists('public/images/'.
+                                $details->firstWhere('column_fk', $cm->column->column_id)->value_string))
+                                <img src="{{ asset('storage/images/'.
+                                    $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
+                                    width=100
+                                />
+                            @else
+                                @lang('columns.image_not_available')
+                            @endif
+                        </div>
+                    </div>
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 @break
