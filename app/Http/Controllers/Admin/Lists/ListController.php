@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Redirect;
 use Auth;
 
-class ListsController extends Controller
+class ListController extends Controller
 {
     /**
      * Display a listing of the resource without flag 'internal' being set.

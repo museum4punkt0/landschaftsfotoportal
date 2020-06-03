@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Redirect;
 use Auth;
 
-class ElementsController extends Controller
+class ElementController extends Controller
 {
     /**
      * Display a listing of the resource.

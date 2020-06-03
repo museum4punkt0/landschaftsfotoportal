@@ -12,7 +12,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Redirect;
 
-class ItemsController extends Controller
+class ItemController extends Controller
 {
     /**
      * Display a listing of the resource.

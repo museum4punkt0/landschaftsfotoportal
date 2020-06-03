@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Redirect;
 use Auth;
 
-class AttributesController extends Controller
+class AttributeController extends Controller
 {
     /**
      * Display a listing of the resource.

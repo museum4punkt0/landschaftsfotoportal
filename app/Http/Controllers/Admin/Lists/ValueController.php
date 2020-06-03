@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 use Redirect;
 use Auth;
 
-class ValuesController extends Controller
+class ValueController extends Controller
 {
     /**
      * Display a listing of the resource.

@@ -10,7 +10,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Redirect;
 
-class ColumnsController extends Controller
+class ColumnController extends Controller
 {
     /**
      * Display a listing of the resource.

@@ -33,16 +33,16 @@ Route::post('/admin/import/csv/process', 'Admin\ImportCSVController@process')->n
     ->middleware('auth');
 
 Route::resource('admin/colmap', 'Admin\ColumnMappingController')->middleware('auth');
-Route::resource('admin/column', 'Admin\ColumnsController')->middleware('auth');
-Route::resource('admin/detail', 'Admin\DetailsController')->middleware('auth');
-Route::get('admin/item/new', 'Admin\ItemsController@new')->name('item.new')->middleware('auth');
-Route::resource('admin/item', 'Admin\ItemsController')->middleware('auth');
+Route::resource('admin/column', 'Admin\ColumnController')->middleware('auth');
+Route::resource('admin/detail', 'Admin\DetailController')->middleware('auth');
+Route::get('admin/item/new', 'Admin\ItemController@new')->name('item.new')->middleware('auth');
+Route::resource('admin/item', 'Admin\ItemController')->middleware('auth');
 Route::resource('admin/taxon', 'Admin\TaxonController')->middleware('auth');
 
-Route::resource('admin/lists/list.element', 'Admin\Lists\ElementsController')->shallow()->middleware('auth');
-Route::resource('admin/lists/element.value', 'Admin\Lists\ValuesController')->shallow()->middleware('auth');
+Route::resource('admin/lists/list.element', 'Admin\Lists\ElementController')->shallow()->middleware('auth');
+Route::resource('admin/lists/element.value', 'Admin\Lists\ValueController')->shallow()->middleware('auth');
 
-Route::get('admin/lists/list/internal', 'Admin\Lists\ListsController@internal')->name('list.internal')->middleware('auth');
-Route::get('admin/lists/list/{id}/tree', 'Admin\Lists\ListsController@tree')->name('list.tree')->middleware('auth');
-Route::resource('admin/lists/list', 'Admin\Lists\ListsController')->middleware('auth');
-Route::resource('admin/lists/attribute', 'Admin\Lists\AttributesController')->middleware('auth');
+Route::get('admin/lists/list/internal', 'Admin\Lists\ListController@internal')->name('list.internal')->middleware('auth');
+Route::get('admin/lists/list/{id}/tree', 'Admin\Lists\ListController@tree')->name('list.tree')->middleware('auth');
+Route::resource('admin/lists/list', 'Admin\Lists\ListController')->middleware('auth');
+Route::resource('admin/lists/attribute', 'Admin\Lists\AttributeController')->middleware('auth');
