@@ -11,6 +11,7 @@ return [
     |
     */
 
+    'all' => 'alle',
     'yes' => 'ja',
     'no' => 'nein',
     'new' => 'neu',

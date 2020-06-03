@@ -6,6 +6,7 @@ use App\ColumnMapping;
 use App\Column;
 use App\Detail;
 use App\Item;
+use App\Taxon;
 use App\Selectlist;
 use App\Element;
 use App\Http\Controllers\Controller;
@@ -37,8 +38,9 @@ class ColumnMappingController extends Controller
         
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
+        $taxa = Taxon::tree()->get();
         
-        return view('admin.colmap.create', compact('columns', 'item_types'));
+        return view('admin.colmap.create', compact('columns', 'item_types', 'taxa'));
     }
 
     /**
@@ -102,8 +104,9 @@ class ColumnMappingController extends Controller
         
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
+        $taxa = Taxon::tree()->get();
         
-        return view('admin.colmap.edit', compact('colmap', 'columns', 'item_types'));
+        return view('admin.colmap.edit', compact('colmap', 'columns', 'item_types', 'taxa'));
     }
 
     /**
