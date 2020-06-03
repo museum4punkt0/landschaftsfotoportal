@@ -1977,16 +1977,16 @@
         },
         {
             "name": "staudenmeir/laravel-adjacency-list",
-            "version": "v1.4.1",
+            "version": "v1.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/staudenmeir/laravel-adjacency-list.git",
-                "reference": "39fab63220441fe7acb9a80c6e8c41550cfd9aae"
+                "reference": "4e5334c0c7db90b9678a22d9228da10709692c71"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/staudenmeir/laravel-adjacency-list/zipball/39fab63220441fe7acb9a80c6e8c41550cfd9aae",
-                "reference": "39fab63220441fe7acb9a80c6e8c41550cfd9aae",
+                "url": "https://api.github.com/repos/staudenmeir/laravel-adjacency-list/zipball/4e5334c0c7db90b9678a22d9228da10709692c71",
+                "reference": "4e5334c0c7db90b9678a22d9228da10709692c71",
                 "shasum": ""
             },
             "require": {
@@ -2015,7 +2015,7 @@
                 }
             ],
             "description": "Recursive Laravel Eloquent relationships with CTEs",
-            "time": "2020-04-18T15:02:39+00:00"
+            "time": "2020-06-01T09:35:53+00:00"
         },
         {
             "name": "staudenmeir/laravel-cte",
