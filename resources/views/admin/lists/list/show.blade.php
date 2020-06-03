@@ -40,26 +40,28 @@
                         <td>
                             {{$element->depth + 1}}
                         </td>
-                        <td><table>
-                        @foreach($element->values as $value)
-                            <tr>
-                            <td>
-                                <a href="{{route('value.edit', $value->value_id)}}" class="btn btn-primary">@lang('common.edit')</a>
-                            </td>
-                            <td>
-                                <form action="{{route('value.destroy', $value->value_id)}}" method="POST">
-                                    {{ csrf_field() }}
-                                    @method('DELETE')
-                                    <button class="btn btn-danger" type="submit">@lang('common.delete')</button>
-                                </form>
-                            </td>
-                            <td>{{$value->attribute['name']}}: <strong>{{$value->value}}</strong></td>
-                            </tr>
-                        @endforeach
-                            <tr><td colspan=3>
-                                <a href="{{route('element.value.create', $element->element_id)}}" class="btn btn-primary">@lang('values.new')</a>
-                            </td></tr>
-                        </table></td>
+                        <td>
+                            <table style="margin-left:{{ $element->depth*50 }}px;">
+                            @foreach($element->values as $value)
+                                <tr>
+                                <td>
+                                    <a href="{{route('value.edit', $value->value_id)}}" class="btn btn-outline-primary btn-sm">@lang('common.edit')</a>
+                                </td>
+                                <td>
+                                    <form action="{{route('value.destroy', $value->value_id)}}" method="POST">
+                                        {{ csrf_field() }}
+                                        @method('DELETE')
+                                        <button class="btn btn-outline-danger btn-sm" type="submit">@lang('common.delete')</button>
+                                    </form>
+                                </td>
+                                <td>{{$value->attribute['name']}}: <strong>{{$value->value}}</strong></td>
+                                </tr>
+                            @endforeach
+                                <tr><td colspan=3>
+                                    <a href="{{route('element.value.create', $element->element_id)}}" class="btn btn-outline-primary btn-sm">@lang('values.new')</a>
+                                </td></tr>
+                            </table>
+                        </td>
                         @if($list->hierarchical)
                             <td>
                                 <form action="{{route('element.edit', $element->element_id)}}" method="GET">
