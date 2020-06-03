@@ -56,6 +56,6 @@ class ColumnMapping extends Model
      */
     public function taxon()
     {
-        #return $this->belongsTo('App\Taxon', 'taxon_fk', 'taxon_id');
+        return $this->belongsTo('App\Taxon', 'taxon_fk', 'taxon_id');
     }
 }

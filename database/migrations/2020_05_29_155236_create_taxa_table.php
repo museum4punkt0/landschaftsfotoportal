@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateElementsTable extends Migration
+class CreateTaxaTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,14 @@ class CreateElementsTable extends Migration
      */
     public function up()
     {
-        Schema::create('elements', function (Blueprint $table) {
-            $table->increments('element_id');
+        Schema::create('taxa', function (Blueprint $table) {
+            $table->increments('taxon_id');
             $table->integer('parent_fk')->nullable(true);
-            $table->integer('list_fk');
-            $table->string('value_summary');
+            $table->string('taxon_name');
+            $table->string('taxon_author')->nullable(true);
+            $table->string('native_name');
+            $table->integer('valid_name')->nullable(true);
+            $table->integer('rank')->nullable(true);
             $table->timestamps();
         });
     }
@@ -29,6 +32,6 @@ class CreateElementsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('elements');
+        Schema::dropIfExists('taxa');
     }
 }

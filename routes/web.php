@@ -37,6 +37,7 @@ Route::resource('admin/column', 'Admin\ColumnsController')->middleware('auth');
 Route::resource('admin/detail', 'Admin\DetailsController')->middleware('auth');
 Route::get('/admin/item/new', 'Admin\ItemsController@new')->name('item.new')->middleware('auth');
 Route::resource('admin/item', 'Admin\ItemsController')->middleware('auth');
+Route::resource('admin/taxon', 'Admin\TaxonController')->middleware('auth');
 
 Route::resource('list.element', 'ElementsController')->shallow()->middleware('auth');
 Route::resource('element.value', 'ValuesController')->shallow()->middleware('auth');

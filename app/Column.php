@@ -78,7 +78,7 @@ class Column extends Model
     }
     
     /**
-     * Get the configs of the column.
+     * Get the mapping of the column.
      */
     public function column_mapping()
     {
