@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin\Lists;
 
 use App\Selectlist;
 use App\Element;
 use App\Value;
 use App\Attribute;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Redirect;
 use Auth;
@@ -34,7 +35,7 @@ class ElementsController extends Controller
         $data['elements'] = Element::where('list_fk', $list_id)->get();
         $data['attributes'] = Attribute::all();
         
-        return view('element.create', $data);
+        return view('admin.lists.element.create', $data);
     }
 
     /**
@@ -66,7 +67,7 @@ class ElementsController extends Controller
         ];
         Value::create($value_data);
         
-        return Redirect::to('list/'.$list_id)
+        return Redirect::to('admin/lists/list/'.$list_id)
             ->with('success', __('elements.created'));
     }
 
@@ -96,7 +97,7 @@ class ElementsController extends Controller
         // Remove all descendants to avoid circular dependencies
         $data['elements'] = $data['elements']->diff($element->descendants()->get());
         
-        return view('element.edit', $data);
+        return view('admin.lists.element.edit', $data);
     }
 
     /**
@@ -115,7 +116,7 @@ class ElementsController extends Controller
         $element->parent_fk = $request->input('parent_fk');
         $element->save();
         
-        return Redirect::to('list/'.$element->list_fk)
+        return Redirect::to('admin/lists/list/'.$element->list_fk)
             ->with('success', __('elements.updated'));
     }
 
@@ -147,7 +148,7 @@ class ElementsController extends Controller
             }
         }
         
-        return Redirect::to('list/'.$element->list_fk)
+        return Redirect::to('admin/lists/list/'.$element->list_fk)
             ->with('success', $success_status_msg);
     }
 }

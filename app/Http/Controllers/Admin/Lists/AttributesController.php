@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin\Lists;
 
 use App\Attribute;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Redirect;
 use Auth;
@@ -18,7 +19,7 @@ class AttributesController extends Controller
     {
         $data['attributes'] = Attribute::orderBy('name')->paginate(10);
         
-        return view('attribute.list', $data);
+        return view('admin.lists.attribute.list', $data);
     }
 
     /**
@@ -28,7 +29,7 @@ class AttributesController extends Controller
      */
     public function create()
     {
-        return view('attribute.create');
+        return view('admin.lists.attribute.create');
     }
 
     /**
@@ -45,7 +46,7 @@ class AttributesController extends Controller
         
         Attribute::create($request->all());
         
-        return Redirect::to('attribute')
+        return Redirect::to('admin/lists/attribute')
             ->with('success', __('attributes.created'));
     }
 
@@ -70,7 +71,7 @@ class AttributesController extends Controller
     {
         $data['attribute'] = $attribute;
         
-        return view('attribute.edit', $data);
+        return view('admin.lists.attribute.edit', $data);
     }
 
     /**
@@ -89,7 +90,7 @@ class AttributesController extends Controller
         $attribute->name = $request->input('name');
         $attribute->save();
         
-        return Redirect::to('attribute')
+        return Redirect::to('admin/lists/attribute')
             ->with('success', __('attributes.updated'));
     }
 
@@ -103,7 +104,7 @@ class AttributesController extends Controller
     {
         $attribute->delete();
         
-        return Redirect::to('attribute')
+        return Redirect::to('admin/lists/attribute')
             ->with('success', __('attributes.deleted'));
     }
 }

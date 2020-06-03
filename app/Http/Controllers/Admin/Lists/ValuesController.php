@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin\Lists;
 
 use App\Element;
 use App\Value;
 use App\Attribute;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Redirect;
 use Auth;
@@ -32,7 +33,7 @@ class ValuesController extends Controller
         $data['element'] = Element::find($element_id);
         $data['attributes'] = Attribute::all();
         
-        return view('value.create', $data);
+        return view('admin.lists.value.create', $data);
     }
 
     /**
@@ -58,7 +59,7 @@ class ValuesController extends Controller
         
         $element = Element::find($element_id);
         
-        return Redirect::to('list/'.$element->list_fk)
+        return Redirect::to('admin/lists/list/'.$element->list_fk)
             ->with('success', __('values.created'));
     }
 
@@ -84,7 +85,7 @@ class ValuesController extends Controller
         $data['value'] = $value;
         $data['attributes'] = Attribute::all();
         
-        return view('value.edit', $data);
+        return view('admin.lists.value.edit', $data);
     }
 
     /**
@@ -106,7 +107,7 @@ class ValuesController extends Controller
         
         $value->save();
         
-        return Redirect::to('list/'.$value->element->list_fk)
+        return Redirect::to('admin/lists/list/'.$value->element->list_fk)
             ->with('success', __('values.updated'));
     }
 
@@ -139,7 +140,7 @@ class ValuesController extends Controller
             }
         }
         
-        return Redirect::to('list/'.$value->element->list_fk)
+        return Redirect::to('admin/lists/list/'.$value->element->list_fk)
             ->with('success', $success_status_msg);
     }
 }

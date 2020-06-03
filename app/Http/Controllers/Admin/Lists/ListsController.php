@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Admin\Lists;
 
 use App\Selectlist;
 use App\Element;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\Builder;
 use Redirect;
@@ -20,7 +21,7 @@ class ListsController extends Controller
     {
         $data['lists'] = Selectlist::where('internal', false)->orderBy('name')->paginate(10);
         
-        return view('list.list',$data);
+        return view('admin.lists.list.list',$data);
     }
 
     /**
@@ -32,7 +33,7 @@ class ListsController extends Controller
     {
         $data['lists'] = Selectlist::where('internal', true)->orderBy('name')->paginate(10);
         
-        return view('list.list',$data);
+        return view('admin.lists.list.list',$data);
     }
 
     /**
@@ -42,7 +43,7 @@ class ListsController extends Controller
      */
     public function create()
     {
-        return view('list.create');
+        return view('admin.lists.list.create');
     }
 
     /**
@@ -62,7 +63,7 @@ class ListsController extends Controller
         
         Selectlist::create($request->all());
         
-        return Redirect::to('list')->with('success', __('lists.created'));
+        return Redirect::to('admin/lists/list')->with('success', __('lists.created'));
     }
 
     /**
@@ -81,7 +82,7 @@ class ListsController extends Controller
 
         $data['elements'] = Element::withRelationshipExpression('desc', $constraint, 0)->depthFirst()->get();
         
-        return view('list.show', $data);
+        return view('admin.lists.list.show', $data);
     }
 
     /**
@@ -100,7 +101,7 @@ class ListsController extends Controller
 
         $data['elements'] = Element::withRelationshipExpression('desc', $constraint, 0)->depthFirst()->get();
         
-        return view('list.tree', $data);
+        return view('admin.lists.list.tree', $data);
     }
 
     /**
@@ -113,7 +114,7 @@ class ListsController extends Controller
     {
         $data['list'] = Selectlist::find($id);
         
-        return view('list.edit', $data);
+        return view('admin.lists.list.edit', $data);
     }
 
     /**
@@ -141,7 +142,7 @@ class ListsController extends Controller
         ];
         Selectlist::where('list_id', $id)->update($update);
         
-        return Redirect::to('list')->with('success', __('lists.updated'));
+        return Redirect::to('admin/lists/list')->with('success', __('lists.updated'));
 
     }
 
@@ -157,6 +158,6 @@ class ListsController extends Controller
         
         // TODO: delete orphaned elements and values
         
-        return Redirect::to('list')->with('success', __('lists.deleted'));
+        return Redirect::to('admin/lists/list')->with('success', __('lists.deleted'));
     }
 }
