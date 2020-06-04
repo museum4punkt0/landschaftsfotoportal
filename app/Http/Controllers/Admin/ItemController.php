@@ -9,6 +9,7 @@ use App\ColumnMapping;
 use App\Selectlist;
 use App\Element;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Redirect;
 
@@ -48,7 +49,16 @@ class ItemController extends Controller
     public function create(Request $request)
     {
         $colmap = ColumnMapping::where('item_type_fk', $request->item_type)->get();
-        $lists = Selectlist::where('internal', false)->orderBy('name')->get();
+        
+        foreach($colmap as $cm) {
+            $list_id = $cm->column->list_fk;
+            if($list_id) {
+                $constraint = function (Builder $query) use ($list_id) {
+                    $query->where('parent_fk', 0)->where('list_fk', $list_id);
+                };
+                $lists[$list_id] = Element::treeOf($constraint)->depthFirst()->get();
+            }
+        }
         
         $dt_list = Selectlist::where('name', '_data_type_')->first();
         $data_types = Element::where('list_fk', $dt_list->list_id)->with(['values', 'attributes'])->get();
@@ -165,7 +175,16 @@ class ItemController extends Controller
     {
         $details = Detail::where('item_fk', $item->item_id)->get();
         $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)->get();
-        $lists = Selectlist::where('internal', false)->orderBy('name')->get();
+        
+        foreach($colmap as $cm) {
+            $list_id = $cm->column->list_fk;
+            if($list_id) {
+                $constraint = function (Builder $query) use ($list_id) {
+                    $query->where('parent_fk', 0)->where('list_fk', $list_id);
+                };
+                $lists[$list_id] = Element::treeOf($constraint)->depthFirst()->get();
+            }
+        }
         
         $dt_list = Selectlist::where('name', '_data_type_')->first();
         $data_types = Element::where('list_fk', $dt_list->list_id)->with(['values', 'attributes'])->get();

@@ -32,6 +32,9 @@
                 @foreach($elements as $element)
                     <option value="{{$element->values[0]->element_fk}}"
                     @if(old('parent_fk') == $element->values[0]->element_fk) selected @endif >
+                    @for ($i = 0; $i < $element->depth + 1; $i++)
+                        |___
+                    @endfor
                     @foreach($element->values as $value)
                         {{$value->value}}; 
                     @endforeach

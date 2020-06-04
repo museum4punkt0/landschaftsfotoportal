@@ -23,7 +23,7 @@
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
                     </span>
                     <select name="fields[{{ $cm->column->column_id }}]" class="form-control" size=1 >
-                        @foreach($lists->firstWhere('list_id', $cm->column->list_fk)->elements as $element)
+                        @foreach($lists[$cm->column->list_fk] as $element)
                             <option value="{{$element->element_id}}"
                                 @if(old('fields.'. $cm->column->column_id, 
                                     $details->firstWhere('column_fk', $cm->column->column_id)->element_fk) == 
@@ -31,6 +31,9 @@
                                         selected
                                 @endif
                             >
+                                @for ($i = 0; $i < $element->depth; $i++)
+                                    |___
+                                @endfor
                                 @foreach($element->values as $v)
                                     {{$v->value}}, 
                                 @endforeach

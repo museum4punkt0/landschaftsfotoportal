@@ -7,6 +7,7 @@ use App\Element;
 use App\Value;
 use App\Attribute;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Redirect;
 use Auth;
@@ -32,7 +33,10 @@ class ElementController extends Controller
     public function create($list_id)
     {
         $data['list'] = Selectlist::find($list_id);
-        $data['elements'] = Element::where('list_fk', $list_id)->get();
+        $constraint = function (Builder $query) use ($list_id) {
+            $query->where('parent_fk', 0)->where('list_fk', $list_id);
+        };
+        $data['elements'] = Element::treeOf($constraint)->depthFirst()->get();
         $data['attributes'] = Attribute::all();
         
         return view('admin.lists.element.create', $data);
@@ -91,11 +95,14 @@ class ElementController extends Controller
     public function edit(Element $element)
     {
         $data['element'] = $element;
-        $data['elements'] = Element::where('list_fk', $element->list_fk)->get()
-                            ->except([$element->element_id]);
+        $list_id = $element->list_fk;
+        $constraint = function (Builder $query) use ($list_id) {
+            $query->where('parent_fk', 0)->where('list_fk', $list_id);
+        };
+        $data['elements'] = Element::treeOf($constraint)->depthFirst()->get();
         
         // Remove all descendants to avoid circular dependencies
-        $data['elements'] = $data['elements']->diff($element->descendants()->get());
+        $data['elements'] = $data['elements']->diff($element->descendantsAndSelf()->get());
         
         return view('admin.lists.element.edit', $data);
     }

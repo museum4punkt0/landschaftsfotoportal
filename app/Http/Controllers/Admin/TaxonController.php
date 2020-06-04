@@ -83,10 +83,10 @@ class TaxonController extends Controller
      */
     public function edit(Taxon $taxon)
     {
-        $taxa = Taxon::tree()->get()->except([$taxon->taxon_id]);
+        $taxa = Taxon::tree()->get();
         
         // Remove all descendants to avoid circular dependencies
-        $taxa = $taxa->diff($taxon->descendants()->get());
+        $taxa = $taxa->diff($taxon->descendantsAndSelf()->get());
         
         return view('admin.taxon.edit', compact('taxon', 'taxa'));
     }
