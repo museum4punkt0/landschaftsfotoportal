@@ -50,6 +50,8 @@ class ItemController extends Controller
     {
         $colmap = ColumnMapping::where('item_type_fk', $request->item_type)->get();
         
+        $lists = null;
+        // Load all list elements of lists used by this item's columns
         foreach($colmap as $cm) {
             $list_id = $cm->column->list_fk;
             if($list_id) {

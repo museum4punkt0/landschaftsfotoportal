@@ -5,6 +5,15 @@
 <div class="container">
 <h2>@lang('items.new')</h2>
 
+@if(count($colmap)==0)
+    <div class="alert alert-info">
+        @lang('colmaps.none_available')
+    </div>
+    <div>
+        <a href="{{route('colmap.create')}}" class="btn btn-primary">@lang('colmaps.new')</a>
+    </div>
+@else
+
 <form action="{{ route('item.store') }}" method="POST" enctype="multipart/form-data">
     
     @foreach($colmap as $cm)
@@ -141,6 +150,8 @@
     </div>
     {{ csrf_field() }}
 </form>
+
+@endif
 
 </div>
 
