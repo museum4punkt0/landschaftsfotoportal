@@ -42,7 +42,7 @@ class TaxonController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'parent_fk' => 'nullable|integer',
+            'parent' => 'nullable|integer',
             'taxon_name' => 'required|string',
             'taxon_author' => 'nullable|string',
             'native_name' => 'required|string',
@@ -103,7 +103,7 @@ class TaxonController extends Controller
     public function update(Request $request, Taxon $taxon)
     {
         $request->validate([
-            'parent_fk' => 'nullable|integer',
+            'parent' => 'nullable|integer',
             'taxon_name' => 'required|string',
             'taxon_author' => 'nullable|string',
             'native_name' => 'required|string',
