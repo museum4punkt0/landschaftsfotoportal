@@ -25,4 +25,5 @@ return [
     'native_name' => 'Umgangssprachlicher Name',
     'valid_name' => 'Valides Taxon',
     'valid' => 'Taxon ist valide',
+    'gsl_id' => 'GermanSL SPECIES_NR',
 ];

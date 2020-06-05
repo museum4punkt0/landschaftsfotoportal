@@ -21,6 +21,7 @@
                         <th colspan="1">@lang('taxon.name')</th>
                         <th colspan="1">@lang('taxon.native_name')</th>
                         <th colspan="1">@lang('taxon.valid_name')</th>
+                        <th colspan="1">@lang('taxon.gsl_id')</th>
                         <th colspan="2">@lang('common.actions')</th>
                     </tr>
                 </thead>
@@ -45,6 +46,9 @@
                             @else
                                 @lang('common.yes')
                             @endif
+                        </td>
+                        <td>
+                            {{$taxon->gsl_id}}<br/>
                         </td>
                         <td>
                             <form action="{{route('taxon.edit', $taxon)}}" method="GET">

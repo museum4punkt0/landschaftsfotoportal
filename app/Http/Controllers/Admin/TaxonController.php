@@ -48,6 +48,7 @@ class TaxonController extends Controller
             'native_name' => 'required|string',
             'valid_name' => 'nullable|integer',
             'rank' => 'integer',
+            'gsl_id' => 'integer',
         ]);
         
         $data = [
@@ -57,6 +58,7 @@ class TaxonController extends Controller
             'native_name' => $request->input('native_name'),
             'valid_name' => $request->input('valid_name'),
             //'rank' => $request->input('rank'),
+            'gsl_id' => $request->input('gsl_id'),
         ];
         Taxon::create($data);
         
@@ -107,6 +109,7 @@ class TaxonController extends Controller
             'native_name' => 'required|string',
             'valid_name' => 'nullable|integer',
             'rank' => 'integer',
+            'gsl_id' => 'integer',
         ]);
         
         $taxon->parent_fk = $request->input('parent');
@@ -115,6 +118,7 @@ class TaxonController extends Controller
         $taxon->native_name = $request->input('native_name');
         $taxon->valid_name = $request->input('valid_name');
         //$taxon->rank = $request->input('rank');
+        $taxon->gsl_id = $request->input('gsl_id');
         $taxon->save();
         
         return Redirect::to('admin/taxon')

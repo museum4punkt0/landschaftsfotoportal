@@ -58,6 +58,11 @@
         </select>
         <span class="text-danger">{{ $errors->first('parent') }}</span>
     </div>
+    <div class="form-group">
+        <span>@lang('taxon.gsl_id')</span>
+        <input type="text" name="gsl_id" class="form-control" value="{{old('gsl_id')}}" />
+        <span class="text-danger">{{ $errors->first('gsl_id') }}</span>
+    </div>
     
     <div class="form-group">
         <button type="submit" class="btn btn-primary">@lang('common.save')</button>
