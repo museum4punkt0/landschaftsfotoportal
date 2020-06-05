@@ -20,6 +20,7 @@
                         <th colspan="1">@lang('common.id')</th>
                         <th colspan="1">@lang('common.description')</th>
                         <th colspan="1">@lang('common.name')</th>
+                        <th colspan="1">@lang('columns.column_group')</th>
                         <th colspan="1">@lang('columns.data_type')</th>
                         <th colspan="1">@lang('lists.list')</th>
                         <th colspan="2">@lang('common.actions')</th>
@@ -39,6 +40,12 @@
                                 {{substr($v->attribute->name, -2)}}: {{$v->value}}<br/>
                             @endforeach
                             ID {{$column->translation_fk}}<br/>
+                        </td>
+                        <td>
+                            @foreach($column->column_group->values as $v)
+                                {{substr($v->attribute->name, -2)}}: {{$v->value}}<br/>
+                            @endforeach
+                            ID {{$column->column_group_fk}}<br/>
                         </td>
                         <td>
                             @foreach($column->data_type->values as $v)
