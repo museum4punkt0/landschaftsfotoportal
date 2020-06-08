@@ -20,6 +20,7 @@
                         <th colspan="1">@lang('common.id')</th>
                         <th colspan="1">@lang('common.description')</th>
                         <th colspan="1">@lang('columns.list')</th>
+                        <th colspan="1">@lang('taxon.list')</th>
                         <th colspan="1">@lang('colmaps.item_type')</th>
                         <th colspan="1">@lang('common.actions')</th>
                     </tr>
@@ -38,6 +39,14 @@
                                 {{substr($v->attribute->name, -2)}}: {{$v->value}}<br/>
                             @endforeach
                             ID {{$colmap->column_fk}}<br/>
+                        </td>
+                        <td>
+                            @if($colmap->taxon_fk)
+                                {{$colmap->taxon->taxon_name}}<br/>
+                                ID {{$colmap->taxon_fk}}
+                            @else
+                                @lang('common.all')
+                            @endif
                         </td>
                         <td>
                             @foreach($colmap->item_type->values as $v)

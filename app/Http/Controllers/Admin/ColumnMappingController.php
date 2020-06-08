@@ -38,6 +38,7 @@ class ColumnMappingController extends Controller
         
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
+        
         $taxa = Taxon::tree()->get();
         
         return view('admin.colmap.create', compact('columns', 'item_types', 'taxa'));
@@ -54,11 +55,13 @@ class ColumnMappingController extends Controller
         $request->validate([
             'column' => 'required|integer',
             'item_type' => 'required|integer',
+            'taxon' => 'nullable|integer',
         ]);
         
         $data = [
             'column_fk' => $request->input('column'),
             'item_type_fk' => $request->input('item_type'),
+            'taxon_fk' => $request->input('taxon'),
         ];
         ColumnMapping::create($data);
         
@@ -104,6 +107,7 @@ class ColumnMappingController extends Controller
         
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
+        
         $taxa = Taxon::tree()->get();
         
         return view('admin.colmap.edit', compact('colmap', 'columns', 'item_types', 'taxa'));
@@ -124,10 +128,12 @@ class ColumnMappingController extends Controller
         $request->validate([
             'column' => 'required|integer',
             'item_type' => 'required|integer',
+            'taxon' => 'nullable|integer',
         ]);
         
         $colmap->column_fk = $request->input('column');
         $colmap->item_type_fk = $request->input('item_type');
+        $colmap->taxon_fk = $request->input('taxon');
         $colmap->save();
         
         // TODO: Create missing details for all items, see function store()
