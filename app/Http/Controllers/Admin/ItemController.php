@@ -48,6 +48,7 @@ class ItemController extends Controller
      */
     public function create(Request $request)
     {
+        $items = Item::tree()->get();
         $colmap = ColumnMapping::where('item_type_fk', $request->item_type)->get();
         
         $lists = null;
@@ -71,7 +72,7 @@ class ItemController extends Controller
         // Save item_type ID to session
         $request->session()->put('item_type', $request->item_type);
         
-        return view('admin.item.create', compact('colmap', 'lists', 'data_types', 'translations'));
+        return view('admin.item.create', compact('items', 'colmap', 'lists', 'data_types', 'translations'));
     }
 
     /**
@@ -82,13 +83,17 @@ class ItemController extends Controller
      */
     public function store(Request $request)
     {
+        $validation_rules['parent'] = 'nullable|integer';
         $validation_rules['fields'] = 'required|array';
+        
         foreach ($request->input('fields') as $column_id => $value) {
             $validation_rules['fields.'.$column_id] = 'required|'. Column::find($column_id)->getValidationRule();
         }
         // Validate uploaded files
-        foreach ($request->file('fields') as $column_id => $value) {
-            $validation_rules['fields.'.$column_id] = 'required|'. Column::find($column_id)->getValidationRule();
+        if($request->file('fields')) {
+            foreach ($request->file('fields') as $column_id => $value) {
+                $validation_rules['fields.'.$column_id] = 'required|'. Column::find($column_id)->getValidationRule();
+            }
         }
         
         $request->validate($validation_rules);
@@ -98,6 +103,7 @@ class ItemController extends Controller
         
         // Save new item to database
         $item_data = [
+            'parent_fk' => $request->input('parent'),
             'item_type_fk' => $item_type,
         ];
         $item = Item::create($item_data);
@@ -130,26 +136,28 @@ class ItemController extends Controller
             }
             Detail::create($detail_data);
         }
-        foreach ($request->file('fields') as $column_id => $value) {
-            $data_type = Column::find($column_id)->getDataType();
-            
-            $detail_data = [
-                'item_fk' => $item->item_id,
-                'column_fk' => $column_id,
-            ];
-            
-            $file = $request->file('fields.'.$column_id);
-            switch ($data_type) {
-                case '_image_':
-                    if($file->isValid()) {
-                        $path = 'public/images/';
-                        $name =  $column_id ."_". date('YmdHis') .".". $file->extension();
-                        $file->storeAs($path, $name);
-                        $detail_data['value_string']  = $name;
-                    }
-                    break;
+        if($request->file('fields')) {
+            foreach ($request->file('fields') as $column_id => $value) {
+                $data_type = Column::find($column_id)->getDataType();
+                
+                $detail_data = [
+                    'item_fk' => $item->item_id,
+                    'column_fk' => $column_id,
+                ];
+                
+                $file = $request->file('fields.'.$column_id);
+                switch ($data_type) {
+                    case '_image_':
+                        if($file->isValid()) {
+                            $path = 'public/images/';
+                            $name =  $column_id ."_". date('YmdHis') .".". $file->extension();
+                            $file->storeAs($path, $name);
+                            $detail_data['value_string']  = $name;
+                        }
+                        break;
+                }
+                Detail::create($detail_data);
             }
-            Detail::create($detail_data);
         }
         
         return Redirect::to('admin/item')
@@ -175,9 +183,15 @@ class ItemController extends Controller
      */
     public function edit(Item $item)
     {
+        $items = Item::tree()->get();
+        // Remove all descendants to avoid circular dependencies
+        $items = $items->diff($item->descendantsAndSelf()->get());
+        
         $details = Detail::where('item_fk', $item->item_id)->get();
         $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)->get();
         
+        $lists = null;
+        // Load all list elements of lists used by this item's columns
         foreach($colmap as $cm) {
             $list_id = $cm->column->list_fk;
             if($list_id) {
@@ -194,7 +208,7 @@ class ItemController extends Controller
         $l10n_list = Selectlist::where('name', '_translation_')->first();
         $translations = Element::where('list_fk', $l10n_list->list_id)->get();
         
-        return view('admin.item.edit', compact('item', 'details', 'colmap', 'lists', 'data_types', 'translations'));
+        return view('admin.item.edit', compact('item', 'items', 'details', 'colmap', 'lists', 'data_types', 'translations'));
     }
 
     /**
@@ -206,16 +220,23 @@ class ItemController extends Controller
      */
     public function update(Request $request, Item $item)
     {
+        $validation_rules['parent'] = 'nullable|integer';
         $validation_rules['fields'] = 'required|array';
+        
         foreach ($request->input('fields') as $column_id => $value) {
             $validation_rules['fields.'.$column_id] = 'required|'. Column::find($column_id)->getValidationRule();
         }
         // Validate uploaded files
-        foreach ($request->file('fields') as $column_id => $value) {
-            $validation_rules['fields.'.$column_id] = Column::find($column_id)->getValidationRule();
+        if($request->file('fields')) {
+            foreach ($request->file('fields') as $column_id => $value) {
+                $validation_rules['fields.'.$column_id] = Column::find($column_id)->getValidationRule();
+            }
         }
         
         $request->validate($validation_rules);
+        
+        $item->parent_fk = $request->input('parent');
+        $item->save();
         
         $details = Detail::where('item_fk', $item->item_id)->get();
         
@@ -245,23 +266,25 @@ class ItemController extends Controller
             }
             $detail->save();
         }
-        foreach ($request->file('fields') as $column_id => $value) {
-            $detail = $details->where('column_fk', $column_id)->first();
-            
-            $data_type = Column::find($column_id)->getDataType();
-            
-            $file = $request->file('fields.'.$column_id);
-            switch ($data_type) {
-                case '_image_':
-                    if($file->isValid()) {
-                        $path = 'public/images/';
-                        $name = $column_id ."_". date('YmdHis') .".". $file->extension();
-                        $file->storeAs($path, $name);
-                        $detail->value_string  = $name;
-                    }
-                    break;
+        if($request->file('fields')) {
+            foreach ($request->file('fields') as $column_id => $value) {
+                $detail = $details->where('column_fk', $column_id)->first();
+                
+                $data_type = Column::find($column_id)->getDataType();
+                
+                $file = $request->file('fields.'.$column_id);
+                switch ($data_type) {
+                    case '_image_':
+                        if($file->isValid()) {
+                            $path = 'public/images/';
+                            $name = $column_id ."_". date('YmdHis') .".". $file->extension();
+                            $file->storeAs($path, $name);
+                            $detail->value_string  = $name;
+                        }
+                        break;
+                }
+                $detail->save();
             }
-            $detail->save();
         }
         
         return Redirect::to('admin/item')

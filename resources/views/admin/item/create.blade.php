@@ -16,6 +16,23 @@
 
 <form action="{{ route('item.store') }}" method="POST" enctype="multipart/form-data">
     
+    <div class="form-group">
+        <span>@lang('lists.parent')</span>
+        <select name="parent" class="form-control" size=1 >
+            <option value="">@lang('common.root')</option>
+            @foreach($items as $item)
+                <option value="{{$item->item_id}}"
+                    @if(old('parent') == $item->item_id) selected @endif>
+                    @for ($i = 0; $i < $item->depth + 1; $i++)
+                        |___
+                    @endfor
+                    {{$item->item_id}}
+                </option>
+            @endforeach
+        </select>
+        <span class="text-danger">{{ $errors->first('parent') }}</span>
+    </div>
+    
     @foreach($colmap as $cm)
         {{--
         tr {{ $cm->column->translation_fk }}, 
@@ -132,7 +149,7 @@
                 @break
             
         @endswitch
-        <br/>
+        
     @endforeach
     
     @if ($errors->any())

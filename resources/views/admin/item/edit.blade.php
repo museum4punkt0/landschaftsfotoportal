@@ -7,6 +7,23 @@
 
 <form action="{{ route('item.update', $item->item_id) }}" method="POST" enctype="multipart/form-data">
     
+    <div class="form-group">
+        <span>@lang('lists.parent')</span>
+        <select name="parent" class="form-control" size=1 >
+            <option value="">@lang('common.root')</option>
+            @foreach($items as $it)
+                <option value="{{$it->item_id}}"
+                    @if(old('parent', $item->parent_fk) == $it->item_id) selected @endif>
+                    @for ($i = 0; $i < $it->depth + 1; $i++)
+                        |___
+                    @endfor
+                    {{$it->item_id}}
+                </option>
+            @endforeach
+        </select>
+        <span class="text-danger">{{ $errors->first('parent') }}</span>
+    </div>
+    
     @foreach($colmap as $cm)
         @switch($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value)
             
@@ -162,7 +179,7 @@
                 @break
             
         @endswitch
-        <br/>
+        
     @endforeach
     
     @if ($errors->any())

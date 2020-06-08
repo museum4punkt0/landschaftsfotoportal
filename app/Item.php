@@ -21,6 +21,7 @@ class Item extends Model
      * @var array
      */
     protected $fillable = [
+        'parent_fk',
         'item_type_fk',
         'taxon_fk',
     ];
@@ -56,5 +57,32 @@ class Item extends Model
     public function details()
     {
         return $this->hasMany('App\Detail', 'item_fk', 'item_id');
+    }
+    
+    
+    use \Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
+    
+    /**
+     * The parent key associated with the table.
+     * 
+     * (The default would be 'parent_id')
+     *
+     * @var string
+     */
+    public function getParentKeyName()
+    {
+        return 'parent_fk';
+    }
+    
+    /**
+     * The primary key associated with the table.
+     * 
+     * (The default would be 'id')
+     *
+     * @var string
+     */
+    public function getLocalKeyName()
+    {
+        return $this->primaryKey;
     }
 }
