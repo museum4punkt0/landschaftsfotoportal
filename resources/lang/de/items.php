@@ -20,4 +20,5 @@ return [
     'deleted' => 'Datensatz wurde gelöscht.',
     
     'item_type' => 'Datensatztyp',
+    'no_title_column' => 'Kein Anzeigefeld als Name definiert.',
 ];

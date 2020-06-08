@@ -19,6 +19,7 @@
                     <tr>
                         <th colspan="1">@lang('common.id')</th>
                         <th colspan="1">@lang('items.item_type')</th>
+                        <th colspan="1">@lang('common.name')</th>
                         <th colspan="2">@lang('common.actions')</th>
                     </tr>
                 </thead>
@@ -33,6 +34,9 @@
                                 {{$v->value}}<br/>
                             @endforeach
                             Typ-ID {{$item->item_type_fk}}
+                        </td>
+                        <td>
+                            {{$item->getTitleColumn()}}
                         </td>
                         <td>
                             <form action="{{route('item.edit', $item)}}" method="GET">

@@ -85,4 +85,41 @@ class Item extends Model
     {
         return $this->primaryKey;
     }
+    
+    
+    /**
+     * Get the id of the column containing a title or name string representing this item.
+     */
+    public function getTitleColumnId()
+    {
+        if($this->item_type->attributes()->firstWhere('name', 'config')) {
+            $json = $this->item_type->attributes()->firstWhere('name', 'config')->pivot->value;
+            $config = json_decode($json, true);
+            
+            return $config['title_column'];
+        }
+        // No config available for this item_type
+        else {
+            return null;
+        }
+    }
+    
+    /**
+     * Get the title or name string representing this item.
+     * 
+     * The column storing that string is set in the JSON config that belongs to the item_type.
+     */
+    public function getTitleColumn()
+    {
+        $title = __('items.no_title_column');
+        
+        if($this->getTitleColumnId()) {
+            $title_column = $this->columns->firstWhere('column_id', $this->getTitleColumnId());
+            if($title_column) {
+                $title = $title_column->pivot->value_string;
+            }
+        }
+        
+        return $title;
+    }
 }
