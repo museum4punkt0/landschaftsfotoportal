@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Item;
+use App\Taxon;
 use App\Detail;
 use App\Column;
 use App\ColumnMapping;
@@ -49,6 +50,7 @@ class ItemController extends Controller
     public function create(Request $request)
     {
         $items = Item::tree()->get();
+        $taxa = Taxon::tree()->get();
         $colmap = ColumnMapping::where('item_type_fk', $request->item_type)->get();
         
         $lists = null;
@@ -72,7 +74,7 @@ class ItemController extends Controller
         // Save item_type ID to session
         $request->session()->put('item_type', $request->item_type);
         
-        return view('admin.item.create', compact('items', 'colmap', 'lists', 'data_types', 'translations'));
+        return view('admin.item.create', compact('items', 'taxa', 'colmap', 'lists', 'data_types', 'translations'));
     }
 
     /**
@@ -84,6 +86,7 @@ class ItemController extends Controller
     public function store(Request $request)
     {
         $validation_rules['parent'] = 'nullable|integer';
+        $validation_rules['taxon'] = 'nullable|integer';
         $validation_rules['fields'] = 'required|array';
         
         foreach ($request->input('fields') as $column_id => $value) {
@@ -104,6 +107,7 @@ class ItemController extends Controller
         // Save new item to database
         $item_data = [
             'parent_fk' => $request->input('parent'),
+            'taxon_fk' => $request->input('taxon'),
             'item_type_fk' => $item_type,
         ];
         $item = Item::create($item_data);
@@ -187,6 +191,7 @@ class ItemController extends Controller
         // Remove all descendants to avoid circular dependencies
         $items = $items->diff($item->descendantsAndSelf()->get());
         
+        $taxa = Taxon::tree()->get();
         $details = Detail::where('item_fk', $item->item_id)->get();
         $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)->get();
         
@@ -208,7 +213,7 @@ class ItemController extends Controller
         $l10n_list = Selectlist::where('name', '_translation_')->first();
         $translations = Element::where('list_fk', $l10n_list->list_id)->get();
         
-        return view('admin.item.edit', compact('item', 'items', 'details', 'colmap', 'lists', 'data_types', 'translations'));
+        return view('admin.item.edit', compact('item', 'items', 'taxa', 'details', 'colmap', 'lists', 'data_types', 'translations'));
     }
 
     /**
@@ -221,6 +226,7 @@ class ItemController extends Controller
     public function update(Request $request, Item $item)
     {
         $validation_rules['parent'] = 'nullable|integer';
+        $validation_rules['taxon'] = 'nullable|integer';
         $validation_rules['fields'] = 'required|array';
         
         foreach ($request->input('fields') as $column_id => $value) {
@@ -236,6 +242,7 @@ class ItemController extends Controller
         $request->validate($validation_rules);
         
         $item->parent_fk = $request->input('parent');
+        $item->taxon_fk = $request->input('taxon');
         $item->save();
         
         $details = Detail::where('item_fk', $item->item_id)->get();
