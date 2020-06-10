@@ -32,7 +32,9 @@ class ColumnMapping extends Model
     protected $fillable = [
         'column_fk',
         'item_type_fk',
+        'column_group_fk',
         'taxon_fk',
+        'column_order',
     ];
     
     /**
@@ -49,6 +51,14 @@ class ColumnMapping extends Model
     public function item_type()
     {
         return $this->belongsTo('App\Element', 'item_type_fk', 'element_id');
+    }
+    
+    /**
+     * Get the element that owns the column.
+     */
+    public function column_group()
+    {
+        return $this->belongsTo('App\Element', 'column_group_fk', 'element_id');
     }
     
     /**

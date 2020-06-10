@@ -36,12 +36,15 @@ class ColumnMappingController extends Controller
     {
         $columns = Column::all();
         
+        $cg_list = Selectlist::where('name', '_column_group_')->first();
+        $column_groups = Element::where('list_fk', $cg_list->list_id)->get();
+        
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
         $taxa = Taxon::tree()->get();
         
-        return view('admin.colmap.create', compact('columns', 'item_types', 'taxa'));
+        return view('admin.colmap.create', compact('columns', 'column_groups', 'item_types', 'taxa'));
     }
 
     /**
@@ -54,12 +57,14 @@ class ColumnMappingController extends Controller
     {
         $request->validate([
             'column' => 'required|integer',
+            'column_group' => 'required|integer',
             'item_type' => 'required|integer',
             'taxon' => 'nullable|integer',
         ]);
         
         $data = [
             'column_fk' => $request->input('column'),
+            'column_group_fk' => $request->input('column_group'),
             'item_type_fk' => $request->input('item_type'),
             'taxon_fk' => $request->input('taxon'),
         ];
@@ -105,12 +110,15 @@ class ColumnMappingController extends Controller
     {
         $columns = Column::all();
         
+        $cg_list = Selectlist::where('name', '_column_group_')->first();
+        $column_groups = Element::where('list_fk', $cg_list->list_id)->get();
+        
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
         $taxa = Taxon::tree()->get();
         
-        return view('admin.colmap.edit', compact('colmap', 'columns', 'item_types', 'taxa'));
+        return view('admin.colmap.edit', compact('colmap', 'columns', 'column_groups', 'item_types', 'taxa'));
     }
 
     /**
@@ -127,11 +135,13 @@ class ColumnMappingController extends Controller
     {
         $request->validate([
             'column' => 'required|integer',
+            'column_group' => 'required|integer',
             'item_type' => 'required|integer',
             'taxon' => 'nullable|integer',
         ]);
         
         $colmap->column_fk = $request->input('column');
+        $colmap->column_group_fk = $request->input('column_group');
         $colmap->item_type_fk = $request->input('item_type');
         $colmap->taxon_fk = $request->input('taxon');
         $colmap->save();

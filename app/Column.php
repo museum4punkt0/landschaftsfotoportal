@@ -21,20 +21,11 @@ class Column extends Model
      * @var array
      */
     protected $fillable = [
-        'column_group_fk',
         'data_type_fk',
         'translation_fk',
         'list_fk',
         'description',
     ];
-    
-    /**
-     * Get the element that owns the column.
-     */
-    public function column_group()
-    {
-        return $this->belongsTo('App\Element', 'column_group_fk', 'element_id');
-    }
     
     /**
      * Get the element that owns the column.

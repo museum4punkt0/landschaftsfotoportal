@@ -29,20 +29,6 @@
         <span class="text-danger">{{ $errors->first('translation') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('columns.column_group')</span>
-        <select name="column_group" class="form-control" size=1 >
-            @foreach($column_groups as $group)
-                <option value="{{$group->element_id}}"
-                    @if(old('column_group', $column->column_group_fk) == $group->element_id) selected @endif>
-                    @foreach($group->values as $v)
-                        {{$v->value}}, 
-                    @endforeach
-                </option>
-            @endforeach
-        </select>
-        <span class="text-danger">{{ $errors->first('column_group') }}</span>
-    </div>
-    <div class="form-group">
         <span>@lang('columns.data_type')</span>
         <select name="data_type" class="form-control" size=1 >
             @foreach($data_types as $type)

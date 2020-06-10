@@ -33,16 +33,13 @@ class ColumnController extends Controller
     {
         $lists = Selectlist::where('internal', false)->orderBy('name')->get();
         
-        $cg_list = Selectlist::where('name', '_column_group_')->first();
-        $column_groups = Element::where('list_fk', $cg_list->list_id)->get();
-        
         $dt_list = Selectlist::where('name', '_data_type_')->first();
         $data_types = Element::where('list_fk', $dt_list->list_id)->get();
         
         $l10n_list = Selectlist::where('name', '_translation_')->first();
         $translations = Element::where('list_fk', $l10n_list->list_id)->get();
         
-        return view('admin.column.create', compact('lists', 'column_groups', 'data_types', 'translations'));
+        return view('admin.column.create', compact('lists', 'data_types', 'translations'));
     }
 
     /**
@@ -59,7 +56,6 @@ class ColumnController extends Controller
         
         $request->validate([
             'list' => 'required_if:data_type,'.$value->element_fk,
-            'column_group' => 'required|integer',
             'data_type' => 'required|integer',
             'translation' => 'required|integer',
             'description' => 'required|string',
@@ -67,7 +63,6 @@ class ColumnController extends Controller
         
         $data = [
             'list_fk' => ($request->input('data_type') == $value->element_fk) ? $request->input('list') : null,
-            'column_group_fk' => $request->input('column_group'),
             'data_type_fk' => $request->input('data_type'),
             'translation_fk' => $request->input('translation'),
             'description' => $request->input('description'),
@@ -99,16 +94,13 @@ class ColumnController extends Controller
     {
         $lists = Selectlist::where('internal', false)->orderBy('name')->get();
         
-        $cg_list = Selectlist::where('name', '_column_group_')->first();
-        $column_groups = Element::where('list_fk', $cg_list->list_id)->get();
-        
         $dt_list = Selectlist::where('name', '_data_type_')->first();
         $data_types = Element::where('list_fk', $dt_list->list_id)->get();
         
         $l10n_list = Selectlist::where('name', '_translation_')->first();
         $translations = Element::where('list_fk', $l10n_list->list_id)->get();
         
-        return view('admin.column.edit', compact('column', 'lists', 'column_groups', 'data_types', 'translations'));
+        return view('admin.column.edit', compact('column', 'lists', 'data_types', 'translations'));
     }
 
     /**
@@ -126,14 +118,12 @@ class ColumnController extends Controller
         
         $request->validate([
             'list' => 'required_if:data_type,'.$value->element_fk,
-            'column_group' => 'required|integer',
             'data_type' => 'required|integer',
             'translation' => 'required|integer',
             'description' => 'required|string',
         ]);
         
         $column->list_fk = ($request->input('data_type') == $value->element_fk) ? $request->input('list') : null;
-        $column->column_group_fk = $request->input('column_group');
         $column->data_type_fk = $request->input('data_type');
         $column->translation_fk = $request->input('translation');
         $column->description = $request->input('description');
