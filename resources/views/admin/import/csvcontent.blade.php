@@ -2,7 +2,7 @@
 
 @section('content')
 
-<div class="container">
+<div class="container-fluid">
     <div class="card">
         <div class="card-header">@lang('import.header')</div>
         <div class="card-body">
@@ -12,7 +12,7 @@
                 <input type="hidden" name="list" value="{{ $list->list_id }}" />
                 <input type="hidden" name="hierarchical" value="{{ $list->hierarchical }}" />
 
-                <table class="table mt-4">
+                <table class="table mx-0">
                     
                     @foreach ($csv_data as $row)
                         <tr>
@@ -24,7 +24,7 @@
                     <tr>
                     @foreach ($csv_data[0] as $key => $value)
                         <td>
-                            <select name="fields[{{ $key }}]">
+                            <select name="fields[{{ $key }}]" style="width: 8em;">
                                 <option value="0">@lang('common.ignore')</option>
                                 @if($list->hierarchical)
                                     <option value="-1"
