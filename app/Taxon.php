@@ -33,9 +33,13 @@ class Taxon extends Model
         'parent_fk',
         'taxon_name',
         'taxon_author',
+        'taxon_suppl',
+        'full_name',
         'native_name',
         'valid_name',
         'rank',
+        'rank_abbr',
+        'gsl_id',
     ];
     
     /**

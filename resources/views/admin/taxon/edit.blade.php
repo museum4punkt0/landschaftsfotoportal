@@ -8,14 +8,24 @@
 <form action="{{ route('taxon.update', $taxon->taxon_id) }}" method="POST">
     
     <div class="form-group">
-        <span>@lang('taxon.name')</span>
+        <span>@lang('taxon.taxon_name')</span>
         <input type="text" name="taxon_name" class="form-control" value="{{old('taxon_name', $taxon->taxon_name)}}" />
         <span class="text-danger">{{ $errors->first('taxon_name') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('taxon.author')</span>
+        <span>@lang('taxon.taxon_author')</span>
         <input type="text" name="taxon_author" class="form-control" value="{{old('taxon_author', $taxon->taxon_author)}}" />
         <span class="text-danger">{{ $errors->first('taxon_author') }}</span>
+    </div>
+    <div class="form-group">
+        <span>@lang('taxon.taxon_suppl')</span>
+        <input type="text" name="taxon_suppl" class="form-control" value="{{old('taxon_suppl', $taxon->taxon_suppl)}}" />
+        <span class="text-danger">{{ $errors->first('taxon_suppl') }}</span>
+    </div>
+    <div class="form-group">
+        <span>@lang('taxon.full_name')</span>
+        <input type="text" name="full_name" class="form-control" value="{{old('full_name', $taxon->full_name)}}" />
+        <span class="text-danger">{{ $errors->first('full_name') }}</span>
     </div>
     <div class="form-group">
         <span>@lang('taxon.native_name')</span>
@@ -57,6 +67,11 @@
             @endforeach
         </select>
         <span class="text-danger">{{ $errors->first('parent') }}</span>
+    </div>
+    <div class="form-group">
+        <span>@lang('taxon.rank_abbr')</span>
+        <input type="text" name="rank_abbr" class="form-control" value="{{old('rank_abbr', $taxon->rank_abbr)}}" />
+        <span class="text-danger">{{ $errors->first('rank_abbr') }}</span>
     </div>
     <div class="form-group">
         <span>@lang('taxon.gsl_id')</span>

@@ -18,9 +18,10 @@
                 <thead>
                     <tr>
                         <th colspan="1">@lang('common.id')</th>
-                        <th colspan="1">@lang('taxon.name')</th>
+                        <th colspan="1">@lang('taxon.taxon_name')</th>
                         <th colspan="1">@lang('taxon.native_name')</th>
                         <th colspan="1">@lang('taxon.valid_name')</th>
+                        <th colspan="1">@lang('taxon.rank')</th>
                         <th colspan="1">@lang('taxon.gsl_id')</th>
                         <th colspan="2">@lang('common.actions')</th>
                     </tr>
@@ -35,7 +36,7 @@
                     @for ($i = 0; $i < $taxon->depth; $i++)
                         |___
                     @endfor
-                            {{$taxon->taxon_name}} {{$taxon->taxon_author}}
+                            {{$taxon->taxon_name}} {{$taxon->taxon_author}} {{$taxon->taxon_suppl}}
                         </td>
                         <td>
                             {{$taxon->native_name}}<br/>
@@ -46,6 +47,9 @@
                             @else
                                 @lang('common.yes')
                             @endif
+                        </td>
+                        <td>
+                            {{$taxon->rank_abbr}}<br/>
                         </td>
                         <td>
                             {{$taxon->gsl_id}}<br/>

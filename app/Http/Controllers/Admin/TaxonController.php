@@ -16,7 +16,7 @@ class TaxonController extends Controller
      */
     public function index()
     {
-        $taxa = Taxon::tree()->paginate(10);
+        $taxa = Taxon::tree()->depthFirst()->paginate(10);
         
         return view('admin.taxon.list', compact('taxa'));
     }
@@ -45,19 +45,25 @@ class TaxonController extends Controller
             'parent' => 'nullable|integer',
             'taxon_name' => 'required|string',
             'taxon_author' => 'nullable|string',
+            'taxon_suppl' => 'nullable|string',
+            'full_name' => 'required|string',
             'native_name' => 'required|string',
             'valid_name' => 'nullable|integer',
-            'rank' => 'integer',
-            'gsl_id' => 'integer',
+            'rank' => 'nullable|integer',
+            'rank_abbr' => 'nullable|string',
+            'gsl_id' => 'nullable|integer',
         ]);
         
         $data = [
             'parent_fk' => $request->input('parent'),
             'taxon_name' => $request->input('taxon_name'),
             'taxon_author' => $request->input('taxon_author'),
+            'taxon_suppl' => $request->input('taxon_suppl'),
+            'full_name' => $request->input('full_name'),
             'native_name' => $request->input('native_name'),
             'valid_name' => $request->input('valid_name'),
             //'rank' => $request->input('rank'),
+            'rank_abbr' => $request->input('rank_abbr'),
             'gsl_id' => $request->input('gsl_id'),
         ];
         Taxon::create($data);
@@ -106,18 +112,24 @@ class TaxonController extends Controller
             'parent' => 'nullable|integer',
             'taxon_name' => 'required|string',
             'taxon_author' => 'nullable|string',
+            'taxon_suppl' => 'nullable|string',
+            'full_name' => 'required|string',
             'native_name' => 'required|string',
             'valid_name' => 'nullable|integer',
-            'rank' => 'integer',
-            'gsl_id' => 'integer',
+            'rank' => 'nullable|integer',
+            'rank_abbr' => 'nullable|string',
+            'gsl_id' => 'nullable|integer',
         ]);
         
         $taxon->parent_fk = $request->input('parent');
         $taxon->taxon_name = $request->input('taxon_name');
         $taxon->taxon_author = $request->input('taxon_author');
+        $taxon->taxon_suppl = $request->input('taxon_suppl');
+        $taxon->full_name = $request->input('full_name');
         $taxon->native_name = $request->input('native_name');
         $taxon->valid_name = $request->input('valid_name');
         //$taxon->rank = $request->input('rank');
+        $taxon->rank_abbr = $request->input('rank_abbr');
         $taxon->gsl_id = $request->input('gsl_id');
         $taxon->save();
         
