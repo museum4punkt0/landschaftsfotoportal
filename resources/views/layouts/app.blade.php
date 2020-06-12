@@ -56,8 +56,18 @@
                                     </a>
                                 </div>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('import.csv.upload') }}">{{ __('import.header') }}</a>
+                            <li class="nav-item dropdown">
+                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
+                                    {{ __('import.header') }} <span class="caret"></span>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" href="{{ route('import.csv.upload') }}">
+                                        {{ __('lists.header') }}
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('import.taxa.upload') }}">
+                                        {{ __('taxon.header') }}
+                                    </a>
+                                </div>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('column.index') }}">{{ __('columns.header') }}</a>

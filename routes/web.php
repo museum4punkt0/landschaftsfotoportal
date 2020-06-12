@@ -32,6 +32,11 @@ Route::get('/admin/import/csv/preview', 'Admin\ImportCSVController@preview')->na
 Route::post('/admin/import/csv/process', 'Admin\ImportCSVController@process')->name('import.csv.process')
     ->middleware('auth');
 
+Route::get('/admin/import/taxa/upload', 'Admin\ImportTaxaController@index')->name('import.taxa.upload');
+Route::post('/admin/import/taxa/save', 'Admin\ImportTaxaController@save')->name('import.taxa.save');
+Route::get('/admin/import/taxa/preview', 'Admin\ImportTaxaController@preview')->name('import.taxa.preview');
+Route::post('/admin/import/taxa/process', 'Admin\ImportTaxaController@process')->name('import.taxa.process');
+
 Route::resource('admin/colmap', 'Admin\ColumnMappingController')->middleware('auth');
 Route::resource('admin/column', 'Admin\ColumnController')->middleware('auth');
 Route::resource('admin/detail', 'Admin\DetailController')->middleware('auth');
