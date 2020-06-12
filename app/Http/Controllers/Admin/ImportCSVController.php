@@ -6,14 +6,22 @@ use App\Selectlist;
 use App\Element;
 use App\Value;
 use App\Attribute;
-
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
-use Validator,Redirect,Response,File;
+use Validator,Redirect,File;
 
 class ImportCSVController extends Controller
 {
+    /**
+     * Instantiate a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index()
     {
         $lists = Selectlist::orderBy('name')->get();
