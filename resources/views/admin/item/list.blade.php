@@ -20,7 +20,7 @@
                         <th colspan="1">@lang('common.id')</th>
                         <th colspan="1">@lang('items.item_type')</th>
                         <th colspan="1">@lang('common.name')</th>
-                        <th colspan="2">@lang('common.actions')</th>
+                        <th colspan="3">@lang('common.actions')</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -37,6 +37,11 @@
                         </td>
                         <td>
                             {{$item->getTitleColumn()}}
+                        </td>
+                        <td>
+                            <form action="{{route('item.show', $item->item_id)}}" method="GET">
+                                <button class="btn btn-primary" type="submit">@lang('common.show')</button>
+                            </form>
                         </td>
                         <td>
                             <form action="{{route('item.edit', $item)}}" method="GET">

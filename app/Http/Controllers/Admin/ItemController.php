@@ -176,7 +176,14 @@ class ItemController extends Controller
      */
     public function show(Item $item)
     {
-        //
+        $taxa = Taxon::tree()->get();
+        $details = Detail::where('item_fk', $item->item_id)->get();
+        $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)->get();
+        
+        $l10n_list = Selectlist::where('name', '_translation_')->first();
+        $translations = Element::where('list_fk', $l10n_list->list_id)->get();
+        
+        return view('admin.item.show', compact('item', 'taxa', 'details', 'colmap', 'translations'));
     }
 
     /**
