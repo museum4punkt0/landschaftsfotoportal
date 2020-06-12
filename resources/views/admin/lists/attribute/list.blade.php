@@ -54,7 +54,10 @@
                 <h3>You need to log in. <a href="{{url()->current()}}/login">Click here to login</a></h3>
             </div>
         @endif
-    </div>                         
+        <div class="card-footer">
+            {{ $attributes->links() }}
+        </div>
+    </div>
 </div>
 
 @endsection

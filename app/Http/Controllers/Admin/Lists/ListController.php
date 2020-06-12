@@ -80,7 +80,8 @@ class ListController extends Controller
             $query->where('parent_fk', 0)->where('list_fk', $id);
         };
 
-        $data['elements'] = Element::withRelationshipExpression('desc', $constraint, 0)->depthFirst()->get();
+        $data['elements'] = Element::withRelationshipExpression('desc', $constraint, 0)
+            ->depthFirst()->paginate(10);
         
         return view('admin.lists.list.show', $data);
     }
@@ -99,7 +100,8 @@ class ListController extends Controller
             $query->where('parent_fk', 0)->where('list_fk', $id);
         };
 
-        $data['elements'] = Element::withRelationshipExpression('desc', $constraint, 0)->depthFirst()->get();
+        $data['elements'] = Element::withRelationshipExpression('desc', $constraint, 0)
+            ->depthFirst()->paginate(10);
         
         return view('admin.lists.list.tree', $data);
     }
