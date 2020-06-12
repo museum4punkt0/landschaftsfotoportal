@@ -28,7 +28,7 @@ class TaxonController extends Controller
      */
     public function create()
     {
-        $taxa = Taxon::tree()->get();
+        $taxa = Taxon::tree()->depthFirst()->get();
         
         return view('admin.taxon.create', compact('taxa'));
     }
@@ -91,7 +91,7 @@ class TaxonController extends Controller
      */
     public function edit(Taxon $taxon)
     {
-        $taxa = Taxon::tree()->get();
+        $taxa = Taxon::tree()->depthFirst()->get();
         
         // Remove all descendants to avoid circular dependencies
         $taxa = $taxa->diff($taxon->descendantsAndSelf()->get());

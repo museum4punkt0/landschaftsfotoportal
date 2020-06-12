@@ -42,7 +42,7 @@ class ColumnMappingController extends Controller
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
-        $taxa = Taxon::tree()->get();
+        $taxa = Taxon::tree()->depthFirst()->get();
         
         return view('admin.colmap.create', compact('columns', 'column_groups', 'item_types', 'taxa'));
     }
@@ -116,7 +116,7 @@ class ColumnMappingController extends Controller
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
-        $taxa = Taxon::tree()->get();
+        $taxa = Taxon::tree()->depthFirst()->get();
         
         return view('admin.colmap.edit', compact('colmap', 'columns', 'column_groups', 'item_types', 'taxa'));
     }

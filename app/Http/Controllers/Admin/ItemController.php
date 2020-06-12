@@ -49,8 +49,8 @@ class ItemController extends Controller
      */
     public function create(Request $request)
     {
-        $items = Item::tree()->get();
-        $taxa = Taxon::tree()->get();
+        $items = Item::tree()->depthFirst()->get();
+        $taxa = Taxon::tree()->depthFirst()->get();
         $colmap = ColumnMapping::where('item_type_fk', $request->item_type)->get();
         
         $lists = null;
@@ -176,14 +176,13 @@ class ItemController extends Controller
      */
     public function show(Item $item)
     {
-        $taxa = Taxon::tree()->get();
         $details = Detail::where('item_fk', $item->item_id)->get();
         $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)->get();
         
         $l10n_list = Selectlist::where('name', '_translation_')->first();
         $translations = Element::where('list_fk', $l10n_list->list_id)->get();
         
-        return view('admin.item.show', compact('item', 'taxa', 'details', 'colmap', 'translations'));
+        return view('admin.item.show', compact('item', 'details', 'colmap', 'translations'));
     }
 
     /**
@@ -194,11 +193,11 @@ class ItemController extends Controller
      */
     public function edit(Item $item)
     {
-        $items = Item::tree()->get();
+        $items = Item::tree()->depthFirst()->get();
         // Remove all descendants to avoid circular dependencies
         $items = $items->diff($item->descendantsAndSelf()->get());
         
-        $taxa = Taxon::tree()->get();
+        $taxa = Taxon::tree()->depthFirst()->get();
         $details = Detail::where('item_fk', $item->item_id)->get();
         $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)->get();
         
