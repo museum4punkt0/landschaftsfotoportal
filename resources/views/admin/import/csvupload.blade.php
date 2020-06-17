@@ -5,11 +5,11 @@
 <div class="container">
     <div class="row justify-content-center">
         <div class="card">
-            <div class="card-header">@lang('import.header')</div>
+            <div class="card-header">@lang('import.header'): @lang('lists.header')</div>
  
             <div class="card-body">
                 <div class="card-text">
-                    @lang('import.intro_hint')
+                    @lang('import.lists_hint')
                 </div>
                 @if ($message = Session::get('success'))
                     <div class="alert alert-success alert-block">

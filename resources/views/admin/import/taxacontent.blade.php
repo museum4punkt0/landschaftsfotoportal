@@ -4,7 +4,7 @@
 
 <div class="container-fluid">
     <div class="card">
-        <div class="card-header">@lang('import.header')</div>
+        <div class="card-header">@lang('import.header'): @lang('taxon.header')</div>
         <div class="card-body">
 
             <form action="{{ route('import.taxa.process') }}" method="POST" class="form-horizontal">

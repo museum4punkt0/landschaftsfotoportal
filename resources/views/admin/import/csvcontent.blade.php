@@ -4,7 +4,7 @@
 
 <div class="container-fluid">
     <div class="card">
-        <div class="card-header">@lang('import.header')</div>
+        <div class="card-header">@lang('import.header'): @lang('lists.header')</div>
         <div class="card-body">
 
             <form action="{{ route('import.csv.process') }}" method="POST" class="form-horizontal">
