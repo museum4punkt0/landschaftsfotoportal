@@ -33,6 +33,11 @@ Route::post('/admin/import/taxa/save', 'Admin\ImportTaxaController@save')->name(
 Route::get('/admin/import/taxa/preview', 'Admin\ImportTaxaController@preview')->name('import.taxa.preview');
 Route::post('/admin/import/taxa/process', 'Admin\ImportTaxaController@process')->name('import.taxa.process');
 
+Route::get('/admin/import/items/upload', 'Admin\ImportItemsController@index')->name('import.items.upload');
+Route::post('/admin/import/items/save', 'Admin\ImportItemsController@save')->name('import.items.save');
+Route::get('/admin/import/items/preview', 'Admin\ImportItemsController@preview')->name('import.items.preview');
+Route::post('/admin/import/items/process', 'Admin\ImportItemsController@process')->name('import.items.process');
+
 Route::resource('admin/colmap', 'Admin\ColumnMappingController');
 Route::resource('admin/column', 'Admin\ColumnController');
 Route::resource('admin/detail', 'Admin\DetailController');
