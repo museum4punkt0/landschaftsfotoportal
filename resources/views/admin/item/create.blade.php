@@ -26,7 +26,7 @@
                     @for ($i = 0; $i < $item->depth + 1; $i++)
                         |___
                     @endfor
-                    {{$item->item_id}}
+                    {{ $item->getTitleColumn() }}
                 </option>
             @endforeach
         </select>
