@@ -96,7 +96,7 @@ class Item extends Model
             $json = $this->item_type->attributes()->firstWhere('name', 'config')->pivot->value;
             $config = json_decode($json, true);
             
-            return $config['title_column'];
+            return isset($config['title_column']) ? $config['title_column'] : null;
         }
         // No config available for this item_type
         else {
@@ -117,6 +117,12 @@ class Item extends Model
             $title_column = $this->columns->firstWhere('column_id', $this->getTitleColumnId());
             if($title_column) {
                 $title = $title_column->pivot->value_string;
+            }
+        }
+        // Try to fetch a taxon name instead if a taxon is linked with this item
+        else {
+            if($this->taxon_fk) {
+                $title = $this->taxon->full_name;
             }
         }
         
