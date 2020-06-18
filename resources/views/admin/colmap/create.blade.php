@@ -14,7 +14,9 @@
                 <option value="{{$type->element_id}}"
                     @if(old('item_type') == $type->element_id) selected @endif>
                     @foreach($type->values as $v)
-                        {{$v->value}}, 
+                        @if($v->attribute->name == 'name_'.app()->getLocale())
+                            {{$v->value}}
+                        @endif
                     @endforeach
                 </option>
             @endforeach
@@ -46,7 +48,9 @@
                 <option value="{{$group->element_id}}"
                     @if(old('column_group') == $group->element_id) selected @endif>
                     @foreach($group->values as $v)
-                        {{$v->value}}, 
+                        @if($v->attribute->name == 'name_'.app()->getLocale())
+                            {{$v->value}}
+                        @endif
                     @endforeach
                 </option>
             @endforeach
@@ -60,7 +64,9 @@
                 <option value="{{$column->column_id}}"
                     @if(old('column') == $column->column_id) selected @endif>
                     @foreach($column->translation->values as $t)
-                        {{$t->value}}, 
+                        @if($t->attribute->name == 'name_'.app()->getLocale())
+                            {{$t->value}}
+                        @endif
                     @endforeach
                     ({{$column->description}})
                 </option>

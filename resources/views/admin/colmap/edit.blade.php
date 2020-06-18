@@ -16,7 +16,9 @@
                 <option value="{{$type->element_id}}"
                     @if(old('item_type', $colmap->item_type_fk) == $type->element_id) selected @endif >
                     @foreach($type->values as $v)
-                        {{$v->value}}, 
+                        @if($v->attribute->name == 'name_'.app()->getLocale())
+                            {{$v->value}}
+                        @endif
                     @endforeach
                 </option>
             @endforeach
@@ -48,7 +50,9 @@
                 <option value="{{$group->element_id}}"
                     @if(old('column_group', $colmap->column_group_fk) == $group->element_id) selected @endif>
                     @foreach($group->values as $v)
-                        {{$v->value}}, 
+                        @if($v->attribute->name == 'name_'.app()->getLocale())
+                            {{$v->value}}
+                        @endif
                     @endforeach
                 </option>
             @endforeach
@@ -62,7 +66,9 @@
                 <option value="{{$column->column_id}}"
                     @if(old('column', $colmap->column_fk) == $column->column_id) selected @endif >
                     @foreach($column->translation->values as $t)
-                        {{$t->value}}, 
+                        @if($t->attribute->name == 'name_'.app()->getLocale())
+                            {{$t->value}}
+                        @endif
                     @endforeach
                     ({{$column->description}})
                 </option>

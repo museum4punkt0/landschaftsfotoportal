@@ -21,7 +21,9 @@
                 <option value="{{$trans->element_id}}"
                     @if(old('translation', $column->translation_fk) == $trans->element_id) selected @endif >
                     @foreach($trans->values as $v)
-                        {{$v->value}}, 
+                        @if($v->attribute->name == 'name_'.app()->getLocale())
+                            {{$v->value}}
+                        @endif
                     @endforeach
                 </option>
             @endforeach
@@ -35,7 +37,9 @@
                 <option value="{{$type->element_id}}"
                     @if(old('data_type', $column->data_type_fk) == $type->element_id) selected @endif >
                     @foreach($type->values as $v)
-                        {{$v->value}}, 
+                        @if($v->attribute->name == 'name_'.app()->getLocale())
+                            {{$v->value}}
+                        @endif
                     @endforeach
                 </option>
             @endforeach

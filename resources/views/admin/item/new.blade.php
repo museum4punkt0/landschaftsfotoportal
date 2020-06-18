@@ -14,7 +14,9 @@
                 <option value="{{$type->element_id}}"
                     @if(old('item_type') == $type->element_id) selected @endif>
                     @foreach($type->values as $v)
-                        {{$v->value}}, 
+                        @if($v->attribute->name == 'name_'.app()->getLocale())
+                            {{$v->value}}
+                        @endif
                     @endforeach
                 </option>
             @endforeach
