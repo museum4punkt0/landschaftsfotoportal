@@ -117,10 +117,15 @@ class ImportItemsController extends Controller
                 function ($attribute, $value, $fail) {
                     // Check for duplicate attributes but not for 'ignored' ones
                     foreach(array_count_values($value) as $selected_attr => $quantity) {
-                        if ($selected_attr !== 0 && $quantity > 1) {
-                            $fail(__('import.attribute_once', [
-                                'attribute' => Column::find($selected_attr)->description
-                            ]));
+                        if($selected_attr !== 0 && $quantity > 1) {
+                            if($selected_attr > 0)
+                                $fail(__('import.attribute_once', [
+                                    'attribute' => Column::find($selected_attr)->description
+                                ]));
+                            if($selected_attr == -1)
+                                $fail(__('import.attribute_once', ['attribute' => __('import.element_id')]));
+                            if($selected_attr == -2)
+                                $fail(__('import.attribute_once', ['attribute' => __('import.parent_id')]));
                         }
                     }
                 },
@@ -175,6 +180,9 @@ class ImportItemsController extends Controller
                 // Check for already existing items
                 if(!empty(Item::where('taxon_fk', $taxon->taxon_id)->first())) {
                     $warning_status_msg .= " ". __('import.taxon_exists', ['full_name' => $line[array_search('-3', $selected_attr)]]);
+                    $request->session()->flash('warning', $warning_status_msg);
+                    // TODO: use messageBag for arrays
+                    continue;
                 }
                 else {
                     $item = Item::create($item_data);

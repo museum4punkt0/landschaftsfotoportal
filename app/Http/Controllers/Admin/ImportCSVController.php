@@ -83,9 +83,14 @@ class ImportCSVController extends Controller
                     // Check for duplicate attributes but not for 'ignored' ones
                     foreach(array_count_values($value) as $selected_attr => $quantity) {
                         if ($selected_attr !== 0 && $quantity > 1) {
-                            $fail(__('import.attribute_once', [
-                                'attribute' => Attribute::find($selected_attr)->name
-                            ]));
+                            if($selected_attr > 0)
+                                $fail(__('import.attribute_once', [
+                                    'attribute' => Attribute::find($selected_attr)->name
+                                ]));
+                            if($selected_attr == -1)
+                                $fail(__('import.attribute_once', ['attribute' => __('import.element_id')]));
+                            if($selected_attr == -2)
+                                $fail(__('import.attribute_once', ['attribute' => __('import.parent_id')]));
                         }
                     }
                 },
