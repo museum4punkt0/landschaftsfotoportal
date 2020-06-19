@@ -44,7 +44,7 @@ class ElementController extends Controller
     {
         $data['list'] = Selectlist::find($list_id);
         $constraint = function (Builder $query) use ($list_id) {
-            $query->where('parent_fk', 0)->where('list_fk', $list_id);
+            $query->where('parent_fk', null)->where('list_fk', $list_id);
         };
         $data['elements'] = Element::treeOf($constraint)->depthFirst()->get();
         $data['attributes'] = Attribute::all();
@@ -64,7 +64,7 @@ class ElementController extends Controller
         $request->validate([
             'value' => 'required',
             'attribute' => 'required',
-            #'parent' => 'required',
+            'parent' => 'nullable|integer',
         ]);
         
         $element_data = [
@@ -107,7 +107,7 @@ class ElementController extends Controller
         $data['element'] = $element;
         $list_id = $element->list_fk;
         $constraint = function (Builder $query) use ($list_id) {
-            $query->where('parent_fk', 0)->where('list_fk', $list_id);
+            $query->where('parent_fk', null)->where('list_fk', $list_id);
         };
         $data['elements'] = Element::treeOf($constraint)->depthFirst()->get();
         
@@ -126,8 +126,9 @@ class ElementController extends Controller
      */
     public function update(Request $request, Element $element)
     {
+        // This is only available for hierarchical lists, that makes parent_fk to be required
         $request->validate([
-            'parent_fk' => 'required',
+            'parent_fk' => 'required|integer',
         ]);
          
         $element->parent_fk = $request->input('parent_fk');

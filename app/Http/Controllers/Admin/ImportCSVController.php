@@ -117,7 +117,7 @@ class ImportCSVController extends Controller
                 }
             },
         ], function ($input) {
-            return $input->has('hierarchical'); // If closure returns true, the condition is true
+            return $input->hierarchical; // If closure returns true, the condition is true
         });
         
         if($validator->fails()) {
@@ -143,7 +143,7 @@ class ImportCSVController extends Controller
                 continue;
             
             $element_data = [
-                'parent_fk' => 0,
+                'parent_fk' => null,
                 'list_fk' => $list_fk,
                 'value_summary' => '',
             ];
@@ -167,7 +167,7 @@ class ImportCSVController extends Controller
                 // Get ID of parent element from temporary tree
                 if($selected_attr[$colnr] == -2) {
                     if(!isset($elements_tree[intval($cell)]))
-                        $element->parent_fk = 0;
+                        $element->parent_fk = null;
                     else
                         $element->parent_fk = $elements_tree[intval($cell)];
                     $element->save();

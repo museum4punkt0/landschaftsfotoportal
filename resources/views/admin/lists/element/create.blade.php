@@ -28,7 +28,7 @@
         <div class="form-group">
             <span>@lang('lists.parent')</span>
             <select name="parent_fk" class="form-control" size=1 >
-                <option value="0">@lang('common.root')</option>
+                <option value="">@lang('common.root')</option>
                 @foreach($elements as $element)
                     <option value="{{$element->values[0]->element_fk}}"
                     @if(old('parent_fk') == $element->values[0]->element_fk) selected @endif >

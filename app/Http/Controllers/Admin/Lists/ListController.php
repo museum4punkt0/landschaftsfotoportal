@@ -87,11 +87,10 @@ class ListController extends Controller
         $data['list'] = Selectlist::find($id);
         #$data['elements'] = Selectlist::find($id)->elements;
         $constraint = function (Builder $query) use ($id) {
-            $query->where('parent_fk', 0)->where('list_fk', $id);
+            $query->where('parent_fk', null)->where('list_fk', $id);
         };
 
-        $data['elements'] = Element::withRelationshipExpression('desc', $constraint, 0)
-            ->depthFirst()->paginate(10);
+        $data['elements'] = Element::treeOf($constraint)->depthFirst()->paginate(10);
         
         return view('admin.lists.list.show', $data);
     }
@@ -107,11 +106,10 @@ class ListController extends Controller
         $data['list'] = Selectlist::find($id);
         
         $constraint = function (Builder $query) use ($id) {
-            $query->where('parent_fk', 0)->where('list_fk', $id);
+            $query->where('parent_fk', null)->where('list_fk', $id);
         };
 
-        $data['elements'] = Element::withRelationshipExpression('desc', $constraint, 0)
-            ->depthFirst()->paginate(10);
+        $data['elements'] = Element::treeOf($constraint)->depthFirst()->paginate(10);
         
         return view('admin.lists.list.tree', $data);
     }
