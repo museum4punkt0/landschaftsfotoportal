@@ -175,7 +175,7 @@ class ImportCSVController extends Controller
             }
         }
         
-        return Redirect::to('list/'.$list_fk)
+        return Redirect::to('admin/lists/list/'.$list_fk)
             ->with('success', __('import.done'));
     }
 }
