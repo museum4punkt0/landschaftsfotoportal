@@ -10,6 +10,7 @@ use App\Taxon;
 use App\Selectlist;
 use App\Element;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Redirect;
 
@@ -44,7 +45,7 @@ class ColumnMappingController extends Controller
      */
     public function create()
     {
-        $columns = Column::all();
+        $columns = Column::doesntHave('column_mapping')->get();
         
         $cg_list = Selectlist::where('name', '_column_group_')->first();
         $column_groups = Element::where('list_fk', $cg_list->list_id)->get();
@@ -108,6 +109,80 @@ class ColumnMappingController extends Controller
     }
 
     /**
+     * Show the form for mass mapping columns to item types, column groups and taxa.
+     *
+     * @param  int  $item_type
+     * @return \Illuminate\Http\Response
+     */
+    public function map($item_type)
+    {
+        $cg_list = Selectlist::where('name', '_column_group_')->first();
+        $column_groups = Element::where('list_fk', $cg_list->list_id)->get();
+        
+        $it_list = Selectlist::where('name', '_item_type_')->first();
+        $item_types = Element::where('list_fk', $it_list->list_id)->get();
+        
+        $taxa = Taxon::tree()->depthFirst()->get();
+        
+        $columns_mapped = Column::whereHas('column_mapping', function (Builder $query) use ($item_type) {
+            $query->where('item_type_fk', $item_type);
+        })->orderBy('description')->get();
+        
+        $columns_avail = Column::doesntHave('column_mapping')->orderBy('description')->get();
+        
+        return view('admin.colmap.map', compact(
+            'item_type', 'column_groups', 'item_types', 'taxa', 'columns_mapped', 'columns_avail'
+        ));
+    }
+
+    /**
+     * Save the mass mappings and create missing details for all items.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function map_store(Request $request)
+    {
+        $request->validate([
+            'column_avail' => 'required|array|min:1',  // at least one column must be selected
+            'column_avail.*' => 'required|integer',
+            'column_group' => 'required|integer',
+            'item_type' => 'required|integer',
+            'taxon' => 'nullable|integer',
+        ]);
+        
+        $mapcount = 0;
+        $success_status_msg = '';
+        
+        // Create mapping for selected columns
+        foreach($request->input('column_avail') as $key => $colnr) {
+            $data = [
+                'column_fk' => $colnr,
+                'column_group_fk' => $request->input('column_group'),
+                'item_type_fk' => $request->input('item_type'),
+                'taxon_fk' => $request->input('taxon'),
+            ];
+            ColumnMapping::create($data);
+            
+            $mapcount++;
+            
+            // Create missing details for all items
+            $count = 0;
+            foreach(Item::where('item_type_fk', $data['item_type_fk'])->get() as $item) {
+                Detail::firstOrCreate(['column_fk' => $data['column_fk'], 'item_fk' => $item->item_id]);
+                $count++;
+            }
+            if($count) {
+                $success_status_msg .= __('colmaps.details_added', ['count' => $count]) ." ";
+            }
+        }
+        $success_status_msg .=  __('colmaps.created_num', ['count' => $mapcount]);
+        
+        return Redirect::to('admin/colmap/map/'.$request->item_type)
+            ->with('success', $success_status_msg);
+    }
+
+    /**
      * Show the form for editing the specified resource.
      *
      * Danger! This should not be called by any user, not even by admins!
@@ -119,6 +194,7 @@ class ColumnMappingController extends Controller
     public function edit(ColumnMapping $colmap)
     {
         $columns = Column::all();
+        #$columns = Column::doesntHave('column_mapping')->get();
         
         $cg_list = Selectlist::where('name', '_column_group_')->first();
         $column_groups = Element::where('list_fk', $cg_list->list_id)->get();

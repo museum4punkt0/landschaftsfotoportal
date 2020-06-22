@@ -38,6 +38,8 @@ Route::post('/admin/import/items/save', 'Admin\ImportItemsController@save')->nam
 Route::get('/admin/import/items/preview', 'Admin\ImportItemsController@preview')->name('import.items.preview');
 Route::post('/admin/import/items/process', 'Admin\ImportItemsController@process')->name('import.items.process');
 
+Route::get('admin/colmap/map/{item_type}', 'Admin\ColumnMappingController@map')->name('colmap.map');
+Route::post('admin/colmap/map/store', 'Admin\ColumnMappingController@map_store')->name('colmap.map.store');
 Route::resource('admin/colmap', 'Admin\ColumnMappingController');
 Route::resource('admin/column', 'Admin\ColumnController');
 Route::resource('admin/detail', 'Admin\DetailController');
