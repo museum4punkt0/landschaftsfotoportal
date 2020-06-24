@@ -44,7 +44,7 @@
             <span class="text-danger">{{ $errors->first('parent_fk') }}</span>
         </div>
     @else
-        <input type="hidden" name="parent_fk" class="form-control" value=0 />
+        <input type="hidden" name="parent_fk" class="form-control" value="" />
     @endif
     
     <div class="form-group">

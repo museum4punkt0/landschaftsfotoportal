@@ -64,7 +64,7 @@ class ElementController extends Controller
         $request->validate([
             'value' => 'required',
             'attribute' => 'required',
-            'parent' => 'nullable|integer',
+            'parent_fk' => 'nullable|integer',
         ]);
         
         $element_data = [

@@ -69,7 +69,7 @@ class ItemController extends Controller
             $list_id = $cm->column->list_fk;
             if($list_id) {
                 $constraint = function (Builder $query) use ($list_id) {
-                    $query->where('parent_fk', 0)->where('list_fk', $list_id);
+                    $query->where('parent_fk', null)->where('list_fk', $list_id);
                 };
                 $lists[$list_id] = Element::treeOf($constraint)->depthFirst()->get();
             }
@@ -217,7 +217,7 @@ class ItemController extends Controller
             $list_id = $cm->column->list_fk;
             if($list_id) {
                 $constraint = function (Builder $query) use ($list_id) {
-                    $query->where('parent_fk', 0)->where('list_fk', $list_id);
+                    $query->where('parent_fk', null)->where('list_fk', $list_id);
                 };
                 $lists[$list_id] = Element::treeOf($constraint)->depthFirst()->get();
             }
