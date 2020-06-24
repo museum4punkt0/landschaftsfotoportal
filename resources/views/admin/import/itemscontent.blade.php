@@ -84,6 +84,10 @@
                     <input type="checkbox" name="header" class="checkbox" value=1 @if(old('header')) checked @endif />
                     <span>@lang('import.contains_header')</span>
                 </div>
+                <div class="form-group">
+                    <input type="checkbox" name="unique_taxa" class="checkbox" value=1 @if(old('unique_taxa')) checked @endif />
+                    <span>@lang('import.unique_taxa')</span>
+                </div>
 
                 <div class="form-group">
                     <span>@lang('lists.parent')</span>

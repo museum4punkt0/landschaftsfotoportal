@@ -178,7 +178,11 @@ class ImportItemsController extends Controller
                     'taxon_fk' => $taxon->taxon_id,
                 ];
                 // Check for already existing items
-                if(!empty(Item::where('taxon_fk', $taxon->taxon_id)->first())) {
+                $existing_item = Item::where([
+                    ['taxon_fk', $taxon->taxon_id],
+                    ['item_type_fk', $request->input('item_type')],
+                ])->first();
+                if(!empty($existing_item) && $request->has('unique_taxa')) {
                     $warning_status_msg .= " ". __('import.taxon_exists', ['full_name' => $line[array_search('-3', $selected_attr)]]);
                     $request->session()->flash('warning', $warning_status_msg);
                     // TODO: use messageBag for arrays
@@ -204,7 +208,7 @@ class ImportItemsController extends Controller
                                     $detail_data['value_int'] = intval($cell);
                                     break;
                                 case '_float_':
-                                    $detail_data['value_float'] = floatval($cell);
+                                    $detail_data['value_float'] = floatval(strtr($cell, ',', '.'));
                                     break;
                                 case '_date_':
                                     $detail_data['value_date'] = $cell;

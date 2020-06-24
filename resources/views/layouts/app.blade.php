@@ -64,6 +64,9 @@
                                     <a class="dropdown-item" href="{{ route('import.csv.upload') }}">
                                         {{ __('lists.header') }}
                                     </a>
+                                    <a class="dropdown-item" href="{{ route('import.items.upload') }}">
+                                        {{ __('items.header') }}
+                                    </a>
                                     <a class="dropdown-item" href="{{ route('import.taxa.upload') }}">
                                         {{ __('taxon.header') }}
                                     </a>

@@ -33,6 +33,7 @@ return [
     'missing_id' => 'Es muss eine Spalte mit den Element-IDs ausgewählt werden!',
     'missing_parent' => 'Es muss eine Spalte mit den Parent-IDs ausgewählt werden!',
     'contains_header' => 'CSV enthält in der ersten Zeile Spaltenüberschriften',
+    'unique_taxa' => 'nur einzigartige (keine doppelten) Taxa importieren',
     'into_this_list' => 'Die CSV-Datei wird anschließend in die Liste ":name" (:description) importiert werden.',
     'taxon_exists' => 'Der Datensatz für ":full_name" wurde nicht importiert, da das Taxon bereits existiert!',
     'taxon_not_found' => 'Der Datensatz für ":full_name" konnte nicht importiert werden, da das Taxon nicht existiert!',
