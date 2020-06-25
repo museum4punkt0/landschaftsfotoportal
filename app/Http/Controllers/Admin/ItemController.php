@@ -61,7 +61,7 @@ class ItemController extends Controller
     {
         $items = Item::tree()->depthFirst()->get();
         $taxa = Taxon::tree()->depthFirst()->get();
-        $colmap = ColumnMapping::where('item_type_fk', $request->item_type)->get();
+        $colmap = ColumnMapping::where('item_type_fk', $request->item_type)->orderBy('column_order')->get();
         
         $lists = null;
         // Load all list elements of lists used by this item's columns
@@ -187,7 +187,7 @@ class ItemController extends Controller
     public function show(Item $item)
     {
         $details = Detail::where('item_fk', $item->item_id)->get();
-        $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)->get();
+        $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)->orderBy('column_order')->get();
         
         $l10n_list = Selectlist::where('name', '_translation_')->first();
         $translations = Element::where('list_fk', $l10n_list->list_id)->get();
@@ -209,7 +209,7 @@ class ItemController extends Controller
         
         $taxa = Taxon::tree()->depthFirst()->get();
         $details = Detail::where('item_fk', $item->item_id)->get();
-        $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)->get();
+        $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)->orderBy('column_order')->get();
         
         $lists = null;
         // Load all list elements of lists used by this item's columns

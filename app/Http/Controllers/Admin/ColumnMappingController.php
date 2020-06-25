@@ -33,7 +33,7 @@ class ColumnMappingController extends Controller
      */
     public function index()
     {
-        $colmaps = ColumnMapping::orderBy('colmap_id')->paginate(10);
+        $colmaps = ColumnMapping::orderByRaw('item_type_fk, column_order')->paginate(10);
         
         return view('admin.colmap.list', compact('colmaps'));
     }
@@ -126,9 +126,12 @@ class ColumnMappingController extends Controller
         
         $columns_mapped = Column::whereHas('column_mapping', function (Builder $query) use ($item_type) {
             $query->where('item_type_fk', $item_type);
-        })->orderBy('description')->get();
+        })
+            ->join('column_mapping', 'column_id', '=', 'column_mapping.column_fk')
+            ->orderBy('column_order')
+            ->get();
         
-        $columns_avail = Column::doesntHave('column_mapping')->orderBy('description')->get();
+        $columns_avail = Column::doesntHave('column_mapping')->orderBy('column_id')->get();
         
         return view('admin.colmap.map', compact(
             'item_type', 'column_groups', 'item_types', 'taxa', 'columns_mapped', 'columns_avail'
@@ -224,12 +227,14 @@ class ColumnMappingController extends Controller
             'column_group' => 'required|integer',
             'item_type' => 'required|integer',
             'taxon' => 'nullable|integer',
+            'column_order' => 'required|integer',
         ]);
         
         $colmap->column_fk = $request->input('column');
         $colmap->column_group_fk = $request->input('column_group');
         $colmap->item_type_fk = $request->input('item_type');
         $colmap->taxon_fk = $request->input('taxon');
+        $colmap->column_order = $request->input('column_order');
         $colmap->save();
         
         // TODO: Create missing details for all items, see function store()

@@ -76,6 +76,13 @@
         </select>
         <span class="text-danger">{{ $errors->first('column') }}</span>
     </div>
+    <div class="form-group">
+        <span>@lang('common.ordering')</span>
+        <input type="text" name="column_order" class="form-control" 
+            value="{{ old('column_order', $colmap->column_order) }}"
+        />
+        <span class="text-danger">{{ $errors->first('column_order') }}</span>
+    </div>
     
     <div class="form-group">
         <button type="submit" class="btn btn-primary">@lang('common.save')</button>

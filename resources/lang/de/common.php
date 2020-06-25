@@ -31,4 +31,5 @@ return [
     'description' => 'Beschreibung',
     'actions' => 'Aktionen',
     'language' => 'Sprache',
+    'ordering' => 'Reihenfolge',
 ];
