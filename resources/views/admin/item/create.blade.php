@@ -100,6 +100,8 @@
             @case('_float_')
             {{-- Data_type of form field is string --}}
             @case('_string_')
+            {{-- Data_type of form field is map --}}
+            @case('_map_')
                 <div class="form-group">
                     <span>
                         {{ $cm->column->translation->attributes->

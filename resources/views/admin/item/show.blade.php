@@ -133,6 +133,25 @@
                 </div>
                 @break
             
+            {{-- Data_type of form field is map --}}
+            @case('_map_')
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        {{ $cm->column->translation->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        ({{ $cm->column->description }})
+                    </h5>
+                </div>
+                <div class="card card-body">
+                    <iframe width="100%" height="670px" scrolling="no" marginheight="0" marginwidth="0" frameborder="0"
+                        src="{{ old('fields.'. $cm->column->column_id, 
+                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
+                    >
+                    <p>@lang('items.no_iframe')</p>
+                    </iframe>
+                </div>
+                @break
+            
         @endswitch
         </div>
     @endforeach

@@ -145,6 +145,7 @@ class ItemController extends Controller
                     break;
                 case '_string_':
                 case '_url_':
+                case '_map_':
                     $detail_data['value_string'] = $value;
                     break;
             }
@@ -284,6 +285,7 @@ class ItemController extends Controller
                     break;
                 case '_string_':
                 case '_url_':
+                case '_map_':
                     $detail->value_string = $value;
                     break;
             }
