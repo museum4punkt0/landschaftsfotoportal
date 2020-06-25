@@ -20,6 +20,7 @@ return [
     'updated' => 'Feld-Zuordnung wurde bearbeitet.',
     'deleted' => 'Feld-Zuordnung wurde gelöscht.',
     
+    'config' => 'Konfiguration (JSON-Format)',
     'item_type' => 'Datensatztyp',
     'mapping_for' => 'Zuordnung von Anzeigefeldern für: ',
     'mapped' => 'Zugeordnete Anzeigefelder',

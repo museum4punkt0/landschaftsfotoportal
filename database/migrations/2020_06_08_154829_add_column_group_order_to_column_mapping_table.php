@@ -16,6 +16,7 @@ class AddColumnGroupOrderToColumnMappingTable extends Migration
         Schema::table('column_mapping', function (Blueprint $table) {
             $table->integer('column_group_fk')->nullable(true);
             $table->integer('column_order')->default(0);
+            $table->string('config')->nullable(true);
         });
     }
 
@@ -29,6 +30,7 @@ class AddColumnGroupOrderToColumnMappingTable extends Migration
         Schema::table('column_mapping', function (Blueprint $table) {
             $table->dropColumn('column_group_fk');
             $table->dropColumn('column_order');
+            $table->dropColumn('config');
         });
     }
 }

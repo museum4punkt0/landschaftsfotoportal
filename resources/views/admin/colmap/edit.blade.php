@@ -83,6 +83,13 @@
         />
         <span class="text-danger">{{ $errors->first('column_order') }}</span>
     </div>
+    <div class="form-group">
+        <span>@lang('colmaps.config')</span>
+        <input type="text" name="config" class="form-control" 
+            value="{{ old('config', $colmap->config) }}"
+        />
+        <span class="text-danger">{{ $errors->first('config') }}</span>
+    </div>
     
     <div class="form-group">
         <button type="submit" class="btn btn-primary">@lang('common.save')</button>

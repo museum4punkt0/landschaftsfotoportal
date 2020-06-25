@@ -71,6 +71,7 @@ class ColumnMappingController extends Controller
             'column_group' => 'required|integer',
             'item_type' => 'required|integer',
             'taxon' => 'nullable|integer',
+            'config' => 'nullable|string',
         ]);
         
         $data = [
@@ -78,6 +79,7 @@ class ColumnMappingController extends Controller
             'column_group_fk' => $request->input('column_group'),
             'item_type_fk' => $request->input('item_type'),
             'taxon_fk' => $request->input('taxon'),
+            'config' => $request->input('config'),
         ];
         ColumnMapping::create($data);
         
@@ -228,6 +230,7 @@ class ColumnMappingController extends Controller
             'item_type' => 'required|integer',
             'taxon' => 'nullable|integer',
             'column_order' => 'required|integer',
+            'config' => 'nullable|string',
         ]);
         
         $colmap->column_fk = $request->input('column');
@@ -235,6 +238,7 @@ class ColumnMappingController extends Controller
         $colmap->item_type_fk = $request->input('item_type');
         $colmap->taxon_fk = $request->input('taxon');
         $colmap->column_order = $request->input('column_order');
+        $colmap->config = $request->input('config');
         $colmap->save();
         
         // TODO: Create missing details for all items, see function store()

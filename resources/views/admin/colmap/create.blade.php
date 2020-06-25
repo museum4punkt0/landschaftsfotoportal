@@ -74,6 +74,11 @@
         </select>
         <span class="text-danger">{{ $errors->first('column') }}</span>
     </div>
+    <div class="form-group">
+        <span>@lang('colmaps.config')</span>
+        <input type="text" name="config" class="form-control" value="{{old('config')}}" />
+        <span class="text-danger">{{ $errors->first('config') }}</span>
+    </div>
     
     <div class="form-group">
         <button type="submit" class="btn btn-primary">@lang('common.save')</button>
