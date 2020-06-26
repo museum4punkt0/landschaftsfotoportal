@@ -58,6 +58,14 @@ class Taxon extends Model
         return $this->hasMany('App\ColumnMapping', 'column_fk', 'column_id');
     }
     
+    /**
+     * Get all synonyms of the taxon.
+     */
+    public function synonyms()
+    {
+        return $this->hasMany('App\Taxon', 'valid_name');
+    }
+    
     
     use \Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
     

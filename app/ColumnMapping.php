@@ -69,4 +69,21 @@ class ColumnMapping extends Model
     {
         return $this->belongsTo('App\Taxon', 'taxon_fk', 'taxon_id');
     }
+    
+    
+    /**
+     * Get the configuration value for a given key from the JSON key/value store.
+     */
+    public function getConfigValue($key)
+    {
+        if($this->config) {
+            $config = json_decode($this->config, true);
+            
+            return isset($config[$key]) ? $config[$key] : null;
+        }
+        // No config available for this item_type
+        else {
+            return null;
+        }
+    }
 }

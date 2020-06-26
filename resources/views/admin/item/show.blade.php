@@ -17,6 +17,30 @@
         <div class="card">
         @switch($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value)
             
+            {{-- Data_type of form field is taxon --}}
+            @case('_taxon_')
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        {{ $cm->column->translation->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        ({{ $cm->column->description }})
+                    </h5>
+                </div>
+                <div class="card card-body">
+                    @if($cm->getConfigValue('taxon_show') == 'full_name')
+                        {{ $item->taxon->full_name }}
+                    @endif
+                    @if($cm->getConfigValue('taxon_show') == 'native_name')
+                        {{ $item->taxon->native_name }}
+                    @endif
+                    @if($cm->getConfigValue('taxon_show') == 'synonyms')
+                        @foreach($item->taxon->synonyms as $synonym)
+                            {{ $synonym->full_name }}<br/>
+                        @endforeach
+                    @endif
+                </div>
+                @break
+            
             {{-- Data_type of form field is list --}}
             @case('_list_')
                 {{-- dd($lists->firstWhere('list_id', $cm->column->list_fk)->elements) --}}
