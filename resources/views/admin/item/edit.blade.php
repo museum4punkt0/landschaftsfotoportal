@@ -183,15 +183,17 @@
                             <span class="form-text text-muted">@lang('column.image_hint')</span>
                         </div>
                         <div class="col">
-                            @if(Storage::exists('public/images/'.
+                        @if($cm->getConfigValue('image_show') == 'preview')
+                            @if(Storage::exists('public/'. Config::get('media.preview_dir') .
                                 $details->firstWhere('column_fk', $cm->column->column_id)->value_string))
-                                <img src="{{ asset('storage/images/'.
+                                <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
                                     $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
                                     width=100
                                 />
                             @else
                                 @lang('columns.image_not_available')
                             @endif
+                        @endif
                         </div>
                     </div>
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>

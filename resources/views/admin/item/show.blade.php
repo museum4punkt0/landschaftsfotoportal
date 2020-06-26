@@ -145,14 +145,23 @@
                     </h5>
                 </div>
                 <div class="card card-body">
-                    @if(Storage::exists('public/images/'.
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string))
-                        <img src="{{ asset('storage/images/'.
-                            $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
-                            width=100
-                        />
-                    @else
-                        @lang('columns.image_not_available')
+                    @if($cm->getConfigValue('image_show') == 'preview')
+                        @if(Storage::exists('public/'. Config::get('media.preview_dir') .
+                            $details->firstWhere('column_fk', $cm->column->column_id)->value_string))
+                            <span>
+                            @if($cm->getConfigValue('image_link') == 'zoomify')
+                                <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{ Config::get('media.zoomify_image_path') }}{{ pathinfo($details->firstWhere('column_fk', $cm->column->column_id)->value_string, PATHINFO_FILENAME) }}.zif">
+                            @endif
+                            <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
+                                $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
+                            />
+                            @if($cm->getConfigValue('image_link') == 'zoomify')
+                                </a>
+                            @endif
+                            </span>
+                        @else
+                            @lang('columns.image_not_available')
+                        @endif
                     @endif
                 </div>
                 @break
