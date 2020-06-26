@@ -44,7 +44,7 @@ class ImportTaxaController extends Controller
         
         // Save CSV file
         if($files = $request->file('fileUpload')) {
-            $destinationPath = 'storage/import/';
+            $destinationPath = 'storage/'. config('media.import_dir');
             $fileName = date('YmdHis') .".". $files->getClientOriginalExtension();
             $files->move($destinationPath, $fileName);
             $csv_file = $destinationPath.$fileName;
