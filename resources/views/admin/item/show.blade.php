@@ -190,6 +190,5 @@
     @endforeach
     
 </div>
-</div>
 
 @endsection
