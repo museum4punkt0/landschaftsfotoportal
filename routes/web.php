@@ -23,6 +23,8 @@ Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/locale/{locale}', 'HomeController@locale')->name('locale');
 
+Route::get('item/{item}', 'ItemController@show')->name('item.show');
+
 Route::get('/admin/import/csv/upload', 'Admin\ImportCSVController@index')->name('import.csv.upload');
 Route::post('/admin/import/csv/save', 'Admin\ImportCSVController@save')->name('import.csv.save');
 Route::get('/admin/import/csv/preview', 'Admin\ImportCSVController@preview')->name('import.csv.preview');
