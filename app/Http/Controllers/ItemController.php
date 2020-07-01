@@ -3,9 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Item;
-use App\Taxon;
+#use App\Taxon;
 use App\Detail;
-use App\Column;
+#use App\Column;
 use App\ColumnMapping;
 use App\Selectlist;
 use App\Element;
@@ -24,12 +24,16 @@ class ItemController extends Controller
      */
     public function show(Item $item)
     {
+        // All items for the sidebar menu
+        $items = Item::tree()->depthFirst()->get();
+        
+        // Details of selected item
         $details = Detail::where('item_fk', $item->item_id)->get();
         $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)->orderBy('column_order')->get();
         
         $l10n_list = Selectlist::where('name', '_translation_')->first();
         $translations = Element::where('list_fk', $l10n_list->list_id)->get();
         
-        return view('item.show', compact('item', 'details', 'colmap', 'translations'));
+        return view('item.show', compact('item', 'items', 'details', 'colmap', 'translations'));
     }
 }

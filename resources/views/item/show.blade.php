@@ -1,5 +1,34 @@
 @extends('layouts.frontend')
 
+@section('sidebar_menu_items')
+    @parent
+    
+    @foreach($items as $it)
+        @if(true || $it->depth > 0)
+            <li class="nav-item">
+                @if($it->item_id == $item->item_id)
+                    <a class="nav-link active" href="{{ $it->item_id }}">
+                @else
+                    <a class="nav-link" href="{{ $it->item_id }}">
+                @endif
+                @if($it->depth == 1)
+                    &nbsp;&nbsp;
+                @endif
+                @if($it->depth == 2)
+                    &nbsp;&nbsp;-->
+                @endif
+                {{ $it->getTitleColumn() }}
+                {{-- Screen readers can mention the currently active menu item --}}
+                @if($it->item_id == $item->item_id)
+                    <span class="sr-only">(current)</span>
+                @endif
+                </a>
+            </li>
+        @endif
+    @endforeach
+    
+@endsection
+
 @section('content')
 
     <h2>@lang('items.list')</h2>
