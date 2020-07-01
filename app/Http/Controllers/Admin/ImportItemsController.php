@@ -10,6 +10,7 @@ use App\Item;
 use App\Selectlist;
 use App\Taxon;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\MessageBag;
 use Validator,Redirect,File;
@@ -220,6 +221,17 @@ class ImportItemsController extends Controller
                                     break;
                             }
                             Detail::create($detail_data);
+                        }
+                        // Set parent fkey of item if individually choosen per item
+                        if($selected_attr[$colnr] == -2) {
+                            // Try to match taxon for given full scientific name
+                            $parent_item = Item::whereHas('taxon', function (Builder $query) use ($cell) {
+                                $query->where('full_name', $cell);
+                            })->first();
+                            if(!empty($parent_item)) {
+                                $item->parent_fk = $parent_item->item_id;
+                                $item->save();
+                            }
                         }
                     }
                 }
