@@ -176,12 +176,22 @@
                     </h5>
                 </div>
                 <div class="card card-body">
-                    <iframe width="100%" height="670px" scrolling="no" marginheight="0" marginwidth="0" frameborder="0"
-                        src="{{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
-                    >
+                @if($cm->getConfigValue('map') == 'iframe')
+                    @if($cm->getConfigValue('map_iframe') == 'url')
+                        <iframe width="100%" height="670px" scrolling="no" marginheight="0" marginwidth="0" frameborder="0"
+                            src="{{ old('fields.'. $cm->column->column_id, 
+                            $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
+                        >
+                    @endif
+                    @if($cm->getConfigValue('map_iframe') == 'service')
+                        <iframe width="100%" height="670px" scrolling="no" marginheight="0" marginwidth="0" frameborder="0"
+                            src="{{ Config::get('media.mapservice_url') }}artid={{ old('fields.'. $cm->column->column_id, 
+                            $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
+                        >
+                    @endif
                     <p>@lang('items.no_iframe')</p>
                     </iframe>
+                @endif
                 </div>
                 @break
             

@@ -217,6 +217,7 @@ class ImportItemsController extends Controller
                                 case '_string_':
                                 case '_url_':
                                 case '_image_':
+                                case '_map_':
                                     $detail_data['value_string'] = $cell;
                                     break;
                             }
