@@ -31,16 +31,6 @@
 
 @section('content')
 
-    <h2>@lang('items.list')</h2>
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">@lang('lists.parent')</h5>
-        </div>
-        <div class="card card-body">
-            {{ $item->taxon->parent->taxon_name }} ({{ $item->taxon->parent_fk }})
-        </div>
-    </div>
-
     @foreach($colmap as $cm)
         <div class="card">
         @switch($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value)
@@ -51,7 +41,6 @@
                     <h5 class="mb-0">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                        ({{ $cm->column->description }})
                     </h5>
                 </div>
                 <div class="card card-body">
@@ -76,7 +65,6 @@
                     <h5 class="mb-0">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                        ({{ $cm->column->description }})
                     </h5>
                 </div>
                 <div class="card card-body">
@@ -94,7 +82,6 @@
                     <h5 class="mb-0">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                        ({{ $cm->column->description }})
                     </h5>
                 </div>
                 <div class="card card-body">
@@ -109,7 +96,6 @@
                     <h5 class="mb-0">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                        ({{ $cm->column->description }})
                     </h5>
                 </div>
                 <div class="card card-body">
@@ -124,7 +110,6 @@
                     <h5 class="mb-0">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                        ({{ $cm->column->description }})
                     </h5>
                 </div>
                 <div class="card card-body">
@@ -139,7 +124,6 @@
                     <h5 class="mb-0">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                        ({{ $cm->column->description }})
                     </h5>
                 </div>
                 <div class="card card-body">
@@ -154,7 +138,6 @@
                     <h5 class="mb-0">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                        ({{ $cm->column->description }})
                     </h5>
                 </div>
                 <div class="card card-body">
@@ -169,7 +152,6 @@
                     <h5 class="mb-0">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                        ({{ $cm->column->description }})
                     </h5>
                 </div>
                 <div class="card card-body">
@@ -200,7 +182,6 @@
                     <h5 class="mb-0">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                        ({{ $cm->column->description }})
                     </h5>
                 </div>
                 <div class="card card-body">
