@@ -99,8 +99,12 @@
               </div>
               <!-- Logo Area -->
               <div class="sidebar-footer pt-3">
+                  <a href="https://www.senckenberg.de/" target="_blank">
                   <img src="{{ asset('storage/images/logos/sgn_logo.png') }}" width=170 vspace=10 />
+                  </a>
+                  <a href="https://www.herbarium.uni-jena.de/" target="_blank">
                   <img src="{{ asset('storage/images/logos/hausknecht_logo.png') }}" width=170 vspace=10 />
+                  </a>
               </div>
             </nav>
             
