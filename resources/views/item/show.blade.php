@@ -31,19 +31,30 @@
 
 @section('content')
 
-    @foreach($colmap as $cm)
-        <div class="card">
+@foreach($colmap->groupBy('column_group_fk') as $cg)
+    
+    <div class="mt-4 mb-0">
+    <a class="font-weight-bold" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="false" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
+        {{ $cg->first()->column_group->attributes
+        ->firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}
+    </a>
+    </div>
+    <hr class="my-0">
+    
+    @foreach($cg as $cm)
+        <div class="container-fluid collapse" id="collapseCG{{ $cm->column_group_fk }}">
+        <div class="row my-2">
         @switch($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value)
             
             {{-- Data_type of form field is taxon --}}
             @case('_taxon_')
-                <div class="card-header">
-                    <h5 class="mb-0">
+                <div class="col-sm-3">
+                    <div class="font-weight-normal">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                    </h5>
+                    </div>
                 </div>
-                <div class="card card-body">
+                <div class="col font-weight-bold">
                     @if($cm->getConfigValue('taxon_show') == 'full_name')
                         {{ $item->taxon->full_name }}
                     @endif
@@ -61,13 +72,13 @@
             {{-- Data_type of form field is list --}}
             @case('_list_')
                 {{-- dd($lists->firstWhere('list_id', $cm->column->list_fk)->elements) --}}
-                <div class="card-header">
-                    <h5 class="mb-0">
+                <div class="col-sm-3">
+                    <div class="font-weight-normal">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                    </h5>
+                    </div>
                 </div>
-                <div class="card card-body">
+                <div class="col font-weight-bold">
                 @foreach($lists[$cm->column->list_fk] as $element)
                     @foreach($element->values as $v)
                         {{$v->value}}, 
@@ -78,13 +89,13 @@
             
             {{-- Data_type of form field is integer --}}
             @case('_integer_')
-                <div class="card-header">
-                    <h5 class="mb-0">
+                <div class="col-sm-3">
+                    <div class="font-weight-normal">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                    </h5>
+                    </div>
                 </div>
-                <div class="card card-body">
+                <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_int) }}
                 </div>
@@ -92,13 +103,13 @@
             
             {{-- Data_type of form field is float --}}
             @case('_float_')
-                <div class="card-header">
-                    <h5 class="mb-0">
+                <div class="col-sm-3">
+                    <div class="font-weight-normal">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                    </h5>
+                    </div>
                 </div>
-                <div class="card card-body">
+                <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_float) }}
                 </div>
@@ -106,13 +117,13 @@
             
             {{-- Data_type of form field is date --}}
             @case('_date_')
-                <div class="card-header">
-                    <h5 class="mb-0">
+                <div class="col-sm-3">
+                    <div class="font-weight-normal">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                    </h5>
+                    </div>
                 </div>
-                <div class="card card-body">
+                <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_date) }}
                 </div>
@@ -120,13 +131,13 @@
             
             {{-- Data_type of form field is string --}}
             @case('_string_')
-                <div class="card-header">
-                    <h5 class="mb-0">
+                <div class="col-sm-3">
+                    <div class="font-weight-normal">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                    </h5>
+                    </div>
                 </div>
-                <div class="card card-body">
+                <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}
                 </div>
@@ -134,13 +145,13 @@
             
             {{-- Data_type of form field is URL --}}
             @case('_url_')
-                <div class="card-header">
-                    <h5 class="mb-0">
+                <div class="col-sm-3">
+                    <div class="font-weight-normal">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                    </h5>
+                    </div>
                 </div>
-                <div class="card card-body">
+                <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}
                 </div>
@@ -148,18 +159,18 @@
             
             {{-- Data_type of form field is image --}}
             @case('_image_')
-                <div class="card-header">
-                    <h5 class="mb-0">
+                <div class="col-sm-3">
+                    <div class="font-weight-normal">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                    </h5>
+                    </div>
                 </div>
-                <div class="card card-body">
+                <div class="col font-weight-bold">
                     @if($cm->getConfigValue('image_show') == 'gallery')
                         <div class="container">
                             <div class="row">
                                 @foreach($items->where('parent_fk', $item->item_id) as $it)
-                                    <div class="col">
+                                    <div class="col-auto">
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
                                             <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{ Config::get('media.zoomify_image_path') }}{{ pathinfo($it->getTitleColumn() .'.jpg', PATHINFO_FILENAME) }}.zif">
                                         @endif
@@ -226,13 +237,13 @@
             
             {{-- Data_type of form field is map --}}
             @case('_map_')
-                <div class="card-header">
-                    <h5 class="mb-0">
+                <div class="col-sm-3">
+                    <div class="font-weight-normal">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                    </h5>
+                    </div>
                 </div>
-                <div class="card card-body">
+                <div class="col font-weight-bold">
                 @if($cm->getConfigValue('map') == 'iframe')
                     @if($cm->getConfigValue('map_iframe') == 'url')
                         <iframe width="100%" height="670px" scrolling="no" marginheight="0" marginwidth="0" frameborder="0"
@@ -254,6 +265,9 @@
             
         @endswitch
         </div>
+        </div>
     @endforeach
     
+@endforeach
+
 @endsection
