@@ -49,10 +49,12 @@
             {{-- Data_type of form field is taxon --}}
             @case('_taxon_')
                 <div class="col-sm-3">
+                @unless($cm->getConfigValue('show_title'))
                     <div class="font-weight-normal">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
                     </div>
+                @endunless
                 </div>
                 <div class="col font-weight-bold">
                     @if($cm->getConfigValue('taxon_show') == 'full_name')
@@ -73,10 +75,12 @@
             @case('_list_')
                 {{-- dd($lists->firstWhere('list_id', $cm->column->list_fk)->elements) --}}
                 <div class="col-sm-3">
+                @unless($cm->getConfigValue('show_title'))
                     <div class="font-weight-normal">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
                     </div>
+                @endunless
                 </div>
                 <div class="col font-weight-bold">
                 @foreach($lists[$cm->column->list_fk] as $element)
@@ -90,10 +94,12 @@
             {{-- Data_type of form field is integer --}}
             @case('_integer_')
                 <div class="col-sm-3">
+                @unless($cm->getConfigValue('show_title'))
                     <div class="font-weight-normal">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
                     </div>
+                @endunless
                 </div>
                 <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
@@ -104,10 +110,12 @@
             {{-- Data_type of form field is float --}}
             @case('_float_')
                 <div class="col-sm-3">
+                @unless($cm->getConfigValue('show_title'))
                     <div class="font-weight-normal">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
                     </div>
+                @endunless
                 </div>
                 <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
@@ -118,10 +126,12 @@
             {{-- Data_type of form field is date --}}
             @case('_date_')
                 <div class="col-sm-3">
+                @unless($cm->getConfigValue('show_title'))
                     <div class="font-weight-normal">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
                     </div>
+                @endunless
                 </div>
                 <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
@@ -132,10 +142,12 @@
             {{-- Data_type of form field is string --}}
             @case('_string_')
                 <div class="col-sm-3">
+                @unless($cm->getConfigValue('show_title'))
                     <div class="font-weight-normal">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
                     </div>
+                @endunless
                 </div>
                 <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
@@ -146,10 +158,12 @@
             {{-- Data_type of form field is URL --}}
             @case('_url_')
                 <div class="col-sm-3">
+                @unless($cm->getConfigValue('show_title'))
                     <div class="font-weight-normal">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
                     </div>
+                @endunless
                 </div>
                 <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
@@ -160,10 +174,12 @@
             {{-- Data_type of form field is image --}}
             @case('_image_')
                 <div class="col-sm-3">
+                @unless($cm->getConfigValue('show_title'))
                     <div class="font-weight-normal">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
                     </div>
+                @endunless
                 </div>
                 <div class="col font-weight-bold">
                     @if($cm->getConfigValue('image_show') == 'gallery')
@@ -238,10 +254,12 @@
             {{-- Data_type of form field is map --}}
             @case('_map_')
                 <div class="col-sm-3">
+                @unless($cm->getConfigValue('show_title'))
                     <div class="font-weight-normal">
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
                     </div>
+                @endunless
                 </div>
                 <div class="col font-weight-bold">
                 @if($cm->getConfigValue('map') == 'iframe')
