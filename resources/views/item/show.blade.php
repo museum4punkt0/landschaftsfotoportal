@@ -48,14 +48,7 @@
             
             {{-- Data_type of form field is taxon --}}
             @case('_taxon_')
-                <div class="col-sm-3">
-                @unless($cm->getConfigValue('show_title'))
-                    <div class="font-weight-normal">
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                    </div>
-                @endunless
-                </div>
+                @include('includes.column_title')
                 <div class="col font-weight-bold">
                     @if($cm->getConfigValue('taxon_show') == 'full_name')
                         {{ $item->taxon->full_name }}
@@ -74,14 +67,7 @@
             {{-- Data_type of form field is list --}}
             @case('_list_')
                 {{-- dd($lists->firstWhere('list_id', $cm->column->list_fk)->elements) --}}
-                <div class="col-sm-3">
-                @unless($cm->getConfigValue('show_title'))
-                    <div class="font-weight-normal">
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                    </div>
-                @endunless
-                </div>
+                @include('includes.column_title')
                 <div class="col font-weight-bold">
                 @foreach($lists[$cm->column->list_fk] as $element)
                     @foreach($element->values as $v)
@@ -93,14 +79,7 @@
             
             {{-- Data_type of form field is integer --}}
             @case('_integer_')
-                <div class="col-sm-3">
-                @unless($cm->getConfigValue('show_title'))
-                    <div class="font-weight-normal">
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                    </div>
-                @endunless
-                </div>
+                @include('includes.column_title')
                 <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_int) }}
@@ -109,14 +88,7 @@
             
             {{-- Data_type of form field is float --}}
             @case('_float_')
-                <div class="col-sm-3">
-                @unless($cm->getConfigValue('show_title'))
-                    <div class="font-weight-normal">
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                    </div>
-                @endunless
-                </div>
+                @include('includes.column_title')
                 <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_float) }}
@@ -125,14 +97,7 @@
             
             {{-- Data_type of form field is date --}}
             @case('_date_')
-                <div class="col-sm-3">
-                @unless($cm->getConfigValue('show_title'))
-                    <div class="font-weight-normal">
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                    </div>
-                @endunless
-                </div>
+                @include('includes.column_title')
                 <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_date) }}
@@ -141,14 +106,7 @@
             
             {{-- Data_type of form field is string --}}
             @case('_string_')
-                <div class="col-sm-3">
-                @unless($cm->getConfigValue('show_title'))
-                    <div class="font-weight-normal">
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                    </div>
-                @endunless
-                </div>
+                @include('includes.column_title')
                 <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}
@@ -157,14 +115,7 @@
             
             {{-- Data_type of form field is URL --}}
             @case('_url_')
-                <div class="col-sm-3">
-                @unless($cm->getConfigValue('show_title'))
-                    <div class="font-weight-normal">
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                    </div>
-                @endunless
-                </div>
+                @include('includes.column_title')
                 <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}
@@ -173,14 +124,7 @@
             
             {{-- Data_type of form field is image --}}
             @case('_image_')
-                <div class="col-sm-3">
-                @unless($cm->getConfigValue('show_title'))
-                    <div class="font-weight-normal">
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                    </div>
-                @endunless
-                </div>
+                @include('includes.column_title')
                 <div class="col font-weight-bold">
                     @if($cm->getConfigValue('image_show') == 'gallery')
                         <div class="container">
@@ -193,10 +137,10 @@
                                         @if(Storage::exists('public/'. Config::get('media.preview_dir') .
                                             $it->getTitleColumn() .'.jpg'))
                                             <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                                $it->getTitleColumn() .'.jpg') }}"
+                                                $it->getTitleColumn() .'.jpg') }}" height=168
                                             />
                                         @else
-                                            <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $it->getTitleColumn() .'.jpg' }}"
+                                            <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $it->getTitleColumn() .'.jpg' }}" height=168
                                             />
                                         @endif
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
@@ -217,10 +161,10 @@
                             @if(Storage::exists('public/'. Config::get('media.preview_dir') .
                                 $it->getTitleColumn() .'.jpg'))
                                 <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                    $it->getTitleColumn() .'.jpg') }}"
+                                    $it->getTitleColumn() .'.jpg') }}" height=168
                                 />
                             @else
-                                <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $it->getTitleColumn() .'.jpg' }}"
+                                <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $it->getTitleColumn() .'.jpg' }}" height=168
                                 />
                             @endif
                             @if($cm->getConfigValue('image_link') == 'zoomify')
@@ -253,14 +197,7 @@
             
             {{-- Data_type of form field is map --}}
             @case('_map_')
-                <div class="col-sm-3">
-                @unless($cm->getConfigValue('show_title'))
-                    <div class="font-weight-normal">
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                    </div>
-                @endunless
-                </div>
+                @include('includes.column_title')
                 <div class="col font-weight-bold">
                 @if($cm->getConfigValue('map') == 'iframe')
                     @if($cm->getConfigValue('map_iframe') == 'url')
