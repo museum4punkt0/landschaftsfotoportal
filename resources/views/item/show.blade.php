@@ -34,15 +34,26 @@
 @foreach($colmap->groupBy('column_group_fk') as $cg)
     
     <div class="mt-4 mb-0">
-    <a class="font-weight-bold" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="false" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
-        {{ $cg->first()->column_group->attributes
-        ->firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}
-    </a>
+    @if($cg->first()->column_group->getConfigValue('show_collapsed'))
+        <a class="font-weight-bold" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="true" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
+            {{ $cg->first()->column_group->attributes
+            ->firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}
+        </a>
+    @else
+        <a class="font-weight-bold" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="false" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
+            {{ $cg->first()->column_group->attributes
+            ->firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}
+        </a>
+    @endif
     </div>
     <hr class="my-0">
     
     @foreach($cg as $cm)
-        <div class="container-fluid collapse" id="collapseCG{{ $cm->column_group_fk }}">
+        @if($cg->first()->column_group->getConfigValue('show_collapsed'))
+            <div class="container-fluid collapse show" id="collapseCG{{ $cm->column_group_fk }}">
+        @else
+            <div class="container-fluid collapse" id="collapseCG{{ $cm->column_group_fk }}">
+        @endif
         <div class="row my-2">
         @switch($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value)
             

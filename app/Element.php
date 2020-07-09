@@ -85,4 +85,22 @@ class Element extends Model
     {
         return $this->primaryKey;
     }
+    
+    
+    /**
+     * Get the configuration value for a given key from the JSON key/value store.
+     */
+    public function getConfigValue($key)
+    {
+        if($this->attributes()->firstWhere('name', 'config')) {
+            $json = $this->attributes()->firstWhere('name', 'config')->pivot->value;
+            $config = json_decode($json, true);
+            
+            return isset($config[$key]) ? $config[$key] : null;
+        }
+        // No config available for this item_type
+        else {
+            return null;
+        }
+    }
 }
