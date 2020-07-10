@@ -106,6 +106,8 @@ class Column extends Model
                 return 'image|mimes:jpeg,png|max:8192';
             case '_map_':
                 return 'string';
+            case '_html_':
+                return 'string';
             default:
                 return '';
         }

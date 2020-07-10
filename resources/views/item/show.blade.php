@@ -124,6 +124,15 @@
                 </div>
                 @break
             
+            {{-- Data_type of form field is html --}}
+            @case('_html_')
+                @include('includes.column_title')
+                <div class="col font-weight-bold">
+                    {!! old('fields.'. $cm->column->column_id, 
+                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string) !!}
+                </div>
+                @break
+            
             {{-- Data_type of form field is URL --}}
             @case('_url_')
                 @include('includes.column_title')

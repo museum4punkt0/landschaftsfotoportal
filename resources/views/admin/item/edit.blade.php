@@ -149,6 +149,23 @@
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 @break
+            {{-- Data_type of form field is html --}}
+            @case('_html_')
+                <div class="form-group">
+                    <span>
+                        {{ $cm->column->translation->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        ({{ $cm->column->description }}, 
+                        @lang('columns.data_type'): 
+                        {{ $cm->column->data_type->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
+                    </span>
+                    <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control" 
+                        rows=5>{!! old('fields.'. $cm->column->column_id, 
+                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string) !!}</textarea>
+                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                </div>
+                @break
             {{-- Data_type of form field is URL --}}
             @case('_url_')
                 <div class="form-group">
