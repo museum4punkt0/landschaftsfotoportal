@@ -4,14 +4,16 @@
 
 <div class="container">
     <h2>@lang('items.list')</h2>
-    <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">@lang('lists.parent')</h5>
+    @if($item->taxon)
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">@lang('lists.parent')</h5>
+            </div>
+            <div class="card card-body">
+                {{ $item->taxon->parent->taxon_name }} ({{ $item->taxon->parent_fk }})
+            </div>
         </div>
-        <div class="card card-body">
-            {{ $item->taxon->parent->taxon_name }} ({{ $item->taxon->parent_fk }})
-        </div>
-    </div>
+    @endif
 
     @foreach($colmap as $cm)
         <div class="card">
