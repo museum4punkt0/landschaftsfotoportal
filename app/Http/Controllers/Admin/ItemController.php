@@ -147,7 +147,7 @@ class ItemController extends Controller
                 case '_url_':
                 case '_map_':
                 case '_html_':
-                    $detail_data['value_string'] = $value;
+                    $detail_data['value_string'] = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', "", $value);
                     break;
             }
             Detail::create($detail_data);
@@ -288,7 +288,7 @@ class ItemController extends Controller
                 case '_url_':
                 case '_map_':
                 case '_html_':
-                    $detail->value_string = $value;
+                    $detail->value_string = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', "", $value);
                     break;
             }
             $detail->save();
