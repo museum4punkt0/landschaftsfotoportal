@@ -128,10 +128,18 @@
                         {{ $cm->column->data_type->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
                     </span>
-                    <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control" 
+                    <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control summernote" 
                         rows=5>{!! old('fields.'. $cm->column->column_id) !!}</textarea>
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
+                <script type="text/javascript">
+                    $(document).ready(function() {
+                        $('.summernote').summernote({
+                            tabsize: 4,
+                            height: 200
+                        });
+                    });
+                </script>
                 @break
             
             {{-- Data_type of form field is date --}}
