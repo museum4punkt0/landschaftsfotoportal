@@ -40,6 +40,8 @@ class Taxon extends Model
         'rank',
         'rank_abbr',
         'gsl_id',
+        'bfn_namnr',
+        'bfn_sipnr',
     ];
     
     /**

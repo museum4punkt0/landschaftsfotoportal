@@ -62,6 +62,8 @@ class TaxonController extends Controller
             'rank' => 'nullable|integer',
             'rank_abbr' => 'nullable|string',
             'gsl_id' => 'nullable|integer',
+            'bfn_namnr' => 'nullable|integer',
+            'bfn_sipnr' => 'nullable|integer',
         ]);
         
         $data = [
@@ -75,6 +77,8 @@ class TaxonController extends Controller
             //'rank' => $request->input('rank'),
             'rank_abbr' => $request->input('rank_abbr'),
             'gsl_id' => $request->input('gsl_id'),
+            'bfn_namnr' => $request->input('bfn_namnr'),
+            'bfn_sipnr' => $request->input('bfn_sipnr'),
         ];
         Taxon::create($data);
         
@@ -129,6 +133,8 @@ class TaxonController extends Controller
             'rank' => 'nullable|integer',
             'rank_abbr' => 'nullable|string',
             'gsl_id' => 'nullable|integer',
+            'bfn_namnr' => 'nullable|integer',
+            'bfn_sipnr' => 'nullable|integer',
         ]);
         
         $taxon->parent_fk = $request->input('parent');
@@ -141,6 +147,8 @@ class TaxonController extends Controller
         //$taxon->rank = $request->input('rank');
         $taxon->rank_abbr = $request->input('rank_abbr');
         $taxon->gsl_id = $request->input('gsl_id');
+        $taxon->bfn_namnr = $request->input('bfn_namnr');
+        $taxon->bfn_sipnr = $request->input('bfn_sipnr');
         $taxon->save();
         
         return Redirect::to('admin/taxon')

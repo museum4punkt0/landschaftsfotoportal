@@ -78,6 +78,16 @@
         <input type="text" name="gsl_id" class="form-control" value="{{old('gsl_id')}}" />
         <span class="text-danger">{{ $errors->first('gsl_id') }}</span>
     </div>
+    <div class="form-group">
+        <span>@lang('taxon.bfn_namnr')</span>
+        <input type="text" name="bfn_namnr" class="form-control" value="{{old('bfn_namnr')}}" />
+        <span class="text-danger">{{ $errors->first('bfn_namnr') }}</span>
+    </div>
+    <div class="form-group">
+        <span>@lang('taxon.bfn_sipnr')</span>
+        <input type="text" name="bfn_sipnr" class="form-control" value="{{old('bfn_sipnr')}}" />
+        <span class="text-danger">{{ $errors->first('bfn_sipnr') }}</span>
+    </div>
     
     <div class="form-group">
         <button type="submit" class="btn btn-primary">@lang('common.save')</button>

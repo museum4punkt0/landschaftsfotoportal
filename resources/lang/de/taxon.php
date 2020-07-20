@@ -33,4 +33,6 @@ return [
     'rank' => 'Rang',
     'rank_abbr' => 'Rang-Kürzel',
     'gsl_id' => 'GermanSL SPECIES_NR',
+    'bfn_namnr' => 'BfN NAMNR',
+    'bfn_sipnr' => 'BfN SIPNR',
 ];

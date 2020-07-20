@@ -22,7 +22,10 @@
                         <th colspan="1">@lang('taxon.native_name')</th>
                         <th colspan="1">@lang('taxon.valid_name')</th>
                         <th colspan="1">@lang('taxon.rank')</th>
-                        <th colspan="1">@lang('taxon.gsl_id')</th>
+                        <th colspan="1">@lang('taxon.gsl_id')<br/>
+                            @lang('taxon.bfn_namnr')<br/>
+                            @lang('taxon.bfn_sipnr')
+                        </th>
                         <th colspan="2">@lang('common.actions')</th>
                     </tr>
                 </thead>
@@ -39,7 +42,7 @@
                             {{$taxon->taxon_name}} {{$taxon->taxon_author}} {{$taxon->taxon_suppl}}
                         </td>
                         <td>
-                            {{$taxon->native_name}}<br/>
+                            {{$taxon->native_name}}
                         </td>
                         <td>
                             @if($taxon->valid_name)
@@ -49,10 +52,10 @@
                             @endif
                         </td>
                         <td>
-                            {{$taxon->rank_abbr}}<br/>
+                            {{$taxon->rank_abbr}}
                         </td>
                         <td>
-                            {{$taxon->gsl_id}}<br/>
+                            {{$taxon->gsl_id}}<br/>{{$taxon->bfn_namnr}}<br/>{{$taxon->bfn_sipnr}}
                         </td>
                         <td>
                             <form action="{{route('taxon.edit', $taxon)}}" method="GET">
