@@ -56,6 +56,14 @@
                                     @if(old('fields.'.$key) == 'gsl_id') selected @endif>
                                     @lang('taxon.gsl_id')
                                 </option>
+                                <option value="bfn_namnr"
+                                    @if(old('fields.'.$key) == 'bfn_namnr') selected @endif>
+                                    @lang('taxon.bfn_namnr')
+                                </option>
+                                <option value="bfn_sipnr"
+                                    @if(old('fields.'.$key) == 'bfn_sipnr') selected @endif>
+                                    @lang('taxon.bfn_sipnr')
+                                </option>
                                 <option value="parent"
                                     @if(old('fields.'.$key) == 'parent') selected @endif>
                                     @lang('taxon.parent')

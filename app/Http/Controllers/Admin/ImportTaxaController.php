@@ -105,7 +105,7 @@ class ImportTaxaController extends Controller
                 },
                 function ($attribute, $value, $fail) {
                     // Import needs a column with element IDs
-                    if(empty(array_count_values($value)['gsl_id'])) {
+                    if(empty(array_count_values($value)['bfn_namnr'])) {
                         $fail(__('import.missing_id'));
                     }
                 },
@@ -169,15 +169,15 @@ class ImportTaxaController extends Controller
             if($number == 0 && $request->has('header'))
                 continue;
             
-            $taxon_data['gsl_id'] = null;
+            $taxon_data['bfn_namnr'] = null;
             
             // Process each column (= table cell)
             foreach($line as $colnr => $cell) {
                 
                 switch($selected_attr[$colnr]) {
                     // Save primary key (=ID) of the recent element to temporary tree
-                    case 'gsl_id':
-                        $taxon_data['gsl_id'] = intval($cell);
+                    case 'bfn_namnr':
+                        $taxon_data['bfn_namnr'] = intval($cell);
                         break;
                     // Get ID of parent element from temporary tree
                     case 'parent':
@@ -208,10 +208,10 @@ class ImportTaxaController extends Controller
             }
             
             // Store taxon to database unless it doesn't exist
-            $taxon = Taxon::firstOrCreate(['gsl_id' => $taxon_data['gsl_id']], $taxon_data);
+            $taxon = Taxon::firstOrCreate(['bfn_namnr' => $taxon_data['bfn_namnr']], $taxon_data);
             
             // Save primary key (=ID) of the recent element to temporary tree
-            $elements_tree[$taxon->gsl_id] = $taxon->taxon_id;
+            $elements_tree[$taxon->bfn_namnr] = $taxon->taxon_id;
         }
         
         return Redirect::to('admin/taxon')
