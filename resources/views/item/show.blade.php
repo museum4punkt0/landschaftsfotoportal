@@ -176,21 +176,21 @@
                     @if($cm->getConfigValue('image_show') == 'specimen')
                         <span>
                             @if($cm->getConfigValue('image_link') == 'zoomify')
-                                <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{ Config::get('media.zoomify_image_path') }}{{ pathinfo($it->getTitleColumn() .'.jpg', PATHINFO_FILENAME) }}.zif">
+                                <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{ Config::get('media.zoomify_image_path') }}{{ pathinfo($item->getTitleColumn() .'.jpg', PATHINFO_FILENAME) }}.zif">
                             @endif
                             @if(Storage::exists('public/'. Config::get('media.preview_dir') .
-                                $it->getTitleColumn() .'.jpg'))
+                                $item->getTitleColumn() .'.jpg'))
                                 <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                    $it->getTitleColumn() .'.jpg') }}" height=168
+                                    $item->getTitleColumn() .'.jpg') }}" height=168
                                 />
                             @else
-                                <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $it->getTitleColumn() .'.jpg' }}" height=168
+                                <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $item->getTitleColumn() .'.jpg' }}" height=168
                                 />
                             @endif
                             @if($cm->getConfigValue('image_link') == 'zoomify')
                                 </a>
                             @endif
-                            <br/>{{ $it->getTitleColumn() }}
+                            <br/>{{ $item->getTitleColumn() }}
                         </span>
                     @endif
                     
