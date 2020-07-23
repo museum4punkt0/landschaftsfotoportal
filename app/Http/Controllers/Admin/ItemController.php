@@ -48,7 +48,9 @@ class ItemController extends Controller
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
-        return view('admin.item.new', compact('item_types'));
+        $taxa = Taxon::tree()->depthFirst()->get();
+        
+        return view('admin.item.new', compact('item_types', 'taxa'));
     }
     
     /**
@@ -61,7 +63,17 @@ class ItemController extends Controller
     {
         $items = Item::tree()->depthFirst()->get();
         $taxa = Taxon::tree()->depthFirst()->get();
-        $colmap = ColumnMapping::where('item_type_fk', $request->item_type)->orderBy('column_order')->get();
+        
+        // Only columns associated with this item's taxon or its descendants
+        $taxon_id = $request->taxon;
+        $colmap = ColumnMapping::where('item_type_fk', $request->item_type)
+            ->where(function (Builder $query) use ($taxon_id) {
+                return $query->whereNull('taxon_fk')
+                    ->orWhereHas('taxon.descendants', function (Builder $query) use ($taxon_id) {
+                        $query->where('taxon_id', $taxon_id);
+                });
+            })
+            ->orderBy('column_order')->get();
         
         $lists = null;
         // Load all list elements of lists used by this item's columns
@@ -83,6 +95,8 @@ class ItemController extends Controller
         
         // Save item_type ID to session
         $request->session()->put('item_type', $request->item_type);
+        // Save taxon ID to session
+        $request->session()->put('taxon', $request->taxon);
         
         return view('admin.item.create', compact('items', 'taxa', 'colmap', 'lists', 'data_types', 'translations'));
     }
@@ -189,7 +203,17 @@ class ItemController extends Controller
     public function show(Item $item)
     {
         $details = Detail::where('item_fk', $item->item_id)->get();
-        $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)->orderBy('column_order')->get();
+        
+        // Only columns associated with this item's taxon or its descendants
+        $taxon_id = $item->taxon_fk;
+        $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)
+            ->where(function (Builder $query) use ($taxon_id) {
+                return $query->whereNull('taxon_fk')
+                    ->orWhereHas('taxon.descendants', function (Builder $query) use ($taxon_id) {
+                        $query->where('taxon_id', $taxon_id);
+                });
+            })
+            ->orderBy('column_order')->get();
         
         $l10n_list = Selectlist::where('name', '_translation_')->first();
         $translations = Element::where('list_fk', $l10n_list->list_id)->get();
@@ -211,7 +235,17 @@ class ItemController extends Controller
         
         $taxa = Taxon::tree()->depthFirst()->get();
         $details = Detail::where('item_fk', $item->item_id)->get();
-        $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)->orderBy('column_order')->get();
+        
+        // Only columns associated with this item's taxon or its descendants
+        $taxon_id = $item->taxon_fk;
+        $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)
+            ->where(function (Builder $query) use ($taxon_id) {
+                return $query->whereNull('taxon_fk')
+                    ->orWhereHas('taxon.descendants', function (Builder $query) use ($taxon_id) {
+                        $query->where('taxon_id', $taxon_id);
+                });
+            })
+            ->orderBy('column_order')->get();
         
         $lists = null;
         // Load all list elements of lists used by this item's columns

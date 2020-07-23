@@ -34,12 +34,12 @@
     </div>
     <div class="form-group">
         <span>@lang('taxon.list')</span>
-        <select name="taxon" class="form-control" size=1 >
+        <select name="taxon" class="form-control" size=1 readonly >
             <option value="">@lang('common.none')</option>
             @foreach($taxa as $taxon)
                 @unless($taxon->valid_name)
                     <option value="{{$taxon->taxon_id}}"
-                        @if(old('taxon') == $taxon->taxon_id) selected @endif>
+                        @if(old('taxon', session('taxon')) == $taxon->taxon_id) selected @endif>
                         @for ($i = 0; $i < $taxon->depth; $i++)
                             |___
                         @endfor

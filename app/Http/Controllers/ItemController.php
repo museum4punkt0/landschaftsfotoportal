@@ -10,7 +10,7 @@ use App\ColumnMapping;
 use App\Selectlist;
 use App\Element;
 #use App\Http\Controllers\Controller;
-#use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Builder;
 #use Illuminate\Http\Request;
 #use Redirect;
 
@@ -29,8 +29,19 @@ class ItemController extends Controller
         
         // Details of selected item
         $details = Detail::where('item_fk', $item->item_id)->get();
-        $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)->orderBy('column_order')->get();
         
+        // Only columns associated with this item's taxon or its descendants
+        $taxon_id = $item->taxon_fk;
+        $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)
+            ->where(function (Builder $query) use ($taxon_id) {
+                return $query->whereNull('taxon_fk')
+                    ->orWhereHas('taxon.descendants', function (Builder $query) use ($taxon_id) {
+                        $query->where('taxon_id', $taxon_id);
+                });
+            })
+            ->orderBy('column_order')->get();
+        
+        // Translations for titles of columns and column groups
         $l10n_list = Selectlist::where('name', '_translation_')->first();
         $translations = Element::where('list_fk', $l10n_list->list_id)->get();
         
