@@ -41,6 +41,12 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 // });
 
 /**
+ * jQuery-UI
+ */
+
+import 'jquery-ui/ui/widgets/sortable.js';
+
+/**
  * Summernote WYSIWYG editor, uses Bootstrap v4
  */
 
