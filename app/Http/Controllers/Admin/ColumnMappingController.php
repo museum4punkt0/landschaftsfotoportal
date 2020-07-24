@@ -188,6 +188,49 @@ class ColumnMappingController extends Controller
     }
 
     /**
+     * Show the form for sorting columns for a given item type.
+     *
+     * @param  int  $item_type
+     * @return \Illuminate\Http\Response
+     */
+    public function sort($item_type)
+    {
+        $it_list = Selectlist::where('name', '_item_type_')->first();
+        $item_types = Element::where('list_fk', $it_list->list_id)->get();
+        
+        $columns_mapped = Column::whereHas('column_mapping', function (Builder $query) use ($item_type) {
+            $query->where('item_type_fk', $item_type);
+        })
+            ->join('column_mapping', 'column_id', '=', 'column_mapping.column_fk')
+            ->orderBy('column_order')
+            ->get();
+        
+        return view('admin.colmap.sort', compact('item_type', 'item_types', 'columns_mapped'));
+    }
+
+    /**
+     * Save the sorting of columns for a given item type.
+     * 
+     * This is called via AJAX request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function sort_store(Request $request)
+    {
+        if($request->has('ids')){
+            $arr = explode(',', $request->input('ids'));
+            
+            foreach($arr as $sortOrder => $id){
+                $colmap = ColumnMapping::firstWhere('column_fk', $id);
+                $colmap->column_order = $sortOrder;
+                $colmap->save();
+            }
+            return ['success'=>true, 'message'=>'Updated'];
+        }
+    }
+
+    /**
      * Show the form for editing the specified resource.
      *
      * Danger! This should not be called by any user, not even by admins!

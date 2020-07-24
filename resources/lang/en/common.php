@@ -24,6 +24,7 @@ return [
     'ignore' => 'ignore',
     'internal' => 'internal',
     'next' => 'next',
+    'update_success' => 'Successfully updated',
 
     'root' => 'root element',
     'id' => 'ID',

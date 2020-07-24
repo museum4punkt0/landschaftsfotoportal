@@ -22,6 +22,8 @@ return [
     
     'config' => 'Konfiguration (JSON-Format)',
     'item_type' => 'Datensatztyp',
+    'sort_for' => 'Sortierung von Anzeigefeldern für: ',
+    'sort_hint' => 'Die Sortierung der Anzeigefelder kann mittels Drag&Drop vorgenommen werden.',
     'mapping_for' => 'Zuordnung von Anzeigefeldern für: ',
     'mapped' => 'Zugeordnete Anzeigefelder',
     'mapped_hint' => 'Diese Anzeigefelder sind bereits mit dem ausgewählten Typ von Datensätzen verknüpft.',
