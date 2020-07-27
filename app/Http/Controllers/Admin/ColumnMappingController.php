@@ -190,11 +190,16 @@ class ColumnMappingController extends Controller
     /**
      * Show the form for sorting columns for a given item type.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @param  int  $item_type
      * @return \Illuminate\Http\Response
      */
-    public function sort($item_type)
+    public function sort(Request $request, $item_type)
     {
+        // Redirect if selected using drop-down menu
+        if(isset($request->item_type) && $request->item_type <> $item_type )
+            return Redirect::to('admin/colmap/sort/'.intval($request->item_type));
+        
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         

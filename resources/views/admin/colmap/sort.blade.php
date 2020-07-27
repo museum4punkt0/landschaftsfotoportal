@@ -25,15 +25,13 @@
                 (Item-ID {{ $item_type }})
                 </div>
                 
-                {{--
                 <form action="{{ route('colmap.sort', $item_type) }}" method="GET">
                     <div class="form-row">
                         <div class="form-group col-md-8">
-                            <span>@lang('colmaps.item_type')</span>
-                            <select name="item_type" class="form-control" size=1 >
+                            <select name="item_type" id="item_type_select" class="form-control" size=1 >
                                 @foreach($item_types as $type)
                                     <option value="{{$type->element_id}}"
-                                        @if(old('item_type') == $type->element_id) selected @endif>
+                                        @if(old('item_type', $item_type) == $type->element_id) selected @endif>
                                         @foreach($type->values as $v)
                                             @if($v->attribute->name == 'name_'.app()->getLocale())
                                                 {{$v->value}}
@@ -44,13 +42,9 @@
                             </select>
                             <span class="text-danger">{{ $errors->first('item_type') }}</span>
                         </div>
-                        <div class="form-group col-md-4">
-                            <button type="submit" class="btn btn-primary">@lang('common.next')</button>
-                        </div>
                         {{ csrf_field() }}
                     </div>
                 </form>
-                --}}
                 
                 <div class="form-row">
                     <div class="form-group col-md-12">
@@ -102,8 +96,16 @@
     </div>
 </div>
 
-<script>
-    $(document).ready(function(){
+<script type="text/javascript">
+    var elem = document.getElementById("item_type_select");
+    elem.addEventListener("change", ItemTypeChanged);
+
+    function ItemTypeChanged() {
+        var item_type = document.getElementById("item_type_select").options[document.getElementById("item_type_select").selectedIndex].value;
+        window.location.href = '{{ url()->current() }}?item_type=' + item_type;
+    }
+    
+    $(document).ready(function() {
 
         function updateToDatabase(idString) {
             $.ajaxSetup({ headers: {'X-CSRF-TOKEN': '{{csrf_token()}}'}});
