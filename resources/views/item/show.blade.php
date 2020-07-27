@@ -72,6 +72,10 @@
                             {{ $synonym->full_name }}<br/>
                         @endforeach
                     @endif
+                    @if($cm->getConfigValue('taxon_parent'))
+                        {{ $item->taxon->getAncestorWhereRank($cm->getConfigValue('taxon_parent'))->taxon_name }}
+                        ({{ $item->taxon->getAncestorWhereRank($cm->getConfigValue('taxon_parent'))->native_name }})
+                    @endif
                 </div>
                 @break
             

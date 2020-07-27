@@ -94,4 +94,19 @@ class Taxon extends Model
     {
         return $this->primaryKey;
     }
+    
+    /**
+     * Get the taxon's ancestor with the given rank name.
+     * 
+     * @param  string  $rank  The abbreviated taxonomic rank, e.g. ORD, FAM, GAT, SPE
+     * @return App\Taxon
+     */
+    public function getAncestorWhereRank($rank)
+    {
+        $a = $this->ancestors->firstWhere('rank_abbr', '=', $rank);
+        if($a)
+            return $a;
+        else
+            return null;
+    }
 }
