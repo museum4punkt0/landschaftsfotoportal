@@ -33,13 +33,9 @@
                             <td>
                                 <select name="fields[{{ $loop->index }}]">
                                     <option value="0">@lang('common.ignore')</option>
-                                    <option value="-1"
-                                        @if(old('fields.'.$loop->index) == -1) selected @endif>
-                                        @lang('import.element_id')
-                                    </option>
                                     <option value="-2"
                                         @if(old('fields.'.$loop->index) == -2) selected @endif>
-                                        @lang('import.parent_id')
+                                        @lang('import.parent_taxon')
                                     </option>
                                     <option value="-3"
                                         @if(old('fields.'.$loop->index) == -3) selected @endif>

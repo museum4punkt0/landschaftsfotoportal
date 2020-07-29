@@ -23,6 +23,7 @@ return [
     'nextrows' => 'Inhalt der nächsten Zeilen',
     'element_id' => 'Element ID',
     'parent_id' => 'Parent ID',
+    'parent_taxon' => 'Parent Taxon',
     'taxon_name' => 'Name des Taxons',
     'attribute_hint' => 'Wählen Sie für jede Tabellenspalte welche Art von Inhalt sie enthält.',
     'fullname_hint' => 'Wenn "Vollname" nicht ausgewählt wird oder leer ist, wird dieser aus den anderen Namensbestandteilen verkettet.',

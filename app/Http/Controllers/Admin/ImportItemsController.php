@@ -123,8 +123,6 @@ class ImportItemsController extends Controller
                                 $fail(__('import.attribute_once', [
                                     'attribute' => Column::find($selected_attr)->description
                                 ]));
-                            if($selected_attr == -1)
-                                $fail(__('import.attribute_once', ['attribute' => __('import.element_id')]));
                             if($selected_attr == -2)
                                 $fail(__('import.attribute_once', ['attribute' => __('import.parent_id')]));
                         }
@@ -152,7 +150,6 @@ class ImportItemsController extends Controller
         }, file($csv_file));
         
         $selected_attr = $request->input('fields.*');
-        $elements_tree = null; // Maps IDs from CSV onto IDs from Database
         $warning_status_msg = null;
         #$messageBag = new MessageBag;
         
