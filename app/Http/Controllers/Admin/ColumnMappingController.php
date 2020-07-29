@@ -8,6 +8,7 @@ use App\Detail;
 use App\Item;
 use App\Taxon;
 use App\Selectlist;
+use App\Value;
 use App\Element;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
@@ -118,8 +119,13 @@ class ColumnMappingController extends Controller
      */
     public function map($item_type)
     {
-        $cg_list = Selectlist::where('name', '_column_group_')->first();
-        $column_groups = Element::where('list_fk', $cg_list->list_id)->get();
+        $lang = 'name_'. app()->getLocale();
+        $column_groups = Value::whereHas('element', function ($query) {
+            $query->where('list_fk', Selectlist::where('name', '_column_group_')->first()->list_id);
+        })->whereHas('attribute', function ($query) use ($lang) {
+            $query->where('name', $lang);
+        })
+        ->orderBy('value')->get();
         
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
