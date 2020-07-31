@@ -216,6 +216,7 @@ class ImportItemsController extends Controller
                                     $detail_data['value_date'] = $cell;
                                     break;
                                 case '_string_':
+                                case '_html_':
                                 case '_url_':
                                 case '_image_':
                                 case '_map_':
