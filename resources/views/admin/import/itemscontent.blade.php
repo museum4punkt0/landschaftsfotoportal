@@ -33,6 +33,10 @@
                             <td>
                                 <select name="fields[{{ $loop->index }}]">
                                     <option value="0">@lang('common.ignore')</option>
+                                    <option value="-1"
+                                        @if(old('fields.'.$loop->index) == -1) selected @endif>
+                                        @lang('import.parent_details')
+                                    </option>
                                     <option value="-2"
                                         @if(old('fields.'.$loop->index) == -2) selected @endif>
                                         @lang('import.parent_taxon')
@@ -88,7 +92,7 @@
                 <div class="form-group">
                     <span>@lang('lists.parent')</span>
                     <select name="parent" class="form-control" size=1 >
-                        <option value="">@lang('common.root')</option>
+                        <option value="">@lang('common.none')</option>
                         @foreach($items as $item)
                             <option value="{{$item->item_id}}"
                                 @if(old('parent') == $item->item_id) selected @endif>
@@ -101,6 +105,24 @@
                     </select>
                     <span>@lang('import.parent_hint')<br/></span>
                     <span class="text-danger">{{ $errors->first('parent') }}</span>
+                </div>
+                
+                <div class="form-group">
+                    <span>@lang('import.parent_item_type')</span>
+                    <select name="parent_item_type" class="form-control" size=1 >
+                        @foreach($item_types as $type)
+                            <option value="{{$type->element_id}}"
+                                @if(old('parent_item_type') == $type->element_id) selected @endif>
+                                @foreach($type->values as $v)
+                                    @if($v->attribute->name == 'name_'.app()->getLocale())
+                                        {{$v->value}}
+                                    @endif
+                                @endforeach
+                            </option>
+                        @endforeach
+                    </select>
+                    <span>@lang('import.parent_item_type_hint')<br/></span>
+                    <span class="text-danger">{{ $errors->first('parent_item_type') }}</span>
                 </div>
                 
                 <div class="form-group">

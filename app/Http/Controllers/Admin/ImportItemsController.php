@@ -101,7 +101,11 @@ class ImportItemsController extends Controller
         
         $items = Item::tree()->depthFirst()->get();
         
-        return view('admin.import.itemscontent', compact('csv_data', 'colmaps', 'items'));
+        // Get list of all item types for dropdown menu
+        $it_list = Selectlist::where('name', '_item_type_')->first();
+        $item_types = Element::where('list_fk', $it_list->list_id)->get();
+        
+        return view('admin.import.itemscontent', compact('csv_data', 'colmaps', 'items', 'item_types'));
     }
     
     /**
@@ -220,12 +224,26 @@ class ImportItemsController extends Controller
                             }
                             Detail::create($detail_data);
                         }
+                        
                         // Set parent fkey of item if individually choosen per item
+                        $pit = $request->input('parent_item_type');
+                        // Try to match parent item using a detail
+                        if($selected_attr[$colnr] == -1) {
+                            // Try to match taxon for given full scientific name
+                            $parent_item = Item::whereHas('details', function (Builder $query) use ($cell, $pit) {
+                                $query->where('value_string', $cell);
+                            })->where('item_type_fk', $pit)->first();
+                            if(!empty($parent_item)) {
+                                $item->parent_fk = $parent_item->item_id;
+                                $item->save();
+                            }
+                        }
+                        // Try to match parent item using a taxon's full scientific name
                         if($selected_attr[$colnr] == -2) {
                             // Try to match taxon for given full scientific name
-                            $parent_item = Item::whereHas('taxon', function (Builder $query) use ($cell) {
+                            $parent_item = Item::whereHas('taxon', function (Builder $query) use ($cell, $pit) {
                                 $query->where('full_name', $cell);
-                            })->first();
+                            })->where('item_type_fk', $pit)->first();
                             if(!empty($parent_item)) {
                                 $item->parent_fk = $parent_item->item_id;
                                 $item->save();
