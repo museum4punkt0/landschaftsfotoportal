@@ -4,7 +4,7 @@
     @parent
     
     @foreach($items as $it)
-        @if(true || $it->depth > 0)
+        @if($it->depth < 2)
             <li class="nav-item">
                 @if($it->item_id == $item->item_id)
                     <a class="nav-link active" href="{{ $it->item_id }}">
@@ -157,49 +157,59 @@
                     @if($cm->getConfigValue('image_show') == 'gallery')
                         <div class="container">
                             <div class="row">
-                                @foreach($items->where('parent_fk', $item->item_id) as $it)
+                            @foreach($items->where('parent_fk', $item->item_id) as $specimen)
+                                @foreach($items->where('parent_fk', $specimen->item_id) as $it)
                                     <div class="col-auto">
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
-                                            <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{ Config::get('media.zoomify_image_path') }}{{ pathinfo($it->getTitleColumn() .'.jpg', PATHINFO_FILENAME) }}.zif">
+                                            <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{ Config::get('media.zoomify_image_path') }}{{ pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME) }}.zif">
                                         @endif
                                         @if(Storage::exists('public/'. Config::get('media.preview_dir') .
-                                            $it->getTitleColumn() .'.jpg'))
+                                            $it->getDetailWhereDataType('_image_')))
                                             <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                                $it->getTitleColumn() .'.jpg') }}" height=168
+                                                $it->getDetailWhereDataType('_image_')) }}" height=168
                                             />
                                         @else
-                                            <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $it->getTitleColumn() .'.jpg' }}" height=168
+                                            <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $it->getDetailWhereDataType('_image_') }}" height=168
                                             />
                                         @endif
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
                                             </a>
                                         @endif
-                                        <br/><a href="{{ route('item.show.public', $it->item_id) }}">{{ $it->getTitleColumn() }}</a>
+                                        <br/><a href="{{ route('item.show.public', $specimen->item_id) }}">
+                                        {{ explode('_', pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME))[0] }}</a>
                                     </div>
                                 @endforeach
+                            @endforeach
                             </div>
                         </div>
                     @endif
                     
                     @if($cm->getConfigValue('image_show') == 'specimen')
-                        <span>
-                            @if($cm->getConfigValue('image_link') == 'zoomify')
-                                <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{ Config::get('media.zoomify_image_path') }}{{ pathinfo($item->getTitleColumn() .'.jpg', PATHINFO_FILENAME) }}.zif">
-                            @endif
-                            @if(Storage::exists('public/'. Config::get('media.preview_dir') .
-                                $item->getTitleColumn() .'.jpg'))
-                                <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                    $item->getTitleColumn() .'.jpg') }}" height=168
-                                />
-                            @else
-                                <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $item->getTitleColumn() .'.jpg' }}" height=168
-                                />
-                            @endif
-                            @if($cm->getConfigValue('image_link') == 'zoomify')
-                                </a>
-                            @endif
-                            <br/>{{ $item->getTitleColumn() }}
-                        </span>
+                        <div class="container">
+                            <div class="row">
+                                @foreach($items->where('parent_fk', $item->item_id) as $it)
+                                    <div class="col-auto">
+                                        @if($cm->getConfigValue('image_link') == 'zoomify')
+                                            <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{ Config::get('media.zoomify_image_path') }}{{ pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME) }}.zif">
+                                        @endif
+                                        @if(Storage::exists('public/'. Config::get('media.preview_dir') .
+                                            $it->getDetailWhereDataType('_image_')))
+                                            <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
+                                                $it->getDetailWhereDataType('_image_')) }}" height=168
+                                            />
+                                        @else
+                                            <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $it->getDetailWhereDataType('_image_') }}" height=168
+                                            />
+                                        @endif
+                                        @if($cm->getConfigValue('image_link') == 'zoomify')
+                                            </a>
+                                        @endif
+                                        <br/>
+                                        {{ explode('_', pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME))[0] }}
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
                     @endif
                     
                     @if($cm->getConfigValue('image_show') == 'preview')

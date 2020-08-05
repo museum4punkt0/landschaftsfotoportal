@@ -128,4 +128,31 @@ class Item extends Model
         
         return $title;
     }
+    
+    public function getDataTypeId($name)
+    {
+        #Element::where('element_id', <10);
+        $id = 9; // for data_type = '_image_'
+        return $id;
+    }
+    
+    /**
+     * Get an item's detail with given data type.
+     *
+     * @param  string  $name
+     * @return string
+     */
+    public function getDetailWhereDataType($name)
+    {
+        $detail = __('items.no_detail_with_data_type');
+        
+        $data_type_id = $this->getDataTypeId($name);
+        if($data_type_id) {
+            $column = $this->columns->firstWhere('data_type_fk', $data_type_id);
+            if($column) {
+                $detail = $column->pivot->value_string;
+            }
+        }
+        return $detail;
+    }
 }
