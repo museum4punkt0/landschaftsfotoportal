@@ -153,9 +153,13 @@
                         {{ $cm->column->data_type->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
                     </span>
-                    <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
-                        value="{{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}" />
+                    @if($details->firstWhere('column_fk', $cm->column->column_id))
+                        <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
+                            value="{{ old('fields.'. $cm->column->column_id, 
+                            $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}" />
+                    @else
+                        <span>detail column {{$cm->column->column_id}} for map not found</span>
+                    @endif
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 @break

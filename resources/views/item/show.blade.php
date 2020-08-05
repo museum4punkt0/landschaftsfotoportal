@@ -123,8 +123,12 @@
             @case('_string_')
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
+                @if($details->firstWhere('column_fk', $cm->column->column_id))
                     {{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}
+                @else
+                    <span>detail column {{$cm->column->column_id}} for string not found</span>
+                @endif
                 </div>
                 @break
             
@@ -199,6 +203,7 @@
                     @endif
                     
                     @if($cm->getConfigValue('image_show') == 'preview')
+                        @if($details->firstWhere('column_fk', $cm->column->column_id))
                         @if(Storage::exists('public/'. Config::get('media.preview_dir') .
                             $details->firstWhere('column_fk', $cm->column->column_id)->value_string))
                             <span>
@@ -215,6 +220,9 @@
                         @else
                             @lang('columns.image_not_available')
                         @endif
+                        @else
+                            <span>detail column {{$cm->column->column_id}} for image preview not found</span>
+                        @endif
                     @endif
                 </div>
                 @break
@@ -224,6 +232,7 @@
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
                 @if($cm->getConfigValue('map') == 'iframe')
+                    @if($details->firstWhere('column_fk', $cm->column->column_id))
                     @if($cm->getConfigValue('map_iframe') == 'url')
                         <iframe width="100%" height="670px" scrolling="no" marginheight="0" marginwidth="0" frameborder="0"
                             src="{{ old('fields.'. $cm->column->column_id, 
@@ -238,6 +247,9 @@
                     @endif
                     <p>@lang('items.no_iframe')</p>
                     </iframe>
+                @else
+                    <span>detail column {{$cm->column->column_id}} for map not found</span>
+                    @endif
                 @endif
                 </div>
                 @break
