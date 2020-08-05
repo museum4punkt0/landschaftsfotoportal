@@ -25,7 +25,7 @@
     </div>
     <div class="form-group">
         <span>@lang('taxon.list')</span>
-        <select name="taxon" class="form-control" size=1 >
+        <select name="taxon" id="taxon_select" class="form-control" size=1 readonly>
             <option value="">@lang('common.none')</option>
             @foreach($taxa as $taxon)
                 @unless($taxon->valid_name)
@@ -41,6 +41,16 @@
         </select>
         <span class="text-danger">{{ $errors->first('taxon') }}</span>
     </div>
+    <script type="text/javascript">
+        var elem = document.getElementById("taxon_select");
+        elem.addEventListener("change", TaxonChanged);
+
+        function TaxonChanged() {
+            var tax = document.getElementById("taxon_select").selectedIndex;
+            alert('Changing the Taxon is not allowed!');
+            //window.location.reload(true);
+        }
+    </script>
     
     @foreach($colmap as $cm)
         @switch($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value)
