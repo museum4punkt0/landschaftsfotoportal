@@ -120,8 +120,8 @@
                 @if($details->firstWhere('column_fk', $cm->column->column_id))
                     {{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}
-                    @else
-                        <span>detail column {{$cm->column->column_id}} for string not found</span>
+                @else
+                    <span>detail column {{$cm->column->column_id}} for string not found</span>
                 @endif
                 </div>
                 @break
