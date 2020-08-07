@@ -129,11 +129,21 @@ class Item extends Model
         return $title;
     }
     
+    /**
+     * Get the element ID of a given data type.
+     *
+     * @param  string  $name
+     * @return int
+     */
     public function getDataTypeId($name)
     {
-        #Element::where('element_id', <10);
-        $id = 9; // for data_type = '_image_'
-        return $id;
+        // Check all columns of this item for given data type
+        foreach($this->columns as $col) {
+            if($col->getDataType() == $name)
+                return $col->data_type_fk;
+        }
+        
+        return null;
     }
     
     /**
@@ -148,9 +158,21 @@ class Item extends Model
         
         $data_type_id = $this->getDataTypeId($name);
         if($data_type_id) {
+            // Get first column with given data type
             $column = $this->columns->firstWhere('data_type_fk', $data_type_id);
             if($column) {
-                $detail = $column->pivot->value_string;
+                // Details can be of different data types
+                switch($name) {
+                    case '_float_':
+                        $detail = $column->pivot->value_float;
+                        break;
+                    case '_integer_':
+                    case '_image_ppi_':
+                        $detail = $column->pivot->value_int;
+                        break;
+                    default:
+                        $detail = $column->pivot->value_string;
+                }
             }
         }
         return $detail;
