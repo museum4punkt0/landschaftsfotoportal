@@ -14,6 +14,7 @@ return [
 
     'import_dir' => 'import/',
     'preview_dir' => 'images/preview/',
+    'preview_width' => 112,
     'zoomify_url' => 'https://webapp.senckenberg.de/zoomify/index_full.html?',
     'zoomify_zif_image_path' => 'bilder/aq-media/bestikri/images_tiled/2/',
     'zoomify_jpg_image_path' => 'bilder/aq-media/bestikri/images/2/',

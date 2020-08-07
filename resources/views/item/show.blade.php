@@ -193,11 +193,13 @@
                                         @if(Storage::exists('public/'. Config::get('media.preview_dir') .
                                             $it->getDetailWhereDataType('_image_')))
                                             <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                                $it->getDetailWhereDataType('_image_')) }}" height=168
+                                                $it->getDetailWhereDataType('_image_')) }}"
+                                                width={{ Config::get('media.preview_width') }}
                                                 title="{{ $it->getDetailWhereDataType('_image_title_') }}"
                                             />
                                         @else
-                                            <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $it->getDetailWhereDataType('_image_') }}" height=168
+                                            <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $it->getDetailWhereDataType('_image_') }}"
+                                            width={{ Config::get('media.preview_width') }}
                                             />
                                         @endif
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
@@ -250,11 +252,13 @@
                                         @if(Storage::exists('public/'. Config::get('media.preview_dir') .
                                             $it->getDetailWhereDataType('_image_')))
                                             <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                                $it->getDetailWhereDataType('_image_')) }}" height=168
+                                                $it->getDetailWhereDataType('_image_')) }}"
+                                                width={{ Config::get('media.preview_width') }}
                                                 title="{{ $it->getDetailWhereDataType('_image_title_') }}"
                                             />
                                         @else
-                                            <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $it->getDetailWhereDataType('_image_') }}" height=168
+                                            <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $it->getDetailWhereDataType('_image_') }}"
+                                            width={{ Config::get('media.preview_width') }}
                                             />
                                         @endif
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
