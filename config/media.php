@@ -15,7 +15,8 @@ return [
     'import_dir' => 'import/',
     'preview_dir' => 'images/preview/',
     'zoomify_url' => 'https://webapp.senckenberg.de/zoomify/index_full.html?',
-    'zoomify_image_path' => 'bilder/aq-media/bestikri/images_tiled/2/',
+    'zoomify_zif_image_path' => 'bilder/aq-media/bestikri/images_tiled/2/',
+    'zoomify_jpg_image_path' => 'bilder/aq-media/bestikri/images/2/',
     'mapservice_url' => 'https://mapservice.senckenberg.de/sgn-projekt/bestrikri/full-map-template.html?',
 
 ];

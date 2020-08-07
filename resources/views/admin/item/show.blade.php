@@ -172,7 +172,7 @@
                             $details->firstWhere('column_fk', $cm->column->column_id)->value_string))
                             <span>
                             @if($cm->getConfigValue('image_link') == 'zoomify')
-                                <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{ Config::get('media.zoomify_image_path') }}{{ pathinfo($details->firstWhere('column_fk', $cm->column->column_id)->value_string, PATHINFO_FILENAME) }}.zif">
+                                <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{ Config::get('media.zoomify_zif_image_path') }}{{ pathinfo($details->firstWhere('column_fk', $cm->column->column_id)->value_string, PATHINFO_FILENAME) }}.zif">
                             @endif
                             <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
                                 $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"

@@ -161,18 +161,34 @@
                                 @foreach($items->where('parent_fk', $specimen->item_id) as $it)
                                     <div class="col-auto">
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
-                                            <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{
-                                                Config::get('media.zoomify_image_path')
-                                            }}{{ pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME)
-                                            }}.zif&caption={{ $item->taxon->full_name
-                                            }}; Barcode: {{
-                                                explode('_', pathinfo($it->getDetailWhereDataType('_image_'),
-                                                    PATHINFO_FILENAME))[0]
-                                            }}&description={{ $it->getDetailWhereDataType('_image_title_')
-                                            }}&copyright={{ $it->getDetailWhereDataType('_image_copyright_')
-                                            }}&params=zMeasureVisible%3D1%26zUnits%3Dmm%26zPixelsPerUnit%3D{{
-                                                $it->getDetailWhereDataType('_image_ppi_')/25.4
-                                            }}">
+                                            {{-- Bestikri images have different pathes and types --}}
+                                            @if(strpos($it->getDetailWhereDataType('_image_title_'), 'Gesamtansicht') === false)
+                                                <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{
+                                                    Config::get('media.zoomify_jpg_image_path')
+                                                }}{{ pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME)
+                                                }}.jpg&caption={{ $item->taxon->full_name
+                                                }}; Barcode: {{
+                                                    explode('_', pathinfo($it->getDetailWhereDataType('_image_'),
+                                                        PATHINFO_FILENAME))[0]
+                                                }}&description={{ $it->getDetailWhereDataType('_image_title_')
+                                                }}&copyright={{ $it->getDetailWhereDataType('_image_copyright_') 
+                                                }}&params=zMeasureVisible%3D1%26zUnits%3Dmm%26zPixelsPerUnit%3D{{
+                                                    $it->getDetailWhereDataType('_image_ppi_')/25.4
+                                                }}">
+                                            @else
+                                                <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{
+                                                    Config::get('media.zoomify_zif_image_path')
+                                                }}{{ pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME)
+                                                }}.zif&caption={{ $item->taxon->full_name
+                                                }}; Barcode: {{
+                                                    explode('_', pathinfo($it->getDetailWhereDataType('_image_'),
+                                                        PATHINFO_FILENAME))[0]
+                                                }}&description={{ $it->getDetailWhereDataType('_image_title_')
+                                                }}&copyright={{ $it->getDetailWhereDataType('_image_copyright_') 
+                                                }}&params=zMeasureVisible%3D1%26zUnits%3Dmm%26zPixelsPerUnit%3D{{
+                                                    $it->getDetailWhereDataType('_image_ppi_')/25.4
+                                                }}">
+                                            @endif
                                         @endif
                                         @if(Storage::exists('public/'. Config::get('media.preview_dir') .
                                             $it->getDetailWhereDataType('_image_')))
@@ -202,18 +218,34 @@
                                 @foreach($items->where('parent_fk', $item->item_id) as $it)
                                     <div class="col-auto">
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
-                                            <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{
-                                                Config::get('media.zoomify_image_path')
-                                            }}{{ pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME)
-                                            }}.zif&caption={{ $item->taxon->full_name
-                                            }}; Barcode: {{
-                                                explode('_', pathinfo($it->getDetailWhereDataType('_image_'),
-                                                    PATHINFO_FILENAME))[0]
-                                            }}&description={{ $it->getDetailWhereDataType('_image_title_')
-                                            }}&copyright={{ $it->getDetailWhereDataType('_image_copyright_') 
-                                            }}&params=zMeasureVisible%3D1%26zUnits%3Dmm%26zPixelsPerUnit%3D{{
-                                                $it->getDetailWhereDataType('_image_ppi_')/25.4
-                                            }}">
+                                            {{-- Bestikri images have different pathes and types --}}
+                                            @if(strpos($it->getDetailWhereDataType('_image_title_'), 'Gesamtansicht') === false)
+                                                <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{
+                                                    Config::get('media.zoomify_jpg_image_path')
+                                                }}{{ pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME)
+                                                }}.jpg&caption={{ $item->taxon->full_name
+                                                }}; Barcode: {{
+                                                    explode('_', pathinfo($it->getDetailWhereDataType('_image_'),
+                                                        PATHINFO_FILENAME))[0]
+                                                }}&description={{ $it->getDetailWhereDataType('_image_title_')
+                                                }}&copyright={{ $it->getDetailWhereDataType('_image_copyright_') 
+                                                }}&params=zMeasureVisible%3D1%26zUnits%3Dmm%26zPixelsPerUnit%3D{{
+                                                    $it->getDetailWhereDataType('_image_ppi_')/25.4
+                                                }}">
+                                            @else
+                                                <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{
+                                                    Config::get('media.zoomify_zif_image_path')
+                                                }}{{ pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME)
+                                                }}.zif&caption={{ $item->taxon->full_name
+                                                }}; Barcode: {{
+                                                    explode('_', pathinfo($it->getDetailWhereDataType('_image_'),
+                                                        PATHINFO_FILENAME))[0]
+                                                }}&description={{ $it->getDetailWhereDataType('_image_title_')
+                                                }}&copyright={{ $it->getDetailWhereDataType('_image_copyright_') 
+                                                }}&params=zMeasureVisible%3D1%26zUnits%3Dmm%26zPixelsPerUnit%3D{{
+                                                    $it->getDetailWhereDataType('_image_ppi_')/25.4
+                                                }}">
+                                            @endif
                                         @endif
                                         @if(Storage::exists('public/'. Config::get('media.preview_dir') .
                                             $it->getDetailWhereDataType('_image_')))
@@ -242,7 +274,7 @@
                                 $details->firstWhere('column_fk', $cm->column->column_id)->value_string))
                                 <span>
                                 @if($cm->getConfigValue('image_link') == 'zoomify')
-                                    <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{ Config::get('media.zoomify_image_path') }}{{ pathinfo($details->firstWhere('column_fk', $cm->column->column_id)->value_string, PATHINFO_FILENAME) }}.zif">
+                                    <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{ Config::get('media.zoomify_zif_image_path') }}{{ pathinfo($details->firstWhere('column_fk', $cm->column->column_id)->value_string, PATHINFO_FILENAME) }}.zif">
                                 @endif
                                 <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
                                     $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
