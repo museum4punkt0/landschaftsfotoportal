@@ -159,6 +159,7 @@
                             <div class="row">
                             @foreach($items->where('parent_fk', $item->item_id) as $specimen)
                                 @foreach($items->where('parent_fk', $specimen->item_id) as $it)
+                                    @if(strpos($it->getDetailWhereDataType('_image_title_'), 'Gesamtansicht') !== false)
                                     <div class="col-auto">
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
                                             {{-- Bestikri images have different pathes and types --}}
@@ -208,6 +209,7 @@
                                         <br/><a href="{{ route('item.show.public', $specimen->item_id) }}">
                                         {{ explode('_', pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME))[0] }}</a>
                                     </div>
+                                    @endif
                                 @endforeach
                             @endforeach
                             </div>
