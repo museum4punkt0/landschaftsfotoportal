@@ -16,13 +16,9 @@
         <span>@lang('columns.translated_name')</span>
         <select name="translation" class="form-control" size=1 >
             @foreach($translations as $trans)
-                <option value="{{$trans->element_id}}"
-                    @if(old('translation') == $trans->element_id) selected @endif>
-                    @foreach($trans->values as $v)
-                        @if($v->attribute->name == 'name_'.app()->getLocale())
-                            {{$v->value}}
-                        @endif
-                    @endforeach
+                <option value="{{$trans->element_fk}}"
+                    @if(old('translation') == $trans->element_fk) selected @endif>
+                    {{ $trans->value }}
                 </option>
             @endforeach
         </select>
@@ -32,13 +28,9 @@
         <span>@lang('columns.data_type')</span>
         <select name="data_type" class="form-control" size=1 >
             @foreach($data_types as $type)
-                <option value="{{$type->element_id}}"
-                    @if(old('data_type') == $type->element_id) selected @endif>
-                    @foreach($type->values as $v)
-                        @if($v->attribute->name == 'name_'.app()->getLocale())
-                            {{$v->value}}
-                        @endif
-                    @endforeach
+                <option value="{{$type->element_fk}}"
+                    @if(old('data_type') == $type->element_fk) selected @endif>
+                    {{ $type->value }}
                 </option>
             @endforeach
         </select>
