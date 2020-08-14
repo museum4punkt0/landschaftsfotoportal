@@ -9,6 +9,7 @@ use App\Column;
 use App\ColumnMapping;
 use App\Selectlist;
 use App\Element;
+use App\Value;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -88,10 +89,10 @@ class ItemController extends Controller
         }
         
         $dt_list = Selectlist::where('name', '_data_type_')->first();
-        $data_types = Element::where('list_fk', $dt_list->list_id)->with(['values', 'attributes'])->get();
+        $data_types = Element::where('list_fk', $dt_list->list_id)->with(['values', 'values.attribute'])->get();
         
         $l10n_list = Selectlist::where('name', '_translation_')->first();
-        $translations = Element::where('list_fk', $l10n_list->list_id)->get();
+        $translations = Element::where('list_fk', $l10n_list->list_id)->with(['values', 'values.attribute'])->get();
         
         // Save item_type ID to session
         $request->session()->put('item_type', $request->item_type);
@@ -259,11 +260,28 @@ class ItemController extends Controller
             }
         }
         
-        $dt_list = Selectlist::where('name', '_data_type_')->first();
-        $data_types = Element::where('list_fk', $dt_list->list_id)->with(['values', 'attributes'])->get();
+        // Get current UI language
+        $lang = 'name_'. app()->getLocale();
         
-        $l10n_list = Selectlist::where('name', '_translation_')->first();
-        $translations = Element::where('list_fk', $l10n_list->list_id)->get();
+        // Get data types of columns with localized names
+        $data_types = Value::whereHas('element', function ($query) {
+            $query->where('list_fk', Selectlist::where('name', '_data_type_')->first()->list_id);
+        })
+        ->whereHas('attribute', function ($query) use ($lang) {
+            $query->where('name', $lang);
+        })
+        ->with(['attribute'])
+        ->get();
+        
+        // Get localized names of columns
+        $translations = Value::whereHas('element', function ($query) {
+            $query->where('list_fk', Selectlist::where('name', '_translation_')->first()->list_id);
+        })
+        ->whereHas('attribute', function ($query) use ($lang) {
+            $query->where('name', $lang);
+        })
+        ->with(['attribute'])
+        ->get();
         
         return view('admin.item.edit', compact('item', 'items', 'taxa', 'details', 'colmap', 'lists', 'data_types', 'translations'));
     }

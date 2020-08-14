@@ -60,12 +60,10 @@
                 {{-- dd($lists->firstWhere('list_id', $cm->column->list_fk)->elements) --}}
                 <div class="form-group">
                     <span>
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
                         ({{ $cm->column->description }}, 
                         @lang('columns.data_type'): 
-                        {{ $cm->column->data_type->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
+                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
                     </span>
                     <select name="fields[{{ $cm->column->column_id }}]" class="form-control" size=1 >
                         @foreach($lists[$cm->column->list_fk] as $element)
@@ -93,12 +91,10 @@
             @case('_integer_')
                 <div class="form-group">
                     <span>
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
                         ({{ $cm->column->description }}, 
                         @lang('columns.data_type'): 
-                        {{ $cm->column->data_type->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
+                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
                     </span>
                     <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
                         value="{{ old('fields.'. $cm->column->column_id, 
@@ -110,12 +106,10 @@
             @case('_float_')
                 <div class="form-group">
                     <span>
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
                         ({{ $cm->column->description }}, 
                         @lang('columns.data_type'): 
-                        {{ $cm->column->data_type->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
+                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
                     </span>
                     <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
                         value="{{ old('fields.'. $cm->column->column_id, 
@@ -127,12 +121,10 @@
             @case('_date_')
                 <div class="form-group">
                     <span>
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
                         ({{ $cm->column->description }}, 
                         @lang('columns.data_type'): 
-                        {{ $cm->column->data_type->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
+                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
                     </span>
                     <input type="date" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
                         value="{{ old('fields.'. $cm->column->column_id, 
@@ -146,12 +138,10 @@
             @case('_map_')
                 <div class="form-group">
                     <span>
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }}
                         ({{ $cm->column->description }}, 
                         @lang('columns.data_type'): 
-                        {{ $cm->column->data_type->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
+                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
                     </span>
                     @if($details->firstWhere('column_fk', $cm->column->column_id))
                         <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
@@ -167,12 +157,10 @@
             @case('_html_')
                 <div class="form-group">
                     <span>
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
                         ({{ $cm->column->description }}, 
                         @lang('columns.data_type'): 
-                        {{ $cm->column->data_type->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
+                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
                     </span>
                     <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control summernote" 
                         rows=5>{!! old('fields.'. $cm->column->column_id, 
@@ -192,12 +180,10 @@
             @case('_url_')
                 <div class="form-group">
                     <span>
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
                         ({{ $cm->column->description }}, 
                         @lang('columns.data_type'): 
-                        {{ $cm->column->data_type->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
+                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
                     </span>
                     <input type="url" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
                         value="{{ old('fields.'. $cm->column->column_id, 
@@ -209,12 +195,10 @@
             @case('_image_')
                 <div class="form-group">
                     <span>
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
                         ({{ $cm->column->description }}, 
                         @lang('columns.data_type'): 
-                        {{ $cm->column->data_type->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
+                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
                     </span>
                     <div class="form-row">
                         <div class="col">
@@ -259,6 +243,10 @@
     {{ csrf_field() }}
     @method('PATCH')
 </form>
+
+@if(env('APP_DEBUG'))
+    [Rendering time: {{ round(microtime(true) - LARAVEL_START, 3) }} seconds]
+@endif
 
 </div>
 
