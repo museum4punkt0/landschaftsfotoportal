@@ -26,7 +26,8 @@
                     @for ($i = 0; $i < $item->depth + 1; $i++)
                         |___
                     @endfor
-                    {{ $item->getTitleColumn() }}
+                    {{ $item->getTitleColumn(true) }}
+                    ({{ $it->item_type_fk }})
                 </option>
             @endforeach
         </select>
@@ -212,6 +213,10 @@
     </div>
     {{ csrf_field() }}
 </form>
+
+@if(env('APP_DEBUG'))
+    [Rendering time: {{ round(microtime(true) - LARAVEL_START, 3) }} seconds]
+@endif
 
 @endif
 

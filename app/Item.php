@@ -108,12 +108,16 @@ class Item extends Model
      * Get the title or name string representing this item.
      * 
      * The column storing that string is set in the JSON config that belongs to the item_type.
+     *
+     * @param  bool  $fromTaxon
+     * @return string
      */
-    public function getTitleColumn()
+    public function getTitleColumn($fromTaxon = false)
     {
         $title = __('items.no_title_column');
         
-        if($this->getTitleColumnId()) {
+        // TODO: getTitleColumnId() is much too slow, we should create a column 'item'.'title'
+        if(!$fromTaxon && $this->getTitleColumnId()) {
             $title_column = $this->columns->firstWhere('column_id', $this->getTitleColumnId());
             if($title_column) {
                 $title = $title_column->pivot->value_string;
