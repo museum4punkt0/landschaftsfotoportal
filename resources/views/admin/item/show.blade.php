@@ -174,9 +174,9 @@
                     </h5>
                 </div>
                 <div class="card card-body">
-                {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}
                 @if($cm->getConfigValue('image_show') == 'preview')
                     @if($details->firstWhere('column_fk', $cm->column->column_id))
+                        {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}
                         @if(Storage::exists('public/'. Config::get('media.preview_dir') .
                             $details->firstWhere('column_fk', $cm->column->column_id)->value_string))
                             <span>
