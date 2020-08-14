@@ -207,6 +207,7 @@ class ImportItemsController extends Controller
                                     $detail_data['element_fk'] = intval($cell);
                                     break;
                                 case '_integer_':
+                                case '_image_ppi_':
                                     $detail_data['value_int'] = intval($cell);
                                     break;
                                 case '_float_':
@@ -216,6 +217,9 @@ class ImportItemsController extends Controller
                                     $detail_data['value_date'] = $cell;
                                     break;
                                 case '_string_':
+                                case '_title_':
+                                case '_image_title_':
+                                case '_image_copyright_':
                                 case '_html_':
                                 case '_url_':
                                 case '_image_':
