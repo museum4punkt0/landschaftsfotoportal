@@ -97,10 +97,18 @@
             
             {{-- Data_type of form field is integer --}}
             @case('_integer_')
+            {{-- Data_type of form field is image pixel per inch --}}
+            @case('_image_ppi_')
             {{-- Data_type of form field is float --}}
             @case('_float_')
             {{-- Data_type of form field is string --}}
             @case('_string_')
+            {{-- Data_type of form field is (menu) title --}}
+            @case('_title_')
+            {{-- Data_type of form field is image title --}}
+            @case('_image_title_')
+            {{-- Data_type of form field is image copyright --}}
+            @case('_image_copyright_')
             {{-- Data_type of form field is map --}}
             @case('_map_')
                 <div class="form-group">

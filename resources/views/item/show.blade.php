@@ -100,6 +100,8 @@
             
             {{-- Data_type of form field is integer --}}
             @case('_integer_')
+            {{-- Data_type of form field is image pixel per inch --}}
+            @case('_image_ppi_')
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
@@ -127,6 +129,12 @@
             
             {{-- Data_type of form field is string --}}
             @case('_string_')
+            {{-- Data_type of form field is (menu) title --}}
+            @case('_title_')
+            {{-- Data_type of form field is image title --}}
+            @case('_image_title_')
+            {{-- Data_type of form field is image copyright --}}
+            @case('_image_copyright_')
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
                 @if($details->firstWhere('column_fk', $cm->column->column_id))

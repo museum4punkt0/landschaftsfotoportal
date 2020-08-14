@@ -64,6 +64,8 @@
             
             {{-- Data_type of form field is integer --}}
             @case('_integer_')
+            {{-- Data_type of form field is image pixel per inch --}}
+            @case('_image_ppi_')
                 <div class="card-header">
                     <h5 class="mb-0">
                         {{ $cm->column->translation->attributes->
@@ -109,6 +111,12 @@
             
             {{-- Data_type of form field is string --}}
             @case('_string_')
+            {{-- Data_type of form field is (menu) title --}}
+            @case('_title_')
+            {{-- Data_type of form field is image title --}}
+            @case('_image_title_')
+            {{-- Data_type of form field is image copyright --}}
+            @case('_image_copyright_')
                 <div class="card-header">
                     <h5 class="mb-0">
                         {{ $cm->column->translation->attributes->
@@ -166,6 +174,7 @@
                     </h5>
                 </div>
                 <div class="card card-body">
+                {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}
                 @if($cm->getConfigValue('image_show') == 'preview')
                     @if($details->firstWhere('column_fk', $cm->column->column_id))
                         @if(Storage::exists('public/'. Config::get('media.preview_dir') .
@@ -235,6 +244,10 @@
         </div>
     @endforeach
     
+    @if(env('APP_DEBUG'))
+        [Rendering time: {{ round(microtime(true) - LARAVEL_START, 3) }} seconds]
+    @endif
+
 </div>
 
 @endsection
