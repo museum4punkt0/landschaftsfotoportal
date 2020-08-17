@@ -54,6 +54,9 @@
                                     <a class="dropdown-item" href="{{ route('list.internal') }}">
                                         {{ __('lists.internal_header') }}
                                     </a>
+                                    <a class="dropdown-item" href="{{ route('item.titles') }}">
+                                        {{ __('items.add_titles') }}
+                                    </a>
                                 </div>
                             </li>
                             <li class="nav-item dropdown">

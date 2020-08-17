@@ -223,6 +223,29 @@ class ItemController extends Controller
     }
 
     /**
+     * Fill title column of items table from details table. 
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function titles()
+    {
+        $items = Item::orderBy('item_id')->get();
+        
+        $count = 0;
+        // Copy title string for all items if doesn't exist yet
+        foreach($items as $item) {
+            if(!$item->title) {
+                $item->title = $item->getTitleColumn();
+                $item->save();
+                $count++;
+            }
+        }
+        
+        return Redirect::to('admin/item')
+            ->with('success', __('items.titles_added', ['count' => $count]));
+    }
+
+    /**
      * Show the form for editing the specified resource.
      *
      * @param  \App\Item  $item

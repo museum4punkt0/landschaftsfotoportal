@@ -48,6 +48,7 @@ Route::resource('admin/colmap', 'Admin\ColumnMappingController');
 Route::resource('admin/column', 'Admin\ColumnController');
 Route::resource('admin/detail', 'Admin\DetailController');
 Route::get('admin/item/new', 'Admin\ItemController@new')->name('item.new');
+Route::get('admin/item/titles', 'Admin\ItemController@titles')->name('item.titles');
 Route::resource('admin/item', 'Admin\ItemController');
 Route::resource('admin/taxon', 'Admin\TaxonController');
 
