@@ -26,8 +26,8 @@
                     @for ($i = 0; $i < $item->depth + 1; $i++)
                         |___
                     @endfor
-                    {{ $item->getTitleColumn(true) }}
-                    ({{ $it->item_type_fk }})
+                    {{ $item->title }}
+                    ({{ $item->item_type_fk }})
                 </option>
             @endforeach
         </select>

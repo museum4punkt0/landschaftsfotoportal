@@ -41,7 +41,7 @@
                             Typ-ID {{$item->item_type_fk}}
                         </td>
                         <td>
-                            {{$item->getTitleColumn()}}
+                            {{$item->title}}
                         </td>
                         <td>
                             <form action="{{route('item.show', $item->item_id)}}" method="GET">

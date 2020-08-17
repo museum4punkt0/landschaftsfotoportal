@@ -17,7 +17,7 @@
                 @if($it->depth == 2)
                     &nbsp;&nbsp;-->
                 @endif
-                {{ $it->getTitleColumn() }}
+                {{ $it->title }}
                 {{-- Screen readers can mention the currently active menu item --}}
                 @if($it->item_id == $item->item_id)
                     <span class="sr-only">(current)</span>
