@@ -24,6 +24,7 @@ class Item extends Model
         'parent_fk',
         'item_type_fk',
         'taxon_fk',
+        'title',
     ];
     
     /**
