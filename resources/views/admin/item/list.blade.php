@@ -41,7 +41,10 @@
                             Typ-ID {{$item->item_type_fk}}
                         </td>
                         <td>
-                            {{$item->title}}
+                            <a href="{{route('item.show.public', $item->item_id)}}"
+                                title="@lang('items.show_frontend')">
+                                {{$item->title}}
+                            </a>
                         </td>
                         <td>
                             <form action="{{route('item.show', $item->item_id)}}" method="GET">

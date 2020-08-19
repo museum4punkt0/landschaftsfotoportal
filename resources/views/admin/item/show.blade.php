@@ -4,6 +4,19 @@
 
 <div class="container">
     <h2>@lang('items.list')</h2>
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{{$item->title}}</h5>
+            </div>
+            <div class="card card-body">
+                <span>
+                    <a href="{{route('item.show.public', $item->item_id)}}" class="btn btn-primary">
+                    @lang('items.show_frontend')
+                    </a>
+                </span>
+            </div>
+        </div>
+    
     @if($item->taxon)
         <div class="card">
             <div class="card-header">

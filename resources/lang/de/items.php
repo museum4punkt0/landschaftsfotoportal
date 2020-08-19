@@ -22,6 +22,7 @@ return [
     'item_type' => 'Datensatztyp',
     'no_title_column' => 'Kein Anzeigefeld als Name definiert.',
     'no_iframe' => 'Ihr Browser kann leider keine eingebetteten Frames anzeigen.',
+    'show_frontend' => 'Im Frontend anzeigen',
     'add_titles' => 'Titel übernehmen',
     'titles_added' => 'Für :count Datensätze wurde ein Titel übernommen.',
 ];
