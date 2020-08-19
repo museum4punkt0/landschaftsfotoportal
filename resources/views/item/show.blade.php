@@ -129,8 +129,6 @@
             
             {{-- Data_type of form field is string --}}
             @case('_string_')
-            {{-- Data_type of form field is (menu) title --}}
-            @case('_title_')
             {{-- Data_type of form field is image title --}}
             @case('_image_title_')
             {{-- Data_type of form field is image copyright --}}
