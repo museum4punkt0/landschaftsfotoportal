@@ -87,11 +87,6 @@
                 <ul class="nav flex-column">
                     
                 @section('sidebar_menu_items')
-                  <li class="nav-item">
-                    <a class="nav-link active" href="{{ url('/') }}">
-                      Home
-                    </a>
-                  </li>
                 @show
                 
                 </ul>

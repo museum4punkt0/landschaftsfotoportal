@@ -27,6 +27,13 @@ class ItemController extends Controller
         // All items for the sidebar menu
         $items = Item::tree()->depthFirst()->get();
         
+        // First level items for the sidebar menu
+        $menu_root = Item::whereNull('parent_fk')->orderBy('item_id')->get();
+        
+        // Get the menu path of the requested item
+        $ancestors = Item::find($item->item_id)->ancestorsAndSelf()->orderBy('depth', 'asc')->first();
+        $path = array_reverse(explode('.', $ancestors->path));
+        
         // Details of selected item
         $details = Detail::where('item_fk', $item->item_id)->get();
         
@@ -44,7 +51,7 @@ class ItemController extends Controller
         // Translations for titles of columns and column groups
         $l10n_list = Selectlist::where('name', '_translation_')->first();
         $translations = Element::where('list_fk', $l10n_list->list_id)->get();
-        
-        return view('item.show', compact('item', 'items', 'details', 'colmap', 'translations'));
+                
+        return view('item.show', compact('item', 'items', 'details', 'menu_root', 'path', 'colmap', 'translations'));
     }
 }

@@ -3,28 +3,27 @@
 @section('sidebar_menu_items')
     @parent
     
-    @foreach($items as $it)
-        @if($it->depth < 2)
+    @foreach($menu_root as $it)
             <li class="nav-item">
                 @if($it->item_id == $item->item_id)
                     <a class="nav-link active" href="{{ $it->item_id }}">
                 @else
                     <a class="nav-link" href="{{ $it->item_id }}">
                 @endif
-                @if($it->depth == 1)
-                    &nbsp;&nbsp;
-                @endif
-                @if($it->depth == 2)
-                    &nbsp;&nbsp;-->
-                @endif
                 {{ $it->title }}
+                
                 {{-- Screen readers can mention the currently active menu item --}}
                 @if($it->item_id == $item->item_id)
                     <span class="sr-only">(current)</span>
                 @endif
                 </a>
+                
+                @if($loop->depth <= count($path) && $path[$loop->depth - 1] == $it->item_id && count($it->children))
+                    <ul>
+                        @include('includes.item_submenu', ['sub' => $it->children, 'path' => $path])
+                    </ul>
+                @endif
             </li>
-        @endif
     @endforeach
     
 @endsection
