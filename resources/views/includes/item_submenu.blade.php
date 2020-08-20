@@ -12,11 +12,12 @@
             <span class="sr-only">(current)</span>
         @endif
         </a>
-        
-        @if($loop->depth <= count($path) && $path[$loop->depth - 1] == $child->item_id && count($child->children))
-            <ul>
-                @include('includes.item_submenu',['sub' => $child->children, 'path' => $path])
-            </ul>
+        @if($loop->depth < Config::get('menu.sidebar_max_levels'))
+            @if($loop->depth <= count($path) && $path[$loop->depth - 1] == $child->item_id && count($child->children))
+                <ul>
+                    @include('includes.item_submenu',['sub' => $child->children, 'path' => $path])
+                </ul>
+            @endif
         @endif
     </li>
 @endforeach
