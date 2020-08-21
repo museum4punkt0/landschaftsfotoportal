@@ -15,12 +15,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     #return view('welcome');
-    return Redirect::to('home');
+    return Redirect::to('frontend');
 });
 
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/frontend', 'HomeController@frontend')->name('frontend');
 Route::get('/locale/{locale}', 'HomeController@locale')->name('locale');
 
 Route::get('item/{item}', 'ItemController@show')->name('item.show.public');
