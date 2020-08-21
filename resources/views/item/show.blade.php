@@ -168,7 +168,7 @@
                     @if($cm->getConfigValue('image_show') == 'gallery')
                         <div class="container">
                             <div class="row">
-                            @foreach($items->where('parent_fk', $item->item_id) as $specimen)
+                            @foreach($items->where('parent_fk', $item->item_id)->sortBy('title') as $specimen)
                                 @foreach($items->where('parent_fk', $specimen->item_id) as $it)
                                     {{-- Show specimen thumbnails only, no images of details --}}
                                     @if(strpos($it->getDetailWhereDataType('_image_title_'), 'Gesamtansicht') !== false)
