@@ -17,6 +17,11 @@
 <form action="{{ route('item.store') }}" method="POST" enctype="multipart/form-data">
     
     <div class="form-group">
+        <span>@lang('items.menu_title')</span>
+        <input type="text" name="title" class="form-control" value="{{old('title')}}" />
+        <span class="text-danger">{{ $errors->first('title') }}</span>
+    </div>
+    <div class="form-group">
         <span>@lang('lists.parent')</span>
         <select name="parent" class="form-control" size=1 >
             <option value="">@lang('common.root')</option>

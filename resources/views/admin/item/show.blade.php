@@ -6,7 +6,7 @@
     <h2>@lang('items.list')</h2>
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">{{$item->title}}</h5>
+                <h5 class="mb-0">@lang('items.menu_title'): {{$item->title}}</h5>
             </div>
             <div class="card card-body">
                 <span>

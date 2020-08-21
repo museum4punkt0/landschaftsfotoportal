@@ -110,6 +110,7 @@ class ItemController extends Controller
      */
     public function store(Request $request)
     {
+        $validation_rules['title'] = 'nullable|string';
         $validation_rules['parent'] = 'nullable|integer';
         $validation_rules['taxon'] = 'nullable|integer';
         $validation_rules['fields'] = 'required|array';
@@ -131,6 +132,7 @@ class ItemController extends Controller
         
         // Save new item to database
         $item_data = [
+            'title' => $request->input('title'),
             'parent_fk' => $request->input('parent'),
             'taxon_fk' => $request->input('taxon'),
             'item_type_fk' => $item_type,
@@ -322,6 +324,7 @@ class ItemController extends Controller
      */
     public function update(Request $request, Item $item)
     {
+        $validation_rules['title'] = 'nullable|string';
         $validation_rules['parent'] = 'nullable|integer';
         $validation_rules['taxon'] = 'nullable|integer';
         $validation_rules['fields'] = 'required|array';
@@ -338,6 +341,7 @@ class ItemController extends Controller
         
         $request->validate($validation_rules);
         
+        $item->title = $request->input('title');
         $item->parent_fk = $request->input('parent');
         $item->taxon_fk = $request->input('taxon');
         $item->save();
