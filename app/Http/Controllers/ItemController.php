@@ -12,7 +12,7 @@ use App\Element;
 #use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 #use Illuminate\Http\Request;
-#use Redirect;
+use Redirect;
 
 class ItemController extends Controller
 {
@@ -24,7 +24,14 @@ class ItemController extends Controller
      */
     public function show(Item $item)
     {
-        // All items for the sidebar menu
+        // Check for redirects
+        $target = $item->getDetailWhereDataType('_redirect_');
+        if($target && $target != __('items.no_detail_with_data_type')) {
+            return Redirect::to($target);
+        }
+        
+        // All items for the show blade
+        // TODO: children or descendants should be enough
         $items = Item::tree()->depthFirst()->get();
         
         // First level items for the sidebar menu

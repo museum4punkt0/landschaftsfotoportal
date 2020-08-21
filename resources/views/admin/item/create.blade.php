@@ -58,13 +58,6 @@
     </div>
     
     @foreach($colmap as $cm)
-        {{--
-        tr {{ $cm->column->translation_fk }}, 
-        dt {{ $cm->column->data_type_fk }}, 
-        {{ $cm->column->data_type->values[0]->value }}, 
-        {{ $cm->column->data_type->values[1]->value }}, 
-        {{ print_r($data_types->contains('_list_')) }}
-        --}}
         
         @switch($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value)
             
@@ -114,6 +107,8 @@
             @case('_image_title_')
             {{-- Data_type of form field is image copyright --}}
             @case('_image_copyright_')
+            {{-- Data_type of form field is redirect --}}
+            @case('_redirect_')
             {{-- Data_type of form field is map --}}
             @case('_map_')
                 <div class="form-group">

@@ -148,6 +148,8 @@
             @case('_image_title_')
             {{-- Data_type of form field is image copyright --}}
             @case('_image_copyright_')
+            {{-- Data_type of form field is redirect --}}
+            @case('_redirect_')
             {{-- Data_type of form field is map --}}
             @case('_map_')
                 <div class="form-group">

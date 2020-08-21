@@ -165,6 +165,7 @@ class ItemController extends Controller
                 case '_title_':
                 case '_image_title_':
                 case '_image_copyright_':
+                case '_redirect_':
                 case '_url_':
                 case '_map_':
                 case '_html_':
@@ -372,6 +373,7 @@ class ItemController extends Controller
                 case '_title_':
                 case '_image_title_':
                 case '_image_copyright_':
+                case '_redirect_':
                 case '_url_':
                 case '_map_':
                 case '_html_':

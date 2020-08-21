@@ -91,7 +91,7 @@ class Column extends Model
     {
         switch ($this->getDataType()) {
             case '_list_':
-                return 'integer';
+            case '_image_copyright_':
             case '_integer_':
                 return 'integer';
             case '_float_':
@@ -104,8 +104,11 @@ class Column extends Model
                 return 'url';
             case '_image_':
                 return 'image|mimes:jpeg,png|max:8192';
+            case '_title_':
+            case '_image_title_':
+            case '_image_copyright_':
+            case '_redirect_':
             case '_map_':
-                return 'string';
             case '_html_':
                 return 'string';
             default:
