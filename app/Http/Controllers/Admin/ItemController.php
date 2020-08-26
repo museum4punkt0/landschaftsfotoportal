@@ -110,13 +110,30 @@ class ItemController extends Controller
      */
     public function store(Request $request)
     {
+        // Get item_type ID from session
+        $item_type = $request->session()->get('item_type');
+        
+        // Only columns associated with this item's taxon or its descendants
+        $taxon_id = $request->taxon;
+        $colmap = ColumnMapping::where('item_type_fk', $item_type)
+            ->where(function (Builder $query) use ($taxon_id) {
+                return $query->whereNull('taxon_fk')
+                    ->orWhereHas('taxon.descendants', function (Builder $query) use ($taxon_id) {
+                        $query->where('taxon_id', $taxon_id);
+                });
+            })
+            ->get();
+        
+        // Validation rules for fields associated with this item
         $validation_rules['title'] = 'nullable|string';
         $validation_rules['parent'] = 'nullable|integer';
         $validation_rules['taxon'] = 'nullable|integer';
         $validation_rules['fields'] = 'required|array';
         
+        // Validation rules for all fields associated with columns
         foreach ($request->input('fields') as $column_id => $value) {
-            $validation_rules['fields.'.$column_id] = 'required|'. Column::find($column_id)->getValidationRule();
+            $required = $colmap->firstWhere('column_fk', $column_id)->getRequiredRule();
+            $validation_rules['fields.'.$column_id] = $required . Column::find($column_id)->getValidationRule();
         }
         // Validate uploaded files
         if($request->file('fields')) {
@@ -126,9 +143,6 @@ class ItemController extends Controller
         }
         
         $request->validate($validation_rules);
-        
-        // Get item_type ID from session
-        $item_type = $request->session()->get('item_type');
         
         // Save new item to database
         $item_data = [
@@ -174,6 +188,8 @@ class ItemController extends Controller
             }
             Detail::create($detail_data);
         }
+        
+        // Save uploaded files and their details
         if($request->file('fields')) {
             foreach ($request->file('fields') as $column_id => $value) {
                 $data_type = Column::find($column_id)->getDataType();
@@ -325,13 +341,27 @@ class ItemController extends Controller
      */
     public function update(Request $request, Item $item)
     {
+        // Only columns associated with this item's taxon or its descendants
+        $taxon_id = $item->taxon_fk;
+        $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)
+            ->where(function (Builder $query) use ($taxon_id) {
+                return $query->whereNull('taxon_fk')
+                    ->orWhereHas('taxon.descendants', function (Builder $query) use ($taxon_id) {
+                        $query->where('taxon_id', $taxon_id);
+                });
+            })
+            ->get();
+        
+        // Validation rules for fields associated with this item
         $validation_rules['title'] = 'nullable|string';
         $validation_rules['parent'] = 'nullable|integer';
         $validation_rules['taxon'] = 'nullable|integer';
         $validation_rules['fields'] = 'required|array';
         
+        // Validation rules for all fields associated with columns
         foreach ($request->input('fields') as $column_id => $value) {
-            $validation_rules['fields.'.$column_id] = 'required|'. Column::find($column_id)->getValidationRule();
+            $required = $colmap->firstWhere('column_fk', $column_id)->getRequiredRule();
+            $validation_rules['fields.'.$column_id] = $required . Column::find($column_id)->getValidationRule();
         }
         // Validate uploaded files
         if($request->file('fields')) {
@@ -382,6 +412,8 @@ class ItemController extends Controller
             }
             $detail->save();
         }
+        
+        // Save uploaded files and their details
         if($request->file('fields')) {
             foreach ($request->file('fields') as $column_id => $value) {
                 $detail = $details->where('column_fk', $column_id)->first();

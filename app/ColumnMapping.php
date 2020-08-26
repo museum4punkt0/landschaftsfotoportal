@@ -73,6 +73,9 @@ class ColumnMapping extends Model
     
     /**
      * Get the configuration value for a given key from the JSON key/value store.
+     * 
+     * @param  string  $key
+     * @return mixed
      */
     public function getConfigValue($key)
     {
@@ -85,5 +88,18 @@ class ColumnMapping extends Model
         else {
             return null;
         }
+    }
+    
+    /**
+     * Get the part of the validation rule which defines if this column is required or not.
+     * 
+     * @return string
+     */
+    public function getRequiredRule()
+    {
+        if($this->getConfigValue('required'))
+            return 'required|';
+        else
+            return 'nullable|';
     }
 }
