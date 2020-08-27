@@ -18,7 +18,7 @@ class CreateTaxaTable extends Migration
             $table->integer('parent_fk')->nullable(true);
             $table->string('taxon_name');
             $table->string('taxon_author')->nullable(true);
-            $table->string('native_name');
+            $table->string('native_name')->nullable(true);
             $table->integer('valid_name')->nullable(true);
             $table->integer('rank')->nullable(true);
             $table->timestamps();
