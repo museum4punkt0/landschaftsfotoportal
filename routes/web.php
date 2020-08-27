@@ -23,6 +23,8 @@ Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/frontend', 'HomeController@frontend')->name('frontend');
 Route::get('/locale/{locale}', 'HomeController@locale')->name('locale');
+Route::get('/search', 'SearchController@index')->name('search.index');
+Route::post('/search/results', 'SearchController@results')->name('search.results');
 
 Route::get('item/{item}', 'ItemController@show')->name('item.show.public');
 
