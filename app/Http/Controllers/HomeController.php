@@ -37,9 +37,16 @@ class HomeController extends Controller
     public function frontend()
     {
         // Get the item which holds the content of the home page
-        $item = Item::where('title', config('menu.home_item_title', '/home'))->first();
+        $item = Item::where('title', config('menu.home_item_title', 'Home'))->first();
         
-        return Redirect::to('item/'.$item->item_id);
+        // Check if item exists, otherwise redirect to search page
+        if($item) {
+            return Redirect::to('item/'.$item->item_id);
+        }
+        else {
+            return redirect()->route('search.index')
+                ->with('warning', __('items.no_home_page'));
+        }
     }
     
     /**
