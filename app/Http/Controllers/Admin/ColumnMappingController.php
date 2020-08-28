@@ -46,7 +46,8 @@ class ColumnMappingController extends Controller
      */
     public function create()
     {
-        $columns = Column::doesntHave('column_mapping')->get();
+        #$columns = Column::doesntHave('column_mapping')->orderBy('description')->get();
+        $columns = Column::orderBy('description')->get();
         
         $lang = 'name_'. app()->getLocale();
         $column_groups = Value::whereHas('element', function ($query) {
@@ -240,7 +241,7 @@ class ColumnMappingController extends Controller
             $arr = explode(',', $request->input('ids'));
             
             foreach($arr as $sortOrder => $id){
-                $colmap = ColumnMapping::firstWhere('column_fk', $id);
+                $colmap = ColumnMapping::firstWhere('colmap_id', $id);
                 $colmap->column_order = $sortOrder;
                 $colmap->save();
             }

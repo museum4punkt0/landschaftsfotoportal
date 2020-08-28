@@ -50,7 +50,7 @@
                     <div class="form-group col-md-12">
                         <ul class="sort_menu list-group">
                             @foreach ($columns_mapped as $column)
-                            <li class="list-group-item" data-id="{{$column->column_id}}">
+                            <li class="list-group-item" data-id="{{$column->colmap_id}}">
                                 <span class="handle"></span>
                                 @foreach($column->translation->values as $t)
                                     @if($t->attribute->name == 'name_'.app()->getLocale())
