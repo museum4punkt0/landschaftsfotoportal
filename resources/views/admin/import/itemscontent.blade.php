@@ -99,7 +99,7 @@
                                 @for ($i = 0; $i < $item->depth + 1; $i++)
                                     |___
                                 @endfor
-                                {{ $item->getTitleColumn() }}
+                                {{ $item->title }}
                             </option>
                         @endforeach
                     </select>
