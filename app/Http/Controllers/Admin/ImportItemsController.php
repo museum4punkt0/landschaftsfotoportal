@@ -62,6 +62,8 @@ class ImportItemsController extends Controller
             
             // Save CSV file path to session
             $request->session()->put('csv_file', $csv_file);
+            // Save original CSV file name to session
+            $request->session()->put('file_name', $files->getClientOriginalName());
             
             return redirect()->route('import.items.preview', ['item_type' => $request->input('item_type')]);
         }
@@ -83,6 +85,8 @@ class ImportItemsController extends Controller
     {
         // Get CSV file path from session and read file into array $data
         $csv_file = $request->session()->get('csv_file');
+        // Get original CSV file name from session
+        $file_name = $request->session()->get('file_name');
         
         // Parse CSV file
         $data = array_map(function($d) {
@@ -105,7 +109,7 @@ class ImportItemsController extends Controller
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
-        return view('admin.import.itemscontent', compact('csv_data', 'colmaps', 'items', 'item_types'));
+        return view('admin.import.itemscontent', compact('file_name', 'csv_data', 'colmaps', 'items', 'item_types'));
     }
     
     /**

@@ -4,7 +4,7 @@
 
 <div class="container-fluid">
     <div class="card">
-        <div class="card-header">@lang('import.header'): @lang('items.header')</div>
+        <div class="card-header">@lang('import.header'): @lang('items.header') ({{ $file_name }})</div>
         <div class="card-body">
 
             <form action="{{ route('import.items.process') }}" method="POST" class="form-horizontal">
