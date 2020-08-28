@@ -29,7 +29,7 @@ class ColumnController extends Controller
      */
     public function index()
     {
-        $columns = Column::orderBy('column_id')->paginate(10);
+        $columns = Column::orderBy('description')->paginate(10);
         
         return view('admin.column.list', compact('columns'));
     }

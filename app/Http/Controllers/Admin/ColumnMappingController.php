@@ -146,7 +146,7 @@ class ColumnMappingController extends Controller
             ->orderBy('column_order')
             ->get();
         
-        $columns_avail = Column::doesntHave('column_mapping')->orderBy('column_id')->get();
+        $columns_avail = Column::doesntHave('column_mapping')->orderBy('description')->get();
         
         return view('admin.colmap.map', compact(
             'item_type', 'column_groups', 'item_types', 'taxa', 'columns_mapped', 'columns_avail'
@@ -259,8 +259,8 @@ class ColumnMappingController extends Controller
      */
     public function edit(ColumnMapping $colmap)
     {
-        $columns = Column::all();
-        #$columns = Column::doesntHave('column_mapping')->get();
+        $columns = Column::orderBy('description')->get();
+        #$columns = Column::doesntHave('column_mapping')->orderBy('description')->get();
         
         $lang = 'name_'. app()->getLocale();
         $column_groups = Value::whereHas('element', function ($query) {
