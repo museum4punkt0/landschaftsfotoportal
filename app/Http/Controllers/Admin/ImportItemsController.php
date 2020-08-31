@@ -266,4 +266,27 @@ class ImportItemsController extends Controller
         return Redirect::to('admin/item')
             ->with('success', __('import.done'));
     }
+    
+    /**
+     * Fix file name extension for items with item type _image_ and column ID 63 data type _image_. 
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function fix_ext()
+    {
+        $details = Detail::where('column_fk', 63)->get();
+        
+        $count = 0;
+        // Copy title string for all details if doesn't exist yet
+        foreach($details as $detail) {
+            if(strpos($detail->value_string, '.tif')) {
+                $detail->value_string = str_replace('.tif', '.jpg' ,$detail->value_string);
+                $detail->save();
+                $count++;
+            }
+        }
+        
+        return Redirect::to('admin/item')
+            ->with('success', __('items.file_ext_fixed', ['count' => $count]));
+    }
 }
