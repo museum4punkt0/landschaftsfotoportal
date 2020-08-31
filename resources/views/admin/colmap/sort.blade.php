@@ -58,6 +58,10 @@
                                     @endif
                                 @endforeach
                                 ({{$column->description}}), ID {{$column->column_id}}
+                                    @if($column->column_mapping->firstWhere('colmap_id', $column->colmap_id)->taxon)
+                                        [{{ $column->column_mapping->firstWhere(
+                                            'colmap_id', $column->colmap_id)->taxon->full_name }}]
+                                    @endif
                             </li>
                             @endforeach
                         </ul>

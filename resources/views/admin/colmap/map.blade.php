@@ -66,6 +66,10 @@
                                         @endif
                                     @endforeach
                                     ({{$column->description}})
+                                    @if($column->column_mapping->firstWhere('colmap_id', $column->colmap_id)->taxon)
+                                        [{{ $column->column_mapping->firstWhere(
+                                            'colmap_id', $column->colmap_id)->taxon->full_name }}]
+                                    @endif
                                 </option>
                             @endforeach
                             </select>
