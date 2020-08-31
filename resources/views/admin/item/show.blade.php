@@ -23,7 +23,8 @@
                 <h5 class="mb-0">@lang('lists.parent')</h5>
             </div>
             <div class="card card-body">
-                {{ $item->taxon->parent->taxon_name }} ({{ $item->taxon->parent_fk }})
+                {{ $item->taxon->parent->taxon_name }}
+                ({{ $item->taxon->parent->rank_abbr }}, Taxon ID {{ $item->taxon->parent_fk }})
             </div>
         </div>
     @endif
@@ -52,6 +53,10 @@
                         @foreach($item->taxon->synonyms as $synonym)
                             {{ $synonym->full_name }}<br/>
                         @endforeach
+                    @endif
+                    @if($cm->getConfigValue('taxon_parent'))
+                        {{ $item->taxon->getAncestorWhereRank($cm->getConfigValue('taxon_parent'))->taxon_name }}
+                        ({{ $item->taxon->getAncestorWhereRank($cm->getConfigValue('taxon_parent'))->native_name }})
                     @endif
                 </div>
                 @break
