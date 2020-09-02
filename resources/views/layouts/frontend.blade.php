@@ -37,6 +37,15 @@
         }
       }
     </style>
+    
+    <!-- OpenLayers -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.4.3/css/ol.css" type="text/css">
+    <style>
+      .map {
+        height: 500px;
+        width: 100%;
+      }
+    </style>
 </head>
 <body>
     <!-- Top Navbar -->

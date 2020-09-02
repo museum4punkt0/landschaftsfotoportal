@@ -326,6 +326,50 @@
                         <span>detail column {{$cm->column->column_id}} for map not found</span>
                     @endif
                 @endif
+                @if($cm->getConfigValue('map') == 'inline')
+                    <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.4.3/build/ol.js"></script>
+                    <div id="map" class="map"></div>
+                    <script type="text/javascript">
+                      var pos = ol.proj.fromLonLat([
+                        {{ $details->firstWhere('column_fk', 21)->value_float }},
+                        {{ $details->firstWhere('column_fk', 20)->value_float }},
+                      ]);
+                      var marker = new ol.Feature({
+                        geometry: new ol.geom.Point(pos)
+                      });
+                      marker.setStyle(
+                        new ol.style.Style({
+                          image: new ol.style.Icon({
+                            color: '#ff0000',
+                            crossOrigin: 'anonymous',
+                            src: '{{ asset("storage/images/dot.svg") }}',
+                            scale: 1.0,
+                          }),
+                        })
+                      );
+                      var vectorSource = new ol.source.Vector({
+                        features: [marker],
+                      });
+                      var vectorLayer = new ol.layer.Vector({
+                        source: vectorSource,
+                      });
+                      
+                      var map = new ol.Map({
+                        target: 'map',
+                        layers: [
+                          new ol.layer.Tile({
+                            source: new ol.source.OSM()
+                          }),
+                          vectorLayer,
+                        ],
+                        view: new ol.View({
+                          center: pos,
+                          zoom: 16,
+                        })
+                      });
+                      
+                    </script>
+                @endif
                 </div>
                 @break
             
