@@ -331,8 +331,8 @@
                     <div id="map" class="map"></div>
                     <script type="text/javascript">
                       var pos = ol.proj.fromLonLat([
-                        {{ $details->firstWhere('column_fk', 21)->value_float }},
-                        {{ $details->firstWhere('column_fk', 20)->value_float }},
+                        {{ $details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col'))->value_float }},
+                        {{ $details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col'))->value_float }},
                       ]);
                       var marker = new ol.Feature({
                         geometry: new ol.geom.Point(pos)
@@ -364,7 +364,7 @@
                         ],
                         view: new ol.View({
                           center: pos,
-                          zoom: 16,
+                          zoom: {{ $cm->getConfigValue('map_zoom') }},
                         })
                       });
                       
