@@ -52,3 +52,10 @@ import 'jquery-ui/ui/widgets/sortable.js';
 
 import 'summernote/dist/summernote-bs4';
 //import 'summernote/dist/lang/summernote-de-DE';
+
+/**
+ * OpenLayers map
+ */
+
+import osm_map from './map.js';
+window.osm_map = osm_map;

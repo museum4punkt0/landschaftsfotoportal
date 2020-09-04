@@ -8,7 +8,10 @@
 @import '~bootstrap/scss/bootstrap';
 
 // Summernote WYSIWYG editor
-@import "~summernote/dist/summernote-bs4.css";
+@import '~summernote/dist/summernote-bs4.css';
 
 // jQuery-UI
 @import '~jquery-ui/themes/base/sortable.css';
+
+// OpenLayers
+@import '~ol/ol.css';
