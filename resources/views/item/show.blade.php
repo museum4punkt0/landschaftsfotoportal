@@ -327,47 +327,19 @@
                     @endif
                 @endif
                 @if($cm->getConfigValue('map') == 'inline')
-                    <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.4.3/build/ol.js"></script>
                     <div id="map" class="map"></div>
                     <script type="text/javascript">
-                      var pos = ol.proj.fromLonLat([
-                        {{ $details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col'))->value_float }},
-                        {{ $details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col'))->value_float }},
-                      ]);
-                      var marker = new ol.Feature({
-                        geometry: new ol.geom.Point(pos)
-                      });
-                      marker.setStyle(
-                        new ol.style.Style({
-                          image: new ol.style.Icon({
-                            color: '#ff0000',
-                            crossOrigin: 'anonymous',
-                            src: '{{ asset("storage/images/dot.svg") }}',
-                            scale: 1.0,
-                          }),
-                        })
-                      );
-                      var vectorSource = new ol.source.Vector({
-                        features: [marker],
-                      });
-                      var vectorLayer = new ol.layer.Vector({
-                        source: vectorSource,
-                      });
-                      
-                      var map = new ol.Map({
-                        target: 'map',
-                        layers: [
-                          new ol.layer.Tile({
-                            source: new ol.source.OSM()
-                          }),
-                          vectorLayer,
-                        ],
-                        view: new ol.View({
-                          center: pos,
-                          zoom: {{ $cm->getConfigValue('map_zoom') }},
-                        })
-                      });
-                      
+                        var lon = {{ $details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col'))->value_float }};
+                        var lat = {{ $details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col'))->value_float }};
+                        var zoom = {{ $cm->getConfigValue('map_zoom') }};
+                        
+                        {{-- Init and display the map --}}
+                        osm_map.display(lon, lat, zoom);
+                        
+                        {{-- Resize the map after un-collapsing the container --}}
+                        $('#collapseCG{{ $cm->column_group_fk }}').on('shown.bs.collapse', function () {
+                            osm_map.updateSize();
+                        });
                     </script>
                 @endif
                 </div>
