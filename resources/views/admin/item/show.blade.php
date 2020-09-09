@@ -4,16 +4,21 @@
 
 <div class="container">
     <h2>@lang('items.list')</h2>
+        <div class="my-4">
+            <a href="{{route('item.show.public', $item->item_id)}}" class="btn btn-primary">
+            @lang('items.show_frontend')
+            </a>
+            <a href="{{route('item.edit', $item->item_id)}}" class="btn btn-primary">
+            @lang('common.edit')
+            </a>
+        </div>
+        
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">@lang('items.menu_title'): {{$item->title}}</h5>
+                <h5 class="mb-0">@lang('items.menu_title')</h5>
             </div>
             <div class="card card-body">
-                <span>
-                    <a href="{{route('item.show.public', $item->item_id)}}" class="btn btn-primary">
-                    @lang('items.show_frontend')
-                    </a>
-                </span>
+                {{$item->title}}
             </div>
         </div>
     
