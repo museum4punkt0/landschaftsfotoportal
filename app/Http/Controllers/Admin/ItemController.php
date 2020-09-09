@@ -150,6 +150,8 @@ class ItemController extends Controller
             'parent_fk' => $request->input('parent'),
             'taxon_fk' => $request->input('taxon'),
             'item_type_fk' => $item_type,
+            'created_by' => $request->user()->id,
+            'updated_by' => $request->user()->id,
         ];
         $item = Item::create($item_data);
         
@@ -375,6 +377,7 @@ class ItemController extends Controller
         $item->title = $request->input('title');
         $item->parent_fk = $request->input('parent');
         $item->taxon_fk = $request->input('taxon');
+        $item->updated_by = $request->user()->id;
         $item->save();
         
         $details = Detail::where('item_fk', $item->item_id)->get();
