@@ -47,6 +47,22 @@ class Item extends Model
     }
     
     /**
+     * Get the user who created the item.
+     */
+    public function creator()
+    {
+        return $this->belongsTo('App\User', 'created_by', 'id');
+    }
+    
+    /**
+     * Get the user who updated the item.
+     */
+    public function editor()
+    {
+        return $this->belongsTo('App\User', 'updated_by', 'id');
+    }
+    
+    /**
      * The columns that belong to the item.
      */
     public function columns()

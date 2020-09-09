@@ -33,4 +33,7 @@ return [
     'actions' => 'Aktionen',
     'language' => 'Sprache',
     'ordering' => 'Reihenfolge',
+    'meta_data' => 'Metadaten',
+    'created' => 'erstellt',
+    'updated' => 'bearbeitet',
 ];

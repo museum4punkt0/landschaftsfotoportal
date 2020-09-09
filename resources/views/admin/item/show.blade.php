@@ -4,23 +4,41 @@
 
 <div class="container">
     <h2>@lang('items.list')</h2>
-        <div class="my-4">
-            <a href="{{route('item.show.public', $item->item_id)}}" class="btn btn-primary">
-            @lang('items.show_frontend')
-            </a>
-            <a href="{{route('item.edit', $item->item_id)}}" class="btn btn-primary">
-            @lang('common.edit')
-            </a>
+    <div class="my-4">
+        <a href="{{route('item.show.public', $item->item_id)}}" class="btn btn-primary">
+        @lang('items.show_frontend')
+        </a>
+        <a href="{{route('item.edit', $item->item_id)}}" class="btn btn-primary">
+        @lang('common.edit')
+        </a>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">@lang('items.menu_title')</h5>
         </div>
-        
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">@lang('items.menu_title')</h5>
-            </div>
-            <div class="card card-body">
-                {{$item->title}}
-            </div>
+        <div class="card card-body">
+            {{$item->title}}
         </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">@lang('common.meta_data')</h5>
+        </div>
+        <div class="card card-body">
+            <table class="table table-sm table-borderless">
+                <tr>
+                    <td>@lang('common.created'):</td>
+                    <td>{{ $item->creator->name }}</td><td>{{ $item->created_at }}</td>
+                </tr>
+                <tr>
+                    <td>@lang('common.updated'):</td>
+                    <td>{{ $item->editor->name }}</td><td>{{ $item->updated_at }}</td>
+                </tr>
+            </table>
+        </div>
+    </div>
     
     @if($item->taxon)
         <div class="card">
