@@ -25,6 +25,9 @@ class Item extends Model
         'item_type_fk',
         'taxon_fk',
         'title',
+        'public',
+        'created_by',
+        'updated_by',
     ];
     
     /**
