@@ -4,6 +4,7 @@
     @parent
     
     @foreach($menu_root as $it)
+        @if($it->public == 1)
             <li class="nav-item">
                 @if($it->item_id == $item->item_id)
                     <a class="nav-link active" href="{{ $it->item_id }}">
@@ -24,6 +25,7 @@
                     </ul>
                 @endif
             </li>
+        @endif
     @endforeach
     
 @endsection
@@ -215,7 +217,7 @@
                     @if($cm->getConfigValue('image_show') == 'specimen')
                         <div class="container">
                             <div class="row">
-                                @foreach($items->where('parent_fk', $item->item_id) as $it)
+                                @foreach($items->where('parent_fk', $item->item_id)->sortBy('title') as $it)
                                     <div class="col-auto">
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
                                             {{-- Bestikri images have different pathes and types --}}

@@ -30,12 +30,15 @@ class ItemController extends Controller
             return Redirect::to($target);
         }
         
-        // All items for the show blade
-        // TODO: children or descendants should be enough
-        $items = Item::tree()->depthFirst()->get();
+        // All items for the show blade, used for image galleries
+        $items = Item::find($item->item_id)
+            ->descendantsAndSelf()
+            ->where('public', 1)
+            ->orderBy('title')
+            ->get();
         
         // First level items for the sidebar menu
-        $menu_root = Item::whereNull('parent_fk')->orderBy('item_id')->get();
+        $menu_root = Item::whereNull('parent_fk')->where('public', 1)->orderBy('item_id')->get();
         
         // Get the menu path of the requested item
         $ancestors = Item::find($item->item_id)->ancestorsAndSelf()->orderBy('depth', 'asc')->first();
