@@ -11,6 +11,11 @@
         <a href="{{route('item.edit', $item->item_id)}}" class="btn btn-primary">
         @lang('common.edit')
         </a>
+        @unless($item->public)
+            <a href="{{route('item.publish', $item->item_id)}}" class="btn btn-primary">
+            @lang('items.publish')
+            </a>
+        @endunless
     </div>
     
     <div class="card">

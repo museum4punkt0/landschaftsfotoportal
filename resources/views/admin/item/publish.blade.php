@@ -27,7 +27,7 @@
                         <th colspan="1">@lang('items.item_type')</th>
                         <th colspan="1">@lang('common.name')</th>
                         <th colspan="1">@lang('common.updated')</th>
-                        <th colspan="3">@lang('common.actions')</th>
+                        <th colspan="4">@lang('common.actions')</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -50,6 +50,11 @@
                         </td>
                         <td>
                             {{$item->editor->name}}, {{$item->updated_at}}
+                        </td>
+                        <td>
+                            <a href="{{route('item.publish', $item->item_id)}}" class="btn btn-primary">
+                            @lang('items.publish')
+                            </a>
                         </td>
                         <td>
                             <form action="{{route('item.show', $item->item_id)}}" method="GET">

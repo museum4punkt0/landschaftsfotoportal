@@ -54,7 +54,7 @@ Route::resource('admin/detail', 'Admin\DetailController');
 Route::get('admin/item/new', 'Admin\ItemController@new')->name('item.new');
 Route::get('admin/item/titles', 'Admin\ItemController@titles')->name('item.titles');
 Route::get('admin/item/unpublished', 'Admin\ItemController@list_unpublished')->name('item.unpublished');
-Route::get('admin/item/publish', 'Admin\ItemController@publish')->name('item.publish');
+Route::get('admin/item/publish/{item?}', 'Admin\ItemController@publish')->name('item.publish');
 Route::resource('admin/item', 'Admin\ItemController');
 Route::resource('admin/taxon', 'Admin\TaxonController');
 

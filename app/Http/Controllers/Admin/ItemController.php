@@ -283,16 +283,23 @@ class ItemController extends Controller
     }
 
     /**
-     * Publish all non-public items. 
+     * Publish a single or all non-public items. 
      *
+     * @param  \App\Item  $item
      * @return \Illuminate\Http\Response
      */
-    public function publish()
+    public function publish(Item $item)
     {
-        $items = Item::where('public', 0)->orderBy('item_id')->get();
+        // Check for single item or batch
+        if($item->item_id) {
+            $items = [Item::find($item->item_id)];
+        }
+        else {
+            $items = Item::where('public', 0)->orderBy('item_id')->get();
+        }
         
         $count = 0;
-        // Set public flag on all items
+        // Set public flag on all given items
         foreach($items as $item) {
             $item->public = 1;
             $item->save();
