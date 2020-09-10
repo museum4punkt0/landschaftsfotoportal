@@ -277,7 +277,7 @@ class ItemController extends Controller
      */
     public function list_unpublished()
     {
-        $items = Item::where('public', 0)->orderBy('item_id')->paginate(10);
+        $items = Item::where('public', 0)->orderByDesc('updated_at')->paginate(10);
         
         return view('admin.item.publish', compact('items'));
     }

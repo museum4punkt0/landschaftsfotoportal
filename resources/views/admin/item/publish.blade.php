@@ -26,6 +26,7 @@
                         <th colspan="1">@lang('common.id')</th>
                         <th colspan="1">@lang('items.item_type')</th>
                         <th colspan="1">@lang('common.name')</th>
+                        <th colspan="1">@lang('common.updated')</th>
                         <th colspan="3">@lang('common.actions')</th>
                     </tr>
                 </thead>
@@ -46,6 +47,9 @@
                                 title="@lang('items.show_frontend')">
                                 {{$item->title}}
                             </a>
+                        </td>
+                        <td>
+                            {{$item->editor->name}}, {{$item->updated_at}}
                         </td>
                         <td>
                             <form action="{{route('item.show', $item->item_id)}}" method="GET">

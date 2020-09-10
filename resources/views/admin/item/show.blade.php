@@ -36,6 +36,10 @@
                     <td>@lang('common.updated'):</td>
                     <td>{{ $item->editor->name }}</td><td>{{ $item->updated_at }}</td>
                 </tr>
+                <tr>
+                    <td>@lang('common.published'):</td>
+                    <td colspan=2>{{ $item->public }}</td>
+                </tr>
             </table>
         </div>
     </div>

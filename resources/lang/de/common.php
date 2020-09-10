@@ -36,4 +36,6 @@ return [
     'meta_data' => 'Metadaten',
     'created' => 'erstellt',
     'updated' => 'bearbeitet',
+    'published' => 'veröffentlicht',
+    'unpublished' => 'unveröffentlicht',
 ];
