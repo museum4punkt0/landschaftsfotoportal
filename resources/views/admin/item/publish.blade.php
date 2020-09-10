@@ -16,10 +16,10 @@
 <div class="container">
     <div class="card">
         @if (true || Auth::check())
-            <div class="card-header">@lang('items.header')</div>
+            <div class="card-header">@lang('items.unpublished')</div>
             <div class="card-body">
                 <a href="{{route('item.new')}}" class="btn btn-primary">@lang('items.new')</a>
-                <a href="{{route('item.unpublished')}}" class="btn btn-primary">@lang('items.unpublished')</a>
+                <a href="{{route('item.publish')}}" class="btn btn-primary">@lang('items.publish_all')</a>
                 <table class="table mt-4">
                 <thead>
                     <tr>

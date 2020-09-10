@@ -271,6 +271,39 @@ class ItemController extends Controller
     }
 
     /**
+     * Display a listing of non-public items for publishing. 
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function list_unpublished()
+    {
+        $items = Item::where('public', 0)->orderBy('item_id')->paginate(10);
+        
+        return view('admin.item.publish', compact('items'));
+    }
+
+    /**
+     * Publish all non-public items. 
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function publish()
+    {
+        $items = Item::where('public', 0)->orderBy('item_id')->get();
+        
+        $count = 0;
+        // Set public flag on all items
+        foreach($items as $item) {
+            $item->public = 1;
+            $item->save();
+            $count++;
+        }
+        
+        return Redirect::to('admin/item/unpublished')
+            ->with('success', __('items.published', ['count' => $count]));
+    }
+
+    /**
      * Show the form for editing the specified resource.
      *
      * @param  \App\Item  $item

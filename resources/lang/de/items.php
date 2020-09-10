@@ -13,6 +13,7 @@ return [
 
     'header' => 'Datensätze',
     'list' => 'Datensatz',
+    'unpublished' => 'Unveröffentlichte Datensätze',
     'new' => 'Neuer Datensatz',
     'edit' => 'Datensatz bearbeiten',
     'created' => 'Datensatz wurde angelegt.',
@@ -26,6 +27,8 @@ return [
     'menu_title' => 'Name des Datensatzes (im Menü angezeigt)',
     'add_titles' => 'Titel übernehmen',
     'titles_added' => 'Für :count Datensätze wurde ein Titel übernommen.',
+    'publish_all' => 'Alle veröffentlichen',
+    'published' => ':count Datensätze wurden veröffentlicht.',
     'file_ext_fixed' => 'Für :count Bild-Datensätze wurde die Endung des Dateinamens korrigiert.',
     'no_home_page' => 'Es wurde keine Seite als Homepage konfiguriert.',
 ];
