@@ -22,6 +22,20 @@
         <span class="text-danger">{{ $errors->first('title') }}</span>
     </div>
     <div class="form-group">
+        <span>@lang('common.published')</span>
+        <select name="public" class="form-control" size=1 >
+            <option value="1"
+                @if(old('public', $item->public) == 1) selected @endif>
+                @lang('common.yes')
+            </option>
+            <option value="0"
+                @if(old('public', $item->public) == 0) selected @endif>
+                @lang('common.no')
+            </option>
+        </select>
+        <span class="text-danger">{{ $errors->first('parent') }}</span>
+    </div>
+    <div class="form-group">
         <span>@lang('lists.parent')</span>
         <select name="parent" class="form-control" size=1 >
             <option value="">@lang('common.root')</option>

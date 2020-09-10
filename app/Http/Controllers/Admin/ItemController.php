@@ -128,6 +128,7 @@ class ItemController extends Controller
         $validation_rules['title'] = 'nullable|string';
         $validation_rules['parent'] = 'nullable|integer';
         $validation_rules['taxon'] = 'nullable|integer';
+        $validation_rules['public'] = 'required|integer';
         $validation_rules['fields'] = 'required|array';
         
         // Validation rules for all fields associated with columns
@@ -149,6 +150,7 @@ class ItemController extends Controller
             'title' => $request->input('title'),
             'parent_fk' => $request->input('parent'),
             'taxon_fk' => $request->input('taxon'),
+            'public' => $request->input('public'),
             'item_type_fk' => $item_type,
             'created_by' => $request->user()->id,
             'updated_by' => $request->user()->id,
@@ -398,6 +400,7 @@ class ItemController extends Controller
         $validation_rules['title'] = 'nullable|string';
         $validation_rules['parent'] = 'nullable|integer';
         $validation_rules['taxon'] = 'nullable|integer';
+        $validation_rules['public'] = 'required|integer';
         $validation_rules['fields'] = 'required|array';
         
         // Validation rules for all fields associated with columns
@@ -417,6 +420,7 @@ class ItemController extends Controller
         $item->title = $request->input('title');
         $item->parent_fk = $request->input('parent');
         $item->taxon_fk = $request->input('taxon');
+        $item->public = $request->input('public');
         $item->updated_by = $request->user()->id;
         $item->save();
         
