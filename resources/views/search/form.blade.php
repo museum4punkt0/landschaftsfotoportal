@@ -4,11 +4,13 @@
     @parent
     
     @foreach($menu_root as $it)
+        @if($it->public == 1)
         <li class="nav-item">
             <a class="nav-link" href="{{ route('item.show.public', [$it->item_id]) }}">
                 {{ $it->title }}
             </a>
         </li>
+        @endif
     @endforeach
     
 @endsection

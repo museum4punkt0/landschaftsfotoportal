@@ -18,7 +18,7 @@ class SearchController extends Controller
     public function index()
     {
         // First level items for the sidebar menu
-        $menu_root = Item::whereNull('parent_fk')->orderBy('item_id')->get();
+        $menu_root = Item::whereNull('parent_fk')->where('public', 1)->orderBy('item_id')->get();
         
         return view('search.form', compact('menu_root'));
     }
