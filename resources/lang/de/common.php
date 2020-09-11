@@ -21,6 +21,7 @@ return [
     'delete' => 'löschen',
     'save' => 'speichern',
     'upload' => 'hochladen',
+    'sort' => 'sortieren',
     'ignore' => 'ignorieren',
     'internal' => 'intern',
     'next' => 'weiter',

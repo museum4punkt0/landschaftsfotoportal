@@ -208,15 +208,19 @@ class ColumnMappingController extends Controller
      * @param  int  $item_type
      * @return \Illuminate\Http\Response
      */
-    public function sort(Request $request, $item_type)
+    public function sort(Request $request)
     {
-        // Redirect if selected using drop-down menu
-        if(isset($request->item_type) && $request->item_type <> $item_type )
-            return Redirect::to('admin/colmap/sort/'.intval($request->item_type));
+        $item_type = $request->item_type;
         
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
+        // Use first item type found in database if ID is invalid
+        if(!$item_types->contains($item_type)) {
+            $item_type = $item_types->first()->element_id;
+        }
+        
+        // Get all columns mapped to the given item type
         $columns_mapped = Column::whereHas('column_mapping', function (Builder $query) use ($item_type) {
             $query->where('item_type_fk', $item_type);
         })

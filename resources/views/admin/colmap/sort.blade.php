@@ -106,7 +106,7 @@
 
     function ItemTypeChanged() {
         var item_type = document.getElementById("item_type_select").options[document.getElementById("item_type_select").selectedIndex].value;
-        window.location.href = '{{ url()->current() }}?item_type=' + item_type;
+        window.location.href = "{{ route('colmap.sort') }}/" + item_type;
     }
     
     $(document).ready(function() {
