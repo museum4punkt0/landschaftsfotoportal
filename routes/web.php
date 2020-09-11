@@ -51,12 +51,14 @@ Route::post('admin/colmap/sort/store', 'Admin\ColumnMappingController@sort_store
 Route::resource('admin/colmap', 'Admin\ColumnMappingController');
 Route::resource('admin/column', 'Admin\ColumnController');
 Route::resource('admin/detail', 'Admin\DetailController');
+
 Route::get('admin/item/new', 'Admin\ItemController@new')->name('item.new');
 Route::get('admin/item/titles', 'Admin\ItemController@titles')->name('item.titles');
 Route::get('admin/item/unpublished', 'Admin\ItemController@list_unpublished')->name('item.unpublished');
 Route::get('admin/item/publish/{item?}', 'Admin\ItemController@publish')->name('item.publish');
 Route::resource('admin/item', 'Admin\ItemController');
 Route::resource('admin/taxon', 'Admin\TaxonController');
+Route::resource('admin/user', 'Admin\UserController');
 
 Route::resource('admin/lists/list.element', 'Admin\Lists\ElementController')->shallow();
 Route::resource('admin/lists/element.value', 'Admin\Lists\ValueController')->shallow();

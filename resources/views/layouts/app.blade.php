@@ -81,6 +81,9 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('colmap.index') }}">{{ __('colmaps.header') }}</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('user.index') }}">{{ __('users.header') }}</a>
+                            </li>
                         @endauth
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
