@@ -121,10 +121,10 @@ class ColumnMappingController extends Controller
     /**
      * Show the form for mass mapping columns to item types, column groups and taxa.
      *
-     * @param  int  $item_type
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function map($item_type)
+    public function map(Request  $request)
     {
         $lang = 'name_'. app()->getLocale();
         $column_groups = Value::whereHas('element', function ($query) {
@@ -135,11 +135,19 @@ class ColumnMappingController extends Controller
         })
         ->orderBy('value')->get();
         
+        $item_type = $request->item_type;
+        
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
+        // Use first item type found in database if ID is invalid
+        if(!$item_types->contains($item_type)) {
+            $item_type = $item_types->first()->element_id;
+        }
+        
         $taxa = Taxon::tree()->depthFirst()->get();
         
+        // Get all columns mapped to the given item type
         $columns_mapped = Column::whereHas('column_mapping', function (Builder $query) use ($item_type) {
             $query->where('item_type_fk', $item_type);
         })
@@ -205,7 +213,6 @@ class ColumnMappingController extends Controller
      * Show the form for sorting columns for a given item type.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $item_type
      * @return \Illuminate\Http\Response
      */
     public function sort(Request $request)

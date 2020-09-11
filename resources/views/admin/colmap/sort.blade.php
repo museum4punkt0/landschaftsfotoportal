@@ -14,6 +14,7 @@
             <div class="card-header">@lang('colmaps.header')</div>
             <div class="card-body">
                 <a href="{{route('colmap.create')}}" class="btn btn-primary">@lang('colmaps.new')</a>
+                <a href="{{route('colmap.map')}}" class="btn btn-primary">@lang('common.batch')</a>
                 <hr>
                 <div class="card-title">
                 @lang('colmaps.sort_for')

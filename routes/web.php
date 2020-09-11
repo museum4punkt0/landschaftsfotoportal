@@ -44,7 +44,7 @@ Route::get('/admin/import/items/preview', 'Admin\ImportItemsController@preview')
 Route::post('/admin/import/items/process', 'Admin\ImportItemsController@process')->name('import.items.process');
 Route::get('/admin/import/items/fix_ext', 'Admin\ImportItemsController@fix_ext')->name('import.items.fix_ext');
 
-Route::get('admin/colmap/map/{item_type}', 'Admin\ColumnMappingController@map')->name('colmap.map');
+Route::get('admin/colmap/map/{item_type?}', 'Admin\ColumnMappingController@map')->name('colmap.map');
 Route::post('admin/colmap/map/store', 'Admin\ColumnMappingController@map_store')->name('colmap.map.store');
 Route::get('admin/colmap/sort/{item_type?}', 'Admin\ColumnMappingController@sort')->name('colmap.sort');
 Route::post('admin/colmap/sort/store', 'Admin\ColumnMappingController@sort_store')->name('colmap.sort.store');

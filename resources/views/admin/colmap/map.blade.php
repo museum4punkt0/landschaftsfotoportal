@@ -14,6 +14,7 @@
             <div class="card-header">@lang('colmaps.header')</div>
             <div class="card-body">
                 <a href="{{route('colmap.create')}}" class="btn btn-primary">@lang('colmaps.new')</a>
+                <a href="{{route('colmap.sort')}}" class="btn btn-primary">@lang('common.sort')</a>
                 <hr>
                 <div class="card-title">
                 @lang('colmaps.mapping_for')
@@ -25,15 +26,14 @@
                 (Item-ID {{ $item_type }})
                 </div>
                 
-                {{--
                 <form action="{{ route('colmap.map', $item_type) }}" method="GET">
                     <div class="form-row">
                         <div class="form-group col-md-8">
                             <span>@lang('colmaps.item_type')</span>
-                            <select name="item_type" class="form-control" size=1 >
+                            <select name="item_type" id="item_type_select" class="form-control" size=1 >
                                 @foreach($item_types as $type)
                                     <option value="{{$type->element_id}}"
-                                        @if(old('item_type') == $type->element_id) selected @endif>
+                                        @if(old('item_type', $item_type) == $type->element_id) selected @endif>
                                         @foreach($type->values as $v)
                                             @if($v->attribute->name == 'name_'.app()->getLocale())
                                                 {{$v->value}}
@@ -44,13 +44,9 @@
                             </select>
                             <span class="text-danger">{{ $errors->first('item_type') }}</span>
                         </div>
-                        <div class="form-group col-md-4">
-                            <button type="submit" class="btn btn-primary">@lang('common.save')</button>
-                        </div>
                         {{ csrf_field() }}
                     </div>
                 </form>
-                --}}
                 
                 <form action="{{ route('colmap.map.store') }}" method="POST">
                     <input type="hidden" name="item_type" value="{{ $item_type }}" />
@@ -153,5 +149,15 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    var elem = document.getElementById("item_type_select");
+    elem.addEventListener("change", ItemTypeChanged);
+
+    function ItemTypeChanged() {
+        var item_type = document.getElementById("item_type_select").options[document.getElementById("item_type_select").selectedIndex].value;
+        window.location.href = "{{ route('colmap.map') }}/" + item_type;
+    }
+</script>
 
 @endsection

@@ -22,6 +22,7 @@ return [
     'save' => 'speichern',
     'upload' => 'hochladen',
     'sort' => 'sortieren',
+    'batch' => 'Stapelverarbeitung',
     'ignore' => 'ignorieren',
     'internal' => 'intern',
     'next' => 'weiter',
