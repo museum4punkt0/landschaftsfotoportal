@@ -24,7 +24,14 @@ class AuthServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerPolicies();
-
-        //
+        
+        Gate::before(function ($user, $ability) {
+            if ($user->group == 5) {
+                return true;
+            }
+        });
+        Gate::define('show-dashboard', function ($user) {
+            return $user->group >= 1;
+        });
     }
 }

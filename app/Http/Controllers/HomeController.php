@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Item;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Session;
 use Redirect;
 
@@ -26,7 +27,13 @@ class HomeController extends Controller
      */
     public function index()
     {
-        return view('home');
+        if(Gate::allows('show-dashboard')) {
+            // The current user can view the admin dashboard
+            return view('home');
+        }
+        else {
+            return redirect()->route('frontend');
+        }
     }
     
     /**
