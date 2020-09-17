@@ -36,4 +36,13 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+    
+    
+    /**
+     * Get the group that owns the user.
+     */
+    public function group()
+    {
+        return $this->belongsTo('App\User', 'group_fk', 'user_id');
+    }
 }
