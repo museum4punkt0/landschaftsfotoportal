@@ -14,7 +14,7 @@ class AddGroupToUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->integer('group')->default(0);
+            $table->integer('group_fk')->default(0);
         });
     }
 
@@ -26,7 +26,7 @@ class AddGroupToUsersTable extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('group');
+            $table->dropColumn('group_fk');
         });
     }
 }

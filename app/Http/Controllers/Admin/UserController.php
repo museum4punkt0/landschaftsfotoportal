@@ -107,7 +107,7 @@ class UserController extends Controller
         
         $user->name = $request->input('name');
         $user->email = $request->input('email');
-        $user->group = $request->input('group');
+        $user->group_fk = $request->input('group');
         $user->save();
         
         return Redirect::to('admin/user')

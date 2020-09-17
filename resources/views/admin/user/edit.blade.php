@@ -19,7 +19,7 @@
     </div>
     <div class="form-group">
         <span>@lang('users.group')</span>
-        <input type="text" name="group" class="form-control" value="{{old('group', $user->group)}}" />
+        <input type="text" name="group" class="form-control" value="{{old('group', $user->group_fk)}}" />
         <span class="text-danger">{{ $errors->first('group') }}</span>
     </div>
     
