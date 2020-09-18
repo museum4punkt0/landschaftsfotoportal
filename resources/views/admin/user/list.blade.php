@@ -45,7 +45,7 @@
                             @lang('users.verified'): {{$user->email_verified_at}}
                         </td>
                         <td>
-                            {{$user->group_fk}}
+                            @lang('users.group_'. $user->group->name)
                         </td>
                         <td>
                             {{$user->created_at}}

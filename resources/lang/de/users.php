@@ -23,4 +23,11 @@ return [
     'group' => 'Benutzergruppe',
     'email' => 'Email',
     'verified' => 'verifiziert',
+    
+    'group_registered' => 'registriert',
+    'group_author' => 'Autor',
+    'group_editor' => 'Editor',
+    'group_publisher' => 'Publisher',
+    'group_admin' => 'Admin',
+    'group_super-admin' => 'Super-Admin',
 ];

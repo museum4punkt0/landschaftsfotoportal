@@ -17,32 +17,26 @@
         <input type="text" name="email" class="form-control" value="{{old('email', $user->email)}}" />
         <span class="text-danger">{{ $errors->first('email') }}</span>
     </div>
+    {{--
     <div class="form-group">
         <span>@lang('users.group')</span>
         <input type="text" name="group" class="form-control" value="{{old('group', $user->group_fk)}}" />
         <span class="text-danger">{{ $errors->first('group') }}</span>
     </div>
+    --}}
     
-    {{--
     <div class="form-group">
-        <span>@lang('user.parent')</span>
-        <select name="parent" class="form-control" size=1 >
-            <option value="">@lang('common.root')</option>
-            @foreach($taxa as $t)
-                @unless($t->valid_name)
-                    <option value="{{$t->id}}"
-                        @if(old('parent', $user->parent_fk) == $t->id) selected @endif>
-                        @for ($i = 0; $i < $t->depth; $i++)
-                            |___
-                        @endfor
-                        {{$t->name}} {{$t->author}} ({{$t->native_name}})
-                    </option>
-                @endunless
+        <span>@lang('users.group')</span>
+        <select name="group" class="form-control" size=1 >
+            @foreach($groups as $group)
+                <option value="{{$group->group_id}}"
+                    @if(old('group', $user->group_fk) == $group->group_id) selected @endif>
+                    @lang('users.group_'. $group->name)
+                </option>
             @endforeach
         </select>
-        <span class="text-danger">{{ $errors->first('parent') }}</span>
+        <span class="text-danger">{{ $errors->first('group') }}</span>
     </div>
-    --}}
     
     <div class="form-group">
         <button type="submit" class="btn btn-primary">@lang('common.save')</button>

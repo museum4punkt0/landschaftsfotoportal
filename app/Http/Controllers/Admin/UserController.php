@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\User;
+use App\Group;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Redirect;
@@ -73,7 +74,9 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        return view('admin.user.edit', compact('user'));
+        $groups = Group::orderBy('group_id')->get();
+        
+        return view('admin.user.edit', compact('user', 'groups'));
     }
 
     /**
