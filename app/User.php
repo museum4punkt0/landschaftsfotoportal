@@ -43,6 +43,6 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function group()
     {
-        return $this->belongsTo('App\User', 'group_fk', 'user_id');
+        return $this->belongsTo('App\Group', 'group_fk', 'group_id');
     }
 }

@@ -29,6 +29,6 @@ class Group extends Model
      */
     public function user()
     {
-        return $this->belongsTo('App\User', 'group_fk', 'user_id');
+        return $this->hasMany('App\User', 'group_fk', 'group_id');
     }
 }
