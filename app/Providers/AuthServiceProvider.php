@@ -26,12 +26,12 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
         
         Gate::before(function ($user, $ability) {
-            if ($user->group == 5) {
+            if ($user->group_fk == 5) {
                 return true;
             }
         });
         Gate::define('show-dashboard', function ($user) {
-            return $user->group >= 1;
+            return $user->group_fk >= 1;
         });
     }
 }
