@@ -25,6 +25,16 @@ class Group extends Model
     ];
     
     /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'permissions' => 'array',
+    ];
+    
+    
+    /**
      * Get the user that owns the group.
      */
     public function user()

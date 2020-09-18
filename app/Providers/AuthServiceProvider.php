@@ -26,12 +26,11 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
         
         Gate::before(function ($user, $ability) {
-            if ($user->group_fk == 5) {
-                return true;
-            }
+            return $user->inGroup('super-admin');
         });
+        
         Gate::define('show-dashboard', function ($user) {
-            return $user->group_fk >= 1;
+            return $user->hasAccess(['show-dashboard']);
         });
     }
 }
