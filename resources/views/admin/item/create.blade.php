@@ -25,11 +25,11 @@
         <span>@lang('common.published')</span>
         <select name="public" class="form-control" size=1 >
             <option value="1"
-                @if(old('public', $item->public) == 1) selected @endif>
+                @if(old('public') == 1) selected @endif>
                 @lang('common.yes')
             </option>
             <option value="0"
-                @if(old('public', $item->public) == 0) selected @endif>
+                @if(old('public') == 0) selected @endif>
                 @lang('common.no')
             </option>
         </select>
