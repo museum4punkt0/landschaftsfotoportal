@@ -182,6 +182,8 @@ class ImportItemsController extends Controller
                     'parent_fk' => $request->input('parent'),
                     'item_type_fk' => $request->input('item_type'),
                     'taxon_fk' => $taxon->taxon_id,
+                    'created_by' => $request->user()->id,
+                    'updated_by' => $request->user()->id,
                 ];
                 // Check for already existing items
                 $existing_item = Item::where([
