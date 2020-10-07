@@ -45,7 +45,7 @@
                                         @if(old('fields.'.$loop->index) == -3) selected @endif>
                                         @lang('import.taxon_name')
                                     </option>
-                                    @foreach($colmaps as $colmap)
+                                    @foreach($colmaps->unique('column_fk') as $colmap)
                                         <option value="{{ $colmap->column_fk }}"
                                             @if(old('fields.'.$loop->parent->index) == $colmap->column_fk)
                                                 selected
