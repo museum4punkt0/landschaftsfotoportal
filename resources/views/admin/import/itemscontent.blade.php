@@ -46,15 +46,19 @@
                                         @lang('import.taxon_name')
                                     </option>
                                     @foreach($colmaps->unique('column_fk') as $colmap)
-                                        <option value="{{ $colmap->column_fk }}"
-                                            @if(old('fields.'.$loop->parent->index) == $colmap->column_fk)
-                                                selected
-                                            @endif
-                                        >
-                                            {{ $colmap->column->translation->attributes
-                                                ->firstWhere('name', 'name_'.app()->getLocale())
-                                                ->pivot->value }}
-                                        </option>
+                                        {{-- Exclude columns with data type 'taxon' --}}
+                                        @unless($colmap->column->data_type->attributes
+                                            ->firstWhere('name', 'code')->pivot->value == '_taxon_')
+                                            <option value="{{ $colmap->column_fk }}"
+                                                @if(old('fields.'.$loop->parent->index) == $colmap->column_fk)
+                                                    selected
+                                                @endif
+                                            >
+                                                {{ $colmap->column->translation->attributes
+                                                    ->firstWhere('name', 'name_'.app()->getLocale())
+                                                    ->pivot->value }}
+                                            </option>
+                                        @endunless
                                     @endforeach
                                 </select>
                             </td>
