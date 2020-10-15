@@ -179,12 +179,11 @@
                                             <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{
                                                 Config::get('media.zoomify_zif_image_path')
                                             }}{{ pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME)
-                                            }}.zif&caption={{ $item->taxon->full_name
-                                            }}; Barcode: {{
+                                            }}.zif&caption={{ rawurlencode($item->taxon->full_name ."; Barcode: ".
                                                 explode('_', pathinfo($it->getDetailWhereDataType('_image_'),
-                                                    PATHINFO_FILENAME))[0]
-                                            }}&description={{ $it->getDetailWhereDataType('_image_title_')
-                                            }}&copyright={{ $it->getDetailWhereDataType('_image_copyright_') 
+                                                    PATHINFO_FILENAME))[0])
+                                            }}&description={{ rawurlencode($it->getDetailWhereDataType('_image_title_'))
+                                            }}&copyright={{ rawurlencode($it->getDetailWhereDataType('_image_copyright_')) 
                                             }}&params=zMeasureVisible%3D1%26zUnits%3Dmm%26zPixelsPerUnit%3D{{
                                                 $it->getDetailWhereDataType('_image_ppi_')/25.4
                                             }}">
@@ -225,12 +224,11 @@
                                                 <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{
                                                     Config::get('media.zoomify_jpg_image_path')
                                                 }}{{ pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME)
-                                                }}.jpg&caption={{ $item->taxon->full_name
-                                                }}; Barcode: {{
+                                                }}.jpg&caption={{ rawurlencode($item->taxon->full_name ."; Barcode: ".
                                                     explode('_', pathinfo($it->getDetailWhereDataType('_image_'),
-                                                        PATHINFO_FILENAME))[0]
-                                                }}&description={{ $it->getDetailWhereDataType('_image_title_')
-                                                }}&copyright={{ $it->getDetailWhereDataType('_image_copyright_') 
+                                                        PATHINFO_FILENAME))[0])
+                                                }}&description={{ rawurlencode($it->getDetailWhereDataType('_image_title_'))
+                                                }}&copyright={{ rawurlencode($it->getDetailWhereDataType('_image_copyright_'))
                                                 }}&params=zMeasureVisible%3D1%26zUnits%3Dmm%26zPixelsPerUnit%3D{{
                                                     $it->getDetailWhereDataType('_image_ppi_')/25.4
                                                 }}">
@@ -238,12 +236,11 @@
                                                 <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{
                                                     Config::get('media.zoomify_zif_image_path')
                                                 }}{{ pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME)
-                                                }}.zif&caption={{ $item->taxon->full_name
-                                                }}; Barcode: {{
+                                                }}.zif&caption={{ rawurlencode($item->taxon->full_name ."; Barcode: ".
                                                     explode('_', pathinfo($it->getDetailWhereDataType('_image_'),
-                                                        PATHINFO_FILENAME))[0]
-                                                }}&description={{ $it->getDetailWhereDataType('_image_title_')
-                                                }}&copyright={{ $it->getDetailWhereDataType('_image_copyright_') 
+                                                        PATHINFO_FILENAME))[0])
+                                                }}&description={{ rawurlencode($it->getDetailWhereDataType('_image_title_'))
+                                                }}&copyright={{ rawurlencode($it->getDetailWhereDataType('_image_copyright_'))
                                                 }}&params=zMeasureVisible%3D1%26zUnits%3Dmm%26zPixelsPerUnit%3D{{
                                                     $it->getDetailWhereDataType('_image_ppi_')/25.4
                                                 }}">
@@ -282,9 +279,9 @@
                                         Config::get('media.zoomify_zif_image_path')
                                         }}{{ pathinfo($details->firstWhere('column_fk',
                                             $cm->column->column_id)->value_string, PATHINFO_FILENAME)
-                                        }}.zif&&caption={{ $item->taxon->full_name
-                                        }}&description={{ $cm->column->translation->attributes
-                                            ->firstWhere('name', 'name_'.app()->getLocale())->pivot->value
+                                        }}.zif&&caption={{ rawurlencode($item->taxon->full_name)
+                                        }}&description={{ rawurlencode($cm->column->translation->attributes
+                                            ->firstWhere('name', 'name_'.app()->getLocale())->pivot->value)
                                         }}">
                                 @endif
                                 <img src="{{ asset('storage/'. Config::get('media.preview_dir') .

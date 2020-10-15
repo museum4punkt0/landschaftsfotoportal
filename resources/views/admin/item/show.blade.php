@@ -235,9 +235,9 @@
                                     Config::get('media.zoomify_zif_image_path')
                                     }}{{ pathinfo($details->firstWhere('column_fk',
                                         $cm->column->column_id)->value_string, PATHINFO_FILENAME)
-                                    }}.zif&&caption={{ $item->taxon->full_name
-                                    }}&description={{ $cm->column->translation->attributes
-                                        ->firstWhere('name', 'name_'.app()->getLocale())->pivot->value
+                                    }}.zif&&caption={{ rawurlencode($item->taxon->full_name)
+                                    }}&description={{ rawurlencode($cm->column->translation->attributes
+                                        ->firstWhere('name', 'name_'.app()->getLocale())->pivot->value)
                                     }}">
                             @endif
                             <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
