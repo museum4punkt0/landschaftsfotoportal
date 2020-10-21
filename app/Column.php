@@ -91,19 +91,11 @@ class Column extends Model
     {
         switch ($this->getDataType()) {
             case '_list_':
-            case '_image_copyright_':
             case '_integer_':
                 return 'integer';
             case '_float_':
                 return 'numeric';
             case '_string_':
-                return 'string';
-            case '_date_':
-                return 'date';
-            case '_url_':
-                return 'url';
-            case '_image_':
-                return 'image|mimes:jpeg,png|max:8192';
             case '_title_':
             case '_image_title_':
             case '_image_copyright_':
@@ -111,6 +103,12 @@ class Column extends Model
             case '_map_':
             case '_html_':
                 return 'string';
+            case '_date_':
+                return 'date';
+            case '_url_':
+                return 'url';
+            case '_image_':
+                return 'image|mimes:jpeg,png|max:8192';
             default:
                 return '';
         }
