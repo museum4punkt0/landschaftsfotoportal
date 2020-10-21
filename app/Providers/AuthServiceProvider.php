@@ -25,8 +25,11 @@ class AuthServiceProvider extends ServiceProvider
     {
         $this->registerPolicies();
         
+        // Intercepting gate to grant all abilities to super-admin
         Gate::before(function ($user, $ability) {
-            return $user->inGroup('super-admin');
+            if ($user->inGroup('super-admin')) {
+                return true;
+            }
         });
         
         Gate::define('show-dashboard', function ($user) {
