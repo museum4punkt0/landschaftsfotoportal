@@ -155,9 +155,9 @@ class ElementController extends Controller
         $success_status_msg .= " ". __('elements.deleted');
         
         // Fix hierarchy of elements if necessary
-        if($element->list->hierarchical) {
+        if ($element->list->hierarchical) {
             // Check for existing descendants
-            foreach(Element::where('parent_fk', $element->element_id)->get() as $descendant) {
+            foreach (Element::where('parent_fk', $element->element_id)->get() as $descendant) {
                 // Fix parent ID on descendant element
                 $descendant->parent_fk = $element->parent_fk;
                 $descendant->save();

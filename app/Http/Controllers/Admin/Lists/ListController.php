@@ -31,7 +31,7 @@ class ListController extends Controller
     {
         $data['lists'] = Selectlist::where('internal', false)->orderBy('name')->paginate(10);
         
-        return view('admin.lists.list.list',$data);
+        return view('admin.lists.list.list', $data);
     }
 
     /**
@@ -43,7 +43,7 @@ class ListController extends Controller
     {
         $data['lists'] = Selectlist::where('internal', true)->orderBy('name')->paginate(10);
         
-        return view('admin.lists.list.list',$data);
+        return view('admin.lists.list.list', $data);
     }
 
     /**
@@ -153,7 +153,6 @@ class ListController extends Controller
         Selectlist::where('list_id', $id)->update($update);
         
         return Redirect::to('admin/lists/list')->with('success', __('lists.updated'));
-
     }
 
     /**
