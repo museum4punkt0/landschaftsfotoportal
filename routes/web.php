@@ -65,5 +65,6 @@ Route::resource('admin/lists/element.value', 'Admin\Lists\ValueController')->sha
 
 Route::get('admin/lists/list/internal', 'Admin\Lists\ListController@internal')->name('list.internal');
 Route::get('admin/lists/list/{id}/tree', 'Admin\Lists\ListController@tree')->name('list.tree');
+Route::get('admin/lists/list/{id}/export', 'Admin\Lists\ListController@export')->name('list.export');
 Route::resource('admin/lists/list', 'Admin\Lists\ListController');
 Route::resource('admin/lists/attribute', 'Admin\Lists\AttributeController');

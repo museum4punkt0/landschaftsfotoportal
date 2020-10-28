@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Lists;
 
 use App\Selectlist;
+use App\Attribute;
 use App\Element;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -112,6 +113,54 @@ class ListController extends Controller
         $data['elements'] = Element::treeOf($constraint)->depthFirst()->paginate(10);
         
         return view('admin.lists.list.tree', $data);
+    }
+
+    /**
+     * Export the specified resource as CSV file.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function export($id)
+    {
+        $data['list'] = Selectlist::find($id);
+        $data['attributes'] = Attribute::orderBy('attribute_id')->get();
+        
+        $constraint = function (Builder $query) use ($id) {
+            $query->where('parent_fk', null)->where('list_fk', $id);
+        };
+        
+        $data['elements'] = Element::treeOf($constraint)->depthFirst()->get();
+        
+        $attributeMap = null;
+        
+        // Create heading (1st line) of CSV file
+        $csvContent = "id;parent_id;";
+        foreach ($data['attributes'] as $attribute) {
+            $attributeMap[$attribute->attribute_id] = '';
+            $csvContent .= $attribute->name .";";
+        }
+        $csvContent .= "\n";
+        
+        // Create all the content lines
+        foreach ($data['elements'] as $element) {
+            $values = $attributeMap;
+            
+            foreach ($element->values as $value) {
+                $values[$value->attribute_fk] = $value->value;
+            }
+            
+            $csvContent .= $element->element_id .";". $element->parent_fk .";";
+            $csvContent .= implode(';', $values);
+            $csvContent .= "\n";
+        }
+        
+        // Set file name for download
+        $exportFileName = sprintf('list_%d_%s_%s.csv', $id, $data['list']->name, date('Y-m-d'));
+        
+        return response()->streamDownload(function () use ($csvContent) {
+            echo $csvContent;
+        }, $exportFileName, ["Content-Type" => "text/csv"]);
     }
 
     /**
