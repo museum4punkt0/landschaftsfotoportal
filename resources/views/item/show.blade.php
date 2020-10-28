@@ -1,4 +1,4 @@
-@extends('layouts.frontend')
+@extends('layouts.frontend_' . Config::get('ui.frontend_layout'))
 
 @section('sidebar_menu_items')
     @parent
