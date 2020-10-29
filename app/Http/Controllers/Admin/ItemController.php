@@ -24,7 +24,10 @@ class ItemController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('verified')->except('show');
+        $this->middleware('verified');
+        
+        // Use app\Policies\ItemPolicy for authorizing ressource controller
+        $this->authorizeResource(Item::class, 'item');
     }
 
     /**
@@ -46,6 +49,8 @@ class ItemController extends Controller
      */
     public function new()
     {
+        $this->authorize('new', Item::class);
+        
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
@@ -256,6 +261,8 @@ class ItemController extends Controller
      */
     public function titles()
     {
+        $this->authorize('titles', Item::class);
+        
         $items = Item::orderBy('item_id')->get();
         
         $count = 0;
@@ -279,6 +286,8 @@ class ItemController extends Controller
      */
     public function list_unpublished()
     {
+        $this->authorize('unpublished', Item::class);
+        
         $items = Item::where('public', 0)->orderByDesc('updated_at')->paginate(10);
         
         return view('admin.item.publish', compact('items'));
@@ -292,6 +301,8 @@ class ItemController extends Controller
      */
     public function publish(Item $item)
     {
+        $this->authorize('publish', $item);
+        
         // Check for single item or batch
         if($item->item_id) {
             $items = [Item::find($item->item_id)];
