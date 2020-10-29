@@ -27,13 +27,7 @@ class HomeController extends Controller
      */
     public function index()
     {
-        if(Gate::allows('show-dashboard')) {
-            // The current user can view the admin dashboard
-            return view('home');
-        }
-        else {
-            return redirect()->route('frontend');
-        }
+        return view('home');
     }
     
     /**
