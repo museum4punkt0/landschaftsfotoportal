@@ -15,6 +15,8 @@
                     @endif
 
                     @lang('auth.logged_in')
+                    <br/>
+                    @lang('users.group'): @lang('users.group_'. $user->group->name)
                 </div>
             </div>
         </div>
