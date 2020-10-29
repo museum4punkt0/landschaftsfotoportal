@@ -23,6 +23,7 @@ return [
     'group' => 'Benutzergruppe',
     'email' => 'Email',
     'verified' => 'verifiziert',
+    'dashboard' => 'Dashboard',
     
     'group_registered' => 'registriert',
     'group_author' => 'Autor',
