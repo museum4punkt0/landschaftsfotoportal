@@ -140,6 +140,12 @@ class ColumnMappingController extends Controller
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
+        // Check for existing item_type, otherwise redirect back with warning message
+        if ($item_types->isEmpty()) {
+            return Redirect::to('admin/colmap')
+                ->with('warning', __('colmaps.no_item_type'));
+        }
+        
         // Use first item type found in database if ID is invalid
         if (!$item_types->contains($item_type)) {
             $item_type = $item_types->first()->element_id;
@@ -226,6 +232,12 @@ class ColumnMappingController extends Controller
         
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
+        
+        // Check for existing item_type, otherwise redirect back with warning message
+        if ($item_types->isEmpty()) {
+            return Redirect::to('admin/colmap')
+                ->with('warning', __('colmaps.no_item_type'));
+        }
         
         // Use first item type found in database if ID is invalid
         if (!$item_types->contains($item_type)) {

@@ -32,4 +32,5 @@ return [
     'details_added' => 'Fehlende Anzeigefelder wurden zu :count Datensätzen hinzugefügt.',
     'edit_danger' => 'Sie bearbeiten Feldzuordnungen. Dies wird Ihre Daten unbrauchbar machen!',
     'none_available' => 'Diesem Datensatztyp wurden noch keine Anzeigefelder zugeordnet.',
+    'no_item_type' => 'Es wurde noch kein Datensatztyp angelegt!',
 ];
