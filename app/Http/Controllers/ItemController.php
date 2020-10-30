@@ -3,15 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Item;
-#use App\Taxon;
 use App\Detail;
-#use App\Column;
 use App\ColumnMapping;
 use App\Selectlist;
 use App\Element;
-#use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
-#use Illuminate\Http\Request;
 use Redirect;
 
 class ItemController extends Controller
@@ -26,7 +22,7 @@ class ItemController extends Controller
     {
         // Check for redirects
         $target = $item->getDetailWhereDataType('_redirect_');
-        if($target && $target != __('items.no_detail_with_data_type')) {
+        if ($target && $target != __('items.no_detail_with_data_type')) {
             return Redirect::to($target);
         }
         
@@ -54,7 +50,7 @@ class ItemController extends Controller
                 return $query->whereNull('taxon_fk')
                     ->orWhereHas('taxon.descendants', function (Builder $query) use ($taxon_id) {
                         $query->where('taxon_id', $taxon_id);
-                });
+                    });
             })
             ->orderBy('column_order')->get();
         

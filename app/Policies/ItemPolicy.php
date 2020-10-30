@@ -16,7 +16,8 @@ class ItemPolicy
      * @param  \App\User  $user
      * @return mixed
      */
-    public function before($user, $ability) {
+    public function before($user, $ability)
+    {
         if ($user->inGroup('super-admin')) {
             return true;
         }

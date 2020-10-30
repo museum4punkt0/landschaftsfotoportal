@@ -8,7 +8,7 @@ class Selectlist extends Model
 {
     /**
      * The table associated with the model.
-     * 
+     *
      * (The default would be 'selectlists')
      *
      * @var string
@@ -17,7 +17,7 @@ class Selectlist extends Model
     
     /**
      * The primary key associated with the table.
-     * 
+     *
      * (The default would be 'id')
      *
      * @var string

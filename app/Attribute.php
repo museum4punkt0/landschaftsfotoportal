@@ -8,7 +8,7 @@ class Attribute extends Model
 {
     /**
      * The primary key associated with the table.
-     * 
+     *
      * (The default would be 'id')
      *
      * @var string

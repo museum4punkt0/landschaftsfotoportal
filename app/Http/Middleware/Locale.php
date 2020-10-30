@@ -18,7 +18,7 @@ class Locale
      */
     public function handle($request, Closure $next)
     {
-        if(!Session::has('locale')) {
+        if (!Session::has('locale')) {
             Session::put('locale', Config::get('app.locale'));
         }
         

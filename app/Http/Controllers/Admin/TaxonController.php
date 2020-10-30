@@ -167,7 +167,7 @@ class TaxonController extends Controller
         $success_status_msg = " ". __('taxon.deleted');
         
         // Check for existing descendants of deleted taxon and fix their parents
-        foreach(Taxon::where('parent_fk', $taxon->taxon_id)->get() as $descendant) {
+        foreach (Taxon::where('parent_fk', $taxon->taxon_id)->get() as $descendant) {
             // Fix parent ID on descendant element
             $descendant->parent_fk = $taxon->parent_fk;
             $descendant->save();

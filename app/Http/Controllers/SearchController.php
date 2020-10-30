@@ -4,9 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Item;
 use App\Taxon;
-#use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-#use Redirect;
 
 class SearchController extends Controller
 {

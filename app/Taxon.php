@@ -8,7 +8,7 @@ class Taxon extends Model
 {
     /**
      * The table associated with the model.
-     * 
+     *
      * (The default would be 'selectlists')
      *
      * @var string
@@ -17,7 +17,7 @@ class Taxon extends Model
     
     /**
      * The primary key associated with the table.
-     * 
+     *
      * (The default would be 'id')
      *
      * @var string
@@ -73,7 +73,7 @@ class Taxon extends Model
     
     /**
      * The parent key associated with the table.
-     * 
+     *
      * (The default would be 'parent_id')
      *
      * @var string
@@ -85,7 +85,7 @@ class Taxon extends Model
     
     /**
      * The primary key associated with the table.
-     * 
+     *
      * (The default would be 'id')
      *
      * @var string
@@ -97,16 +97,17 @@ class Taxon extends Model
     
     /**
      * Get the taxon's ancestor with the given rank name.
-     * 
+     *
      * @param  string  $rank  The abbreviated taxonomic rank, e.g. ORD, FAM, GAT, SPE
      * @return App\Taxon
      */
     public function getAncestorWhereRank($rank)
     {
         $a = $this->ancestors->firstWhere('rank_abbr', '=', $rank);
-        if($a)
+        if ($a) {
             return $a;
-        else
+        } else {
             return null;
+        }
     }
 }

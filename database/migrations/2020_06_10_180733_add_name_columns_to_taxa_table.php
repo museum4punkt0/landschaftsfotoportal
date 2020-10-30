@@ -16,7 +16,7 @@ class AddNameColumnsToTaxaTable extends Migration
         Schema::table('taxa', function (Blueprint $table) {
             $table->string('taxon_suppl')->nullable(true);
             $table->string('full_name')->default('');
-            $table->string('rank_abbr')->nullable(true);;
+            $table->string('rank_abbr')->nullable(true);
         });
     }
 

@@ -102,7 +102,7 @@ class UserController extends Controller
             'group' => 'required|integer',
         ]);
         
-        if($validator->fails()) {
+        if ($validator->fails()) {
             return redirect()->route('user.edit', $user)
                         ->withErrors($validator)
                         ->withInput();

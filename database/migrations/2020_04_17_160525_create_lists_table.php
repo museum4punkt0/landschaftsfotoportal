@@ -18,7 +18,7 @@ class CreateListsTable extends Migration
             $table->string('name');
             $table->string('description');
             $table->boolean('hierarchical')->default(false);
-            $table->string('attribute_order')->nullable(TRUE);
+            $table->string('attribute_order')->nullable(true);
             $table->timestamps();
         });
     }

@@ -8,7 +8,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | The following language lines are used to manage the taxonomic tree in the backend.
-    | 
+    |
     | There should be lines for each column of 'taxon' database table to print proper
     | validation errors. The names of language lines and database columns must be equal.
     |

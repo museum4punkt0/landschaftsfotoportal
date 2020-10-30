@@ -8,7 +8,7 @@ class Item extends Model
 {
     /**
      * The primary key associated with the table.
-     * 
+     *
      * (The default would be 'id')
      *
      * @var string
@@ -84,7 +84,7 @@ class Item extends Model
     
     /**
      * The parent key associated with the table.
-     * 
+     *
      * (The default would be 'parent_id')
      *
      * @var string
@@ -96,7 +96,7 @@ class Item extends Model
     
     /**
      * The primary key associated with the table.
-     * 
+     *
      * (The default would be 'id')
      *
      * @var string
@@ -112,7 +112,7 @@ class Item extends Model
      */
     public function getTitleColumnId()
     {
-        if($this->item_type->attributes()->firstWhere('name', 'config')) {
+        if ($this->item_type->attributes()->firstWhere('name', 'config')) {
             $json = $this->item_type->attributes()->firstWhere('name', 'config')->pivot->value;
             $config = json_decode($json, true);
             
@@ -126,7 +126,7 @@ class Item extends Model
     
     /**
      * Get the title or name string representing this item.
-     * 
+     *
      * The column storing that string is set in the JSON config that belongs to the item_type.
      *
      * @param  bool  $fromTaxon
@@ -137,15 +137,15 @@ class Item extends Model
         $title = __('items.no_title_column');
         
         // TODO: getTitleColumnId() is much too slow, we should create a column 'item'.'title'
-        if(!$fromTaxon && $this->getTitleColumnId()) {
+        if (!$fromTaxon && $this->getTitleColumnId()) {
             $title_column = $this->columns->firstWhere('column_id', $this->getTitleColumnId());
-            if($title_column) {
+            if ($title_column) {
                 $title = $title_column->pivot->value_string;
             }
         }
         // Try to fetch a taxon name instead if a taxon is linked with this item
         else {
-            if($this->taxon_fk) {
+            if ($this->taxon_fk) {
                 $title = $this->taxon->full_name;
             }
         }
@@ -162,9 +162,10 @@ class Item extends Model
     public function getDataTypeId($name)
     {
         // Check all columns of this item for given data type
-        foreach($this->columns as $col) {
-            if($col->getDataType() == $name)
+        foreach ($this->columns as $col) {
+            if ($col->getDataType() == $name) {
                 return $col->data_type_fk;
+            }
         }
         
         return null;
@@ -181,12 +182,12 @@ class Item extends Model
         $detail = __('items.no_detail_with_data_type');
         
         $data_type_id = $this->getDataTypeId($name);
-        if($data_type_id) {
+        if ($data_type_id) {
             // Get first column with given data type
             $column = $this->columns->firstWhere('data_type_fk', $data_type_id);
-            if($column) {
+            if ($column) {
                 // Details can be of different data types
-                switch($name) {
+                switch ($name) {
                     case '_float_':
                         $detail = $column->pivot->value_float;
                         break;

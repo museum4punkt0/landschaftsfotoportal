@@ -13,7 +13,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\MessageBag;
-use Validator,Redirect,File;
+use Validator;
+use Redirect;
+use File;
 
 class ImportItemsController extends Controller
 {
@@ -54,7 +56,7 @@ class ImportItemsController extends Controller
         ]);
         
         // Save CSV file
-        if($files = $request->file('fileUpload')) {
+        if ($files = $request->file('fileUpload')) {
             $destinationPath = 'storage/'. config('media.import_dir');
             $fileName = date('YmdHis') .".". $files->getClientOriginalExtension();
             $files->move($destinationPath, $fileName);
@@ -68,8 +70,7 @@ class ImportItemsController extends Controller
             return redirect()->route('import.items.preview', ['item_type' => $request->input('item_type')]);
         }
         // Saving file failed
-        else
-        {
+        else {
             return redirect()->route('import.items.upload')
                 ->with('error', __('import.save_error'));
         }
@@ -89,7 +90,7 @@ class ImportItemsController extends Controller
         $file_name = $request->session()->get('file_name');
         
         // Parse CSV file
-        $data = array_map(function($d) {
+        $data = array_map(function ($d) {
             return str_getcsv($d, ";");
         }, file($csv_file));
         $csv_data = array_slice($data, 0, 5);
@@ -98,7 +99,7 @@ class ImportItemsController extends Controller
         $colmaps = ColumnMapping::where('item_type_fk', $request->item_type)->get();
         
         // Check for defined columns for this item_type, otherwise redirect back with error message
-        if($colmaps->isEmpty()) {
+        if ($colmaps->isEmpty()) {
             return redirect()->route('import.items.upload')
                 ->with('error', __('colmaps.none_available'));
         }
@@ -125,27 +126,32 @@ class ImportItemsController extends Controller
             'fields' => [
                 function ($attribute, $value, $fail) {
                     // Check for duplicate attributes but not for 'ignored' ones
-                    foreach(array_count_values($value) as $selected_attr => $quantity) {
-                        if($selected_attr !== 0 && $quantity > 1) {
-                            if($selected_attr > 0)
+                    foreach (array_count_values($value) as $selected_attr => $quantity) {
+                        if ($selected_attr !== 0 && $quantity > 1) {
+                            if ($selected_attr > 0) {
                                 $fail(__('import.attribute_once', [
                                     'attribute' => Column::find($selected_attr)->description
                                 ]));
-                            if($selected_attr == -2)
+                            }
+                            if ($selected_attr == -2) {
                                 $fail(__('import.attribute_once', ['attribute' => __('import.parent_id')]));
+                            }
                         }
                     }
                 },
                 function ($attribute, $value, $fail) {
                     // Check for missing attributes, at least one (column) must be selected
-                    $a = array_filter($value, function ($v) { return $v>0; } );
-                    if(!array_sum($a))
+                    $a = array_filter($value, function ($v) {
+                        return $v>0;
+                    });
+                    if (!array_sum($a)) {
                         $fail(__('import.missing_columns'));
+                    }
                 },
             ],
         ]);
         
-        if($validator->fails()) {
+        if ($validator->fails()) {
             return redirect()->route('import.items.preview', ['item_type' => $request->input('item_type')])
                         ->withErrors($validator)
                         ->withInput();
@@ -153,7 +159,7 @@ class ImportItemsController extends Controller
                 
         // Get CSV file path from session and read file into array $data
         $csv_file = $request->session()->get('csv_file');
-        $data = array_map(function($d) {
+        $data = array_map(function ($d) {
             return str_getcsv($d, ";");
         }, file($csv_file));
         
@@ -162,22 +168,22 @@ class ImportItemsController extends Controller
         #$messageBag = new MessageBag;
         
         // Process each line of given CSV file
-        foreach($data as $number => $line) {
+        foreach ($data as $number => $line) {
             // Skip first row if containing table headers
-            if($number == 0 && $request->has('header'))
+            if ($number == 0 && $request->has('header')) {
                 continue;
+            }
             
             // Try to match taxon for given full scientific name
             $taxon = Taxon::where('full_name', $line[array_search('-3', $selected_attr)])->first();
-            if(empty($taxon)) {
+            if (empty($taxon)) {
                 // Taxon not found: skip this one and set warning message
                 $warning_status_msg .= " ". __('import.taxon_not_found', ['full_name' => $line[array_search('-3', $selected_attr)]]);
                 $request->session()->flash('warning', $warning_status_msg);
                 // TODO: use messageBag for arrays
                 #$messageBag->add('warning', $warning_status_msg);
                 continue;
-            }
-            else {
+            } else {
                 $item_data = [
                     'parent_fk' => $request->input('parent'),
                     'item_type_fk' => $request->input('item_type'),
@@ -190,19 +196,18 @@ class ImportItemsController extends Controller
                     ['taxon_fk', $taxon->taxon_id],
                     ['item_type_fk', $request->input('item_type')],
                 ])->first();
-                if(!empty($existing_item) && $request->has('unique_taxa')) {
+                if (!empty($existing_item) && $request->has('unique_taxa')) {
                     $warning_status_msg .= " ". __('import.taxon_exists', ['full_name' => $line[array_search('-3', $selected_attr)]]);
                     $request->session()->flash('warning', $warning_status_msg);
                     // TODO: use messageBag for arrays
                     continue;
-                }
-                else {
+                } else {
                     $item = Item::create($item_data);
                     
                     // Process each column (= table cell)
-                    foreach($line as $colnr => $cell) {
+                    foreach ($line as $colnr => $cell) {
                         // Check for column's attribute chosen by user
-                        if($selected_attr[$colnr] > 0) {
+                        if ($selected_attr[$colnr] > 0) {
                             $detail_data = [
                                 'item_fk' => $item->item_id,
                                 'column_fk' => $selected_attr[$colnr],
@@ -239,23 +244,23 @@ class ImportItemsController extends Controller
                         // Set parent fkey of item if individually choosen per item
                         $pit = $request->input('parent_item_type');
                         // Try to match parent item using a detail
-                        if($selected_attr[$colnr] == -1) {
+                        if ($selected_attr[$colnr] == -1) {
                             // Try to match taxon for given full scientific name
                             $parent_item = Item::whereHas('details', function (Builder $query) use ($cell, $pit) {
                                 $query->where('value_string', $cell);
                             })->where('item_type_fk', $pit)->first();
-                            if(!empty($parent_item)) {
+                            if (!empty($parent_item)) {
                                 $item->parent_fk = $parent_item->item_id;
                                 $item->save();
                             }
                         }
                         // Try to match parent item using a taxon's full scientific name
-                        if($selected_attr[$colnr] == -2) {
+                        if ($selected_attr[$colnr] == -2) {
                             // Try to match taxon for given full scientific name
                             $parent_item = Item::whereHas('taxon', function (Builder $query) use ($cell, $pit) {
                                 $query->where('full_name', $cell);
                             })->where('item_type_fk', $pit)->first();
-                            if(!empty($parent_item)) {
+                            if (!empty($parent_item)) {
                                 $item->parent_fk = $parent_item->item_id;
                                 $item->save();
                             }
@@ -270,7 +275,7 @@ class ImportItemsController extends Controller
     }
     
     /**
-     * Fix file name extension for items with item type _image_ and column ID 63 data type _image_. 
+     * Fix file name extension for items with item type _image_ and column ID 63 data type _image_.
      *
      * @return \Illuminate\Http\Response
      */
@@ -280,9 +285,9 @@ class ImportItemsController extends Controller
         
         $count = 0;
         // Copy title string for all details if doesn't exist yet
-        foreach($details as $detail) {
-            if(strpos($detail->value_string, '.tif')) {
-                $detail->value_string = str_replace('.tif', '.jpg' ,$detail->value_string);
+        foreach ($details as $detail) {
+            if (strpos($detail->value_string, '.tif')) {
+                $detail->value_string = str_replace('.tif', '.jpg', $detail->value_string);
                 $detail->save();
                 $count++;
             }

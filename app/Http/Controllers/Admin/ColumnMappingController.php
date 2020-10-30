@@ -95,11 +95,11 @@ class ColumnMappingController extends Controller
         
         // Create missing details for all items
         $count = 0;
-        foreach(Item::where('item_type_fk', $data['item_type_fk'])->get() as $item) {
+        foreach (Item::where('item_type_fk', $data['item_type_fk'])->get() as $item) {
             Detail::firstOrCreate(['column_fk' => $data['column_fk'], 'item_fk' => $item->item_id]);
             $count++;
         }
-        if($count) {
+        if ($count) {
             $success_status_msg .= " ". __('colmaps.details_added', ['count' => $count]);
         }
         
@@ -141,7 +141,7 @@ class ColumnMappingController extends Controller
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
         // Use first item type found in database if ID is invalid
-        if(!$item_types->contains($item_type)) {
+        if (!$item_types->contains($item_type)) {
             $item_type = $item_types->first()->element_id;
         }
         
@@ -158,7 +158,12 @@ class ColumnMappingController extends Controller
         $columns_avail = Column::doesntHave('column_mapping')->orderBy('description')->get();
         
         return view('admin.colmap.map', compact(
-            'item_type', 'column_groups', 'item_types', 'taxa', 'columns_mapped', 'columns_avail'
+            'item_type',
+            'column_groups',
+            'item_types',
+            'taxa',
+            'columns_mapped',
+            'columns_avail'
         ));
     }
 
@@ -182,7 +187,7 @@ class ColumnMappingController extends Controller
         $success_status_msg = '';
         
         // Create mapping for selected columns
-        foreach($request->input('column_avail') as $key => $colnr) {
+        foreach ($request->input('column_avail') as $key => $colnr) {
             $data = [
                 'column_fk' => $colnr,
                 'column_group_fk' => $request->input('column_group'),
@@ -195,11 +200,11 @@ class ColumnMappingController extends Controller
             
             // Create missing details for all items
             $count = 0;
-            foreach(Item::where('item_type_fk', $data['item_type_fk'])->get() as $item) {
+            foreach (Item::where('item_type_fk', $data['item_type_fk'])->get() as $item) {
                 Detail::firstOrCreate(['column_fk' => $data['column_fk'], 'item_fk' => $item->item_id]);
                 $count++;
             }
-            if($count) {
+            if ($count) {
                 $success_status_msg .= __('colmaps.details_added', ['count' => $count]) ." ";
             }
         }
@@ -223,7 +228,7 @@ class ColumnMappingController extends Controller
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
         // Use first item type found in database if ID is invalid
-        if(!$item_types->contains($item_type)) {
+        if (!$item_types->contains($item_type)) {
             $item_type = $item_types->first()->element_id;
         }
         
@@ -240,7 +245,7 @@ class ColumnMappingController extends Controller
 
     /**
      * Save the sorting of columns for a given item type.
-     * 
+     *
      * This is called via AJAX request.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -248,10 +253,10 @@ class ColumnMappingController extends Controller
      */
     public function sort_store(Request $request)
     {
-        if($request->has('ids')){
+        if ($request->has('ids')) {
             $arr = explode(',', $request->input('ids'));
             
-            foreach($arr as $sortOrder => $id){
+            foreach ($arr as $sortOrder => $id) {
                 $colmap = ColumnMapping::firstWhere('colmap_id', $id);
                 $colmap->column_order = $sortOrder;
                 $colmap->save();
@@ -293,7 +298,7 @@ class ColumnMappingController extends Controller
 
     /**
      * Update the specified resource in storage.
-     * 
+     *
      * Danger! This should not be called by any user, not even by admins!
      * All Links in the backend have been removed. The URL route is still available though.
      *

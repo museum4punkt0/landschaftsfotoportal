@@ -8,7 +8,9 @@ use App\Value;
 use App\Attribute;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Validator,Redirect,File;
+use Validator;
+use Redirect;
+use File;
 
 class ImportCSVController extends Controller
 {
@@ -37,7 +39,7 @@ class ImportCSVController extends Controller
         ]);
         
         // Save CSV file
-        if($files = $request->file('fileUpload')) {
+        if ($files = $request->file('fileUpload')) {
             $destinationPath = 'storage/'. config('media.import_dir');
             $fileName = date('YmdHis') .".". $files->getClientOriginalExtension();
             $files->move($destinationPath, $fileName);
@@ -49,8 +51,7 @@ class ImportCSVController extends Controller
             return redirect()->route('import.csv.preview', ['list'=>$request->input('list')]);
         }
         // Saving file failed
-        else
-        {
+        else {
             return redirect()->route('import.csv.upload')
                 ->with('error', __('import.save_error'));
         }
@@ -62,7 +63,7 @@ class ImportCSVController extends Controller
         $csv_file = $request->session()->get('csv_file');
         
         // Parse CSV file
-        $data = array_map(function($d) {
+        $data = array_map(function ($d) {
             return str_getcsv($d, ";");
         }, file($csv_file));
         $csv_data = array_slice($data, 0, 5);
@@ -81,24 +82,30 @@ class ImportCSVController extends Controller
             'fields' => [
                 function ($attribute, $value, $fail) {
                     // Check for duplicate attributes but not for 'ignored' ones
-                    foreach(array_count_values($value) as $selected_attr => $quantity) {
+                    foreach (array_count_values($value) as $selected_attr => $quantity) {
                         if ($selected_attr !== 0 && $quantity > 1) {
-                            if($selected_attr > 0)
+                            if ($selected_attr > 0) {
                                 $fail(__('import.attribute_once', [
                                     'attribute' => Attribute::find($selected_attr)->name
                                 ]));
-                            if($selected_attr == -1)
+                            }
+                            if ($selected_attr == -1) {
                                 $fail(__('import.attribute_once', ['attribute' => __('import.element_id')]));
-                            if($selected_attr == -2)
+                            }
+                            if ($selected_attr == -2) {
                                 $fail(__('import.attribute_once', ['attribute' => __('import.parent_id')]));
+                            }
                         }
                     }
                 },
                 function ($attribute, $value, $fail) {
                     // Check for missing attributes, at least one (column) must be selected
-                    $a = array_filter($value, function ($v) { return $v>0; } );
-                    if(!array_sum($a))
+                    $a = array_filter($value, function ($v) {
+                        return $v>0;
+                    });
+                    if (!array_sum($a)) {
                         $fail(__('import.missing_attributes'));
+                    }
                 },
             ],
         ]);
@@ -106,13 +113,13 @@ class ImportCSVController extends Controller
         $validator->sometimes('fields', [
             function ($attribute, $value, $fail) {
                 // Hierarchical lists need a column with element IDs
-                if(empty(array_count_values($value)[-1])) {
+                if (empty(array_count_values($value)[-1])) {
                     $fail(__('import.missing_id'));
                 }
             },
             function ($attribute, $value, $fail) {
                 // Hierarchical lists need a column with parent IDs
-                if(empty(array_count_values($value)[-2])) {
+                if (empty(array_count_values($value)[-2])) {
                     $fail(__('import.missing_parent'));
                 }
             },
@@ -120,7 +127,7 @@ class ImportCSVController extends Controller
             return $input->hierarchical; // If closure returns true, the condition is true
         });
         
-        if($validator->fails()) {
+        if ($validator->fails()) {
             return redirect()->route('import.csv.preview', ['list'=>$request->input('list')])
                         ->withErrors($validator)
                         ->withInput();
@@ -128,19 +135,20 @@ class ImportCSVController extends Controller
                 
         // Get CSV file path from session and read file into array $data
         $csv_file = $request->session()->get('csv_file');
-        $data = array_map(function($d) {
+        $data = array_map(function ($d) {
             return str_getcsv($d, ";");
         }, file($csv_file));
         
         $selected_attr = $request->input('fields.*');
         $list_fk = $request->input('list');
-        $elements_tree = null; // Maps IDs from CSV onto IDs from Database 
+        $elements_tree = null; // Maps IDs from CSV onto IDs from Database
         
         // Process each line of given CSV file
-        foreach($data as $number => $line) {
+        foreach ($data as $number => $line) {
             // Skip first row if containing table headers
-            if($number == 0 && $request->has('header'))
+            if ($number == 0 && $request->has('header')) {
                 continue;
+            }
             
             $element_data = [
                 'parent_fk' => null,
@@ -150,9 +158,9 @@ class ImportCSVController extends Controller
             $element = Element::create($element_data);
             
             // Process each column (= table cell)
-            foreach($line as $colnr => $cell) {
+            foreach ($line as $colnr => $cell) {
                 // Check for column's attribute chosen by user
-                if($selected_attr[$colnr] > 0) {
+                if ($selected_attr[$colnr] > 0) {
                     $value_data = [
                         'element_fk' => $element->element_id,
                         'attribute_fk' => $selected_attr[$colnr],
@@ -161,15 +169,16 @@ class ImportCSVController extends Controller
                     Value::create($value_data);
                 }
                 // Save primary key (=ID) of the recent element to temporary tree
-                if($selected_attr[$colnr] == -1) {
+                if ($selected_attr[$colnr] == -1) {
                     $elements_tree[intval($cell)] = $element->element_id;
                 }
                 // Get ID of parent element from temporary tree
-                if($selected_attr[$colnr] == -2) {
-                    if(!isset($elements_tree[intval($cell)]))
+                if ($selected_attr[$colnr] == -2) {
+                    if (!isset($elements_tree[intval($cell)])) {
                         $element->parent_fk = null;
-                    else
+                    } else {
                         $element->parent_fk = $elements_tree[intval($cell)];
+                    }
                     $element->save();
                 }
             }

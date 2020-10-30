@@ -77,15 +77,15 @@ class ItemController extends Controller
                 return $query->whereNull('taxon_fk')
                     ->orWhereHas('taxon.descendants', function (Builder $query) use ($taxon_id) {
                         $query->where('taxon_id', $taxon_id);
-                });
+                    });
             })
             ->orderBy('column_order')->get();
         
         $lists = null;
         // Load all list elements of lists used by this item's columns
-        foreach($colmap as $cm) {
+        foreach ($colmap as $cm) {
             $list_id = $cm->column->list_fk;
-            if($list_id) {
+            if ($list_id) {
                 $constraint = function (Builder $query) use ($list_id) {
                     $query->where('parent_fk', null)->where('list_fk', $list_id);
                 };
@@ -125,7 +125,7 @@ class ItemController extends Controller
                 return $query->whereNull('taxon_fk')
                     ->orWhereHas('taxon.descendants', function (Builder $query) use ($taxon_id) {
                         $query->where('taxon_id', $taxon_id);
-                });
+                    });
             })
             ->get();
         
@@ -142,7 +142,7 @@ class ItemController extends Controller
             $validation_rules['fields.'.$column_id] = $required . Column::find($column_id)->getValidationRule();
         }
         // Validate uploaded files
-        if($request->file('fields')) {
+        if ($request->file('fields')) {
             foreach ($request->file('fields') as $column_id => $value) {
                 $validation_rules['fields.'.$column_id] = 'required|'. Column::find($column_id)->getValidationRule();
             }
@@ -199,7 +199,7 @@ class ItemController extends Controller
         }
         
         // Save uploaded files and their details
-        if($request->file('fields')) {
+        if ($request->file('fields')) {
             foreach ($request->file('fields') as $column_id => $value) {
                 $data_type = Column::find($column_id)->getDataType();
                 
@@ -211,7 +211,7 @@ class ItemController extends Controller
                 $file = $request->file('fields.'.$column_id);
                 switch ($data_type) {
                     case '_image_':
-                        if($file->isValid()) {
+                        if ($file->isValid()) {
                             $path = 'public/images/';
                             $name =  $column_id ."_". date('YmdHis') .".". $file->extension();
                             $file->storeAs($path, $name);
@@ -244,7 +244,7 @@ class ItemController extends Controller
                 return $query->whereNull('taxon_fk')
                     ->orWhereHas('taxon.descendants', function (Builder $query) use ($taxon_id) {
                         $query->where('taxon_id', $taxon_id);
-                });
+                    });
             })
             ->orderBy('column_order')->get();
         
@@ -255,7 +255,7 @@ class ItemController extends Controller
     }
 
     /**
-     * Fill title column of items table from details table. 
+     * Fill title column of items table from details table.
      *
      * @return \Illuminate\Http\Response
      */
@@ -267,8 +267,8 @@ class ItemController extends Controller
         
         $count = 0;
         // Copy title string for all items if doesn't exist yet
-        foreach($items as $item) {
-            if(!$item->title) {
+        foreach ($items as $item) {
+            if (!$item->title) {
                 $item->title = $item->getTitleColumn();
                 $item->save();
                 $count++;
@@ -280,7 +280,7 @@ class ItemController extends Controller
     }
 
     /**
-     * Display a listing of non-public items for publishing. 
+     * Display a listing of non-public items for publishing.
      *
      * @return \Illuminate\Http\Response
      */
@@ -294,7 +294,7 @@ class ItemController extends Controller
     }
 
     /**
-     * Publish a single or all non-public items. 
+     * Publish a single or all non-public items.
      *
      * @param  \App\Item  $item
      * @return \Illuminate\Http\Response
@@ -304,16 +304,15 @@ class ItemController extends Controller
         $this->authorize('publish', $item);
         
         // Check for single item or batch
-        if($item->item_id) {
+        if ($item->item_id) {
             $items = [Item::find($item->item_id)];
-        }
-        else {
+        } else {
             $items = Item::where('public', 0)->orderBy('item_id')->get();
         }
         
         $count = 0;
         // Set public flag on all given items
-        foreach($items as $item) {
+        foreach ($items as $item) {
             $item->public = 1;
             $item->save();
             $count++;
@@ -345,15 +344,15 @@ class ItemController extends Controller
                 return $query->whereNull('taxon_fk')
                     ->orWhereHas('taxon.descendants', function (Builder $query) use ($taxon_id) {
                         $query->where('taxon_id', $taxon_id);
-                });
+                    });
             })
             ->orderBy('column_order')->get();
         
         $lists = null;
         // Load all list elements of lists used by this item's columns
-        foreach($colmap as $cm) {
+        foreach ($colmap as $cm) {
             $list_id = $cm->column->list_fk;
-            if($list_id) {
+            if ($list_id) {
                 $constraint = function (Builder $query) use ($list_id) {
                     $query->where('parent_fk', null)->where('list_fk', $list_id);
                 };
@@ -403,7 +402,7 @@ class ItemController extends Controller
                 return $query->whereNull('taxon_fk')
                     ->orWhereHas('taxon.descendants', function (Builder $query) use ($taxon_id) {
                         $query->where('taxon_id', $taxon_id);
-                });
+                    });
             })
             ->get();
         
@@ -420,7 +419,7 @@ class ItemController extends Controller
             $validation_rules['fields.'.$column_id] = $required . Column::find($column_id)->getValidationRule();
         }
         // Validate uploaded files
-        if($request->file('fields')) {
+        if ($request->file('fields')) {
             foreach ($request->file('fields') as $column_id => $value) {
                 $validation_rules['fields.'.$column_id] = Column::find($column_id)->getValidationRule();
             }
@@ -472,7 +471,7 @@ class ItemController extends Controller
         }
         
         // Save uploaded files and their details
-        if($request->file('fields')) {
+        if ($request->file('fields')) {
             foreach ($request->file('fields') as $column_id => $value) {
                 $detail = $details->where('column_fk', $column_id)->first();
                 
@@ -481,7 +480,7 @@ class ItemController extends Controller
                 $file = $request->file('fields.'.$column_id);
                 switch ($data_type) {
                     case '_image_':
-                        if($file->isValid()) {
+                        if ($file->isValid()) {
                             $path = 'public/images/';
                             $name = $column_id ."_". date('YmdHis') .".". $file->extension();
                             $file->storeAs($path, $name);

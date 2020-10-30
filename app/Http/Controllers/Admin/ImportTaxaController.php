@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Taxon;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Redirect,File,Validator;
+use Redirect;
+use File;
+use Validator;
 
 class ImportTaxaController extends Controller
 {
@@ -43,7 +45,7 @@ class ImportTaxaController extends Controller
         ]);
         
         // Save CSV file
-        if($files = $request->file('fileUpload')) {
+        if ($files = $request->file('fileUpload')) {
             $destinationPath = 'storage/'. config('media.import_dir');
             $fileName = date('YmdHis') .".". $files->getClientOriginalExtension();
             $files->move($destinationPath, $fileName);
@@ -55,8 +57,7 @@ class ImportTaxaController extends Controller
             return Redirect::to('admin/import/taxa/preview');
         }
         // Saving file failed
-        else
-        {
+        else {
             return Redirect::to('admin/import/taxa/upload')
                 ->with('error', __('import.save_error'));
         }
@@ -74,7 +75,7 @@ class ImportTaxaController extends Controller
         $csv_file = $request->session()->get('csv_file');
         
         // Parse CSV file
-        $data = array_map(function($d) {
+        $data = array_map(function ($d) {
             return str_getcsv($d, ";");
         }, file($csv_file));
         $csv_data = array_slice($data, 0, 10);
@@ -95,7 +96,7 @@ class ImportTaxaController extends Controller
             'fields' => [
                 function ($attribute, $value, $fail) {
                     // Check for duplicate attributes but not for 'ignored' ones
-                    foreach(array_count_values($value) as $selected_attr => $quantity) {
+                    foreach (array_count_values($value) as $selected_attr => $quantity) {
                         if ($selected_attr !== 0 && $quantity > 1) {
                             $fail(__('import.attribute_once', [
                                 'attribute' => __('taxon.'.$selected_attr)
@@ -105,50 +106,50 @@ class ImportTaxaController extends Controller
                 },
                 function ($attribute, $value, $fail) {
                     // Import needs a column with element IDs
-                    if(empty(array_count_values($value)['bfn_namnr'])) {
+                    if (empty(array_count_values($value)['bfn_namnr'])) {
                         $fail(__('import.missing_id'));
                     }
                 },
                 function ($attribute, $value, $fail) {
                     // Import needs a column with parent IDs
-                    if(empty(array_count_values($value)['parent'])) {
+                    if (empty(array_count_values($value)['parent'])) {
                         $fail(__('import.missing_parent'));
                     }
                 },
                 function ($attribute, $value, $fail) {
                     // Import needs a column with taxon names
-                    if(empty(array_count_values($value)['taxon_name'])) {
+                    if (empty(array_count_values($value)['taxon_name'])) {
                         $fail(__('validation.required', ['attribute' => __('taxon.taxon_name')]));
                     }
                 },
                 function ($attribute, $value, $fail) {
                     // Import needs a column with taxon authors
-                    if(empty(array_count_values($value)['taxon_author'])) {
+                    if (empty(array_count_values($value)['taxon_author'])) {
                         $fail(__('validation.required', ['attribute' => __('taxon.taxon_author')]));
                     }
                 },
                 function ($attribute, $value, $fail) {
                     // Import needs a column with taxon name supplements
-                    if(empty(array_count_values($value)['taxon_suppl'])) {
+                    if (empty(array_count_values($value)['taxon_suppl'])) {
                         $fail(__('validation.required', ['attribute' => __('taxon.taxon_suppl')]));
                     }
                 },
                 function ($attribute, $value, $fail) {
                     // Import needs a column with taxon native names
-                    if(empty(array_count_values($value)['native_name'])) {
+                    if (empty(array_count_values($value)['native_name'])) {
                         $fail(__('validation.required', ['attribute' => __('taxon.native_name')]));
                     }
                 },
                 function ($attribute, $value, $fail) {
                     // Import needs a column with taxon valid name IDs
-                    if(empty(array_count_values($value)['valid_name'])) {
+                    if (empty(array_count_values($value)['valid_name'])) {
                         $fail(__('validation.required', ['attribute' => __('taxon.valid_name')]));
                     }
                 },
             ],
         ]);
         
-        if($validator->fails()) {
+        if ($validator->fails()) {
             return redirect()->route('import.taxa.preview')
                         ->withErrors($validator)
                         ->withInput();
@@ -156,7 +157,7 @@ class ImportTaxaController extends Controller
         
         // Get CSV file path from session and read file into array $data
         $csv_file = $request->session()->get('csv_file');
-        $data = array_map(function($d) {
+        $data = array_map(function ($d) {
             return str_getcsv($d, ";");
         }, file($csv_file));
         
@@ -164,45 +165,46 @@ class ImportTaxaController extends Controller
         $elements_tree = null; // Maps IDs from CSV onto IDs from Database
         
         // Process each line of given CSV file
-        foreach($data as $number => $line) {
+        foreach ($data as $number => $line) {
             // Skip first row if containing table headers
-            if($number == 0 && $request->has('header'))
+            if ($number == 0 && $request->has('header')) {
                 continue;
+            }
             
             $taxon_data['bfn_namnr'] = null;
             
             // Process each column (= table cell)
-            foreach($line as $colnr => $cell) {
-                
-                switch($selected_attr[$colnr]) {
+            foreach ($line as $colnr => $cell) {
+                switch ($selected_attr[$colnr]) {
                     // Save primary key (=ID) of the recent element to temporary tree
                     case 'bfn_namnr':
                         $taxon_data['bfn_namnr'] = intval($cell);
                         break;
                     // Get ID of parent element from temporary tree
                     case 'parent':
-                        if(!isset($elements_tree[intval($cell)]))
+                        if (!isset($elements_tree[intval($cell)])) {
                             $taxon_data['parent_fk'] = null;
-                        else
+                        } else {
                             $taxon_data['parent_fk'] = $elements_tree[intval($cell)];
+                        }
                         break;
                     // Get ID of taxon with valid name (in case of synoymes) from temporary tree
                     case 'valid_name':
-                        if(!isset($elements_tree[intval($cell)]))
+                        if (!isset($elements_tree[intval($cell)])) {
                             $taxon_data['valid_name'] = null;
-                        else
+                        } else {
                             $taxon_data['valid_name'] = $elements_tree[intval($cell)];
+                        }
                         break;
                     default:
                         // Check if column was chosen for import
-                        if($selected_attr[$colnr]) {
+                        if ($selected_attr[$colnr]) {
                             $taxon_data[$selected_attr[$colnr]] = $cell;
                         }
                 }
-                
             }
             // Concatenate some name parts to full name, if not present or not chosen
-            if(empty($taxon_data['full_name'])) {
+            if (empty($taxon_data['full_name'])) {
                 $taxon_data['full_name'] = $taxon_data['taxon_name'] ." ".
                     $taxon_data['taxon_author'] ." ". $taxon_data['taxon_suppl'];
             }

@@ -8,7 +8,7 @@ class Element extends Model
 {
     /**
      * The primary key associated with the table.
-     * 
+     *
      * (The default would be 'id')
      *
      * @var string
@@ -64,7 +64,7 @@ class Element extends Model
     
     /**
      * The parent key associated with the table.
-     * 
+     *
      * (The default would be 'parent_id')
      *
      * @var string
@@ -76,7 +76,7 @@ class Element extends Model
     
     /**
      * The primary key associated with the table.
-     * 
+     *
      * (The default would be 'id')
      *
      * @var string
@@ -92,7 +92,7 @@ class Element extends Model
      */
     public function getConfigValue($key)
     {
-        if($this->attributes()->firstWhere('name', 'config')) {
+        if ($this->attributes()->firstWhere('name', 'config')) {
             $json = $this->attributes()->firstWhere('name', 'config')->pivot->value;
             $config = json_decode($json, true);
             

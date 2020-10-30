@@ -7,7 +7,7 @@ return [
     | Media storage
     |--------------------------------------------------------------------------
     |
-    | All directories are relative to /storage/app/public/ and must contain a 
+    | All directories are relative to /storage/app/public/ and must contain a
     | trailing slash.
     |
     */

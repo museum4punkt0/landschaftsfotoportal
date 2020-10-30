@@ -45,10 +45,9 @@ class HomeController extends Controller
         $item = Item::where('title', config('menu.home_item_title', 'Home'))->first();
         
         // Check if item exists, otherwise redirect to search page
-        if($item) {
+        if ($item) {
             return Redirect::to('item/'.$item->item_id);
-        }
-        else {
+        } else {
             return redirect()->route('search.index')
                 ->with('warning', __('items.no_home_page'));
         }

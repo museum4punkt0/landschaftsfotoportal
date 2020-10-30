@@ -8,7 +8,7 @@ class ColumnMapping extends Model
 {
     /**
      * The table associated with the model.
-     * 
+     *
      * (The default would be 'column_mappings')
      *
      * @var string
@@ -17,7 +17,7 @@ class ColumnMapping extends Model
     
     /**
      * The primary key associated with the table.
-     * 
+     *
      * (The default would be 'id')
      *
      * @var string
@@ -73,13 +73,13 @@ class ColumnMapping extends Model
     
     /**
      * Get the configuration value for a given key from the JSON key/value store.
-     * 
+     *
      * @param  string  $key
      * @return mixed
      */
     public function getConfigValue($key)
     {
-        if($this->config) {
+        if ($this->config) {
             $config = json_decode($this->config, true);
             
             return isset($config[$key]) ? $config[$key] : null;
@@ -92,14 +92,15 @@ class ColumnMapping extends Model
     
     /**
      * Get the part of the validation rule which defines if this column is required or not.
-     * 
+     *
      * @return string
      */
     public function getRequiredRule()
     {
-        if($this->getConfigValue('required'))
+        if ($this->getConfigValue('required')) {
             return 'required|';
-        else
+        } else {
             return 'nullable|';
+        }
     }
 }
