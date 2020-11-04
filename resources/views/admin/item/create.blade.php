@@ -33,7 +33,7 @@
                 @lang('common.no')
             </option>
         </select>
-        <span class="text-danger">{{ $errors->first('parent') }}</span>
+        <span class="text-danger">{{ $errors->first('public') }}</span>
     </div>
     <div class="form-group">
         <span>@lang('lists.parent')</span>
