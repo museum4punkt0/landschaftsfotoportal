@@ -21,7 +21,7 @@ class CreateDetailsTable extends Migration
             $table->integer('value_int')->nullable(true);
             $table->float('value_float')->nullable(true);
             $table->date('value_date')->nullable(true);
-            $table->string('value_string')->nullable(true);
+            $table->string('value_string', 65536)->nullable(true);
             $table->timestamps();
         });
     }
