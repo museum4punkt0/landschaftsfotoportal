@@ -61,12 +61,13 @@
             @foreach($columns as $column)
                 <option value="{{$column->column_id}}"
                     @if(old('column', $colmap->column_fk) == $column->column_id) selected @endif >
+                    {{$column->description}}
+                    /
                     @foreach($column->translation->values as $t)
                         @if($t->attribute->name == 'name_'.app()->getLocale())
                             {{$t->value}}
                         @endif
                     @endforeach
-                    ({{$column->description}})
                 </option>
             @endforeach
         </select>
