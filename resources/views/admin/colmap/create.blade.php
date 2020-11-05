@@ -83,6 +83,10 @@
     {{ csrf_field() }}
 </form>
 
+@if(env('APP_DEBUG'))
+    [Rendering time: {{ round(microtime(true) - LARAVEL_START, 3) }} seconds]
+@endif
+
 </div>
 
 @endsection

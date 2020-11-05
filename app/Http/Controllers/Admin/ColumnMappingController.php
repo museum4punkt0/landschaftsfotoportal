@@ -47,7 +47,7 @@ class ColumnMappingController extends Controller
     public function create()
     {
         #$columns = Column::doesntHave('column_mapping')->orderBy('description')->get();
-        $columns = Column::orderBy('description')->get();
+        $columns = Column::with(['translation.values'])->orderBy('description')->get();
         
         $lang = 'name_'. app()->getLocale();
         $column_groups = Value::whereHas('element', function ($query) {
@@ -288,7 +288,7 @@ class ColumnMappingController extends Controller
      */
     public function edit(ColumnMapping $colmap)
     {
-        $columns = Column::orderBy('description')->get();
+        $columns = Column::with(['translation.values'])->orderBy('description')->get();
         #$columns = Column::doesntHave('column_mapping')->orderBy('description')->get();
         
         $lang = 'name_'. app()->getLocale();
