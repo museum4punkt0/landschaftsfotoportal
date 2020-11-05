@@ -79,6 +79,14 @@ class Item extends Model
         return $this->hasMany('App\Detail', 'item_fk', 'item_id');
     }
     
+    /**
+     * Get the comments of the item.
+     */
+    public function comments()
+    {
+        return $this->hasMany('App\Comment', 'item_fk', 'item_id');
+    }
+    
     
     use \Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
     

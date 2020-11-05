@@ -57,6 +57,7 @@ Route::get('admin/item/titles', 'Admin\ItemController@titles')->name('item.title
 Route::get('admin/item/unpublished', 'Admin\ItemController@list_unpublished')->name('item.unpublished');
 Route::get('admin/item/publish/{item?}', 'Admin\ItemController@publish')->name('item.publish');
 Route::resource('admin/item', 'Admin\ItemController');
+Route::resource('admin/item.comment', 'Admin\CommentController')->shallow();
 Route::resource('admin/taxon', 'Admin\TaxonController');
 Route::resource('admin/user', 'Admin\UserController');
 
