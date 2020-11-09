@@ -54,6 +54,12 @@ class ItemController extends Controller
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
+        // Check for existing item_type, otherwise redirect back with warning message
+        if ($item_types->isEmpty()) {
+            return Redirect::to('admin/item')
+                ->with('warning', __('colmaps.no_item_type'));
+        }
+        
         $taxa = Taxon::tree()->depthFirst()->get();
         
         return view('admin.item.new', compact('item_types', 'taxa'));
