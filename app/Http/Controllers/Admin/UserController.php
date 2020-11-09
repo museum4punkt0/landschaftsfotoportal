@@ -20,6 +20,9 @@ class UserController extends Controller
     public function __construct()
     {
         $this->middleware('verified');
+        
+        // Use app\Policies\UserPolicy for authorizing ressource controller
+        $this->authorizeResource(User::class, 'user');
     }
 
     /**
