@@ -58,6 +58,7 @@ Route::get('admin/item/unpublished', 'Admin\ItemController@list_unpublished')->n
 Route::get('admin/item/publish/{item?}', 'Admin\ItemController@publish')->name('item.publish');
 Route::resource('admin/item', 'Admin\ItemController');
 Route::resource('admin/item.comment', 'Admin\CommentController')->shallow();
+Route::get('admin/taxon/autocomplete', 'Admin\TaxonController@autocomplete')->name('taxon.autocomplete');
 Route::resource('admin/taxon', 'Admin\TaxonController');
 Route::resource('admin/user', 'Admin\UserController');
 

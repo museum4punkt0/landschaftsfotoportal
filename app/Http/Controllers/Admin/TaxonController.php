@@ -178,4 +178,31 @@ class TaxonController extends Controller
         return Redirect::to('admin/taxon')
             ->with('success', $success_status_msg);
     }
+
+    /**
+     * Get resource for AJAX autocompletion search field.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function autocomplete(Request $request)
+    {
+        $results = Taxon::select('taxon_id', 'full_name', 'native_name')
+            ->where('full_name', 'LIKE', "%{$request->search}%")
+            ->orWhere('native_name', 'LIKE', "%{$request->search}%")
+            ->orderBy('full_name')
+            ->limit(5)
+            ->get();
+        
+        $response = array();
+        foreach($results as $result){
+            $response[] = array(
+                "value" => $result->taxon_id,
+                "label" => $result->full_name ." (". $result->native_name .")",
+            );
+        }
+        
+        return response()->json($response);
+    }
+
 }

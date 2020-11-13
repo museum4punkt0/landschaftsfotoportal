@@ -13,7 +13,49 @@
         @if (true || Auth::check())
             <div class="card-header">@lang('taxon.header')</div>
             <div class="card-body">
-                <a href="{{route('taxon.create')}}" class="btn btn-primary">@lang('taxon.new')</a>
+                <div class="row">
+                    <div class="col align-self-start">
+                        <a href="{{route('taxon.create')}}" class="btn btn-primary">@lang('taxon.new')</a>
+                    </div>
+                    
+                    <div class="col align-self-end">
+                        <!-- For defining autocomplete search -->
+                        <input type="text" id='auto_search' class="form-control autocomplete" placeholder="@lang('search.search')" />
+                    </div>
+                </div>
+                
+                <!-- Script using jQuery UI autocomplete widget -->
+                <script type="text/javascript">
+                    // CSRF Token
+                    var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
+                    
+                    $(document).ready(function() {
+                        $('#auto_search').autocomplete( {
+                            source: function(request, response) {
+                                // Fetch data
+                                $.ajax({
+                                    url:"{{route('taxon.autocomplete')}}",
+                                    type: 'get',
+                                    dataType: 'json',
+                                    data: {
+                                        _token: CSRF_TOKEN,
+                                        search: request.term
+                                    },
+                                    success: function(data) {
+                                        response(data);
+                                    }
+                                });
+                            },
+                            select: function (event, ui) {
+                                // Set selection
+                                $('#auto_search').val(ui.item.label); // display the selected text
+                                location.href = "{{route('taxon.index')}}/" + ui.item.value + "/edit";
+                                return false;
+                            }
+                        });
+                    });
+                </script>
+                
                 <table class="table mt-4">
                 <thead>
                     <tr>
