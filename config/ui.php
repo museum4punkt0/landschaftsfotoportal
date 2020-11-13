@@ -23,4 +23,15 @@ return [
     
     'frontend_layout' => 'bestikri',
 
+    /*
+    |--------------------------------------------------------------------------
+    | Number of search results for autocomplete
+    |--------------------------------------------------------------------------
+    |
+    | How many result rows are returned for an autocomplete search
+    |
+    */
+    
+    'autocomplete_results' => 5,
+
 ];

@@ -191,7 +191,7 @@ class TaxonController extends Controller
             ->where('full_name', 'LIKE', "%{$request->search}%")
             ->orWhere('native_name', 'LIKE', "%{$request->search}%")
             ->orderBy('full_name')
-            ->limit(5)
+            ->limit(config('ui.autocomplete_results', 5))
             ->get();
         
         $response = array();
