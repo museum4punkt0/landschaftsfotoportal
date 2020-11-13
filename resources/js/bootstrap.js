@@ -44,6 +44,7 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
  * jQuery-UI
  */
 
+import 'jquery-ui/ui/widgets/autocomplete.js';
 import 'jquery-ui/ui/widgets/sortable.js';
 
 /**
