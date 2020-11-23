@@ -14,15 +14,21 @@
     </div>
     <div class="form-group">
         <span>@lang('columns.translated_name')</span>
-        <select name="translation" class="form-control" size=1 >
+        <select name="translation" id="translation_select" class="form-control" size=1 >
             @foreach($translations as $trans)
                 <option value="{{$trans->element_fk}}"
                     @if(old('translation') == $trans->element_fk) selected @endif>
                     {{ $trans->value }}
                 </option>
             @endforeach
+            <option value="-1" @if(old('translation') == -1) selected @endif>
+                --- @lang('common.new') ---
+            </option>
         </select>
         <span class="text-danger">{{ $errors->first('translation') }}</span>
+        <input type="hidden" name="lang" value="{{$attribute->attribute_id}}" />
+        <input type="text" name="new_translation" id="translation_input" class="form-control" value="{{old('new_translation')}}" />
+        <span class="text-danger">{{ $errors->first('new_translation') }}</span>
     </div>
     <div class="form-group">
         <span>@lang('columns.data_type')</span>
@@ -57,5 +63,24 @@
 </form>
 
 </div>
+
+<script type="text/javascript">
+    var select_element = document.getElementById("translation_select");
+    var input_element = document.getElementById("translation_input");
+    // Register event for changing/selecting options
+    select_element.addEventListener("change", TranslationChanged);
+    TranslationChanged();
+
+    function TranslationChanged() {
+        var translation = select_element.options[select_element.selectedIndex].value;
+        // Toggle visibility of text input depending on selected option
+        if (translation == -1) {
+            input_element.style.visibility = "visible";
+        }
+        else {
+            input_element.style.visibility = "hidden";
+        }
+    }
+</script>
 
 @endsection

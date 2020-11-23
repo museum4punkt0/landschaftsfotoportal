@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Column;
 use App\Selectlist;
 use App\Element;
+use App\Attribute;
 use App\Value;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -46,6 +47,9 @@ class ColumnController extends Controller
         // Get current UI language
         $lang = 'name_'. app()->getLocale();
         
+        // Get name attribute for current language
+        $attribute = Attribute::where('name', $lang)->first();
+        
         // Get data types of columns with localized names
         $data_types = Value::whereHas('element', function ($query) {
             $query->where('list_fk', Selectlist::where('name', '_data_type_')->first()->list_id);
@@ -64,7 +68,7 @@ class ColumnController extends Controller
         })
         ->orderBy('value')->get();
         
-        return view('admin.column.create', compact('lists', 'data_types', 'translations'));
+        return view('admin.column.create', compact('lists', 'data_types', 'translations', 'attribute'));
     }
 
     /**
@@ -84,6 +88,8 @@ class ColumnController extends Controller
             'data_type' => 'required|integer',
             'translation' => 'required|integer',
             'description' => 'required|string',
+            'new_translation' => 'exclude_unless:translation,-1|required|string',
+            'lang' => 'required|integer',
         ]);
         
         $data = [
@@ -92,6 +98,26 @@ class ColumnController extends Controller
             'translation_fk' => $request->input('translation'),
             'description' => $request->input('description'),
         ];
+        
+        // Store element and value for new translation
+        if ($request->input('translation') == -1) {
+            $element_data = [
+                'parent_fk' => null,
+                'list_fk' => Selectlist::where('name', '_translation_')->first()->list_id,
+                'value_summary' => '',
+            ];
+            $element = Element::create($element_data);
+            
+            $value_data = [
+                'element_fk' => $element->element_id,
+                'attribute_fk' => $request->input('lang'),
+                'value' => $request->input('new_translation'),
+            ];
+            Value::create($value_data);
+            
+            $data['translation_fk'] = $element->element_id;
+        }
+        
         Column::create($data);
         
         return Redirect::to('admin/column')
