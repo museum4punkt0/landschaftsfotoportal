@@ -19,8 +19,8 @@
             <div class="card-header">@lang('colmaps.header')</div>
             <div class="card-body">
                 <a href="{{route('colmap.create')}}" class="btn btn-primary">@lang('colmaps.new')</a>
+                <a href="{{route('colmap.map')}}" class="btn btn-primary">@lang('common.batch')</a>
                 @if(count($colmaps))
-                    <a href="{{route('colmap.map')}}" class="btn btn-primary">@lang('common.batch')</a>
                     <a href="{{route('colmap.sort')}}" class="btn btn-primary">@lang('common.sort')</a>
                 @endif
                 <table class="table mt-4">
