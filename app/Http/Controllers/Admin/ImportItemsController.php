@@ -173,98 +173,104 @@ class ImportItemsController extends Controller
             if ($number == 0 && $request->has('header')) {
                 continue;
             }
-            
-            // Try to match taxon for given full scientific name
-            $taxon = Taxon::where('full_name', $line[array_search('-3', $selected_attr)])->first();
-            if (empty($taxon)) {
-                // Taxon not found: skip this one and set warning message
-                $warning_status_msg .= " ". __('import.taxon_not_found', ['full_name' => $line[array_search('-3', $selected_attr)]]);
-                $request->session()->flash('warning', $warning_status_msg);
-                // TODO: use messageBag for arrays
-                #$messageBag->add('warning', $warning_status_msg);
-                continue;
-            } else {
-                $item_data = [
-                    'parent_fk' => $request->input('parent'),
-                    'item_type_fk' => $request->input('item_type'),
-                    'taxon_fk' => $taxon->taxon_id,
-                    'created_by' => $request->user()->id,
-                    'updated_by' => $request->user()->id,
-                ];
-                // Check for already existing items
-                $existing_item = Item::where([
-                    ['taxon_fk', $taxon->taxon_id],
-                    ['item_type_fk', $request->input('item_type')],
-                ])->first();
-                if (!empty($existing_item) && $request->has('unique_taxa')) {
-                    $warning_status_msg .= " ". __('import.taxon_exists', ['full_name' => $line[array_search('-3', $selected_attr)]]);
+            $taxon_fk = null;
+            // Check if a taxon is associated to item to be imported
+            if (array_search('-3', $selected_attr)) {
+                // Try to match taxon for given full scientific name
+                $taxon = Taxon::where('full_name', $line[array_search('-3', $selected_attr)])->first();
+                if (empty($taxon)) {
+                    // Taxon not found: skip this one and set warning message
+                    $warning_status_msg .= " ". __('import.taxon_not_found', ['full_name' => $line[array_search('-3', $selected_attr)]]);
                     $request->session()->flash('warning', $warning_status_msg);
                     // TODO: use messageBag for arrays
+                    #$messageBag->add('warning', $warning_status_msg);
                     continue;
                 } else {
-                    $item = Item::create($item_data);
-                    
-                    // Process each column (= table cell)
-                    foreach ($line as $colnr => $cell) {
-                        // Check for column's attribute chosen by user
-                        if ($selected_attr[$colnr] > 0) {
-                            $detail_data = [
-                                'item_fk' => $item->item_id,
-                                'column_fk' => $selected_attr[$colnr],
-                            ];
-                            $data_type = Column::find($selected_attr[$colnr])->getDataType();
-                            switch ($data_type) {
-                                case '_list_':
-                                    $detail_data['element_fk'] = intval($cell);
-                                    break;
-                                case '_integer_':
-                                case '_image_ppi_':
-                                    $detail_data['value_int'] = intval($cell);
-                                    break;
-                                case '_float_':
-                                    $detail_data['value_float'] = floatval(strtr($cell, ',', '.'));
-                                    break;
-                                case '_date_':
-                                    $detail_data['value_date'] = $cell;
-                                    break;
-                                case '_string_':
-                                case '_title_':
-                                case '_image_title_':
-                                case '_image_copyright_':
-                                case '_html_':
-                                case '_url_':
-                                case '_image_':
-                                case '_map_':
-                                    $detail_data['value_string'] = $cell;
-                                    break;
-                            }
-                            Detail::create($detail_data);
-                        }
-                        
-                        // Set parent fkey of item if individually choosen per item
-                        $pit = $request->input('parent_item_type');
-                        // Try to match parent item using a detail
-                        if ($selected_attr[$colnr] == -1) {
-                            // Try to match taxon for given full scientific name
-                            $parent_item = Item::whereHas('details', function (Builder $query) use ($cell, $pit) {
-                                $query->where('value_string', $cell);
-                            })->where('item_type_fk', $pit)->first();
-                            if (!empty($parent_item)) {
-                                $item->parent_fk = $parent_item->item_id;
-                                $item->save();
-                            }
-                        }
-                        // Try to match parent item using a taxon's full scientific name
-                        if ($selected_attr[$colnr] == -2) {
-                            // Try to match taxon for given full scientific name
-                            $parent_item = Item::whereHas('taxon', function (Builder $query) use ($cell, $pit) {
-                                $query->where('full_name', $cell);
-                            })->where('item_type_fk', $pit)->first();
-                            if (!empty($parent_item)) {
-                                $item->parent_fk = $parent_item->item_id;
-                                $item->save();
-                            }
-                        }
+                    $taxon_fk = $taxon->taxon_id;
+                    // Check for already existing items (depending on taxon)
+                    $existing_item = Item::where([
+                        ['taxon_fk', $taxon_fk],
+                        ['item_type_fk', $request->input('item_type')],
+                    ])->first();
+                    if (!empty($existing_item) && $request->has('unique_taxa')) {
+                        $warning_status_msg .= " ". __('import.taxon_exists', ['full_name' => $line[array_search('-3', $selected_attr)]]);
+                        $request->session()->flash('warning', $warning_status_msg);
+                        // TODO: use messageBag for arrays
+                        continue;
+                    }
+                }
+            }
+            #} else { // NOTE: former Taxon exits
+            // All checks have been passed, let's create the item
+            $item_data = [
+                'parent_fk' => $request->input('parent'),
+                'item_type_fk' => $request->input('item_type'),
+                'taxon_fk' => $taxon_fk,
+                'created_by' => $request->user()->id,
+                'updated_by' => $request->user()->id,
+            ];
+            #} else { // NOTE: former Taxon already exists
+            $item = Item::create($item_data);
+            
+            // Process each column (= table cell)
+            foreach ($line as $colnr => $cell) {
+                // Check for column's attribute chosen by user
+                if ($selected_attr[$colnr] > 0) {
+                    $detail_data = [
+                        'item_fk' => $item->item_id,
+                        'column_fk' => $selected_attr[$colnr],
+                    ];
+                    $data_type = Column::find($selected_attr[$colnr])->getDataType();
+                    switch ($data_type) {
+                        case '_list_':
+                            $detail_data['element_fk'] = intval($cell);
+                            break;
+                        case '_integer_':
+                        case '_image_ppi_':
+                            $detail_data['value_int'] = intval($cell);
+                            break;
+                        case '_float_':
+                            $detail_data['value_float'] = floatval(strtr($cell, ',', '.'));
+                            break;
+                        case '_date_':
+                            $detail_data['value_date'] = $cell ? $cell : null;
+                            break;
+                        case '_string_':
+                        case '_title_':
+                        case '_image_title_':
+                        case '_image_copyright_':
+                        case '_html_':
+                        case '_url_':
+                        case '_image_':
+                        case '_map_':
+                            $detail_data['value_string'] = $cell;
+                            break;
+                    }
+                    Detail::create($detail_data);
+                }
+                
+                // Set parent fkey of item if individually choosen per item
+                $pit = $request->input('parent_item_type');
+                // Try to match parent item using a detail
+                if ($selected_attr[$colnr] == -1) {
+                    // Try to match taxon for given full scientific name
+                    $parent_item = Item::whereHas('details', function (Builder $query) use ($cell, $pit) {
+                        $query->where('value_string', $cell);
+                    })->where('item_type_fk', $pit)->first();
+                    if (!empty($parent_item)) {
+                        $item->parent_fk = $parent_item->item_id;
+                        $item->save();
+                    }
+                }
+                // Try to match parent item using a taxon's full scientific name
+                if ($selected_attr[$colnr] == -2) {
+                    // Try to match taxon for given full scientific name
+                    $parent_item = Item::whereHas('taxon', function (Builder $query) use ($cell, $pit) {
+                        $query->where('full_name', $cell);
+                    })->where('item_type_fk', $pit)->first();
+                    if (!empty($parent_item)) {
+                        $item->parent_fk = $parent_item->item_id;
+                        $item->save();
                     }
                 }
             }
