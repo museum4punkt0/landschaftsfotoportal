@@ -91,11 +91,8 @@
                 {{-- dd($lists->firstWhere('list_id', $cm->column->list_fk)->elements) --}}
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
-                @foreach($lists[$cm->column->list_fk] as $element)
-                    @foreach($element->values as $v)
-                        {{$v->value}}, 
-                    @endforeach
-                @endforeach
+                    {{ $details->firstWhere('column_fk', $cm->column->column_id)->element->attributes->
+                        firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}
                 </div>
                 @break
             

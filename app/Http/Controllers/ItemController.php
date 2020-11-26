@@ -54,10 +54,22 @@ class ItemController extends Controller
             })
             ->orderBy('column_order')->get();
         
+        $lists = null;
+        // Load all list elements of lists used by this item's columns
+        foreach ($colmap as $cm) {
+            $list_id = $cm->column->list_fk;
+            if ($list_id) {
+                $constraint = function (Builder $query) use ($list_id) {
+                    $query->where('parent_fk', null)->where('list_fk', $list_id);
+                };
+                $lists[$list_id] = Element::treeOf($constraint)->depthFirst()->get();
+            }
+        }
+        
         // Translations for titles of columns and column groups
         $l10n_list = Selectlist::where('name', '_translation_')->first();
         $translations = Element::where('list_fk', $l10n_list->list_id)->get();
                 
-        return view('item.show', compact('item', 'items', 'details', 'menu_root', 'path', 'colmap', 'translations'));
+        return view('item.show', compact('item', 'items', 'details', 'menu_root', 'path', 'colmap', 'lists', 'translations'));
     }
 }

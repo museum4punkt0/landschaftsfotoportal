@@ -104,11 +104,8 @@
                     </h5>
                 </div>
                 <div class="card card-body">
-                @foreach($lists[$cm->column->list_fk] as $element)
-                    @foreach($element->values as $v)
-                        {{$v->value}}, 
-                    @endforeach
-                @endforeach
+                    {{ $details->firstWhere('column_fk', $cm->column->column_id)->element->attributes->
+                        firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}
                 </div>
                 @break
             
