@@ -8,6 +8,7 @@ use App\Detail;
 use App\Element;
 use App\Item;
 use App\Selectlist;
+use App\Value;
 use App\Taxon;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
@@ -200,7 +201,6 @@ class ImportItemsController extends Controller
                     }
                 }
             }
-            #} else { // NOTE: former Taxon exits
             // All checks have been passed, let's create the item
             $item_data = [
                 'parent_fk' => $request->input('parent'),
@@ -209,7 +209,6 @@ class ImportItemsController extends Controller
                 'created_by' => $request->user()->id,
                 'updated_by' => $request->user()->id,
             ];
-            #} else { // NOTE: former Taxon already exists
             $item = Item::create($item_data);
             
             // Process each column (= table cell)
@@ -223,7 +222,15 @@ class ImportItemsController extends Controller
                     $data_type = Column::find($selected_attr[$colnr])->getDataType();
                     switch ($data_type) {
                         case '_list_':
-                            $detail_data['element_fk'] = intval($cell);
+                            // Get element's ID for given value, independent of language
+                            $attr = $selected_attr[$colnr];
+                            $value = Value::whereHas('element', function ($query) use ($attr) {
+                                $query->where('list_fk', Column::find($attr)->list_fk);
+                            })
+                            ->where('value', $cell)
+                            ->first();
+                            // TODO: don't import and add warning if value doesn't exist in list
+                            $detail_data['element_fk'] = $value ? $value->element_fk : null;
                             break;
                         case '_integer_':
                         case '_image_ppi_':
