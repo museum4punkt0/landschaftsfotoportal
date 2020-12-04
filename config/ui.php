@@ -21,7 +21,7 @@ return [
     |
     */
     
-    'frontend_layout' => 'bestikri',
+    'frontend_layout' => 'landschaftsfotoportal',
 
     /*
     |--------------------------------------------------------------------------
