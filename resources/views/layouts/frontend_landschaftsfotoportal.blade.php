@@ -206,6 +206,24 @@
             </ul>
         </div>
     </section>
+    
+    <!-- Image details -->
+    <section class="page-section" id="details">
+        <div class="container">
+            <div class="text-center">
+                <h2 class="section-heading text-uppercase">Bilddetails</h2>
+                <h3 class="section-subheading text-muted">Lorem ipsum dolor sit amet consectetur.</h3>
+            </div>
+            <div class="row">
+                <div class="card">
+                    <div class="card-body">
+                        @yield('content')
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
     <!-- Footer-->
     <footer class="footer py-4">
         <div class="container">
@@ -217,7 +235,7 @@
                 </div>
                 <div class="col-lg-4 text-lg-right">
                     <a class="mr-3" href="#!">Impressum</a>
-                    <a href="#!">Kontakt</a>
+                    <a class="mr-3" href="#!">Kontakt</a>
                     <a href="#!">Danksagung</a>
                 </div>
             </div>
