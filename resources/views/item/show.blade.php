@@ -295,6 +295,10 @@
                             <span>detail column {{$cm->column->column_id}} for image preview not found</span>
                         @endif
                     @endif
+                    
+                    @if($cm->getConfigValue('image_show') == 'filename')
+                        {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}
+                    @endif
                 </div>
                 @break
             
