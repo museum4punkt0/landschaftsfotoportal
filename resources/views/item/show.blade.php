@@ -32,6 +32,19 @@
 
 @section('content')
 
+{{-- Quick hack for LFP mock-up --}}
+@if(Config::get('ui.frontend_layout') == 'landschaftsfotoportal')
+    <!-- Image details -->
+    <section class="page-section" id="details">
+        <div class="container">
+            <div class="text-center">
+                <h2 class="section-heading text-uppercase">Bilddetails</h2>
+                <h3 class="section-subheading text-muted">Lorem ipsum dolor sit amet consectetur.</h3>
+            </div>
+            <div class="card">
+                <div class="card-body">
+@endif
+
 @foreach($colmap->groupBy('column_group_fk') as $cg)
     
     @unless($cg->first()->column_group->getConfigValue('hide_heading'))
@@ -351,5 +364,13 @@
     @endforeach
     
 @endforeach
+
+{{-- Quick hack for LFP mock-up --}}
+@if(Config::get('ui.frontend_layout') == 'landschaftsfotoportal')
+                </div>
+            </div>
+        </div>
+    </section>
+@endif
 
 @endsection

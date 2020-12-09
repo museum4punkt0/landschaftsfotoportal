@@ -101,7 +101,7 @@
             <div class="row">
                 <div class="col-lg-4 col-sm-6 mb-4">
                     <div class="portfolio-item">
-                        <a class="portfolio-link" data-toggle="modal" href="#portfolioModal1">
+                        <a class="portfolio-link d-flex justify-content-center" data-toggle="modal" href="#portfolioModal1">
                             <div class="portfolio-hover">
                                 <div class="portfolio-hover-content"><i class="portfolio-caption-heading">Beschreibung</i></div>
                             </div>
@@ -115,7 +115,7 @@
                 </div>
                 <div class="col-lg-4 col-sm-6 mb-4">
                     <div class="portfolio-item">
-                        <a class="portfolio-link" data-toggle="modal" href="#portfolioModal2">
+                        <a class="portfolio-link d-flex justify-content-center" data-toggle="modal" href="#portfolioModal2">
                             <div class="portfolio-hover">
                                 <div class="portfolio-hover-content"><i class="portfolio-caption-heading">Beschreibung</i></div>
                             </div>
@@ -129,7 +129,7 @@
                 </div>
                 <div class="col-lg-4 col-sm-6 mb-4">
                     <div class="portfolio-item">
-                        <a class="portfolio-link" data-toggle="modal" href="#portfolioModal3">
+                        <a class="portfolio-link d-flex justify-content-center" data-toggle="modal" href="#portfolioModal3">
                             <div class="portfolio-hover">
                                 <div class="portfolio-hover-content"><i class="portfolio-caption-heading">Beschreibung</i></div>
                             </div>
@@ -208,21 +208,7 @@
     </section>
     
     <!-- Image details -->
-    <section class="page-section" id="details">
-        <div class="container">
-            <div class="text-center">
-                <h2 class="section-heading text-uppercase">Bilddetails</h2>
-                <h3 class="section-subheading text-muted">Lorem ipsum dolor sit amet consectetur.</h3>
-            </div>
-            <div class="row">
-                <div class="card">
-                    <div class="card-body">
-                        @yield('content')
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+    @yield('content')
     
     <!-- Footer-->
     <footer class="footer py-4">
