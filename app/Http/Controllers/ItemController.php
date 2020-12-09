@@ -72,4 +72,16 @@ class ItemController extends Controller
                 
         return view('item.show', compact('item', 'items', 'details', 'menu_root', 'path', 'colmap', 'lists', 'translations'));
     }
+
+    /**
+     * Display the image gallery containing latest items.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function gallery()
+    {
+        $items = Item::with('details')->where('public', 1)->orderBy('created_at')->take(3)->get();
+        
+        return view('item.gallery', compact('items'));
+    }
 }
