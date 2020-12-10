@@ -8,6 +8,7 @@ use App\ColumnMapping;
 use App\Selectlist;
 use App\Element;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 use Redirect;
 
 class ItemController extends Controller
@@ -83,5 +84,24 @@ class ItemController extends Controller
         $items = Item::with('details')->where('public', 1)->orderBy('created_at')->take(3)->get();
         
         return view('item.gallery', compact('items'));
+    }
+
+    /**
+     * Display the timeline for all items.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function timeline()
+    {
+        $decades = Detail::select("value_int AS decade", DB::raw("COUNT(*) AS images_count"))
+                        ->whereHas('item', function (Builder $query) {
+                            $query->where('public', 1);
+                        })
+                        ->where('column_fk', 18) // TODO: introduce a data type for decades?
+                        ->groupBy('value_int')
+                        ->orderBy('value_int')
+                        ->get();
+        
+        return view('item.timeline', compact('decades'));
     }
 }

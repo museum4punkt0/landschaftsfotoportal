@@ -28,6 +28,7 @@ Route::post('/search/results', 'SearchController@results')->name('search.results
 
 Route::get('item/{item}', 'ItemController@show')->name('item.show.public');
 Route::get('gallery', 'ItemController@gallery')->name('item.gallery');
+Route::get('timeline', 'ItemController@timeline')->name('item.timeline');
 
 Route::get('/admin/import/csv/upload', 'Admin\ImportCSVController@index')->name('import.csv.upload');
 Route::post('/admin/import/csv/save', 'Admin\ImportCSVController@save')->name('import.csv.save');
