@@ -93,6 +93,7 @@ class ItemController extends Controller
      */
     public function timeline()
     {
+        // Get number of items per decade
         $decades = Detail::select("value_int AS decade", DB::raw("COUNT(*) AS images_count"))
                         ->whereHas('item', function (Builder $query) {
                             $query->where('public', 1);
@@ -102,6 +103,19 @@ class ItemController extends Controller
                         ->orderBy('value_int')
                         ->get();
         
-        return view('item.timeline', compact('decades'));
+        // Get some random items per decade, to be shown as examples
+        foreach ($decades as $decade) {
+            $details[$decade->decade] = Detail::with('item')
+                        ->whereHas('item', function (Builder $query) {
+                            $query->where('public', 1);
+                        })
+                        ->where('column_fk', 18) // TODO: introduce a data type for decades?
+                        ->where('value_int', $decade->decade)
+                        ->inRandomOrder()
+                        ->take(3)
+                        ->get();
+        }
+        
+        return view('item.timeline', compact('decades', 'details'));
     }
 }

@@ -24,9 +24,14 @@
                         <div class="timeline-heading">
                             <h4 class="subheading">{{ $dec->images_count}} Fotos</h4>
                         </div>
-                        <div class="timeline-body"><p class="text-muted">
-                            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sunt ut voluptatum eius sapiente, totam reiciendis temporibus qui quibusdam, recusandae sit vero unde, sed, incidunt et ea quo dolore laudantium consectetur!
-                        </p></div>
+                        <div class="timeline-body">
+                            <div class="row"><p class="text-muted">
+                            @foreach($details[$dec->decade] as $detail)
+                                <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
+                                    $detail->item->details->firstWhere('column_fk', 13)->value_string .'.jpg') }}" height=100 alt="" />
+                            @endforeach
+                            </p></div>
+                        </div>
                     </div>
                 </li>
             @endforeach
