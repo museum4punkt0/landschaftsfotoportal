@@ -40,6 +40,11 @@
             <div class="text-center">
                 <h2 class="section-heading text-uppercase">Bilddetails</h2>
                 <h3 class="section-subheading text-muted">Lorem ipsum dolor sit amet consectetur.</h3>
+                <a href="{{ asset('storage/'. Config::get('media.full_dir') .
+                    $item->details->firstWhere('column_fk', 13)->value_string .'.jpg') }}">
+                <img class="img-fluid" src="{{ asset('storage/'. Config::get('media.medium_dir') .
+                    $item->details->firstWhere('column_fk', 13)->value_string .'.jpg') }}" alt="" />
+                </a>
             </div>
             <div class="card">
                 <div class="card-body">
