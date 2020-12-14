@@ -100,7 +100,7 @@ class ItemController extends Controller
                         })
                         ->where('column_fk', 18) // TODO: introduce a data type for decades?
                         ->groupBy('value_int')
-                        ->orderBy('value_int')
+                        ->orderBy('value_int', 'desc')
                         ->get();
         
         // Get some random items per decade, to be shown as examples
