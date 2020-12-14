@@ -18,7 +18,13 @@
                 @endif
                 
                     <div class="timeline-image">
-                        <h4>{{ $dec->decade }}er</h4>
+                        <h4>
+                        @if($dec->decade)
+                            {{ $dec->decade }}er
+                        @else
+                            Unbekannt
+                        @endif
+                        </h4>
                     </div>
                     <div class="timeline-panel">
                         <div class="timeline-heading">
