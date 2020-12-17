@@ -27,6 +27,7 @@ Route::get('/search', 'SearchController@index')->name('search.index');
 Route::post('/search/results', 'SearchController@results')->name('search.results');
 
 Route::get('item/{item}', 'ItemController@show')->name('item.show.public');
+Route::get('download/{item}', 'ItemController@download')->name('item.download');
 Route::get('gallery', 'ItemController@gallery')->name('item.gallery');
 Route::get('timeline', 'ItemController@timeline')->name('item.timeline');
 

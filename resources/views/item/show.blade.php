@@ -34,6 +34,27 @@
 
 {{-- Quick hack for LFP mock-up --}}
 @if(Config::get('ui.frontend_layout') == 'landschaftsfotoportal')
+    <!-- Modal for download -->
+    <div class="modal fade" id="downloadModal" tabindex="-1" aria-labelledby="downloadModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Foto in Originalgröße herunterladen</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Mit dem Herunterladen akzeptieren Sie die Lizenzbedingungen!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('common.cancel')</button>
+                    <a class="btn btn-primary" href="{{ route('item.download', $item->item_id) }}" onClick="$('#downloadModal').modal('hide')">@lang('common.download')</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Image details -->
     <section class="page-section" id="details">
         <div class="container">
@@ -48,6 +69,26 @@
             </div>
             <div class="card">
                 <div class="card-body">
+                <div>
+                    <span class="fa-stack fa-2x">
+                    @guest
+                        <a href="#" data-toggle="modal" data-target="#downloadModal" title="@lang('common.download')">
+                    @else
+                        <a href="{{ route('item.download', $item->item_id) }}" title="@lang('common.download')">
+                    @endguest
+                            <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                            <i class="fas fa-download fa-stack-1x fa-inverse"></i>
+                        </a>
+                    </span>
+                    <span class="fa-stack fa-2x">
+                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                        <i class="fas fa-shopping-basket fa-stack-1x fa-inverse"></i>
+                    </span>
+                    <span class="fa-stack fa-2x">
+                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                        <i class="fas fa-comment fa-stack-1x fa-inverse"></i>
+                    </span>
+                </div>
 @endif
 
 @foreach($colmap->groupBy('column_group_fk') as $cg)

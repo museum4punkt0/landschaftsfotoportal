@@ -9,6 +9,7 @@ use App\Selectlist;
 use App\Element;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Redirect;
 
 class ItemController extends Controller
@@ -72,6 +73,23 @@ class ItemController extends Controller
         $translations = Element::where('list_fk', $l10n_list->list_id)->get();
                 
         return view('item.show', compact('item', 'items', 'details', 'menu_root', 'path', 'colmap', 'lists', 'translations'));
+    }
+
+    /**
+     * Forces the user's browser to download the image belonging to this item.
+     *
+     * @param  \App\Item  $item
+     * @return \Illuminate\Http\Response
+     */
+    public function download(Item $item)
+    {
+        $filename = $item->details->firstWhere('column_fk', 13)->value_string . '.jpg';
+        $pathToFile = 'public/'. config('media.full_dir') . $filename;
+        
+        if (Storage::missing($pathToFile))
+            abort(404);
+        
+        return Storage::download($pathToFile);
     }
 
     /**
