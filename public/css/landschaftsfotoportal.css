@@ -10095,6 +10095,10 @@ img::-moz-selection {
     height: 2rem;
     transition: height 0.3s ease-in-out;
   }
+  #mainNav .navbar-nav .nav-item .nav-link {
+    font-weight: 600;
+    color: #000;
+  }
   #mainNav.navbar-shrink {
     padding-top: 1rem;
     padding-bottom: 1rem;
@@ -10104,8 +10108,12 @@ img::-moz-selection {
     font-size: 1.25em;
   }
   #mainNav.navbar-shrink .navbar-brand svg,
-#mainNav.navbar-shrink .navbar-brand img {
+  #mainNav.navbar-shrink .navbar-brand img {
     height: 1.5rem;
+  }
+  #mainNav.navbar-shrink .nav-item .nav-link {
+    font-weight: 400;
+    color: #fff;
   }
   #mainNav .navbar-nav .nav-item {
     margin-right: 1rem;
@@ -10142,8 +10150,8 @@ header.masthead .masthead-heading {
 
 @media (min-width: 768px) {
   header.masthead {
-    padding-top: 17rem;
-    padding-bottom: 12.5rem;
+    padding-top: 10rem;
+    padding-bottom: 5.5rem;
   }
   header.masthead .masthead-subheading {
     font-size: 2.25rem;
