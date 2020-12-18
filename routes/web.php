@@ -31,6 +31,8 @@ Route::get('download/{item}', 'ItemController@download')->name('item.download');
 Route::get('gallery', 'ItemController@gallery')->name('item.gallery');
 Route::get('timeline', 'ItemController@timeline')->name('item.timeline');
 
+Route::post('comment/{item}/store', 'AjaxCommentController@store')->name('comment.store');
+
 Route::get('/admin/import/csv/upload', 'Admin\ImportCSVController@index')->name('import.csv.upload');
 Route::post('/admin/import/csv/save', 'Admin\ImportCSVController@save')->name('import.csv.save');
 Route::get('/admin/import/csv/preview', 'Admin\ImportCSVController@preview')->name('import.csv.preview');

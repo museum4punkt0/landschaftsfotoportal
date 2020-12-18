@@ -39,7 +39,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Foto in Originalgröße herunterladen</h5>
+                    <h5 class="modal-title" id="downloadModalLabel">Foto in Originalgröße herunterladen</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -54,6 +54,77 @@
             </div>
         </div>
     </div>
+    
+    <!-- Modal for requesting login -->
+    <div class="modal fade" id="requestLoginModal" tabindex="-1" aria-labelledby="requestLoginModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="requestLoginModalLabel">@lang('Login')</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Um diese Funktion zu nutzen, müssen Sie sich anmelden!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('common.cancel')</button>
+                    <a class="btn btn-primary" href="{{ route('login') }}">@lang('Login')</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal for adding a comment -->
+    <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="commentModalLabel">@lang('comments.new')</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <span>@lang('comments.message')</span>
+                        <textarea name="message" class="form-control" rows=3>{{old('message')}}</textarea>
+                        <span class="text-danger">{{ $errors->first('message') }}</span>
+                    </div>
+                    {{ csrf_field() }}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('common.cancel')</button>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-submit">@lang('common.save')</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="text/javascript">
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+        
+        $(".btn-submit").click(function(e) {
+            e.preventDefault();
+            var message = $("textarea[name=message]").val();
+            
+            $.ajax({
+                type:'POST',
+                url:"{{ route('comment.store', $item->item_id) }}",
+                data:{message:message},
+                success:function(data){
+                    //alert(data.success);
+                    $('#commentModal').modal('hide')
+                }
+            });
+        });
+    </script>
     
     <!-- Image details -->
     <section class="page-section" id="details">
@@ -81,12 +152,24 @@
                         </a>
                     </span>
                     <span class="fa-stack fa-2x">
-                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                        <i class="fas fa-shopping-basket fa-stack-1x fa-inverse"></i>
+                    @guest
+                        <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('cart.add')">
+                    @else
+                        <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('cart.add')">
+                    @endguest
+                            <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                            <i class="fas fa-shopping-basket fa-stack-1x fa-inverse"></i>
+                        </a>
                     </span>
                     <span class="fa-stack fa-2x">
-                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                        <i class="fas fa-comment fa-stack-1x fa-inverse"></i>
+                    @guest
+                        <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('comments.new')">
+                    @else
+                        <a href="#" data-toggle="modal" data-target="#commentModal" title="@lang('comments.new')">
+                    @endguest
+                            <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                            <i class="fas fa-comment fa-stack-1x fa-inverse"></i>
+                        </a>
                     </span>
                 </div>
 @endif
