@@ -87,6 +87,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
+                    
                     <div class="form-group">
                         <span>@lang('comments.message')</span>
                         <textarea name="message" class="form-control" rows=3>{{old('message')}}</textarea>
@@ -94,7 +95,7 @@
                     </div>
                     {{ csrf_field() }}
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer" id="alert-success">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('common.cancel')</button>
                     <div class="form-group">
                         <button type="submit" class="btn btn-primary btn-submit">@lang('common.save')</button>
@@ -110,18 +111,27 @@
             }
         });
         
-        $(".btn-submit").click(function(e) {
-            e.preventDefault();
+        $(".btn-submit").click(function (xhr) {
+            xhr.preventDefault();
             var message = $("textarea[name=message]").val();
             
             $.ajax({
                 type:'POST',
                 url:"{{ route('comment.store', $item->item_id) }}",
                 data:{message:message},
-                success:function(data){
-                    //alert(data.success);
-                    $('#commentModal').modal('hide')
-                }
+                success:function (data) {
+                    $('#alert-success').html('<div class="alert alert-success">' + data.success + '</div>');
+                    // Close modal dialog
+                    window.setTimeout(function () {
+                        $('#commentModal').modal('hide');
+                    }, 2500);
+                },
+                error:function (xhr) {
+                    $.each(xhr.responseJSON.errors, function (field, error) {
+                        // Render the error messages below each form field
+                        $(document).find('[name='+field+']').after('<span class="text-danger">' + error + '</span>')
+                    }); 
+                },
             });
         });
     </script>
