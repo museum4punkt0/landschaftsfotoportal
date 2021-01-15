@@ -45,7 +45,19 @@
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#portfolio">Bildersuche</a></li>
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.timeline') }}#timeline">Zeitstrahl</a></li>
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#">Karte</a></li>
-                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('login') }}">{{ __('Login') }}</a></li>
+                    @guest
+                        <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('login') }}">{{ __('Login') }}</a></li>
+                    @else
+                        <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('home') }}">{{ __('users.profile') }}</a></li>
+                        <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('logout') }}"
+                           onclick="event.preventDefault();
+                                         document.getElementById('logout-form').submit();">
+                            {{ __('Logout') }}
+                        </a></li>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                            @csrf
+                        </form>
+                    @endguest
                 </ul>
             </div>
         </div>
