@@ -87,6 +87,14 @@ class Item extends Model
         return $this->hasMany('App\Comment', 'item_fk', 'item_id');
     }
     
+    /**
+     * Get the carts of the item.
+     */
+    public function carts()
+    {
+        return $this->hasMany('App\Cart', 'item_fk', 'item_id');
+    }
+    
     
     use \Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
     

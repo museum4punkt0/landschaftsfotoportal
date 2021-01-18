@@ -76,6 +76,22 @@
         </div>
     </div>
     
+    <!-- Modal for adding an item to cart -->
+    <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cartModalLabel">@lang('cart.add')</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="alert-cart-add">
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Modal for adding a comment -->
     <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -165,7 +181,7 @@
                     @guest
                         <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('cart.add')">
                     @else
-                        <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('cart.add')">
+                        <a href="#" id="btn-cart-add" title="@lang('cart.add')">
                     @endguest
                             <i class="fas fa-circle fa-stack-2x text-primary"></i>
                             <i class="fas fa-shopping-basket fa-stack-1x fa-inverse"></i>
@@ -510,6 +526,29 @@
             </div>
         </div>
     </section>
+    <script type="text/javascript">
+        // Adding items to cart
+        $("#btn-cart-add").click(function (xhr) {
+            xhr.preventDefault();
+            
+            $.ajax({
+                type:'POST',
+                url:"{{ route('cart.add', $item->item_id) }}",
+                data:{foo:null},
+                success:function (data) {
+                    $('#alert-cart-add').html('<div class="alert alert-success">' + data.success + '</div>');
+                    $('#cartModal').modal('show');
+                },
+                error:function (xhr) {
+                    $.each(xhr.responseJSON.errors, function (field, error) {
+                        // Render the error messages
+                        $('#alert-cart-add').append('<div class="alert alert-danger">' + error + '</div>');
+                    });
+                    $('#cartModal').modal('show');
+                },
+            });
+        });
+    </script>
 @endif
 
 @endsection
