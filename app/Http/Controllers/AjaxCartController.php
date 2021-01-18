@@ -24,17 +24,20 @@ class AjaxCartController extends Controller
      * Store a newly created resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $item_id  ID of the item owning this comment
+     * @param  int  $item_id  ID of the item owning this cart
      * @return \Illuminate\Http\Response
      */
     public function add(Request $request, $item_id)
     {
-        $data = [
-            'item_fk' => $item_id,
-            'created_by' => $request->user()->id,
-            'updated_by' => $request->user()->id,
-        ];
-        Cart::create($data);
+        // Prevent duplicate items per user
+        if (Cart::where([['item_fk', $item_id], ['created_by', $request->user()->id]])->get()->isEmpty()) {
+            $data = [
+                'item_fk' => $item_id,
+                'created_by' => $request->user()->id,
+                'updated_by' => $request->user()->id,
+            ];
+            Cart::create($data);
+        }
         
         return response()->json(['success' => __('cart.added')]);
     }
