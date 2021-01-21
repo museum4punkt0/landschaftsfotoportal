@@ -109,6 +109,7 @@ module.exports = __webpack_require__(/*! ./lib/axios */ "./node_modules/axios/li
 
 var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/utils.js");
 var settle = __webpack_require__(/*! ./../core/settle */ "./node_modules/axios/lib/core/settle.js");
+var cookies = __webpack_require__(/*! ./../helpers/cookies */ "./node_modules/axios/lib/helpers/cookies.js");
 var buildURL = __webpack_require__(/*! ./../helpers/buildURL */ "./node_modules/axios/lib/helpers/buildURL.js");
 var buildFullPath = __webpack_require__(/*! ../core/buildFullPath */ "./node_modules/axios/lib/core/buildFullPath.js");
 var parseHeaders = __webpack_require__(/*! ./../helpers/parseHeaders */ "./node_modules/axios/lib/helpers/parseHeaders.js");
@@ -129,7 +130,7 @@ module.exports = function xhrAdapter(config) {
     // HTTP basic authentication
     if (config.auth) {
       var username = config.auth.username || '';
-      var password = config.auth.password || '';
+      var password = config.auth.password ? unescape(encodeURIComponent(config.auth.password)) : '';
       requestHeaders.Authorization = 'Basic ' + btoa(username + ':' + password);
     }
 
@@ -210,8 +211,6 @@ module.exports = function xhrAdapter(config) {
     // This is only done if running in a standard browser environment.
     // Specifically not if we're in a web worker, or react-native.
     if (utils.isStandardBrowserEnv()) {
-      var cookies = __webpack_require__(/*! ./../helpers/cookies */ "./node_modules/axios/lib/helpers/cookies.js");
-
       // Add xsrf header
       var xsrfValue = (config.withCredentials || isURLSameOrigin(fullPath)) && config.xsrfCookieName ?
         cookies.read(config.xsrfCookieName) :
@@ -277,7 +276,7 @@ module.exports = function xhrAdapter(config) {
       });
     }
 
-    if (requestData === undefined) {
+    if (!requestData) {
       requestData = null;
     }
 
@@ -345,6 +344,9 @@ axios.all = function all(promises) {
   return Promise.all(promises);
 };
 axios.spread = __webpack_require__(/*! ./helpers/spread */ "./node_modules/axios/lib/helpers/spread.js");
+
+// Expose isAxiosError
+axios.isAxiosError = __webpack_require__(/*! ./helpers/isAxiosError */ "./node_modules/axios/lib/helpers/isAxiosError.js");
 
 module.exports = axios;
 
@@ -554,9 +556,10 @@ Axios.prototype.getUri = function getUri(config) {
 utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
   /*eslint func-names:0*/
   Axios.prototype[method] = function(url, config) {
-    return this.request(utils.merge(config || {}, {
+    return this.request(mergeConfig(config || {}, {
       method: method,
-      url: url
+      url: url,
+      data: (config || {}).data
     }));
   };
 });
@@ -564,7 +567,7 @@ utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData
 utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
   /*eslint func-names:0*/
   Axios.prototype[method] = function(url, data, config) {
-    return this.request(utils.merge(config || {}, {
+    return this.request(mergeConfig(config || {}, {
       method: method,
       url: url,
       data: data
@@ -824,7 +827,7 @@ module.exports = function enhanceError(error, config, code, request, response) {
   error.response = response;
   error.isAxiosError = true;
 
-  error.toJSON = function() {
+  error.toJSON = function toJSON() {
     return {
       // Standard
       message: this.message,
@@ -873,59 +876,73 @@ module.exports = function mergeConfig(config1, config2) {
   config2 = config2 || {};
   var config = {};
 
-  var valueFromConfig2Keys = ['url', 'method', 'params', 'data'];
-  var mergeDeepPropertiesKeys = ['headers', 'auth', 'proxy'];
+  var valueFromConfig2Keys = ['url', 'method', 'data'];
+  var mergeDeepPropertiesKeys = ['headers', 'auth', 'proxy', 'params'];
   var defaultToConfig2Keys = [
-    'baseURL', 'url', 'transformRequest', 'transformResponse', 'paramsSerializer',
-    'timeout', 'withCredentials', 'adapter', 'responseType', 'xsrfCookieName',
-    'xsrfHeaderName', 'onUploadProgress', 'onDownloadProgress',
-    'maxContentLength', 'validateStatus', 'maxRedirects', 'httpAgent',
-    'httpsAgent', 'cancelToken', 'socketPath'
+    'baseURL', 'transformRequest', 'transformResponse', 'paramsSerializer',
+    'timeout', 'timeoutMessage', 'withCredentials', 'adapter', 'responseType', 'xsrfCookieName',
+    'xsrfHeaderName', 'onUploadProgress', 'onDownloadProgress', 'decompress',
+    'maxContentLength', 'maxBodyLength', 'maxRedirects', 'transport', 'httpAgent',
+    'httpsAgent', 'cancelToken', 'socketPath', 'responseEncoding'
   ];
+  var directMergeKeys = ['validateStatus'];
+
+  function getMergedValue(target, source) {
+    if (utils.isPlainObject(target) && utils.isPlainObject(source)) {
+      return utils.merge(target, source);
+    } else if (utils.isPlainObject(source)) {
+      return utils.merge({}, source);
+    } else if (utils.isArray(source)) {
+      return source.slice();
+    }
+    return source;
+  }
+
+  function mergeDeepProperties(prop) {
+    if (!utils.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(config1[prop], config2[prop]);
+    } else if (!utils.isUndefined(config1[prop])) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
+    }
+  }
 
   utils.forEach(valueFromConfig2Keys, function valueFromConfig2(prop) {
-    if (typeof config2[prop] !== 'undefined') {
-      config[prop] = config2[prop];
+    if (!utils.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(undefined, config2[prop]);
     }
   });
 
-  utils.forEach(mergeDeepPropertiesKeys, function mergeDeepProperties(prop) {
-    if (utils.isObject(config2[prop])) {
-      config[prop] = utils.deepMerge(config1[prop], config2[prop]);
-    } else if (typeof config2[prop] !== 'undefined') {
-      config[prop] = config2[prop];
-    } else if (utils.isObject(config1[prop])) {
-      config[prop] = utils.deepMerge(config1[prop]);
-    } else if (typeof config1[prop] !== 'undefined') {
-      config[prop] = config1[prop];
-    }
-  });
+  utils.forEach(mergeDeepPropertiesKeys, mergeDeepProperties);
 
   utils.forEach(defaultToConfig2Keys, function defaultToConfig2(prop) {
-    if (typeof config2[prop] !== 'undefined') {
-      config[prop] = config2[prop];
-    } else if (typeof config1[prop] !== 'undefined') {
-      config[prop] = config1[prop];
+    if (!utils.isUndefined(config2[prop])) {
+      config[prop] = getMergedValue(undefined, config2[prop]);
+    } else if (!utils.isUndefined(config1[prop])) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
+    }
+  });
+
+  utils.forEach(directMergeKeys, function merge(prop) {
+    if (prop in config2) {
+      config[prop] = getMergedValue(config1[prop], config2[prop]);
+    } else if (prop in config1) {
+      config[prop] = getMergedValue(undefined, config1[prop]);
     }
   });
 
   var axiosKeys = valueFromConfig2Keys
     .concat(mergeDeepPropertiesKeys)
-    .concat(defaultToConfig2Keys);
+    .concat(defaultToConfig2Keys)
+    .concat(directMergeKeys);
 
   var otherKeys = Object
-    .keys(config2)
+    .keys(config1)
+    .concat(Object.keys(config2))
     .filter(function filterAxiosKeys(key) {
       return axiosKeys.indexOf(key) === -1;
     });
 
-  utils.forEach(otherKeys, function otherKeysDefaultToConfig2(prop) {
-    if (typeof config2[prop] !== 'undefined') {
-      config[prop] = config2[prop];
-    } else if (typeof config1[prop] !== 'undefined') {
-      config[prop] = config1[prop];
-    }
-  });
+  utils.forEach(otherKeys, mergeDeepProperties);
 
   return config;
 };
@@ -954,7 +971,7 @@ var createError = __webpack_require__(/*! ./createError */ "./node_modules/axios
  */
 module.exports = function settle(resolve, reject, response) {
   var validateStatus = response.config.validateStatus;
-  if (!validateStatus || validateStatus(response.status)) {
+  if (!response.status || !validateStatus || validateStatus(response.status)) {
     resolve(response);
   } else {
     reject(createError(
@@ -1086,6 +1103,7 @@ var defaults = {
   xsrfHeaderName: 'X-XSRF-TOKEN',
 
   maxContentLength: -1,
+  maxBodyLength: -1,
 
   validateStatus: function validateStatus(status) {
     return status >= 200 && status < 300;
@@ -1149,7 +1167,6 @@ var utils = __webpack_require__(/*! ./../utils */ "./node_modules/axios/lib/util
 
 function encode(val) {
   return encodeURIComponent(val).
-    replace(/%40/gi, '@').
     replace(/%3A/gi, ':').
     replace(/%24/g, '$').
     replace(/%2C/gi, ',').
@@ -1330,6 +1347,29 @@ module.exports = function isAbsoluteURL(url) {
   // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
   // by any combination of letters, digits, plus, period, or hyphen.
   return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
+};
+
+
+/***/ }),
+
+/***/ "./node_modules/axios/lib/helpers/isAxiosError.js":
+/*!********************************************************!*\
+  !*** ./node_modules/axios/lib/helpers/isAxiosError.js ***!
+  \********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Determines whether the payload is an error thrown by Axios
+ *
+ * @param {*} payload The value to test
+ * @returns {boolean} True if the payload is an error thrown by Axios, otherwise false
+ */
+module.exports = function isAxiosError(payload) {
+  return (typeof payload === 'object') && (payload.isAxiosError === true);
 };
 
 
@@ -1659,6 +1699,21 @@ function isObject(val) {
 }
 
 /**
+ * Determine if a value is a plain Object
+ *
+ * @param {Object} val The value to test
+ * @return {boolean} True if value is a plain Object, otherwise false
+ */
+function isPlainObject(val) {
+  if (toString.call(val) !== '[object Object]') {
+    return false;
+  }
+
+  var prototype = Object.getPrototypeOf(val);
+  return prototype === null || prototype === Object.prototype;
+}
+
+/**
  * Determine if a value is a Date
  *
  * @param {Object} val The value to test
@@ -1814,34 +1869,12 @@ function forEach(obj, fn) {
 function merge(/* obj1, obj2, obj3, ... */) {
   var result = {};
   function assignValue(val, key) {
-    if (typeof result[key] === 'object' && typeof val === 'object') {
+    if (isPlainObject(result[key]) && isPlainObject(val)) {
       result[key] = merge(result[key], val);
-    } else {
-      result[key] = val;
-    }
-  }
-
-  for (var i = 0, l = arguments.length; i < l; i++) {
-    forEach(arguments[i], assignValue);
-  }
-  return result;
-}
-
-/**
- * Function equal to merge with the difference being that no reference
- * to original objects is kept.
- *
- * @see merge
- * @param {Object} obj1 Object to merge
- * @returns {Object} Result of all merge properties
- */
-function deepMerge(/* obj1, obj2, obj3, ... */) {
-  var result = {};
-  function assignValue(val, key) {
-    if (typeof result[key] === 'object' && typeof val === 'object') {
-      result[key] = deepMerge(result[key], val);
-    } else if (typeof val === 'object') {
-      result[key] = deepMerge({}, val);
+    } else if (isPlainObject(val)) {
+      result[key] = merge({}, val);
+    } else if (isArray(val)) {
+      result[key] = val.slice();
     } else {
       result[key] = val;
     }
@@ -1872,6 +1905,19 @@ function extend(a, b, thisArg) {
   return a;
 }
 
+/**
+ * Remove byte order marker. This catches EF BB BF (the UTF-8 BOM)
+ *
+ * @param {string} content with BOM
+ * @return {string} content value without BOM
+ */
+function stripBOM(content) {
+  if (content.charCodeAt(0) === 0xFEFF) {
+    content = content.slice(1);
+  }
+  return content;
+}
+
 module.exports = {
   isArray: isArray,
   isArrayBuffer: isArrayBuffer,
@@ -1881,6 +1927,7 @@ module.exports = {
   isString: isString,
   isNumber: isNumber,
   isObject: isObject,
+  isPlainObject: isPlainObject,
   isUndefined: isUndefined,
   isDate: isDate,
   isFile: isFile,
@@ -1891,9 +1938,9 @@ module.exports = {
   isStandardBrowserEnv: isStandardBrowserEnv,
   forEach: forEach,
   merge: merge,
-  deepMerge: deepMerge,
   extend: extend,
-  trim: trim
+  trim: trim,
+  stripBOM: stripBOM
 };
 
 
@@ -1907,17 +1954,19 @@ module.exports = {
 /***/ (function(module, exports, __webpack_require__) {
 
 /*!
-  * Bootstrap v4.5.0 (https://getbootstrap.com/)
-  * Copyright 2011-2020 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
-  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+  * Bootstrap v4.6.0 (https://getbootstrap.com/)
+  * Copyright 2011-2021 The Bootstrap Authors (https://github.com/twbs/bootstrap/graphs/contributors)
+  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
   */
 (function (global, factory) {
    true ? factory(exports, __webpack_require__(/*! jquery */ "./node_modules/jquery/dist/jquery.js"), __webpack_require__(/*! popper.js */ "./node_modules/popper.js/dist/esm/popper.js")) :
   undefined;
 }(this, (function (exports, $, Popper) { 'use strict';
 
-  $ = $ && Object.prototype.hasOwnProperty.call($, 'default') ? $['default'] : $;
-  Popper = Popper && Object.prototype.hasOwnProperty.call(Popper, 'default') ? Popper['default'] : Popper;
+  function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
+
+  var $__default = /*#__PURE__*/_interopDefaultLegacy($);
+  var Popper__default = /*#__PURE__*/_interopDefaultLegacy(Popper);
 
   function _defineProperties(target, props) {
     for (var i = 0; i < props.length; i++) {
@@ -1935,53 +1984,22 @@ module.exports = {
     return Constructor;
   }
 
-  function _defineProperty(obj, key, value) {
-    if (key in obj) {
-      Object.defineProperty(obj, key, {
-        value: value,
-        enumerable: true,
-        configurable: true,
-        writable: true
-      });
-    } else {
-      obj[key] = value;
-    }
+  function _extends() {
+    _extends = Object.assign || function (target) {
+      for (var i = 1; i < arguments.length; i++) {
+        var source = arguments[i];
 
-    return obj;
-  }
-
-  function ownKeys(object, enumerableOnly) {
-    var keys = Object.keys(object);
-
-    if (Object.getOwnPropertySymbols) {
-      var symbols = Object.getOwnPropertySymbols(object);
-      if (enumerableOnly) symbols = symbols.filter(function (sym) {
-        return Object.getOwnPropertyDescriptor(object, sym).enumerable;
-      });
-      keys.push.apply(keys, symbols);
-    }
-
-    return keys;
-  }
-
-  function _objectSpread2(target) {
-    for (var i = 1; i < arguments.length; i++) {
-      var source = arguments[i] != null ? arguments[i] : {};
-
-      if (i % 2) {
-        ownKeys(Object(source), true).forEach(function (key) {
-          _defineProperty(target, key, source[key]);
-        });
-      } else if (Object.getOwnPropertyDescriptors) {
-        Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
-      } else {
-        ownKeys(Object(source)).forEach(function (key) {
-          Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
-        });
+        for (var key in source) {
+          if (Object.prototype.hasOwnProperty.call(source, key)) {
+            target[key] = source[key];
+          }
+        }
       }
-    }
 
-    return target;
+      return target;
+    };
+
+    return _extends.apply(this, arguments);
   }
 
   function _inheritsLoose(subClass, superClass) {
@@ -1992,8 +2010,8 @@ module.exports = {
 
   /**
    * --------------------------------------------------------------------------
-   * Bootstrap (v4.5.0): util.js
-   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+   * Bootstrap (v4.6.0): util.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
    * --------------------------------------------------------------------------
    */
   /**
@@ -2019,7 +2037,7 @@ module.exports = {
       bindType: TRANSITION_END,
       delegateType: TRANSITION_END,
       handle: function handle(event) {
-        if ($(event.target).is(this)) {
+        if ($__default['default'](event.target).is(this)) {
           return event.handleObj.handler.apply(this, arguments); // eslint-disable-line prefer-rest-params
         }
 
@@ -2032,7 +2050,7 @@ module.exports = {
     var _this = this;
 
     var called = false;
-    $(this).one(Util.TRANSITION_END, function () {
+    $__default['default'](this).one(Util.TRANSITION_END, function () {
       called = true;
     });
     setTimeout(function () {
@@ -2044,8 +2062,8 @@ module.exports = {
   }
 
   function setTransitionEndSupport() {
-    $.fn.emulateTransitionEnd = transitionEndEmulator;
-    $.event.special[Util.TRANSITION_END] = getSpecialTransitionEndEvent();
+    $__default['default'].fn.emulateTransitionEnd = transitionEndEmulator;
+    $__default['default'].event.special[Util.TRANSITION_END] = getSpecialTransitionEndEvent();
   }
   /**
    * --------------------------------------------------------------------------
@@ -2058,7 +2076,6 @@ module.exports = {
     TRANSITION_END: 'bsTransitionEnd',
     getUID: function getUID(prefix) {
       do {
-        // eslint-disable-next-line no-bitwise
         prefix += ~~(Math.random() * MAX_UID); // "~~" acts like a faster Math.floor() here
       } while (document.getElementById(prefix));
 
@@ -2074,7 +2091,7 @@ module.exports = {
 
       try {
         return document.querySelector(selector) ? selector : null;
-      } catch (err) {
+      } catch (_) {
         return null;
       }
     },
@@ -2084,8 +2101,8 @@ module.exports = {
       } // Get transition-duration of the element
 
 
-      var transitionDuration = $(element).css('transition-duration');
-      var transitionDelay = $(element).css('transition-delay');
+      var transitionDuration = $__default['default'](element).css('transition-duration');
+      var transitionDelay = $__default['default'](element).css('transition-delay');
       var floatTransitionDuration = parseFloat(transitionDuration);
       var floatTransitionDelay = parseFloat(transitionDelay); // Return 0 if element or transition duration is not found
 
@@ -2102,9 +2119,8 @@ module.exports = {
       return element.offsetHeight;
     },
     triggerTransitionEnd: function triggerTransitionEnd(element) {
-      $(element).trigger(TRANSITION_END);
+      $__default['default'](element).trigger(TRANSITION_END);
     },
-    // TODO: Remove in v5
     supportsTransitionEnd: function supportsTransitionEnd() {
       return Boolean(TRANSITION_END);
     },
@@ -2147,11 +2163,11 @@ module.exports = {
       return Util.findShadowRoot(element.parentNode);
     },
     jQueryDetection: function jQueryDetection() {
-      if (typeof $ === 'undefined') {
+      if (typeof $__default['default'] === 'undefined') {
         throw new TypeError('Bootstrap\'s JavaScript requires jQuery. jQuery must be included before Bootstrap\'s JavaScript.');
       }
 
-      var version = $.fn.jquery.split(' ')[0].split('.');
+      var version = $__default['default'].fn.jquery.split(' ')[0].split('.');
       var minMajor = 1;
       var ltMajor = 2;
       var minMinor = 9;
@@ -2173,11 +2189,11 @@ module.exports = {
    */
 
   var NAME = 'alert';
-  var VERSION = '4.5.0';
+  var VERSION = '4.6.0';
   var DATA_KEY = 'bs.alert';
   var EVENT_KEY = "." + DATA_KEY;
   var DATA_API_KEY = '.data-api';
-  var JQUERY_NO_CONFLICT = $.fn[NAME];
+  var JQUERY_NO_CONFLICT = $__default['default'].fn[NAME];
   var SELECTOR_DISMISS = '[data-dismiss="alert"]';
   var EVENT_CLOSE = "close" + EVENT_KEY;
   var EVENT_CLOSED = "closed" + EVENT_KEY;
@@ -2217,7 +2233,7 @@ module.exports = {
     };
 
     _proto.dispose = function dispose() {
-      $.removeData(this._element, DATA_KEY);
+      $__default['default'].removeData(this._element, DATA_KEY);
       this._element = null;
     } // Private
     ;
@@ -2231,43 +2247,43 @@ module.exports = {
       }
 
       if (!parent) {
-        parent = $(element).closest("." + CLASS_NAME_ALERT)[0];
+        parent = $__default['default'](element).closest("." + CLASS_NAME_ALERT)[0];
       }
 
       return parent;
     };
 
     _proto._triggerCloseEvent = function _triggerCloseEvent(element) {
-      var closeEvent = $.Event(EVENT_CLOSE);
-      $(element).trigger(closeEvent);
+      var closeEvent = $__default['default'].Event(EVENT_CLOSE);
+      $__default['default'](element).trigger(closeEvent);
       return closeEvent;
     };
 
     _proto._removeElement = function _removeElement(element) {
       var _this = this;
 
-      $(element).removeClass(CLASS_NAME_SHOW);
+      $__default['default'](element).removeClass(CLASS_NAME_SHOW);
 
-      if (!$(element).hasClass(CLASS_NAME_FADE)) {
+      if (!$__default['default'](element).hasClass(CLASS_NAME_FADE)) {
         this._destroyElement(element);
 
         return;
       }
 
       var transitionDuration = Util.getTransitionDurationFromElement(element);
-      $(element).one(Util.TRANSITION_END, function (event) {
+      $__default['default'](element).one(Util.TRANSITION_END, function (event) {
         return _this._destroyElement(element, event);
       }).emulateTransitionEnd(transitionDuration);
     };
 
     _proto._destroyElement = function _destroyElement(element) {
-      $(element).detach().trigger(EVENT_CLOSED).remove();
+      $__default['default'](element).detach().trigger(EVENT_CLOSED).remove();
     } // Static
     ;
 
     Alert._jQueryInterface = function _jQueryInterface(config) {
       return this.each(function () {
-        var $element = $(this);
+        var $element = $__default['default'](this);
         var data = $element.data(DATA_KEY);
 
         if (!data) {
@@ -2307,18 +2323,18 @@ module.exports = {
    */
 
 
-  $(document).on(EVENT_CLICK_DATA_API, SELECTOR_DISMISS, Alert._handleDismiss(new Alert()));
+  $__default['default'](document).on(EVENT_CLICK_DATA_API, SELECTOR_DISMISS, Alert._handleDismiss(new Alert()));
   /**
    * ------------------------------------------------------------------------
    * jQuery
    * ------------------------------------------------------------------------
    */
 
-  $.fn[NAME] = Alert._jQueryInterface;
-  $.fn[NAME].Constructor = Alert;
+  $__default['default'].fn[NAME] = Alert._jQueryInterface;
+  $__default['default'].fn[NAME].Constructor = Alert;
 
-  $.fn[NAME].noConflict = function () {
-    $.fn[NAME] = JQUERY_NO_CONFLICT;
+  $__default['default'].fn[NAME].noConflict = function () {
+    $__default['default'].fn[NAME] = JQUERY_NO_CONFLICT;
     return Alert._jQueryInterface;
   };
 
@@ -2329,11 +2345,11 @@ module.exports = {
    */
 
   var NAME$1 = 'button';
-  var VERSION$1 = '4.5.0';
+  var VERSION$1 = '4.6.0';
   var DATA_KEY$1 = 'bs.button';
   var EVENT_KEY$1 = "." + DATA_KEY$1;
   var DATA_API_KEY$1 = '.data-api';
-  var JQUERY_NO_CONFLICT$1 = $.fn[NAME$1];
+  var JQUERY_NO_CONFLICT$1 = $__default['default'].fn[NAME$1];
   var CLASS_NAME_ACTIVE = 'active';
   var CLASS_NAME_BUTTON = 'btn';
   var CLASS_NAME_FOCUS = 'focus';
@@ -2356,6 +2372,7 @@ module.exports = {
   var Button = /*#__PURE__*/function () {
     function Button(element) {
       this._element = element;
+      this.shouldAvoidTriggerChange = false;
     } // Getters
 
 
@@ -2365,7 +2382,7 @@ module.exports = {
     _proto.toggle = function toggle() {
       var triggerChangeEvent = true;
       var addAriaPressed = true;
-      var rootElement = $(this._element).closest(SELECTOR_DATA_TOGGLES)[0];
+      var rootElement = $__default['default'](this._element).closest(SELECTOR_DATA_TOGGLES)[0];
 
       if (rootElement) {
         var input = this._element.querySelector(SELECTOR_INPUT);
@@ -2378,7 +2395,7 @@ module.exports = {
               var activeElement = rootElement.querySelector(SELECTOR_ACTIVE);
 
               if (activeElement) {
-                $(activeElement).removeClass(CLASS_NAME_ACTIVE);
+                $__default['default'](activeElement).removeClass(CLASS_NAME_ACTIVE);
               }
             }
           }
@@ -2389,7 +2406,9 @@ module.exports = {
               input.checked = !this._element.classList.contains(CLASS_NAME_ACTIVE);
             }
 
-            $(input).trigger('change');
+            if (!this.shouldAvoidTriggerChange) {
+              $__default['default'](input).trigger('change');
+            }
           }
 
           input.focus();
@@ -2403,25 +2422,28 @@ module.exports = {
         }
 
         if (triggerChangeEvent) {
-          $(this._element).toggleClass(CLASS_NAME_ACTIVE);
+          $__default['default'](this._element).toggleClass(CLASS_NAME_ACTIVE);
         }
       }
     };
 
     _proto.dispose = function dispose() {
-      $.removeData(this._element, DATA_KEY$1);
+      $__default['default'].removeData(this._element, DATA_KEY$1);
       this._element = null;
     } // Static
     ;
 
-    Button._jQueryInterface = function _jQueryInterface(config) {
+    Button._jQueryInterface = function _jQueryInterface(config, avoidTriggerChange) {
       return this.each(function () {
-        var data = $(this).data(DATA_KEY$1);
+        var $element = $__default['default'](this);
+        var data = $element.data(DATA_KEY$1);
 
         if (!data) {
           data = new Button(this);
-          $(this).data(DATA_KEY$1, data);
+          $element.data(DATA_KEY$1, data);
         }
+
+        data.shouldAvoidTriggerChange = avoidTriggerChange;
 
         if (config === 'toggle') {
           data[config]();
@@ -2445,12 +2467,12 @@ module.exports = {
    */
 
 
-  $(document).on(EVENT_CLICK_DATA_API$1, SELECTOR_DATA_TOGGLE_CARROT, function (event) {
+  $__default['default'](document).on(EVENT_CLICK_DATA_API$1, SELECTOR_DATA_TOGGLE_CARROT, function (event) {
     var button = event.target;
     var initialButton = button;
 
-    if (!$(button).hasClass(CLASS_NAME_BUTTON)) {
-      button = $(button).closest(SELECTOR_BUTTON)[0];
+    if (!$__default['default'](button).hasClass(CLASS_NAME_BUTTON)) {
+      button = $__default['default'](button).closest(SELECTOR_BUTTON)[0];
     }
 
     if (!button || button.hasAttribute('disabled') || button.classList.contains('disabled')) {
@@ -2464,17 +2486,15 @@ module.exports = {
         return;
       }
 
-      if (initialButton.tagName === 'LABEL' && inputBtn && inputBtn.type === 'checkbox') {
-        event.preventDefault(); // work around event sent to label and input
+      if (initialButton.tagName === 'INPUT' || button.tagName !== 'LABEL') {
+        Button._jQueryInterface.call($__default['default'](button), 'toggle', initialButton.tagName === 'INPUT');
       }
-
-      Button._jQueryInterface.call($(button), 'toggle');
     }
   }).on(EVENT_FOCUS_BLUR_DATA_API, SELECTOR_DATA_TOGGLE_CARROT, function (event) {
-    var button = $(event.target).closest(SELECTOR_BUTTON)[0];
-    $(button).toggleClass(CLASS_NAME_FOCUS, /^focus(in)?$/.test(event.type));
+    var button = $__default['default'](event.target).closest(SELECTOR_BUTTON)[0];
+    $__default['default'](button).toggleClass(CLASS_NAME_FOCUS, /^focus(in)?$/.test(event.type));
   });
-  $(window).on(EVENT_LOAD_DATA_API, function () {
+  $__default['default'](window).on(EVENT_LOAD_DATA_API, function () {
     // ensure correct active class is set to match the controls' actual values/states
     // find all checkboxes/readio buttons inside data-toggle groups
     var buttons = [].slice.call(document.querySelectorAll(SELECTOR_DATA_TOGGLES_BUTTONS));
@@ -2509,11 +2529,11 @@ module.exports = {
    * ------------------------------------------------------------------------
    */
 
-  $.fn[NAME$1] = Button._jQueryInterface;
-  $.fn[NAME$1].Constructor = Button;
+  $__default['default'].fn[NAME$1] = Button._jQueryInterface;
+  $__default['default'].fn[NAME$1].Constructor = Button;
 
-  $.fn[NAME$1].noConflict = function () {
-    $.fn[NAME$1] = JQUERY_NO_CONFLICT$1;
+  $__default['default'].fn[NAME$1].noConflict = function () {
+    $__default['default'].fn[NAME$1] = JQUERY_NO_CONFLICT$1;
     return Button._jQueryInterface;
   };
 
@@ -2524,11 +2544,11 @@ module.exports = {
    */
 
   var NAME$2 = 'carousel';
-  var VERSION$2 = '4.5.0';
+  var VERSION$2 = '4.6.0';
   var DATA_KEY$2 = 'bs.carousel';
   var EVENT_KEY$2 = "." + DATA_KEY$2;
   var DATA_API_KEY$2 = '.data-api';
-  var JQUERY_NO_CONFLICT$2 = $.fn[NAME$2];
+  var JQUERY_NO_CONFLICT$2 = $__default['default'].fn[NAME$2];
   var ARROW_LEFT_KEYCODE = 37; // KeyboardEvent.which value for left arrow key
 
   var ARROW_RIGHT_KEYCODE = 39; // KeyboardEvent.which value for right arrow key
@@ -2625,9 +2645,10 @@ module.exports = {
     };
 
     _proto.nextWhenVisible = function nextWhenVisible() {
-      // Don't call next when the page isn't visible
+      var $element = $__default['default'](this._element); // Don't call next when the page isn't visible
       // or the carousel or its parent isn't visible
-      if (!document.hidden && $(this._element).is(':visible') && $(this._element).css('visibility') !== 'hidden') {
+
+      if (!document.hidden && $element.is(':visible') && $element.css('visibility') !== 'hidden') {
         this.next();
       }
     };
@@ -2663,6 +2684,8 @@ module.exports = {
       }
 
       if (this._config.interval && !this._isPaused) {
+        this._updateInterval();
+
         this._interval = setInterval((document.visibilityState ? this.nextWhenVisible : this.next).bind(this), this._config.interval);
       }
     };
@@ -2679,7 +2702,7 @@ module.exports = {
       }
 
       if (this._isSliding) {
-        $(this._element).one(EVENT_SLID, function () {
+        $__default['default'](this._element).one(EVENT_SLID, function () {
           return _this.to(index);
         });
         return;
@@ -2697,8 +2720,8 @@ module.exports = {
     };
 
     _proto.dispose = function dispose() {
-      $(this._element).off(EVENT_KEY$2);
-      $.removeData(this._element, DATA_KEY$2);
+      $__default['default'](this._element).off(EVENT_KEY$2);
+      $__default['default'].removeData(this._element, DATA_KEY$2);
       this._items = null;
       this._config = null;
       this._element = null;
@@ -2711,7 +2734,7 @@ module.exports = {
     ;
 
     _proto._getConfig = function _getConfig(config) {
-      config = _objectSpread2(_objectSpread2({}, Default), config);
+      config = _extends({}, Default, config);
       Util.typeCheckConfig(NAME$2, config, DefaultType);
       return config;
     };
@@ -2740,13 +2763,13 @@ module.exports = {
       var _this2 = this;
 
       if (this._config.keyboard) {
-        $(this._element).on(EVENT_KEYDOWN, function (event) {
+        $__default['default'](this._element).on(EVENT_KEYDOWN, function (event) {
           return _this2._keydown(event);
         });
       }
 
       if (this._config.pause === 'hover') {
-        $(this._element).on(EVENT_MOUSEENTER, function (event) {
+        $__default['default'](this._element).on(EVENT_MOUSEENTER, function (event) {
           return _this2.pause(event);
         }).on(EVENT_MOUSELEAVE, function (event) {
           return _this2.cycle(event);
@@ -2809,27 +2832,27 @@ module.exports = {
         }
       };
 
-      $(this._element.querySelectorAll(SELECTOR_ITEM_IMG)).on(EVENT_DRAG_START, function (e) {
+      $__default['default'](this._element.querySelectorAll(SELECTOR_ITEM_IMG)).on(EVENT_DRAG_START, function (e) {
         return e.preventDefault();
       });
 
       if (this._pointerEvent) {
-        $(this._element).on(EVENT_POINTERDOWN, function (event) {
+        $__default['default'](this._element).on(EVENT_POINTERDOWN, function (event) {
           return start(event);
         });
-        $(this._element).on(EVENT_POINTERUP, function (event) {
+        $__default['default'](this._element).on(EVENT_POINTERUP, function (event) {
           return end(event);
         });
 
         this._element.classList.add(CLASS_NAME_POINTER_EVENT);
       } else {
-        $(this._element).on(EVENT_TOUCHSTART, function (event) {
+        $__default['default'](this._element).on(EVENT_TOUCHSTART, function (event) {
           return start(event);
         });
-        $(this._element).on(EVENT_TOUCHMOVE, function (event) {
+        $__default['default'](this._element).on(EVENT_TOUCHMOVE, function (event) {
           return move(event);
         });
-        $(this._element).on(EVENT_TOUCHEND, function (event) {
+        $__default['default'](this._element).on(EVENT_TOUCHEND, function (event) {
           return end(event);
         });
       }
@@ -2881,26 +2904,43 @@ module.exports = {
 
       var fromIndex = this._getItemIndex(this._element.querySelector(SELECTOR_ACTIVE_ITEM));
 
-      var slideEvent = $.Event(EVENT_SLIDE, {
+      var slideEvent = $__default['default'].Event(EVENT_SLIDE, {
         relatedTarget: relatedTarget,
         direction: eventDirectionName,
         from: fromIndex,
         to: targetIndex
       });
-      $(this._element).trigger(slideEvent);
+      $__default['default'](this._element).trigger(slideEvent);
       return slideEvent;
     };
 
     _proto._setActiveIndicatorElement = function _setActiveIndicatorElement(element) {
       if (this._indicatorsElement) {
         var indicators = [].slice.call(this._indicatorsElement.querySelectorAll(SELECTOR_ACTIVE$1));
-        $(indicators).removeClass(CLASS_NAME_ACTIVE$1);
+        $__default['default'](indicators).removeClass(CLASS_NAME_ACTIVE$1);
 
         var nextIndicator = this._indicatorsElement.children[this._getItemIndex(element)];
 
         if (nextIndicator) {
-          $(nextIndicator).addClass(CLASS_NAME_ACTIVE$1);
+          $__default['default'](nextIndicator).addClass(CLASS_NAME_ACTIVE$1);
         }
+      }
+    };
+
+    _proto._updateInterval = function _updateInterval() {
+      var element = this._activeElement || this._element.querySelector(SELECTOR_ACTIVE_ITEM);
+
+      if (!element) {
+        return;
+      }
+
+      var elementInterval = parseInt(element.getAttribute('data-interval'), 10);
+
+      if (elementInterval) {
+        this._config.defaultInterval = this._config.defaultInterval || this._config.interval;
+        this._config.interval = elementInterval;
+      } else {
+        this._config.interval = this._config.defaultInterval || this._config.interval;
       }
     };
 
@@ -2930,7 +2970,7 @@ module.exports = {
         eventDirectionName = DIRECTION_RIGHT;
       }
 
-      if (nextElement && $(nextElement).hasClass(CLASS_NAME_ACTIVE$1)) {
+      if (nextElement && $__default['default'](nextElement).hasClass(CLASS_NAME_ACTIVE$1)) {
         this._isSliding = false;
         return;
       }
@@ -2954,41 +2994,33 @@ module.exports = {
 
       this._setActiveIndicatorElement(nextElement);
 
-      var slidEvent = $.Event(EVENT_SLID, {
+      this._activeElement = nextElement;
+      var slidEvent = $__default['default'].Event(EVENT_SLID, {
         relatedTarget: nextElement,
         direction: eventDirectionName,
         from: activeElementIndex,
         to: nextElementIndex
       });
 
-      if ($(this._element).hasClass(CLASS_NAME_SLIDE)) {
-        $(nextElement).addClass(orderClassName);
+      if ($__default['default'](this._element).hasClass(CLASS_NAME_SLIDE)) {
+        $__default['default'](nextElement).addClass(orderClassName);
         Util.reflow(nextElement);
-        $(activeElement).addClass(directionalClassName);
-        $(nextElement).addClass(directionalClassName);
-        var nextElementInterval = parseInt(nextElement.getAttribute('data-interval'), 10);
-
-        if (nextElementInterval) {
-          this._config.defaultInterval = this._config.defaultInterval || this._config.interval;
-          this._config.interval = nextElementInterval;
-        } else {
-          this._config.interval = this._config.defaultInterval || this._config.interval;
-        }
-
+        $__default['default'](activeElement).addClass(directionalClassName);
+        $__default['default'](nextElement).addClass(directionalClassName);
         var transitionDuration = Util.getTransitionDurationFromElement(activeElement);
-        $(activeElement).one(Util.TRANSITION_END, function () {
-          $(nextElement).removeClass(directionalClassName + " " + orderClassName).addClass(CLASS_NAME_ACTIVE$1);
-          $(activeElement).removeClass(CLASS_NAME_ACTIVE$1 + " " + orderClassName + " " + directionalClassName);
+        $__default['default'](activeElement).one(Util.TRANSITION_END, function () {
+          $__default['default'](nextElement).removeClass(directionalClassName + " " + orderClassName).addClass(CLASS_NAME_ACTIVE$1);
+          $__default['default'](activeElement).removeClass(CLASS_NAME_ACTIVE$1 + " " + orderClassName + " " + directionalClassName);
           _this4._isSliding = false;
           setTimeout(function () {
-            return $(_this4._element).trigger(slidEvent);
+            return $__default['default'](_this4._element).trigger(slidEvent);
           }, 0);
         }).emulateTransitionEnd(transitionDuration);
       } else {
-        $(activeElement).removeClass(CLASS_NAME_ACTIVE$1);
-        $(nextElement).addClass(CLASS_NAME_ACTIVE$1);
+        $__default['default'](activeElement).removeClass(CLASS_NAME_ACTIVE$1);
+        $__default['default'](nextElement).addClass(CLASS_NAME_ACTIVE$1);
         this._isSliding = false;
-        $(this._element).trigger(slidEvent);
+        $__default['default'](this._element).trigger(slidEvent);
       }
 
       if (isCycling) {
@@ -2999,19 +3031,19 @@ module.exports = {
 
     Carousel._jQueryInterface = function _jQueryInterface(config) {
       return this.each(function () {
-        var data = $(this).data(DATA_KEY$2);
+        var data = $__default['default'](this).data(DATA_KEY$2);
 
-        var _config = _objectSpread2(_objectSpread2({}, Default), $(this).data());
+        var _config = _extends({}, Default, $__default['default'](this).data());
 
         if (typeof config === 'object') {
-          _config = _objectSpread2(_objectSpread2({}, _config), config);
+          _config = _extends({}, _config, config);
         }
 
         var action = typeof config === 'string' ? config : _config.slide;
 
         if (!data) {
           data = new Carousel(this, _config);
-          $(this).data(DATA_KEY$2, data);
+          $__default['default'](this).data(DATA_KEY$2, data);
         }
 
         if (typeof config === 'number') {
@@ -3036,13 +3068,13 @@ module.exports = {
         return;
       }
 
-      var target = $(selector)[0];
+      var target = $__default['default'](selector)[0];
 
-      if (!target || !$(target).hasClass(CLASS_NAME_CAROUSEL)) {
+      if (!target || !$__default['default'](target).hasClass(CLASS_NAME_CAROUSEL)) {
         return;
       }
 
-      var config = _objectSpread2(_objectSpread2({}, $(target).data()), $(this).data());
+      var config = _extends({}, $__default['default'](target).data(), $__default['default'](this).data());
 
       var slideIndex = this.getAttribute('data-slide-to');
 
@@ -3050,10 +3082,10 @@ module.exports = {
         config.interval = false;
       }
 
-      Carousel._jQueryInterface.call($(target), config);
+      Carousel._jQueryInterface.call($__default['default'](target), config);
 
       if (slideIndex) {
-        $(target).data(DATA_KEY$2).to(slideIndex);
+        $__default['default'](target).data(DATA_KEY$2).to(slideIndex);
       }
 
       event.preventDefault();
@@ -3080,12 +3112,12 @@ module.exports = {
    */
 
 
-  $(document).on(EVENT_CLICK_DATA_API$2, SELECTOR_DATA_SLIDE, Carousel._dataApiClickHandler);
-  $(window).on(EVENT_LOAD_DATA_API$1, function () {
+  $__default['default'](document).on(EVENT_CLICK_DATA_API$2, SELECTOR_DATA_SLIDE, Carousel._dataApiClickHandler);
+  $__default['default'](window).on(EVENT_LOAD_DATA_API$1, function () {
     var carousels = [].slice.call(document.querySelectorAll(SELECTOR_DATA_RIDE));
 
     for (var i = 0, len = carousels.length; i < len; i++) {
-      var $carousel = $(carousels[i]);
+      var $carousel = $__default['default'](carousels[i]);
 
       Carousel._jQueryInterface.call($carousel, $carousel.data());
     }
@@ -3096,11 +3128,11 @@ module.exports = {
    * ------------------------------------------------------------------------
    */
 
-  $.fn[NAME$2] = Carousel._jQueryInterface;
-  $.fn[NAME$2].Constructor = Carousel;
+  $__default['default'].fn[NAME$2] = Carousel._jQueryInterface;
+  $__default['default'].fn[NAME$2].Constructor = Carousel;
 
-  $.fn[NAME$2].noConflict = function () {
-    $.fn[NAME$2] = JQUERY_NO_CONFLICT$2;
+  $__default['default'].fn[NAME$2].noConflict = function () {
+    $__default['default'].fn[NAME$2] = JQUERY_NO_CONFLICT$2;
     return Carousel._jQueryInterface;
   };
 
@@ -3111,11 +3143,11 @@ module.exports = {
    */
 
   var NAME$3 = 'collapse';
-  var VERSION$3 = '4.5.0';
+  var VERSION$3 = '4.6.0';
   var DATA_KEY$3 = 'bs.collapse';
   var EVENT_KEY$3 = "." + DATA_KEY$3;
   var DATA_API_KEY$3 = '.data-api';
-  var JQUERY_NO_CONFLICT$3 = $.fn[NAME$3];
+  var JQUERY_NO_CONFLICT$3 = $__default['default'].fn[NAME$3];
   var Default$1 = {
     toggle: true,
     parent: ''
@@ -3181,7 +3213,7 @@ module.exports = {
 
     // Public
     _proto.toggle = function toggle() {
-      if ($(this._element).hasClass(CLASS_NAME_SHOW$1)) {
+      if ($__default['default'](this._element).hasClass(CLASS_NAME_SHOW$1)) {
         this.hide();
       } else {
         this.show();
@@ -3191,7 +3223,7 @@ module.exports = {
     _proto.show = function show() {
       var _this = this;
 
-      if (this._isTransitioning || $(this._element).hasClass(CLASS_NAME_SHOW$1)) {
+      if (this._isTransitioning || $__default['default'](this._element).hasClass(CLASS_NAME_SHOW$1)) {
         return;
       }
 
@@ -3213,64 +3245,64 @@ module.exports = {
       }
 
       if (actives) {
-        activesData = $(actives).not(this._selector).data(DATA_KEY$3);
+        activesData = $__default['default'](actives).not(this._selector).data(DATA_KEY$3);
 
         if (activesData && activesData._isTransitioning) {
           return;
         }
       }
 
-      var startEvent = $.Event(EVENT_SHOW);
-      $(this._element).trigger(startEvent);
+      var startEvent = $__default['default'].Event(EVENT_SHOW);
+      $__default['default'](this._element).trigger(startEvent);
 
       if (startEvent.isDefaultPrevented()) {
         return;
       }
 
       if (actives) {
-        Collapse._jQueryInterface.call($(actives).not(this._selector), 'hide');
+        Collapse._jQueryInterface.call($__default['default'](actives).not(this._selector), 'hide');
 
         if (!activesData) {
-          $(actives).data(DATA_KEY$3, null);
+          $__default['default'](actives).data(DATA_KEY$3, null);
         }
       }
 
       var dimension = this._getDimension();
 
-      $(this._element).removeClass(CLASS_NAME_COLLAPSE).addClass(CLASS_NAME_COLLAPSING);
+      $__default['default'](this._element).removeClass(CLASS_NAME_COLLAPSE).addClass(CLASS_NAME_COLLAPSING);
       this._element.style[dimension] = 0;
 
       if (this._triggerArray.length) {
-        $(this._triggerArray).removeClass(CLASS_NAME_COLLAPSED).attr('aria-expanded', true);
+        $__default['default'](this._triggerArray).removeClass(CLASS_NAME_COLLAPSED).attr('aria-expanded', true);
       }
 
       this.setTransitioning(true);
 
       var complete = function complete() {
-        $(_this._element).removeClass(CLASS_NAME_COLLAPSING).addClass(CLASS_NAME_COLLAPSE + " " + CLASS_NAME_SHOW$1);
+        $__default['default'](_this._element).removeClass(CLASS_NAME_COLLAPSING).addClass(CLASS_NAME_COLLAPSE + " " + CLASS_NAME_SHOW$1);
         _this._element.style[dimension] = '';
 
         _this.setTransitioning(false);
 
-        $(_this._element).trigger(EVENT_SHOWN);
+        $__default['default'](_this._element).trigger(EVENT_SHOWN);
       };
 
       var capitalizedDimension = dimension[0].toUpperCase() + dimension.slice(1);
       var scrollSize = "scroll" + capitalizedDimension;
       var transitionDuration = Util.getTransitionDurationFromElement(this._element);
-      $(this._element).one(Util.TRANSITION_END, complete).emulateTransitionEnd(transitionDuration);
+      $__default['default'](this._element).one(Util.TRANSITION_END, complete).emulateTransitionEnd(transitionDuration);
       this._element.style[dimension] = this._element[scrollSize] + "px";
     };
 
     _proto.hide = function hide() {
       var _this2 = this;
 
-      if (this._isTransitioning || !$(this._element).hasClass(CLASS_NAME_SHOW$1)) {
+      if (this._isTransitioning || !$__default['default'](this._element).hasClass(CLASS_NAME_SHOW$1)) {
         return;
       }
 
-      var startEvent = $.Event(EVENT_HIDE);
-      $(this._element).trigger(startEvent);
+      var startEvent = $__default['default'].Event(EVENT_HIDE);
+      $__default['default'](this._element).trigger(startEvent);
 
       if (startEvent.isDefaultPrevented()) {
         return;
@@ -3280,7 +3312,7 @@ module.exports = {
 
       this._element.style[dimension] = this._element.getBoundingClientRect()[dimension] + "px";
       Util.reflow(this._element);
-      $(this._element).addClass(CLASS_NAME_COLLAPSING).removeClass(CLASS_NAME_COLLAPSE + " " + CLASS_NAME_SHOW$1);
+      $__default['default'](this._element).addClass(CLASS_NAME_COLLAPSING).removeClass(CLASS_NAME_COLLAPSE + " " + CLASS_NAME_SHOW$1);
       var triggerArrayLength = this._triggerArray.length;
 
       if (triggerArrayLength > 0) {
@@ -3289,10 +3321,10 @@ module.exports = {
           var selector = Util.getSelectorFromElement(trigger);
 
           if (selector !== null) {
-            var $elem = $([].slice.call(document.querySelectorAll(selector)));
+            var $elem = $__default['default']([].slice.call(document.querySelectorAll(selector)));
 
             if (!$elem.hasClass(CLASS_NAME_SHOW$1)) {
-              $(trigger).addClass(CLASS_NAME_COLLAPSED).attr('aria-expanded', false);
+              $__default['default'](trigger).addClass(CLASS_NAME_COLLAPSED).attr('aria-expanded', false);
             }
           }
         }
@@ -3303,12 +3335,12 @@ module.exports = {
       var complete = function complete() {
         _this2.setTransitioning(false);
 
-        $(_this2._element).removeClass(CLASS_NAME_COLLAPSING).addClass(CLASS_NAME_COLLAPSE).trigger(EVENT_HIDDEN);
+        $__default['default'](_this2._element).removeClass(CLASS_NAME_COLLAPSING).addClass(CLASS_NAME_COLLAPSE).trigger(EVENT_HIDDEN);
       };
 
       this._element.style[dimension] = '';
       var transitionDuration = Util.getTransitionDurationFromElement(this._element);
-      $(this._element).one(Util.TRANSITION_END, complete).emulateTransitionEnd(transitionDuration);
+      $__default['default'](this._element).one(Util.TRANSITION_END, complete).emulateTransitionEnd(transitionDuration);
     };
 
     _proto.setTransitioning = function setTransitioning(isTransitioning) {
@@ -3316,7 +3348,7 @@ module.exports = {
     };
 
     _proto.dispose = function dispose() {
-      $.removeData(this._element, DATA_KEY$3);
+      $__default['default'].removeData(this._element, DATA_KEY$3);
       this._config = null;
       this._parent = null;
       this._element = null;
@@ -3326,7 +3358,7 @@ module.exports = {
     ;
 
     _proto._getConfig = function _getConfig(config) {
-      config = _objectSpread2(_objectSpread2({}, Default$1), config);
+      config = _extends({}, Default$1, config);
       config.toggle = Boolean(config.toggle); // Coerce string values
 
       Util.typeCheckConfig(NAME$3, config, DefaultType$1);
@@ -3334,7 +3366,7 @@ module.exports = {
     };
 
     _proto._getDimension = function _getDimension() {
-      var hasWidth = $(this._element).hasClass(DIMENSION_WIDTH);
+      var hasWidth = $__default['default'](this._element).hasClass(DIMENSION_WIDTH);
       return hasWidth ? DIMENSION_WIDTH : DIMENSION_HEIGHT;
     };
 
@@ -3355,17 +3387,17 @@ module.exports = {
 
       var selector = "[data-toggle=\"collapse\"][data-parent=\"" + this._config.parent + "\"]";
       var children = [].slice.call(parent.querySelectorAll(selector));
-      $(children).each(function (i, element) {
+      $__default['default'](children).each(function (i, element) {
         _this3._addAriaAndCollapsedClass(Collapse._getTargetFromElement(element), [element]);
       });
       return parent;
     };
 
     _proto._addAriaAndCollapsedClass = function _addAriaAndCollapsedClass(element, triggerArray) {
-      var isOpen = $(element).hasClass(CLASS_NAME_SHOW$1);
+      var isOpen = $__default['default'](element).hasClass(CLASS_NAME_SHOW$1);
 
       if (triggerArray.length) {
-        $(triggerArray).toggleClass(CLASS_NAME_COLLAPSED, !isOpen).attr('aria-expanded', isOpen);
+        $__default['default'](triggerArray).toggleClass(CLASS_NAME_COLLAPSED, !isOpen).attr('aria-expanded', isOpen);
       }
     } // Static
     ;
@@ -3377,10 +3409,10 @@ module.exports = {
 
     Collapse._jQueryInterface = function _jQueryInterface(config) {
       return this.each(function () {
-        var $this = $(this);
-        var data = $this.data(DATA_KEY$3);
+        var $element = $__default['default'](this);
+        var data = $element.data(DATA_KEY$3);
 
-        var _config = _objectSpread2(_objectSpread2(_objectSpread2({}, Default$1), $this.data()), typeof config === 'object' && config ? config : {});
+        var _config = _extends({}, Default$1, $element.data(), typeof config === 'object' && config ? config : {});
 
         if (!data && _config.toggle && typeof config === 'string' && /show|hide/.test(config)) {
           _config.toggle = false;
@@ -3388,7 +3420,7 @@ module.exports = {
 
         if (!data) {
           data = new Collapse(this, _config);
-          $this.data(DATA_KEY$3, data);
+          $element.data(DATA_KEY$3, data);
         }
 
         if (typeof config === 'string') {
@@ -3422,17 +3454,17 @@ module.exports = {
    */
 
 
-  $(document).on(EVENT_CLICK_DATA_API$3, SELECTOR_DATA_TOGGLE$1, function (event) {
+  $__default['default'](document).on(EVENT_CLICK_DATA_API$3, SELECTOR_DATA_TOGGLE$1, function (event) {
     // preventDefault only for <a> elements (which change the URL) not inside the collapsible element
     if (event.currentTarget.tagName === 'A') {
       event.preventDefault();
     }
 
-    var $trigger = $(this);
+    var $trigger = $__default['default'](this);
     var selector = Util.getSelectorFromElement(this);
     var selectors = [].slice.call(document.querySelectorAll(selector));
-    $(selectors).each(function () {
-      var $target = $(this);
+    $__default['default'](selectors).each(function () {
+      var $target = $__default['default'](this);
       var data = $target.data(DATA_KEY$3);
       var config = data ? 'toggle' : $trigger.data();
 
@@ -3445,11 +3477,11 @@ module.exports = {
    * ------------------------------------------------------------------------
    */
 
-  $.fn[NAME$3] = Collapse._jQueryInterface;
-  $.fn[NAME$3].Constructor = Collapse;
+  $__default['default'].fn[NAME$3] = Collapse._jQueryInterface;
+  $__default['default'].fn[NAME$3].Constructor = Collapse;
 
-  $.fn[NAME$3].noConflict = function () {
-    $.fn[NAME$3] = JQUERY_NO_CONFLICT$3;
+  $__default['default'].fn[NAME$3].noConflict = function () {
+    $__default['default'].fn[NAME$3] = JQUERY_NO_CONFLICT$3;
     return Collapse._jQueryInterface;
   };
 
@@ -3460,11 +3492,11 @@ module.exports = {
    */
 
   var NAME$4 = 'dropdown';
-  var VERSION$4 = '4.5.0';
+  var VERSION$4 = '4.6.0';
   var DATA_KEY$4 = 'bs.dropdown';
   var EVENT_KEY$4 = "." + DATA_KEY$4;
   var DATA_API_KEY$4 = '.data-api';
-  var JQUERY_NO_CONFLICT$4 = $.fn[NAME$4];
+  var JQUERY_NO_CONFLICT$4 = $__default['default'].fn[NAME$4];
   var ESCAPE_KEYCODE = 27; // KeyboardEvent.which value for Escape (Esc) key
 
   var SPACE_KEYCODE = 32; // KeyboardEvent.which value for space key
@@ -3542,11 +3574,11 @@ module.exports = {
 
     // Public
     _proto.toggle = function toggle() {
-      if (this._element.disabled || $(this._element).hasClass(CLASS_NAME_DISABLED)) {
+      if (this._element.disabled || $__default['default'](this._element).hasClass(CLASS_NAME_DISABLED)) {
         return;
       }
 
-      var isActive = $(this._menu).hasClass(CLASS_NAME_SHOW$2);
+      var isActive = $__default['default'](this._menu).hasClass(CLASS_NAME_SHOW$2);
 
       Dropdown._clearMenus();
 
@@ -3562,22 +3594,22 @@ module.exports = {
         usePopper = false;
       }
 
-      if (this._element.disabled || $(this._element).hasClass(CLASS_NAME_DISABLED) || $(this._menu).hasClass(CLASS_NAME_SHOW$2)) {
+      if (this._element.disabled || $__default['default'](this._element).hasClass(CLASS_NAME_DISABLED) || $__default['default'](this._menu).hasClass(CLASS_NAME_SHOW$2)) {
         return;
       }
 
       var relatedTarget = {
         relatedTarget: this._element
       };
-      var showEvent = $.Event(EVENT_SHOW$1, relatedTarget);
+      var showEvent = $__default['default'].Event(EVENT_SHOW$1, relatedTarget);
 
       var parent = Dropdown._getParentFromElement(this._element);
 
-      $(parent).trigger(showEvent);
+      $__default['default'](parent).trigger(showEvent);
 
       if (showEvent.isDefaultPrevented()) {
         return;
-      } // Disable totally Popper.js for Dropdown in Navbar
+      } // Totally disable Popper for Dropdowns in Navbar
 
 
       if (!this._inNavbar && usePopper) {
@@ -3585,8 +3617,8 @@ module.exports = {
          * Check for Popper dependency
          * Popper - https://popper.js.org
          */
-        if (typeof Popper === 'undefined') {
-          throw new TypeError('Bootstrap\'s dropdowns require Popper.js (https://popper.js.org/)');
+        if (typeof Popper__default['default'] === 'undefined') {
+          throw new TypeError('Bootstrap\'s dropdowns require Popper (https://popper.js.org)');
         }
 
         var referenceElement = this._element;
@@ -3605,41 +3637,41 @@ module.exports = {
 
 
         if (this._config.boundary !== 'scrollParent') {
-          $(parent).addClass(CLASS_NAME_POSITION_STATIC);
+          $__default['default'](parent).addClass(CLASS_NAME_POSITION_STATIC);
         }
 
-        this._popper = new Popper(referenceElement, this._menu, this._getPopperConfig());
+        this._popper = new Popper__default['default'](referenceElement, this._menu, this._getPopperConfig());
       } // If this is a touch-enabled device we add extra
       // empty mouseover listeners to the body's immediate children;
       // only needed because of broken event delegation on iOS
       // https://www.quirksmode.org/blog/archives/2014/02/mouse_event_bub.html
 
 
-      if ('ontouchstart' in document.documentElement && $(parent).closest(SELECTOR_NAVBAR_NAV).length === 0) {
-        $(document.body).children().on('mouseover', null, $.noop);
+      if ('ontouchstart' in document.documentElement && $__default['default'](parent).closest(SELECTOR_NAVBAR_NAV).length === 0) {
+        $__default['default'](document.body).children().on('mouseover', null, $__default['default'].noop);
       }
 
       this._element.focus();
 
       this._element.setAttribute('aria-expanded', true);
 
-      $(this._menu).toggleClass(CLASS_NAME_SHOW$2);
-      $(parent).toggleClass(CLASS_NAME_SHOW$2).trigger($.Event(EVENT_SHOWN$1, relatedTarget));
+      $__default['default'](this._menu).toggleClass(CLASS_NAME_SHOW$2);
+      $__default['default'](parent).toggleClass(CLASS_NAME_SHOW$2).trigger($__default['default'].Event(EVENT_SHOWN$1, relatedTarget));
     };
 
     _proto.hide = function hide() {
-      if (this._element.disabled || $(this._element).hasClass(CLASS_NAME_DISABLED) || !$(this._menu).hasClass(CLASS_NAME_SHOW$2)) {
+      if (this._element.disabled || $__default['default'](this._element).hasClass(CLASS_NAME_DISABLED) || !$__default['default'](this._menu).hasClass(CLASS_NAME_SHOW$2)) {
         return;
       }
 
       var relatedTarget = {
         relatedTarget: this._element
       };
-      var hideEvent = $.Event(EVENT_HIDE$1, relatedTarget);
+      var hideEvent = $__default['default'].Event(EVENT_HIDE$1, relatedTarget);
 
       var parent = Dropdown._getParentFromElement(this._element);
 
-      $(parent).trigger(hideEvent);
+      $__default['default'](parent).trigger(hideEvent);
 
       if (hideEvent.isDefaultPrevented()) {
         return;
@@ -3649,13 +3681,13 @@ module.exports = {
         this._popper.destroy();
       }
 
-      $(this._menu).toggleClass(CLASS_NAME_SHOW$2);
-      $(parent).toggleClass(CLASS_NAME_SHOW$2).trigger($.Event(EVENT_HIDDEN$1, relatedTarget));
+      $__default['default'](this._menu).toggleClass(CLASS_NAME_SHOW$2);
+      $__default['default'](parent).toggleClass(CLASS_NAME_SHOW$2).trigger($__default['default'].Event(EVENT_HIDDEN$1, relatedTarget));
     };
 
     _proto.dispose = function dispose() {
-      $.removeData(this._element, DATA_KEY$4);
-      $(this._element).off(EVENT_KEY$4);
+      $__default['default'].removeData(this._element, DATA_KEY$4);
+      $__default['default'](this._element).off(EVENT_KEY$4);
       this._element = null;
       this._menu = null;
 
@@ -3678,7 +3710,7 @@ module.exports = {
     _proto._addEventListeners = function _addEventListeners() {
       var _this = this;
 
-      $(this._element).on(EVENT_CLICK, function (event) {
+      $__default['default'](this._element).on(EVENT_CLICK, function (event) {
         event.preventDefault();
         event.stopPropagation();
 
@@ -3687,7 +3719,7 @@ module.exports = {
     };
 
     _proto._getConfig = function _getConfig(config) {
-      config = _objectSpread2(_objectSpread2(_objectSpread2({}, this.constructor.Default), $(this._element).data()), config);
+      config = _extends({}, this.constructor.Default, $__default['default'](this._element).data(), config);
       Util.typeCheckConfig(NAME$4, config, this.constructor.DefaultType);
       return config;
     };
@@ -3705,16 +3737,16 @@ module.exports = {
     };
 
     _proto._getPlacement = function _getPlacement() {
-      var $parentDropdown = $(this._element.parentNode);
+      var $parentDropdown = $__default['default'](this._element.parentNode);
       var placement = PLACEMENT_BOTTOM; // Handle dropup
 
       if ($parentDropdown.hasClass(CLASS_NAME_DROPUP)) {
-        placement = $(this._menu).hasClass(CLASS_NAME_MENURIGHT) ? PLACEMENT_TOPEND : PLACEMENT_TOP;
+        placement = $__default['default'](this._menu).hasClass(CLASS_NAME_MENURIGHT) ? PLACEMENT_TOPEND : PLACEMENT_TOP;
       } else if ($parentDropdown.hasClass(CLASS_NAME_DROPRIGHT)) {
         placement = PLACEMENT_RIGHT;
       } else if ($parentDropdown.hasClass(CLASS_NAME_DROPLEFT)) {
         placement = PLACEMENT_LEFT;
-      } else if ($(this._menu).hasClass(CLASS_NAME_MENURIGHT)) {
+      } else if ($__default['default'](this._menu).hasClass(CLASS_NAME_MENURIGHT)) {
         placement = PLACEMENT_BOTTOMEND;
       }
 
@@ -3722,7 +3754,7 @@ module.exports = {
     };
 
     _proto._detectNavbar = function _detectNavbar() {
-      return $(this._element).closest('.navbar').length > 0;
+      return $__default['default'](this._element).closest('.navbar').length > 0;
     };
 
     _proto._getOffset = function _getOffset() {
@@ -3732,7 +3764,7 @@ module.exports = {
 
       if (typeof this._config.offset === 'function') {
         offset.fn = function (data) {
-          data.offsets = _objectSpread2(_objectSpread2({}, data.offsets), _this2._config.offset(data.offsets, _this2._element) || {});
+          data.offsets = _extends({}, data.offsets, _this2._config.offset(data.offsets, _this2._element) || {});
           return data;
         };
       } else {
@@ -3754,7 +3786,7 @@ module.exports = {
             boundariesElement: this._config.boundary
           }
         }
-      }; // Disable Popper.js if we have a static display
+      }; // Disable Popper if we have a static display
 
       if (this._config.display === 'static') {
         popperConfig.modifiers.applyStyle = {
@@ -3762,19 +3794,19 @@ module.exports = {
         };
       }
 
-      return _objectSpread2(_objectSpread2({}, popperConfig), this._config.popperConfig);
+      return _extends({}, popperConfig, this._config.popperConfig);
     } // Static
     ;
 
     Dropdown._jQueryInterface = function _jQueryInterface(config) {
       return this.each(function () {
-        var data = $(this).data(DATA_KEY$4);
+        var data = $__default['default'](this).data(DATA_KEY$4);
 
         var _config = typeof config === 'object' ? config : null;
 
         if (!data) {
           data = new Dropdown(this, _config);
-          $(this).data(DATA_KEY$4, data);
+          $__default['default'](this).data(DATA_KEY$4, data);
         }
 
         if (typeof config === 'string') {
@@ -3797,7 +3829,7 @@ module.exports = {
       for (var i = 0, len = toggles.length; i < len; i++) {
         var parent = Dropdown._getParentFromElement(toggles[i]);
 
-        var context = $(toggles[i]).data(DATA_KEY$4);
+        var context = $__default['default'](toggles[i]).data(DATA_KEY$4);
         var relatedTarget = {
           relatedTarget: toggles[i]
         };
@@ -3812,16 +3844,16 @@ module.exports = {
 
         var dropdownMenu = context._menu;
 
-        if (!$(parent).hasClass(CLASS_NAME_SHOW$2)) {
+        if (!$__default['default'](parent).hasClass(CLASS_NAME_SHOW$2)) {
           continue;
         }
 
-        if (event && (event.type === 'click' && /input|textarea/i.test(event.target.tagName) || event.type === 'keyup' && event.which === TAB_KEYCODE) && $.contains(parent, event.target)) {
+        if (event && (event.type === 'click' && /input|textarea/i.test(event.target.tagName) || event.type === 'keyup' && event.which === TAB_KEYCODE) && $__default['default'].contains(parent, event.target)) {
           continue;
         }
 
-        var hideEvent = $.Event(EVENT_HIDE$1, relatedTarget);
-        $(parent).trigger(hideEvent);
+        var hideEvent = $__default['default'].Event(EVENT_HIDE$1, relatedTarget);
+        $__default['default'](parent).trigger(hideEvent);
 
         if (hideEvent.isDefaultPrevented()) {
           continue;
@@ -3830,7 +3862,7 @@ module.exports = {
 
 
         if ('ontouchstart' in document.documentElement) {
-          $(document.body).children().off('mouseover', null, $.noop);
+          $__default['default'](document.body).children().off('mouseover', null, $__default['default'].noop);
         }
 
         toggles[i].setAttribute('aria-expanded', 'false');
@@ -3839,8 +3871,8 @@ module.exports = {
           context._popper.destroy();
         }
 
-        $(dropdownMenu).removeClass(CLASS_NAME_SHOW$2);
-        $(parent).removeClass(CLASS_NAME_SHOW$2).trigger($.Event(EVENT_HIDDEN$1, relatedTarget));
+        $__default['default'](dropdownMenu).removeClass(CLASS_NAME_SHOW$2);
+        $__default['default'](parent).removeClass(CLASS_NAME_SHOW$2).trigger($__default['default'].Event(EVENT_HIDDEN$1, relatedTarget));
       }
     };
 
@@ -3864,17 +3896,17 @@ module.exports = {
       //  - If key is other than escape
       //    - If key is not up or down => not a dropdown command
       //    - If trigger inside the menu => not a dropdown command
-      if (/input|textarea/i.test(event.target.tagName) ? event.which === SPACE_KEYCODE || event.which !== ESCAPE_KEYCODE && (event.which !== ARROW_DOWN_KEYCODE && event.which !== ARROW_UP_KEYCODE || $(event.target).closest(SELECTOR_MENU).length) : !REGEXP_KEYDOWN.test(event.which)) {
+      if (/input|textarea/i.test(event.target.tagName) ? event.which === SPACE_KEYCODE || event.which !== ESCAPE_KEYCODE && (event.which !== ARROW_DOWN_KEYCODE && event.which !== ARROW_UP_KEYCODE || $__default['default'](event.target).closest(SELECTOR_MENU).length) : !REGEXP_KEYDOWN.test(event.which)) {
         return;
       }
 
-      if (this.disabled || $(this).hasClass(CLASS_NAME_DISABLED)) {
+      if (this.disabled || $__default['default'](this).hasClass(CLASS_NAME_DISABLED)) {
         return;
       }
 
       var parent = Dropdown._getParentFromElement(this);
 
-      var isActive = $(parent).hasClass(CLASS_NAME_SHOW$2);
+      var isActive = $__default['default'](parent).hasClass(CLASS_NAME_SHOW$2);
 
       if (!isActive && event.which === ESCAPE_KEYCODE) {
         return;
@@ -3883,17 +3915,17 @@ module.exports = {
       event.preventDefault();
       event.stopPropagation();
 
-      if (!isActive || isActive && (event.which === ESCAPE_KEYCODE || event.which === SPACE_KEYCODE)) {
+      if (!isActive || event.which === ESCAPE_KEYCODE || event.which === SPACE_KEYCODE) {
         if (event.which === ESCAPE_KEYCODE) {
-          $(parent.querySelector(SELECTOR_DATA_TOGGLE$2)).trigger('focus');
+          $__default['default'](parent.querySelector(SELECTOR_DATA_TOGGLE$2)).trigger('focus');
         }
 
-        $(this).trigger('click');
+        $__default['default'](this).trigger('click');
         return;
       }
 
       var items = [].slice.call(parent.querySelectorAll(SELECTOR_VISIBLE_ITEMS)).filter(function (item) {
-        return $(item).is(':visible');
+        return $__default['default'](item).is(':visible');
       });
 
       if (items.length === 0) {
@@ -3945,11 +3977,11 @@ module.exports = {
    */
 
 
-  $(document).on(EVENT_KEYDOWN_DATA_API, SELECTOR_DATA_TOGGLE$2, Dropdown._dataApiKeydownHandler).on(EVENT_KEYDOWN_DATA_API, SELECTOR_MENU, Dropdown._dataApiKeydownHandler).on(EVENT_CLICK_DATA_API$4 + " " + EVENT_KEYUP_DATA_API, Dropdown._clearMenus).on(EVENT_CLICK_DATA_API$4, SELECTOR_DATA_TOGGLE$2, function (event) {
+  $__default['default'](document).on(EVENT_KEYDOWN_DATA_API, SELECTOR_DATA_TOGGLE$2, Dropdown._dataApiKeydownHandler).on(EVENT_KEYDOWN_DATA_API, SELECTOR_MENU, Dropdown._dataApiKeydownHandler).on(EVENT_CLICK_DATA_API$4 + " " + EVENT_KEYUP_DATA_API, Dropdown._clearMenus).on(EVENT_CLICK_DATA_API$4, SELECTOR_DATA_TOGGLE$2, function (event) {
     event.preventDefault();
     event.stopPropagation();
 
-    Dropdown._jQueryInterface.call($(this), 'toggle');
+    Dropdown._jQueryInterface.call($__default['default'](this), 'toggle');
   }).on(EVENT_CLICK_DATA_API$4, SELECTOR_FORM_CHILD, function (e) {
     e.stopPropagation();
   });
@@ -3959,11 +3991,11 @@ module.exports = {
    * ------------------------------------------------------------------------
    */
 
-  $.fn[NAME$4] = Dropdown._jQueryInterface;
-  $.fn[NAME$4].Constructor = Dropdown;
+  $__default['default'].fn[NAME$4] = Dropdown._jQueryInterface;
+  $__default['default'].fn[NAME$4].Constructor = Dropdown;
 
-  $.fn[NAME$4].noConflict = function () {
-    $.fn[NAME$4] = JQUERY_NO_CONFLICT$4;
+  $__default['default'].fn[NAME$4].noConflict = function () {
+    $__default['default'].fn[NAME$4] = JQUERY_NO_CONFLICT$4;
     return Dropdown._jQueryInterface;
   };
 
@@ -3974,11 +4006,11 @@ module.exports = {
    */
 
   var NAME$5 = 'modal';
-  var VERSION$5 = '4.5.0';
+  var VERSION$5 = '4.6.0';
   var DATA_KEY$5 = 'bs.modal';
   var EVENT_KEY$5 = "." + DATA_KEY$5;
   var DATA_API_KEY$5 = '.data-api';
-  var JQUERY_NO_CONFLICT$5 = $.fn[NAME$5];
+  var JQUERY_NO_CONFLICT$5 = $__default['default'].fn[NAME$5];
   var ESCAPE_KEYCODE$1 = 27; // KeyboardEvent.which value for Escape (Esc) key
 
   var Default$3 = {
@@ -4052,14 +4084,14 @@ module.exports = {
         return;
       }
 
-      if ($(this._element).hasClass(CLASS_NAME_FADE$1)) {
+      if ($__default['default'](this._element).hasClass(CLASS_NAME_FADE$1)) {
         this._isTransitioning = true;
       }
 
-      var showEvent = $.Event(EVENT_SHOW$2, {
+      var showEvent = $__default['default'].Event(EVENT_SHOW$2, {
         relatedTarget: relatedTarget
       });
-      $(this._element).trigger(showEvent);
+      $__default['default'](this._element).trigger(showEvent);
 
       if (this._isShown || showEvent.isDefaultPrevented()) {
         return;
@@ -4077,12 +4109,12 @@ module.exports = {
 
       this._setResizeEvent();
 
-      $(this._element).on(EVENT_CLICK_DISMISS, SELECTOR_DATA_DISMISS, function (event) {
+      $__default['default'](this._element).on(EVENT_CLICK_DISMISS, SELECTOR_DATA_DISMISS, function (event) {
         return _this.hide(event);
       });
-      $(this._dialog).on(EVENT_MOUSEDOWN_DISMISS, function () {
-        $(_this._element).one(EVENT_MOUSEUP_DISMISS, function (event) {
-          if ($(event.target).is(_this._element)) {
+      $__default['default'](this._dialog).on(EVENT_MOUSEDOWN_DISMISS, function () {
+        $__default['default'](_this._element).one(EVENT_MOUSEUP_DISMISS, function (event) {
+          if ($__default['default'](event.target).is(_this._element)) {
             _this._ignoreBackdropClick = true;
           }
         });
@@ -4104,15 +4136,15 @@ module.exports = {
         return;
       }
 
-      var hideEvent = $.Event(EVENT_HIDE$2);
-      $(this._element).trigger(hideEvent);
+      var hideEvent = $__default['default'].Event(EVENT_HIDE$2);
+      $__default['default'](this._element).trigger(hideEvent);
 
       if (!this._isShown || hideEvent.isDefaultPrevented()) {
         return;
       }
 
       this._isShown = false;
-      var transition = $(this._element).hasClass(CLASS_NAME_FADE$1);
+      var transition = $__default['default'](this._element).hasClass(CLASS_NAME_FADE$1);
 
       if (transition) {
         this._isTransitioning = true;
@@ -4122,14 +4154,14 @@ module.exports = {
 
       this._setResizeEvent();
 
-      $(document).off(EVENT_FOCUSIN);
-      $(this._element).removeClass(CLASS_NAME_SHOW$3);
-      $(this._element).off(EVENT_CLICK_DISMISS);
-      $(this._dialog).off(EVENT_MOUSEDOWN_DISMISS);
+      $__default['default'](document).off(EVENT_FOCUSIN);
+      $__default['default'](this._element).removeClass(CLASS_NAME_SHOW$3);
+      $__default['default'](this._element).off(EVENT_CLICK_DISMISS);
+      $__default['default'](this._dialog).off(EVENT_MOUSEDOWN_DISMISS);
 
       if (transition) {
         var transitionDuration = Util.getTransitionDurationFromElement(this._element);
-        $(this._element).one(Util.TRANSITION_END, function (event) {
+        $__default['default'](this._element).one(Util.TRANSITION_END, function (event) {
           return _this2._hideModal(event);
         }).emulateTransitionEnd(transitionDuration);
       } else {
@@ -4139,7 +4171,7 @@ module.exports = {
 
     _proto.dispose = function dispose() {
       [window, this._element, this._dialog].forEach(function (htmlElement) {
-        return $(htmlElement).off(EVENT_KEY$5);
+        return $__default['default'](htmlElement).off(EVENT_KEY$5);
       });
       /**
        * `document` has 2 events `EVENT_FOCUSIN` and `EVENT_CLICK_DATA_API`
@@ -4147,8 +4179,8 @@ module.exports = {
        * It will remove `EVENT_CLICK_DATA_API` event that should remain
        */
 
-      $(document).off(EVENT_FOCUSIN);
-      $.removeData(this._element, DATA_KEY$5);
+      $__default['default'](document).off(EVENT_FOCUSIN);
+      $__default['default'].removeData(this._element, DATA_KEY$5);
       this._config = null;
       this._element = null;
       this._dialog = null;
@@ -4166,7 +4198,7 @@ module.exports = {
     ;
 
     _proto._getConfig = function _getConfig(config) {
-      config = _objectSpread2(_objectSpread2({}, Default$3), config);
+      config = _extends({}, Default$3, config);
       Util.typeCheckConfig(NAME$5, config, DefaultType$3);
       return config;
     };
@@ -4174,31 +4206,40 @@ module.exports = {
     _proto._triggerBackdropTransition = function _triggerBackdropTransition() {
       var _this3 = this;
 
-      if (this._config.backdrop === 'static') {
-        var hideEventPrevented = $.Event(EVENT_HIDE_PREVENTED);
-        $(this._element).trigger(hideEventPrevented);
+      var hideEventPrevented = $__default['default'].Event(EVENT_HIDE_PREVENTED);
+      $__default['default'](this._element).trigger(hideEventPrevented);
 
-        if (hideEventPrevented.defaultPrevented) {
-          return;
-        }
-
-        this._element.classList.add(CLASS_NAME_STATIC);
-
-        var modalTransitionDuration = Util.getTransitionDurationFromElement(this._element);
-        $(this._element).one(Util.TRANSITION_END, function () {
-          _this3._element.classList.remove(CLASS_NAME_STATIC);
-        }).emulateTransitionEnd(modalTransitionDuration);
-
-        this._element.focus();
-      } else {
-        this.hide();
+      if (hideEventPrevented.isDefaultPrevented()) {
+        return;
       }
+
+      var isModalOverflowing = this._element.scrollHeight > document.documentElement.clientHeight;
+
+      if (!isModalOverflowing) {
+        this._element.style.overflowY = 'hidden';
+      }
+
+      this._element.classList.add(CLASS_NAME_STATIC);
+
+      var modalTransitionDuration = Util.getTransitionDurationFromElement(this._dialog);
+      $__default['default'](this._element).off(Util.TRANSITION_END);
+      $__default['default'](this._element).one(Util.TRANSITION_END, function () {
+        _this3._element.classList.remove(CLASS_NAME_STATIC);
+
+        if (!isModalOverflowing) {
+          $__default['default'](_this3._element).one(Util.TRANSITION_END, function () {
+            _this3._element.style.overflowY = '';
+          }).emulateTransitionEnd(_this3._element, modalTransitionDuration);
+        }
+      }).emulateTransitionEnd(modalTransitionDuration);
+
+      this._element.focus();
     };
 
     _proto._showElement = function _showElement(relatedTarget) {
       var _this4 = this;
 
-      var transition = $(this._element).hasClass(CLASS_NAME_FADE$1);
+      var transition = $__default['default'](this._element).hasClass(CLASS_NAME_FADE$1);
       var modalBody = this._dialog ? this._dialog.querySelector(SELECTOR_MODAL_BODY) : null;
 
       if (!this._element.parentNode || this._element.parentNode.nodeType !== Node.ELEMENT_NODE) {
@@ -4212,7 +4253,9 @@ module.exports = {
 
       this._element.setAttribute('aria-modal', true);
 
-      if ($(this._dialog).hasClass(CLASS_NAME_SCROLLABLE) && modalBody) {
+      this._element.setAttribute('role', 'dialog');
+
+      if ($__default['default'](this._dialog).hasClass(CLASS_NAME_SCROLLABLE) && modalBody) {
         modalBody.scrollTop = 0;
       } else {
         this._element.scrollTop = 0;
@@ -4222,13 +4265,13 @@ module.exports = {
         Util.reflow(this._element);
       }
 
-      $(this._element).addClass(CLASS_NAME_SHOW$3);
+      $__default['default'](this._element).addClass(CLASS_NAME_SHOW$3);
 
       if (this._config.focus) {
         this._enforceFocus();
       }
 
-      var shownEvent = $.Event(EVENT_SHOWN$2, {
+      var shownEvent = $__default['default'].Event(EVENT_SHOWN$2, {
         relatedTarget: relatedTarget
       });
 
@@ -4238,12 +4281,12 @@ module.exports = {
         }
 
         _this4._isTransitioning = false;
-        $(_this4._element).trigger(shownEvent);
+        $__default['default'](_this4._element).trigger(shownEvent);
       };
 
       if (transition) {
         var transitionDuration = Util.getTransitionDurationFromElement(this._dialog);
-        $(this._dialog).one(Util.TRANSITION_END, transitionComplete).emulateTransitionEnd(transitionDuration);
+        $__default['default'](this._dialog).one(Util.TRANSITION_END, transitionComplete).emulateTransitionEnd(transitionDuration);
       } else {
         transitionComplete();
       }
@@ -4252,9 +4295,9 @@ module.exports = {
     _proto._enforceFocus = function _enforceFocus() {
       var _this5 = this;
 
-      $(document).off(EVENT_FOCUSIN) // Guard against infinite focus loop
+      $__default['default'](document).off(EVENT_FOCUSIN) // Guard against infinite focus loop
       .on(EVENT_FOCUSIN, function (event) {
-        if (document !== event.target && _this5._element !== event.target && $(_this5._element).has(event.target).length === 0) {
+        if (document !== event.target && _this5._element !== event.target && $__default['default'](_this5._element).has(event.target).length === 0) {
           _this5._element.focus();
         }
       });
@@ -4264,7 +4307,7 @@ module.exports = {
       var _this6 = this;
 
       if (this._isShown) {
-        $(this._element).on(EVENT_KEYDOWN_DISMISS, function (event) {
+        $__default['default'](this._element).on(EVENT_KEYDOWN_DISMISS, function (event) {
           if (_this6._config.keyboard && event.which === ESCAPE_KEYCODE$1) {
             event.preventDefault();
 
@@ -4274,7 +4317,7 @@ module.exports = {
           }
         });
       } else if (!this._isShown) {
-        $(this._element).off(EVENT_KEYDOWN_DISMISS);
+        $__default['default'](this._element).off(EVENT_KEYDOWN_DISMISS);
       }
     };
 
@@ -4282,11 +4325,11 @@ module.exports = {
       var _this7 = this;
 
       if (this._isShown) {
-        $(window).on(EVENT_RESIZE, function (event) {
+        $__default['default'](window).on(EVENT_RESIZE, function (event) {
           return _this7.handleUpdate(event);
         });
       } else {
-        $(window).off(EVENT_RESIZE);
+        $__default['default'](window).off(EVENT_RESIZE);
       }
     };
 
@@ -4299,22 +4342,24 @@ module.exports = {
 
       this._element.removeAttribute('aria-modal');
 
+      this._element.removeAttribute('role');
+
       this._isTransitioning = false;
 
       this._showBackdrop(function () {
-        $(document.body).removeClass(CLASS_NAME_OPEN);
+        $__default['default'](document.body).removeClass(CLASS_NAME_OPEN);
 
         _this8._resetAdjustments();
 
         _this8._resetScrollbar();
 
-        $(_this8._element).trigger(EVENT_HIDDEN$2);
+        $__default['default'](_this8._element).trigger(EVENT_HIDDEN$2);
       });
     };
 
     _proto._removeBackdrop = function _removeBackdrop() {
       if (this._backdrop) {
-        $(this._backdrop).remove();
+        $__default['default'](this._backdrop).remove();
         this._backdrop = null;
       }
     };
@@ -4322,7 +4367,7 @@ module.exports = {
     _proto._showBackdrop = function _showBackdrop(callback) {
       var _this9 = this;
 
-      var animate = $(this._element).hasClass(CLASS_NAME_FADE$1) ? CLASS_NAME_FADE$1 : '';
+      var animate = $__default['default'](this._element).hasClass(CLASS_NAME_FADE$1) ? CLASS_NAME_FADE$1 : '';
 
       if (this._isShown && this._config.backdrop) {
         this._backdrop = document.createElement('div');
@@ -4332,8 +4377,8 @@ module.exports = {
           this._backdrop.classList.add(animate);
         }
 
-        $(this._backdrop).appendTo(document.body);
-        $(this._element).on(EVENT_CLICK_DISMISS, function (event) {
+        $__default['default'](this._backdrop).appendTo(document.body);
+        $__default['default'](this._element).on(EVENT_CLICK_DISMISS, function (event) {
           if (_this9._ignoreBackdropClick) {
             _this9._ignoreBackdropClick = false;
             return;
@@ -4343,14 +4388,18 @@ module.exports = {
             return;
           }
 
-          _this9._triggerBackdropTransition();
+          if (_this9._config.backdrop === 'static') {
+            _this9._triggerBackdropTransition();
+          } else {
+            _this9.hide();
+          }
         });
 
         if (animate) {
           Util.reflow(this._backdrop);
         }
 
-        $(this._backdrop).addClass(CLASS_NAME_SHOW$3);
+        $__default['default'](this._backdrop).addClass(CLASS_NAME_SHOW$3);
 
         if (!callback) {
           return;
@@ -4362,9 +4411,9 @@ module.exports = {
         }
 
         var backdropTransitionDuration = Util.getTransitionDurationFromElement(this._backdrop);
-        $(this._backdrop).one(Util.TRANSITION_END, callback).emulateTransitionEnd(backdropTransitionDuration);
+        $__default['default'](this._backdrop).one(Util.TRANSITION_END, callback).emulateTransitionEnd(backdropTransitionDuration);
       } else if (!this._isShown && this._backdrop) {
-        $(this._backdrop).removeClass(CLASS_NAME_SHOW$3);
+        $__default['default'](this._backdrop).removeClass(CLASS_NAME_SHOW$3);
 
         var callbackRemove = function callbackRemove() {
           _this9._removeBackdrop();
@@ -4374,10 +4423,10 @@ module.exports = {
           }
         };
 
-        if ($(this._element).hasClass(CLASS_NAME_FADE$1)) {
+        if ($__default['default'](this._element).hasClass(CLASS_NAME_FADE$1)) {
           var _backdropTransitionDuration = Util.getTransitionDurationFromElement(this._backdrop);
 
-          $(this._backdrop).one(Util.TRANSITION_END, callbackRemove).emulateTransitionEnd(_backdropTransitionDuration);
+          $__default['default'](this._backdrop).one(Util.TRANSITION_END, callbackRemove).emulateTransitionEnd(_backdropTransitionDuration);
         } else {
           callbackRemove();
         }
@@ -4422,46 +4471,46 @@ module.exports = {
         var fixedContent = [].slice.call(document.querySelectorAll(SELECTOR_FIXED_CONTENT));
         var stickyContent = [].slice.call(document.querySelectorAll(SELECTOR_STICKY_CONTENT)); // Adjust fixed content padding
 
-        $(fixedContent).each(function (index, element) {
+        $__default['default'](fixedContent).each(function (index, element) {
           var actualPadding = element.style.paddingRight;
-          var calculatedPadding = $(element).css('padding-right');
-          $(element).data('padding-right', actualPadding).css('padding-right', parseFloat(calculatedPadding) + _this10._scrollbarWidth + "px");
+          var calculatedPadding = $__default['default'](element).css('padding-right');
+          $__default['default'](element).data('padding-right', actualPadding).css('padding-right', parseFloat(calculatedPadding) + _this10._scrollbarWidth + "px");
         }); // Adjust sticky content margin
 
-        $(stickyContent).each(function (index, element) {
+        $__default['default'](stickyContent).each(function (index, element) {
           var actualMargin = element.style.marginRight;
-          var calculatedMargin = $(element).css('margin-right');
-          $(element).data('margin-right', actualMargin).css('margin-right', parseFloat(calculatedMargin) - _this10._scrollbarWidth + "px");
+          var calculatedMargin = $__default['default'](element).css('margin-right');
+          $__default['default'](element).data('margin-right', actualMargin).css('margin-right', parseFloat(calculatedMargin) - _this10._scrollbarWidth + "px");
         }); // Adjust body padding
 
         var actualPadding = document.body.style.paddingRight;
-        var calculatedPadding = $(document.body).css('padding-right');
-        $(document.body).data('padding-right', actualPadding).css('padding-right', parseFloat(calculatedPadding) + this._scrollbarWidth + "px");
+        var calculatedPadding = $__default['default'](document.body).css('padding-right');
+        $__default['default'](document.body).data('padding-right', actualPadding).css('padding-right', parseFloat(calculatedPadding) + this._scrollbarWidth + "px");
       }
 
-      $(document.body).addClass(CLASS_NAME_OPEN);
+      $__default['default'](document.body).addClass(CLASS_NAME_OPEN);
     };
 
     _proto._resetScrollbar = function _resetScrollbar() {
       // Restore fixed content padding
       var fixedContent = [].slice.call(document.querySelectorAll(SELECTOR_FIXED_CONTENT));
-      $(fixedContent).each(function (index, element) {
-        var padding = $(element).data('padding-right');
-        $(element).removeData('padding-right');
+      $__default['default'](fixedContent).each(function (index, element) {
+        var padding = $__default['default'](element).data('padding-right');
+        $__default['default'](element).removeData('padding-right');
         element.style.paddingRight = padding ? padding : '';
       }); // Restore sticky content
 
       var elements = [].slice.call(document.querySelectorAll("" + SELECTOR_STICKY_CONTENT));
-      $(elements).each(function (index, element) {
-        var margin = $(element).data('margin-right');
+      $__default['default'](elements).each(function (index, element) {
+        var margin = $__default['default'](element).data('margin-right');
 
         if (typeof margin !== 'undefined') {
-          $(element).css('margin-right', margin).removeData('margin-right');
+          $__default['default'](element).css('margin-right', margin).removeData('margin-right');
         }
       }); // Restore body padding
 
-      var padding = $(document.body).data('padding-right');
-      $(document.body).removeData('padding-right');
+      var padding = $__default['default'](document.body).data('padding-right');
+      $__default['default'](document.body).removeData('padding-right');
       document.body.style.paddingRight = padding ? padding : '';
     };
 
@@ -4478,13 +4527,13 @@ module.exports = {
 
     Modal._jQueryInterface = function _jQueryInterface(config, relatedTarget) {
       return this.each(function () {
-        var data = $(this).data(DATA_KEY$5);
+        var data = $__default['default'](this).data(DATA_KEY$5);
 
-        var _config = _objectSpread2(_objectSpread2(_objectSpread2({}, Default$3), $(this).data()), typeof config === 'object' && config ? config : {});
+        var _config = _extends({}, Default$3, $__default['default'](this).data(), typeof config === 'object' && config ? config : {});
 
         if (!data) {
           data = new Modal(this, _config);
-          $(this).data(DATA_KEY$5, data);
+          $__default['default'](this).data(DATA_KEY$5, data);
         }
 
         if (typeof config === 'string') {
@@ -4520,7 +4569,7 @@ module.exports = {
    */
 
 
-  $(document).on(EVENT_CLICK_DATA_API$5, SELECTOR_DATA_TOGGLE$3, function (event) {
+  $__default['default'](document).on(EVENT_CLICK_DATA_API$5, SELECTOR_DATA_TOGGLE$3, function (event) {
     var _this11 = this;
 
     var target;
@@ -4530,26 +4579,26 @@ module.exports = {
       target = document.querySelector(selector);
     }
 
-    var config = $(target).data(DATA_KEY$5) ? 'toggle' : _objectSpread2(_objectSpread2({}, $(target).data()), $(this).data());
+    var config = $__default['default'](target).data(DATA_KEY$5) ? 'toggle' : _extends({}, $__default['default'](target).data(), $__default['default'](this).data());
 
     if (this.tagName === 'A' || this.tagName === 'AREA') {
       event.preventDefault();
     }
 
-    var $target = $(target).one(EVENT_SHOW$2, function (showEvent) {
+    var $target = $__default['default'](target).one(EVENT_SHOW$2, function (showEvent) {
       if (showEvent.isDefaultPrevented()) {
         // Only register focus restorer if modal will actually get shown
         return;
       }
 
       $target.one(EVENT_HIDDEN$2, function () {
-        if ($(_this11).is(':visible')) {
+        if ($__default['default'](_this11).is(':visible')) {
           _this11.focus();
         }
       });
     });
 
-    Modal._jQueryInterface.call($(target), config, this);
+    Modal._jQueryInterface.call($__default['default'](target), config, this);
   });
   /**
    * ------------------------------------------------------------------------
@@ -4557,18 +4606,18 @@ module.exports = {
    * ------------------------------------------------------------------------
    */
 
-  $.fn[NAME$5] = Modal._jQueryInterface;
-  $.fn[NAME$5].Constructor = Modal;
+  $__default['default'].fn[NAME$5] = Modal._jQueryInterface;
+  $__default['default'].fn[NAME$5].Constructor = Modal;
 
-  $.fn[NAME$5].noConflict = function () {
-    $.fn[NAME$5] = JQUERY_NO_CONFLICT$5;
+  $__default['default'].fn[NAME$5].noConflict = function () {
+    $__default['default'].fn[NAME$5] = JQUERY_NO_CONFLICT$5;
     return Modal._jQueryInterface;
   };
 
   /**
    * --------------------------------------------------------------------------
-   * Bootstrap (v4.5.0): tools/sanitizer.js
-   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
+   * Bootstrap (v4.6.0): tools/sanitizer.js
+   * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
    * --------------------------------------------------------------------------
    */
   var uriAttrs = ['background', 'cite', 'href', 'itemtype', 'longdesc', 'poster', 'src', 'xlink:href'];
@@ -4693,10 +4742,10 @@ module.exports = {
    */
 
   var NAME$6 = 'tooltip';
-  var VERSION$6 = '4.5.0';
+  var VERSION$6 = '4.6.0';
   var DATA_KEY$6 = 'bs.tooltip';
   var EVENT_KEY$6 = "." + DATA_KEY$6;
-  var JQUERY_NO_CONFLICT$6 = $.fn[NAME$6];
+  var JQUERY_NO_CONFLICT$6 = $__default['default'].fn[NAME$6];
   var CLASS_PREFIX = 'bs-tooltip';
   var BSCLS_PREFIX_REGEX = new RegExp("(^|\\s)" + CLASS_PREFIX + "\\S+", 'g');
   var DISALLOWED_ATTRIBUTES = ['sanitize', 'whiteList', 'sanitizeFn'];
@@ -4713,6 +4762,7 @@ module.exports = {
     container: '(string|element|boolean)',
     fallbackPlacement: '(string|array)',
     boundary: '(string|element)',
+    customClass: '(string|function)',
     sanitize: 'boolean',
     sanitizeFn: '(null|function)',
     whiteList: 'object',
@@ -4738,6 +4788,7 @@ module.exports = {
     container: false,
     fallbackPlacement: 'flip',
     boundary: 'scrollParent',
+    customClass: '',
     sanitize: true,
     sanitizeFn: null,
     whiteList: DefaultWhitelist,
@@ -4773,8 +4824,8 @@ module.exports = {
 
   var Tooltip = /*#__PURE__*/function () {
     function Tooltip(element, config) {
-      if (typeof Popper === 'undefined') {
-        throw new TypeError('Bootstrap\'s tooltips require Popper.js (https://popper.js.org/)');
+      if (typeof Popper__default['default'] === 'undefined') {
+        throw new TypeError('Bootstrap\'s tooltips require Popper (https://popper.js.org)');
       } // private
 
 
@@ -4814,11 +4865,11 @@ module.exports = {
 
       if (event) {
         var dataKey = this.constructor.DATA_KEY;
-        var context = $(event.currentTarget).data(dataKey);
+        var context = $__default['default'](event.currentTarget).data(dataKey);
 
         if (!context) {
           context = new this.constructor(event.currentTarget, this._getDelegateConfig());
-          $(event.currentTarget).data(dataKey, context);
+          $__default['default'](event.currentTarget).data(dataKey, context);
         }
 
         context._activeTrigger.click = !context._activeTrigger.click;
@@ -4829,7 +4880,7 @@ module.exports = {
           context._leave(null, context);
         }
       } else {
-        if ($(this.getTipElement()).hasClass(CLASS_NAME_SHOW$4)) {
+        if ($__default['default'](this.getTipElement()).hasClass(CLASS_NAME_SHOW$4)) {
           this._leave(null, this);
 
           return;
@@ -4841,12 +4892,12 @@ module.exports = {
 
     _proto.dispose = function dispose() {
       clearTimeout(this._timeout);
-      $.removeData(this.element, this.constructor.DATA_KEY);
-      $(this.element).off(this.constructor.EVENT_KEY);
-      $(this.element).closest('.modal').off('hide.bs.modal', this._hideModalHandler);
+      $__default['default'].removeData(this.element, this.constructor.DATA_KEY);
+      $__default['default'](this.element).off(this.constructor.EVENT_KEY);
+      $__default['default'](this.element).closest('.modal').off('hide.bs.modal', this._hideModalHandler);
 
       if (this.tip) {
-        $(this.tip).remove();
+        $__default['default'](this.tip).remove();
       }
 
       this._isEnabled = null;
@@ -4867,16 +4918,16 @@ module.exports = {
     _proto.show = function show() {
       var _this = this;
 
-      if ($(this.element).css('display') === 'none') {
+      if ($__default['default'](this.element).css('display') === 'none') {
         throw new Error('Please use show on visible elements');
       }
 
-      var showEvent = $.Event(this.constructor.Event.SHOW);
+      var showEvent = $__default['default'].Event(this.constructor.Event.SHOW);
 
       if (this.isWithContent() && this._isEnabled) {
-        $(this.element).trigger(showEvent);
+        $__default['default'](this.element).trigger(showEvent);
         var shadowRoot = Util.findShadowRoot(this.element);
-        var isInTheDom = $.contains(shadowRoot !== null ? shadowRoot : this.element.ownerDocument.documentElement, this.element);
+        var isInTheDom = $__default['default'].contains(shadowRoot !== null ? shadowRoot : this.element.ownerDocument.documentElement, this.element);
 
         if (showEvent.isDefaultPrevented() || !isInTheDom) {
           return;
@@ -4889,7 +4940,7 @@ module.exports = {
         this.setContent();
 
         if (this.config.animation) {
-          $(tip).addClass(CLASS_NAME_FADE$2);
+          $__default['default'](tip).addClass(CLASS_NAME_FADE$2);
         }
 
         var placement = typeof this.config.placement === 'function' ? this.config.placement.call(this, tip, this.element) : this.config.placement;
@@ -4900,21 +4951,22 @@ module.exports = {
 
         var container = this._getContainer();
 
-        $(tip).data(this.constructor.DATA_KEY, this);
+        $__default['default'](tip).data(this.constructor.DATA_KEY, this);
 
-        if (!$.contains(this.element.ownerDocument.documentElement, this.tip)) {
-          $(tip).appendTo(container);
+        if (!$__default['default'].contains(this.element.ownerDocument.documentElement, this.tip)) {
+          $__default['default'](tip).appendTo(container);
         }
 
-        $(this.element).trigger(this.constructor.Event.INSERTED);
-        this._popper = new Popper(this.element, tip, this._getPopperConfig(attachment));
-        $(tip).addClass(CLASS_NAME_SHOW$4); // If this is a touch-enabled device we add extra
+        $__default['default'](this.element).trigger(this.constructor.Event.INSERTED);
+        this._popper = new Popper__default['default'](this.element, tip, this._getPopperConfig(attachment));
+        $__default['default'](tip).addClass(CLASS_NAME_SHOW$4);
+        $__default['default'](tip).addClass(this.config.customClass); // If this is a touch-enabled device we add extra
         // empty mouseover listeners to the body's immediate children;
         // only needed because of broken event delegation on iOS
         // https://www.quirksmode.org/blog/archives/2014/02/mouse_event_bub.html
 
         if ('ontouchstart' in document.documentElement) {
-          $(document.body).children().on('mouseover', null, $.noop);
+          $__default['default'](document.body).children().on('mouseover', null, $__default['default'].noop);
         }
 
         var complete = function complete() {
@@ -4924,16 +4976,16 @@ module.exports = {
 
           var prevHoverState = _this._hoverState;
           _this._hoverState = null;
-          $(_this.element).trigger(_this.constructor.Event.SHOWN);
+          $__default['default'](_this.element).trigger(_this.constructor.Event.SHOWN);
 
           if (prevHoverState === HOVER_STATE_OUT) {
             _this._leave(null, _this);
           }
         };
 
-        if ($(this.tip).hasClass(CLASS_NAME_FADE$2)) {
+        if ($__default['default'](this.tip).hasClass(CLASS_NAME_FADE$2)) {
           var transitionDuration = Util.getTransitionDurationFromElement(this.tip);
-          $(this.tip).one(Util.TRANSITION_END, complete).emulateTransitionEnd(transitionDuration);
+          $__default['default'](this.tip).one(Util.TRANSITION_END, complete).emulateTransitionEnd(transitionDuration);
         } else {
           complete();
         }
@@ -4944,7 +4996,7 @@ module.exports = {
       var _this2 = this;
 
       var tip = this.getTipElement();
-      var hideEvent = $.Event(this.constructor.Event.HIDE);
+      var hideEvent = $__default['default'].Event(this.constructor.Event.HIDE);
 
       var complete = function complete() {
         if (_this2._hoverState !== HOVER_STATE_SHOW && tip.parentNode) {
@@ -4955,7 +5007,7 @@ module.exports = {
 
         _this2.element.removeAttribute('aria-describedby');
 
-        $(_this2.element).trigger(_this2.constructor.Event.HIDDEN);
+        $__default['default'](_this2.element).trigger(_this2.constructor.Event.HIDDEN);
 
         if (_this2._popper !== null) {
           _this2._popper.destroy();
@@ -4966,26 +5018,26 @@ module.exports = {
         }
       };
 
-      $(this.element).trigger(hideEvent);
+      $__default['default'](this.element).trigger(hideEvent);
 
       if (hideEvent.isDefaultPrevented()) {
         return;
       }
 
-      $(tip).removeClass(CLASS_NAME_SHOW$4); // If this is a touch-enabled device we remove the extra
+      $__default['default'](tip).removeClass(CLASS_NAME_SHOW$4); // If this is a touch-enabled device we remove the extra
       // empty mouseover listeners we added for iOS support
 
       if ('ontouchstart' in document.documentElement) {
-        $(document.body).children().off('mouseover', null, $.noop);
+        $__default['default'](document.body).children().off('mouseover', null, $__default['default'].noop);
       }
 
       this._activeTrigger[TRIGGER_CLICK] = false;
       this._activeTrigger[TRIGGER_FOCUS] = false;
       this._activeTrigger[TRIGGER_HOVER] = false;
 
-      if ($(this.tip).hasClass(CLASS_NAME_FADE$2)) {
+      if ($__default['default'](this.tip).hasClass(CLASS_NAME_FADE$2)) {
         var transitionDuration = Util.getTransitionDurationFromElement(tip);
-        $(tip).one(Util.TRANSITION_END, complete).emulateTransitionEnd(transitionDuration);
+        $__default['default'](tip).one(Util.TRANSITION_END, complete).emulateTransitionEnd(transitionDuration);
       } else {
         complete();
       }
@@ -5005,29 +5057,29 @@ module.exports = {
     };
 
     _proto.addAttachmentClass = function addAttachmentClass(attachment) {
-      $(this.getTipElement()).addClass(CLASS_PREFIX + "-" + attachment);
+      $__default['default'](this.getTipElement()).addClass(CLASS_PREFIX + "-" + attachment);
     };
 
     _proto.getTipElement = function getTipElement() {
-      this.tip = this.tip || $(this.config.template)[0];
+      this.tip = this.tip || $__default['default'](this.config.template)[0];
       return this.tip;
     };
 
     _proto.setContent = function setContent() {
       var tip = this.getTipElement();
-      this.setElementContent($(tip.querySelectorAll(SELECTOR_TOOLTIP_INNER)), this.getTitle());
-      $(tip).removeClass(CLASS_NAME_FADE$2 + " " + CLASS_NAME_SHOW$4);
+      this.setElementContent($__default['default'](tip.querySelectorAll(SELECTOR_TOOLTIP_INNER)), this.getTitle());
+      $__default['default'](tip).removeClass(CLASS_NAME_FADE$2 + " " + CLASS_NAME_SHOW$4);
     };
 
     _proto.setElementContent = function setElementContent($element, content) {
       if (typeof content === 'object' && (content.nodeType || content.jquery)) {
         // Content is a DOM node or a jQuery
         if (this.config.html) {
-          if (!$(content).parent().is($element)) {
+          if (!$__default['default'](content).parent().is($element)) {
             $element.empty().append(content);
           }
         } else {
-          $element.text($(content).text());
+          $element.text($__default['default'](content).text());
         }
 
         return;
@@ -5081,7 +5133,7 @@ module.exports = {
           return _this3._handlePopperPlacementChange(data);
         }
       };
-      return _objectSpread2(_objectSpread2({}, defaultBsConfig), this.config.popperConfig);
+      return _extends({}, defaultBsConfig, this.config.popperConfig);
     };
 
     _proto._getOffset = function _getOffset() {
@@ -5091,7 +5143,7 @@ module.exports = {
 
       if (typeof this.config.offset === 'function') {
         offset.fn = function (data) {
-          data.offsets = _objectSpread2(_objectSpread2({}, data.offsets), _this4.config.offset(data.offsets, _this4.element) || {});
+          data.offsets = _extends({}, data.offsets, _this4.config.offset(data.offsets, _this4.element) || {});
           return data;
         };
       } else {
@@ -5107,10 +5159,10 @@ module.exports = {
       }
 
       if (Util.isElement(this.config.container)) {
-        return $(this.config.container);
+        return $__default['default'](this.config.container);
       }
 
-      return $(document).find(this.config.container);
+      return $__default['default'](document).find(this.config.container);
     };
 
     _proto._getAttachment = function _getAttachment(placement) {
@@ -5123,13 +5175,13 @@ module.exports = {
       var triggers = this.config.trigger.split(' ');
       triggers.forEach(function (trigger) {
         if (trigger === 'click') {
-          $(_this5.element).on(_this5.constructor.Event.CLICK, _this5.config.selector, function (event) {
+          $__default['default'](_this5.element).on(_this5.constructor.Event.CLICK, _this5.config.selector, function (event) {
             return _this5.toggle(event);
           });
         } else if (trigger !== TRIGGER_MANUAL) {
           var eventIn = trigger === TRIGGER_HOVER ? _this5.constructor.Event.MOUSEENTER : _this5.constructor.Event.FOCUSIN;
           var eventOut = trigger === TRIGGER_HOVER ? _this5.constructor.Event.MOUSELEAVE : _this5.constructor.Event.FOCUSOUT;
-          $(_this5.element).on(eventIn, _this5.config.selector, function (event) {
+          $__default['default'](_this5.element).on(eventIn, _this5.config.selector, function (event) {
             return _this5._enter(event);
           }).on(eventOut, _this5.config.selector, function (event) {
             return _this5._leave(event);
@@ -5143,10 +5195,10 @@ module.exports = {
         }
       };
 
-      $(this.element).closest('.modal').on('hide.bs.modal', this._hideModalHandler);
+      $__default['default'](this.element).closest('.modal').on('hide.bs.modal', this._hideModalHandler);
 
       if (this.config.selector) {
-        this.config = _objectSpread2(_objectSpread2({}, this.config), {}, {
+        this.config = _extends({}, this.config, {
           trigger: 'manual',
           selector: ''
         });
@@ -5166,18 +5218,18 @@ module.exports = {
 
     _proto._enter = function _enter(event, context) {
       var dataKey = this.constructor.DATA_KEY;
-      context = context || $(event.currentTarget).data(dataKey);
+      context = context || $__default['default'](event.currentTarget).data(dataKey);
 
       if (!context) {
         context = new this.constructor(event.currentTarget, this._getDelegateConfig());
-        $(event.currentTarget).data(dataKey, context);
+        $__default['default'](event.currentTarget).data(dataKey, context);
       }
 
       if (event) {
         context._activeTrigger[event.type === 'focusin' ? TRIGGER_FOCUS : TRIGGER_HOVER] = true;
       }
 
-      if ($(context.getTipElement()).hasClass(CLASS_NAME_SHOW$4) || context._hoverState === HOVER_STATE_SHOW) {
+      if ($__default['default'](context.getTipElement()).hasClass(CLASS_NAME_SHOW$4) || context._hoverState === HOVER_STATE_SHOW) {
         context._hoverState = HOVER_STATE_SHOW;
         return;
       }
@@ -5199,11 +5251,11 @@ module.exports = {
 
     _proto._leave = function _leave(event, context) {
       var dataKey = this.constructor.DATA_KEY;
-      context = context || $(event.currentTarget).data(dataKey);
+      context = context || $__default['default'](event.currentTarget).data(dataKey);
 
       if (!context) {
         context = new this.constructor(event.currentTarget, this._getDelegateConfig());
-        $(event.currentTarget).data(dataKey, context);
+        $__default['default'](event.currentTarget).data(dataKey, context);
       }
 
       if (event) {
@@ -5240,13 +5292,13 @@ module.exports = {
     };
 
     _proto._getConfig = function _getConfig(config) {
-      var dataAttributes = $(this.element).data();
+      var dataAttributes = $__default['default'](this.element).data();
       Object.keys(dataAttributes).forEach(function (dataAttr) {
         if (DISALLOWED_ATTRIBUTES.indexOf(dataAttr) !== -1) {
           delete dataAttributes[dataAttr];
         }
       });
-      config = _objectSpread2(_objectSpread2(_objectSpread2({}, this.constructor.Default), dataAttributes), typeof config === 'object' && config ? config : {});
+      config = _extends({}, this.constructor.Default, dataAttributes, typeof config === 'object' && config ? config : {});
 
       if (typeof config.delay === 'number') {
         config.delay = {
@@ -5287,7 +5339,7 @@ module.exports = {
     };
 
     _proto._cleanTipClass = function _cleanTipClass() {
-      var $tip = $(this.getTipElement());
+      var $tip = $__default['default'](this.getTipElement());
       var tabClass = $tip.attr('class').match(BSCLS_PREFIX_REGEX);
 
       if (tabClass !== null && tabClass.length) {
@@ -5311,7 +5363,7 @@ module.exports = {
         return;
       }
 
-      $(tip).removeClass(CLASS_NAME_FADE$2);
+      $__default['default'](tip).removeClass(CLASS_NAME_FADE$2);
       this.config.animation = false;
       this.hide();
       this.show();
@@ -5321,7 +5373,8 @@ module.exports = {
 
     Tooltip._jQueryInterface = function _jQueryInterface(config) {
       return this.each(function () {
-        var data = $(this).data(DATA_KEY$6);
+        var $element = $__default['default'](this);
+        var data = $element.data(DATA_KEY$6);
 
         var _config = typeof config === 'object' && config;
 
@@ -5331,7 +5384,7 @@ module.exports = {
 
         if (!data) {
           data = new Tooltip(this, _config);
-          $(this).data(DATA_KEY$6, data);
+          $element.data(DATA_KEY$6, data);
         }
 
         if (typeof config === 'string') {
@@ -5390,11 +5443,11 @@ module.exports = {
    */
 
 
-  $.fn[NAME$6] = Tooltip._jQueryInterface;
-  $.fn[NAME$6].Constructor = Tooltip;
+  $__default['default'].fn[NAME$6] = Tooltip._jQueryInterface;
+  $__default['default'].fn[NAME$6].Constructor = Tooltip;
 
-  $.fn[NAME$6].noConflict = function () {
-    $.fn[NAME$6] = JQUERY_NO_CONFLICT$6;
+  $__default['default'].fn[NAME$6].noConflict = function () {
+    $__default['default'].fn[NAME$6] = JQUERY_NO_CONFLICT$6;
     return Tooltip._jQueryInterface;
   };
 
@@ -5405,21 +5458,21 @@ module.exports = {
    */
 
   var NAME$7 = 'popover';
-  var VERSION$7 = '4.5.0';
+  var VERSION$7 = '4.6.0';
   var DATA_KEY$7 = 'bs.popover';
   var EVENT_KEY$7 = "." + DATA_KEY$7;
-  var JQUERY_NO_CONFLICT$7 = $.fn[NAME$7];
+  var JQUERY_NO_CONFLICT$7 = $__default['default'].fn[NAME$7];
   var CLASS_PREFIX$1 = 'bs-popover';
   var BSCLS_PREFIX_REGEX$1 = new RegExp("(^|\\s)" + CLASS_PREFIX$1 + "\\S+", 'g');
 
-  var Default$5 = _objectSpread2(_objectSpread2({}, Tooltip.Default), {}, {
+  var Default$5 = _extends({}, Tooltip.Default, {
     placement: 'right',
     trigger: 'click',
     content: '',
     template: '<div class="popover" role="tooltip">' + '<div class="arrow"></div>' + '<h3 class="popover-header"></h3>' + '<div class="popover-body"></div></div>'
   });
 
-  var DefaultType$5 = _objectSpread2(_objectSpread2({}, Tooltip.DefaultType), {}, {
+  var DefaultType$5 = _extends({}, Tooltip.DefaultType, {
     content: '(string|element|function)'
   });
 
@@ -5460,16 +5513,16 @@ module.exports = {
     };
 
     _proto.addAttachmentClass = function addAttachmentClass(attachment) {
-      $(this.getTipElement()).addClass(CLASS_PREFIX$1 + "-" + attachment);
+      $__default['default'](this.getTipElement()).addClass(CLASS_PREFIX$1 + "-" + attachment);
     };
 
     _proto.getTipElement = function getTipElement() {
-      this.tip = this.tip || $(this.config.template)[0];
+      this.tip = this.tip || $__default['default'](this.config.template)[0];
       return this.tip;
     };
 
     _proto.setContent = function setContent() {
-      var $tip = $(this.getTipElement()); // We use append for html objects to maintain js events
+      var $tip = $__default['default'](this.getTipElement()); // We use append for html objects to maintain js events
 
       this.setElementContent($tip.find(SELECTOR_TITLE), this.getTitle());
 
@@ -5489,7 +5542,7 @@ module.exports = {
     };
 
     _proto._cleanTipClass = function _cleanTipClass() {
-      var $tip = $(this.getTipElement());
+      var $tip = $__default['default'](this.getTipElement());
       var tabClass = $tip.attr('class').match(BSCLS_PREFIX_REGEX$1);
 
       if (tabClass !== null && tabClass.length > 0) {
@@ -5500,7 +5553,7 @@ module.exports = {
 
     Popover._jQueryInterface = function _jQueryInterface(config) {
       return this.each(function () {
-        var data = $(this).data(DATA_KEY$7);
+        var data = $__default['default'](this).data(DATA_KEY$7);
 
         var _config = typeof config === 'object' ? config : null;
 
@@ -5510,7 +5563,7 @@ module.exports = {
 
         if (!data) {
           data = new Popover(this, _config);
-          $(this).data(DATA_KEY$7, data);
+          $__default['default'](this).data(DATA_KEY$7, data);
         }
 
         if (typeof config === 'string') {
@@ -5570,11 +5623,11 @@ module.exports = {
    */
 
 
-  $.fn[NAME$7] = Popover._jQueryInterface;
-  $.fn[NAME$7].Constructor = Popover;
+  $__default['default'].fn[NAME$7] = Popover._jQueryInterface;
+  $__default['default'].fn[NAME$7].Constructor = Popover;
 
-  $.fn[NAME$7].noConflict = function () {
-    $.fn[NAME$7] = JQUERY_NO_CONFLICT$7;
+  $__default['default'].fn[NAME$7].noConflict = function () {
+    $__default['default'].fn[NAME$7] = JQUERY_NO_CONFLICT$7;
     return Popover._jQueryInterface;
   };
 
@@ -5585,11 +5638,11 @@ module.exports = {
    */
 
   var NAME$8 = 'scrollspy';
-  var VERSION$8 = '4.5.0';
+  var VERSION$8 = '4.6.0';
   var DATA_KEY$8 = 'bs.scrollspy';
   var EVENT_KEY$8 = "." + DATA_KEY$8;
   var DATA_API_KEY$6 = '.data-api';
-  var JQUERY_NO_CONFLICT$8 = $.fn[NAME$8];
+  var JQUERY_NO_CONFLICT$8 = $__default['default'].fn[NAME$8];
   var Default$6 = {
     offset: 10,
     method: 'auto',
@@ -5633,7 +5686,7 @@ module.exports = {
       this._targets = [];
       this._activeTarget = null;
       this._scrollHeight = 0;
-      $(this._scrollElement).on(EVENT_SCROLL, function (event) {
+      $__default['default'](this._scrollElement).on(EVENT_SCROLL, function (event) {
         return _this._process(event);
       });
       this.refresh();
@@ -5668,7 +5721,7 @@ module.exports = {
 
           if (targetBCR.width || targetBCR.height) {
             // TODO (fat): remove sketch reliance on jQuery position/offset
-            return [$(target)[offsetMethod]().top + offsetBase, targetSelector];
+            return [$__default['default'](target)[offsetMethod]().top + offsetBase, targetSelector];
           }
         }
 
@@ -5685,8 +5738,8 @@ module.exports = {
     };
 
     _proto.dispose = function dispose() {
-      $.removeData(this._element, DATA_KEY$8);
-      $(this._scrollElement).off(EVENT_KEY$8);
+      $__default['default'].removeData(this._element, DATA_KEY$8);
+      $__default['default'](this._scrollElement).off(EVENT_KEY$8);
       this._element = null;
       this._scrollElement = null;
       this._config = null;
@@ -5699,14 +5752,14 @@ module.exports = {
     ;
 
     _proto._getConfig = function _getConfig(config) {
-      config = _objectSpread2(_objectSpread2({}, Default$6), typeof config === 'object' && config ? config : {});
+      config = _extends({}, Default$6, typeof config === 'object' && config ? config : {});
 
       if (typeof config.target !== 'string' && Util.isElement(config.target)) {
-        var id = $(config.target).attr('id');
+        var id = $__default['default'](config.target).attr('id');
 
         if (!id) {
           id = Util.getUID(NAME$8);
-          $(config.target).attr('id', id);
+          $__default['default'](config.target).attr('id', id);
         }
 
         config.target = "#" + id;
@@ -5775,7 +5828,7 @@ module.exports = {
         return selector + "[data-target=\"" + target + "\"]," + selector + "[href=\"" + target + "\"]";
       });
 
-      var $link = $([].slice.call(document.querySelectorAll(queries.join(','))));
+      var $link = $__default['default']([].slice.call(document.querySelectorAll(queries.join(','))));
 
       if ($link.hasClass(CLASS_NAME_DROPDOWN_ITEM)) {
         $link.closest(SELECTOR_DROPDOWN).find(SELECTOR_DROPDOWN_TOGGLE).addClass(CLASS_NAME_ACTIVE$2);
@@ -5790,7 +5843,7 @@ module.exports = {
         $link.parents(SELECTOR_NAV_LIST_GROUP).prev(SELECTOR_NAV_ITEMS).children(SELECTOR_NAV_LINKS).addClass(CLASS_NAME_ACTIVE$2);
       }
 
-      $(this._scrollElement).trigger(EVENT_ACTIVATE, {
+      $__default['default'](this._scrollElement).trigger(EVENT_ACTIVATE, {
         relatedTarget: target
       });
     };
@@ -5806,13 +5859,13 @@ module.exports = {
 
     ScrollSpy._jQueryInterface = function _jQueryInterface(config) {
       return this.each(function () {
-        var data = $(this).data(DATA_KEY$8);
+        var data = $__default['default'](this).data(DATA_KEY$8);
 
         var _config = typeof config === 'object' && config;
 
         if (!data) {
           data = new ScrollSpy(this, _config);
-          $(this).data(DATA_KEY$8, data);
+          $__default['default'](this).data(DATA_KEY$8, data);
         }
 
         if (typeof config === 'string') {
@@ -5846,12 +5899,12 @@ module.exports = {
    */
 
 
-  $(window).on(EVENT_LOAD_DATA_API$2, function () {
+  $__default['default'](window).on(EVENT_LOAD_DATA_API$2, function () {
     var scrollSpys = [].slice.call(document.querySelectorAll(SELECTOR_DATA_SPY));
     var scrollSpysLength = scrollSpys.length;
 
     for (var i = scrollSpysLength; i--;) {
-      var $spy = $(scrollSpys[i]);
+      var $spy = $__default['default'](scrollSpys[i]);
 
       ScrollSpy._jQueryInterface.call($spy, $spy.data());
     }
@@ -5862,11 +5915,11 @@ module.exports = {
    * ------------------------------------------------------------------------
    */
 
-  $.fn[NAME$8] = ScrollSpy._jQueryInterface;
-  $.fn[NAME$8].Constructor = ScrollSpy;
+  $__default['default'].fn[NAME$8] = ScrollSpy._jQueryInterface;
+  $__default['default'].fn[NAME$8].Constructor = ScrollSpy;
 
-  $.fn[NAME$8].noConflict = function () {
-    $.fn[NAME$8] = JQUERY_NO_CONFLICT$8;
+  $__default['default'].fn[NAME$8].noConflict = function () {
+    $__default['default'].fn[NAME$8] = JQUERY_NO_CONFLICT$8;
     return ScrollSpy._jQueryInterface;
   };
 
@@ -5877,11 +5930,11 @@ module.exports = {
    */
 
   var NAME$9 = 'tab';
-  var VERSION$9 = '4.5.0';
+  var VERSION$9 = '4.6.0';
   var DATA_KEY$9 = 'bs.tab';
   var EVENT_KEY$9 = "." + DATA_KEY$9;
   var DATA_API_KEY$7 = '.data-api';
-  var JQUERY_NO_CONFLICT$9 = $.fn[NAME$9];
+  var JQUERY_NO_CONFLICT$9 = $__default['default'].fn[NAME$9];
   var EVENT_HIDE$3 = "hide" + EVENT_KEY$9;
   var EVENT_HIDDEN$3 = "hidden" + EVENT_KEY$9;
   var EVENT_SHOW$3 = "show" + EVENT_KEY$9;
@@ -5917,33 +5970,33 @@ module.exports = {
     _proto.show = function show() {
       var _this = this;
 
-      if (this._element.parentNode && this._element.parentNode.nodeType === Node.ELEMENT_NODE && $(this._element).hasClass(CLASS_NAME_ACTIVE$3) || $(this._element).hasClass(CLASS_NAME_DISABLED$1)) {
+      if (this._element.parentNode && this._element.parentNode.nodeType === Node.ELEMENT_NODE && $__default['default'](this._element).hasClass(CLASS_NAME_ACTIVE$3) || $__default['default'](this._element).hasClass(CLASS_NAME_DISABLED$1)) {
         return;
       }
 
       var target;
       var previous;
-      var listElement = $(this._element).closest(SELECTOR_NAV_LIST_GROUP$1)[0];
+      var listElement = $__default['default'](this._element).closest(SELECTOR_NAV_LIST_GROUP$1)[0];
       var selector = Util.getSelectorFromElement(this._element);
 
       if (listElement) {
         var itemSelector = listElement.nodeName === 'UL' || listElement.nodeName === 'OL' ? SELECTOR_ACTIVE_UL : SELECTOR_ACTIVE$2;
-        previous = $.makeArray($(listElement).find(itemSelector));
+        previous = $__default['default'].makeArray($__default['default'](listElement).find(itemSelector));
         previous = previous[previous.length - 1];
       }
 
-      var hideEvent = $.Event(EVENT_HIDE$3, {
+      var hideEvent = $__default['default'].Event(EVENT_HIDE$3, {
         relatedTarget: this._element
       });
-      var showEvent = $.Event(EVENT_SHOW$3, {
+      var showEvent = $__default['default'].Event(EVENT_SHOW$3, {
         relatedTarget: previous
       });
 
       if (previous) {
-        $(previous).trigger(hideEvent);
+        $__default['default'](previous).trigger(hideEvent);
       }
 
-      $(this._element).trigger(showEvent);
+      $__default['default'](this._element).trigger(showEvent);
 
       if (showEvent.isDefaultPrevented() || hideEvent.isDefaultPrevented()) {
         return;
@@ -5956,14 +6009,14 @@ module.exports = {
       this._activate(this._element, listElement);
 
       var complete = function complete() {
-        var hiddenEvent = $.Event(EVENT_HIDDEN$3, {
+        var hiddenEvent = $__default['default'].Event(EVENT_HIDDEN$3, {
           relatedTarget: _this._element
         });
-        var shownEvent = $.Event(EVENT_SHOWN$3, {
+        var shownEvent = $__default['default'].Event(EVENT_SHOWN$3, {
           relatedTarget: previous
         });
-        $(previous).trigger(hiddenEvent);
-        $(_this._element).trigger(shownEvent);
+        $__default['default'](previous).trigger(hiddenEvent);
+        $__default['default'](_this._element).trigger(shownEvent);
       };
 
       if (target) {
@@ -5974,7 +6027,7 @@ module.exports = {
     };
 
     _proto.dispose = function dispose() {
-      $.removeData(this._element, DATA_KEY$9);
+      $__default['default'].removeData(this._element, DATA_KEY$9);
       this._element = null;
     } // Private
     ;
@@ -5982,9 +6035,9 @@ module.exports = {
     _proto._activate = function _activate(element, container, callback) {
       var _this2 = this;
 
-      var activeElements = container && (container.nodeName === 'UL' || container.nodeName === 'OL') ? $(container).find(SELECTOR_ACTIVE_UL) : $(container).children(SELECTOR_ACTIVE$2);
+      var activeElements = container && (container.nodeName === 'UL' || container.nodeName === 'OL') ? $__default['default'](container).find(SELECTOR_ACTIVE_UL) : $__default['default'](container).children(SELECTOR_ACTIVE$2);
       var active = activeElements[0];
-      var isTransitioning = callback && active && $(active).hasClass(CLASS_NAME_FADE$4);
+      var isTransitioning = callback && active && $__default['default'](active).hasClass(CLASS_NAME_FADE$4);
 
       var complete = function complete() {
         return _this2._transitionComplete(element, active, callback);
@@ -5992,7 +6045,7 @@ module.exports = {
 
       if (active && isTransitioning) {
         var transitionDuration = Util.getTransitionDurationFromElement(active);
-        $(active).removeClass(CLASS_NAME_SHOW$6).one(Util.TRANSITION_END, complete).emulateTransitionEnd(transitionDuration);
+        $__default['default'](active).removeClass(CLASS_NAME_SHOW$6).one(Util.TRANSITION_END, complete).emulateTransitionEnd(transitionDuration);
       } else {
         complete();
       }
@@ -6000,11 +6053,11 @@ module.exports = {
 
     _proto._transitionComplete = function _transitionComplete(element, active, callback) {
       if (active) {
-        $(active).removeClass(CLASS_NAME_ACTIVE$3);
-        var dropdownChild = $(active.parentNode).find(SELECTOR_DROPDOWN_ACTIVE_CHILD)[0];
+        $__default['default'](active).removeClass(CLASS_NAME_ACTIVE$3);
+        var dropdownChild = $__default['default'](active.parentNode).find(SELECTOR_DROPDOWN_ACTIVE_CHILD)[0];
 
         if (dropdownChild) {
-          $(dropdownChild).removeClass(CLASS_NAME_ACTIVE$3);
+          $__default['default'](dropdownChild).removeClass(CLASS_NAME_ACTIVE$3);
         }
 
         if (active.getAttribute('role') === 'tab') {
@@ -6012,7 +6065,7 @@ module.exports = {
         }
       }
 
-      $(element).addClass(CLASS_NAME_ACTIVE$3);
+      $__default['default'](element).addClass(CLASS_NAME_ACTIVE$3);
 
       if (element.getAttribute('role') === 'tab') {
         element.setAttribute('aria-selected', true);
@@ -6024,12 +6077,12 @@ module.exports = {
         element.classList.add(CLASS_NAME_SHOW$6);
       }
 
-      if (element.parentNode && $(element.parentNode).hasClass(CLASS_NAME_DROPDOWN_MENU)) {
-        var dropdownElement = $(element).closest(SELECTOR_DROPDOWN$1)[0];
+      if (element.parentNode && $__default['default'](element.parentNode).hasClass(CLASS_NAME_DROPDOWN_MENU)) {
+        var dropdownElement = $__default['default'](element).closest(SELECTOR_DROPDOWN$1)[0];
 
         if (dropdownElement) {
           var dropdownToggleList = [].slice.call(dropdownElement.querySelectorAll(SELECTOR_DROPDOWN_TOGGLE$1));
-          $(dropdownToggleList).addClass(CLASS_NAME_ACTIVE$3);
+          $__default['default'](dropdownToggleList).addClass(CLASS_NAME_ACTIVE$3);
         }
 
         element.setAttribute('aria-expanded', true);
@@ -6043,7 +6096,7 @@ module.exports = {
 
     Tab._jQueryInterface = function _jQueryInterface(config) {
       return this.each(function () {
-        var $this = $(this);
+        var $this = $__default['default'](this);
         var data = $this.data(DATA_KEY$9);
 
         if (!data) {
@@ -6077,10 +6130,10 @@ module.exports = {
    */
 
 
-  $(document).on(EVENT_CLICK_DATA_API$6, SELECTOR_DATA_TOGGLE$4, function (event) {
+  $__default['default'](document).on(EVENT_CLICK_DATA_API$6, SELECTOR_DATA_TOGGLE$4, function (event) {
     event.preventDefault();
 
-    Tab._jQueryInterface.call($(this), 'show');
+    Tab._jQueryInterface.call($__default['default'](this), 'show');
   });
   /**
    * ------------------------------------------------------------------------
@@ -6088,11 +6141,11 @@ module.exports = {
    * ------------------------------------------------------------------------
    */
 
-  $.fn[NAME$9] = Tab._jQueryInterface;
-  $.fn[NAME$9].Constructor = Tab;
+  $__default['default'].fn[NAME$9] = Tab._jQueryInterface;
+  $__default['default'].fn[NAME$9].Constructor = Tab;
 
-  $.fn[NAME$9].noConflict = function () {
-    $.fn[NAME$9] = JQUERY_NO_CONFLICT$9;
+  $__default['default'].fn[NAME$9].noConflict = function () {
+    $__default['default'].fn[NAME$9] = JQUERY_NO_CONFLICT$9;
     return Tab._jQueryInterface;
   };
 
@@ -6103,10 +6156,10 @@ module.exports = {
    */
 
   var NAME$a = 'toast';
-  var VERSION$a = '4.5.0';
+  var VERSION$a = '4.6.0';
   var DATA_KEY$a = 'bs.toast';
   var EVENT_KEY$a = "." + DATA_KEY$a;
-  var JQUERY_NO_CONFLICT$a = $.fn[NAME$a];
+  var JQUERY_NO_CONFLICT$a = $__default['default'].fn[NAME$a];
   var EVENT_CLICK_DISMISS$1 = "click.dismiss" + EVENT_KEY$a;
   var EVENT_HIDE$4 = "hide" + EVENT_KEY$a;
   var EVENT_HIDDEN$4 = "hidden" + EVENT_KEY$a;
@@ -6149,12 +6202,14 @@ module.exports = {
     _proto.show = function show() {
       var _this = this;
 
-      var showEvent = $.Event(EVENT_SHOW$4);
-      $(this._element).trigger(showEvent);
+      var showEvent = $__default['default'].Event(EVENT_SHOW$4);
+      $__default['default'](this._element).trigger(showEvent);
 
       if (showEvent.isDefaultPrevented()) {
         return;
       }
+
+      this._clearTimeout();
 
       if (this._config.animation) {
         this._element.classList.add(CLASS_NAME_FADE$5);
@@ -6165,7 +6220,7 @@ module.exports = {
 
         _this._element.classList.add(CLASS_NAME_SHOW$7);
 
-        $(_this._element).trigger(EVENT_SHOWN$4);
+        $__default['default'](_this._element).trigger(EVENT_SHOWN$4);
 
         if (_this._config.autohide) {
           _this._timeout = setTimeout(function () {
@@ -6182,7 +6237,7 @@ module.exports = {
 
       if (this._config.animation) {
         var transitionDuration = Util.getTransitionDurationFromElement(this._element);
-        $(this._element).one(Util.TRANSITION_END, complete).emulateTransitionEnd(transitionDuration);
+        $__default['default'](this._element).one(Util.TRANSITION_END, complete).emulateTransitionEnd(transitionDuration);
       } else {
         complete();
       }
@@ -6193,8 +6248,8 @@ module.exports = {
         return;
       }
 
-      var hideEvent = $.Event(EVENT_HIDE$4);
-      $(this._element).trigger(hideEvent);
+      var hideEvent = $__default['default'].Event(EVENT_HIDE$4);
+      $__default['default'](this._element).trigger(hideEvent);
 
       if (hideEvent.isDefaultPrevented()) {
         return;
@@ -6204,22 +6259,21 @@ module.exports = {
     };
 
     _proto.dispose = function dispose() {
-      clearTimeout(this._timeout);
-      this._timeout = null;
+      this._clearTimeout();
 
       if (this._element.classList.contains(CLASS_NAME_SHOW$7)) {
         this._element.classList.remove(CLASS_NAME_SHOW$7);
       }
 
-      $(this._element).off(EVENT_CLICK_DISMISS$1);
-      $.removeData(this._element, DATA_KEY$a);
+      $__default['default'](this._element).off(EVENT_CLICK_DISMISS$1);
+      $__default['default'].removeData(this._element, DATA_KEY$a);
       this._element = null;
       this._config = null;
     } // Private
     ;
 
     _proto._getConfig = function _getConfig(config) {
-      config = _objectSpread2(_objectSpread2(_objectSpread2({}, Default$7), $(this._element).data()), typeof config === 'object' && config ? config : {});
+      config = _extends({}, Default$7, $__default['default'](this._element).data(), typeof config === 'object' && config ? config : {});
       Util.typeCheckConfig(NAME$a, config, this.constructor.DefaultType);
       return config;
     };
@@ -6227,7 +6281,7 @@ module.exports = {
     _proto._setListeners = function _setListeners() {
       var _this2 = this;
 
-      $(this._element).on(EVENT_CLICK_DISMISS$1, SELECTOR_DATA_DISMISS$1, function () {
+      $__default['default'](this._element).on(EVENT_CLICK_DISMISS$1, SELECTOR_DATA_DISMISS$1, function () {
         return _this2.hide();
       });
     };
@@ -6238,23 +6292,28 @@ module.exports = {
       var complete = function complete() {
         _this3._element.classList.add(CLASS_NAME_HIDE);
 
-        $(_this3._element).trigger(EVENT_HIDDEN$4);
+        $__default['default'](_this3._element).trigger(EVENT_HIDDEN$4);
       };
 
       this._element.classList.remove(CLASS_NAME_SHOW$7);
 
       if (this._config.animation) {
         var transitionDuration = Util.getTransitionDurationFromElement(this._element);
-        $(this._element).one(Util.TRANSITION_END, complete).emulateTransitionEnd(transitionDuration);
+        $__default['default'](this._element).one(Util.TRANSITION_END, complete).emulateTransitionEnd(transitionDuration);
       } else {
         complete();
       }
+    };
+
+    _proto._clearTimeout = function _clearTimeout() {
+      clearTimeout(this._timeout);
+      this._timeout = null;
     } // Static
     ;
 
     Toast._jQueryInterface = function _jQueryInterface(config) {
       return this.each(function () {
-        var $element = $(this);
+        var $element = $__default['default'](this);
         var data = $element.data(DATA_KEY$a);
 
         var _config = typeof config === 'object' && config;
@@ -6300,11 +6359,11 @@ module.exports = {
    */
 
 
-  $.fn[NAME$a] = Toast._jQueryInterface;
-  $.fn[NAME$a].Constructor = Toast;
+  $__default['default'].fn[NAME$a] = Toast._jQueryInterface;
+  $__default['default'].fn[NAME$a].Constructor = Toast;
 
-  $.fn[NAME$a].noConflict = function () {
-    $.fn[NAME$a] = JQUERY_NO_CONFLICT$a;
+  $__default['default'].fn[NAME$a].noConflict = function () {
+    $__default['default'].fn[NAME$a] = JQUERY_NO_CONFLICT$a;
     return Toast._jQueryInterface;
   };
 
@@ -21980,7 +22039,7 @@ return jQuery;
   var undefined;
 
   /** Used as the semantic version number. */
-  var VERSION = '4.17.15';
+  var VERSION = '4.17.20';
 
   /** Used as the size to enable large array optimizations. */
   var LARGE_ARRAY_SIZE = 200;
@@ -25687,8 +25746,21 @@ return jQuery;
      * @returns {Array} Returns the new sorted array.
      */
     function baseOrderBy(collection, iteratees, orders) {
+      if (iteratees.length) {
+        iteratees = arrayMap(iteratees, function(iteratee) {
+          if (isArray(iteratee)) {
+            return function(value) {
+              return baseGet(value, iteratee.length === 1 ? iteratee[0] : iteratee);
+            }
+          }
+          return iteratee;
+        });
+      } else {
+        iteratees = [identity];
+      }
+
       var index = -1;
-      iteratees = arrayMap(iteratees.length ? iteratees : [identity], baseUnary(getIteratee()));
+      iteratees = arrayMap(iteratees, baseUnary(getIteratee()));
 
       var result = baseMap(collection, function(value, key, collection) {
         var criteria = arrayMap(iteratees, function(iteratee) {
@@ -25945,6 +26017,10 @@ return jQuery;
         var key = toKey(path[index]),
             newValue = value;
 
+        if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+          return object;
+        }
+
         if (index != lastIndex) {
           var objValue = nested[key];
           newValue = customizer ? customizer(objValue, key, nested) : undefined;
@@ -26097,11 +26173,14 @@ return jQuery;
      *  into `array`.
      */
     function baseSortedIndexBy(array, value, iteratee, retHighest) {
-      value = iteratee(value);
-
       var low = 0,
-          high = array == null ? 0 : array.length,
-          valIsNaN = value !== value,
+          high = array == null ? 0 : array.length;
+      if (high === 0) {
+        return 0;
+      }
+
+      value = iteratee(value);
+      var valIsNaN = value !== value,
           valIsNull = value === null,
           valIsSymbol = isSymbol(value),
           valIsUndefined = value === undefined;
@@ -27586,10 +27665,11 @@ return jQuery;
       if (arrLength != othLength && !(isPartial && othLength > arrLength)) {
         return false;
       }
-      // Assume cyclic values are equal.
-      var stacked = stack.get(array);
-      if (stacked && stack.get(other)) {
-        return stacked == other;
+      // Check that cyclic values are equal.
+      var arrStacked = stack.get(array);
+      var othStacked = stack.get(other);
+      if (arrStacked && othStacked) {
+        return arrStacked == other && othStacked == array;
       }
       var index = -1,
           result = true,
@@ -27751,10 +27831,11 @@ return jQuery;
           return false;
         }
       }
-      // Assume cyclic values are equal.
-      var stacked = stack.get(object);
-      if (stacked && stack.get(other)) {
-        return stacked == other;
+      // Check that cyclic values are equal.
+      var objStacked = stack.get(object);
+      var othStacked = stack.get(other);
+      if (objStacked && othStacked) {
+        return objStacked == other && othStacked == object;
       }
       var result = true;
       stack.set(object, other);
@@ -31135,6 +31216,10 @@ return jQuery;
      * // The `_.property` iteratee shorthand.
      * _.filter(users, 'active');
      * // => objects for ['barney']
+     *
+     * // Combining several predicates using `_.overEvery` or `_.overSome`.
+     * _.filter(users, _.overSome([{ 'age': 36 }, ['age', 40]]));
+     * // => objects for ['fred', 'barney']
      */
     function filter(collection, predicate) {
       var func = isArray(collection) ? arrayFilter : baseFilter;
@@ -31884,15 +31969,15 @@ return jQuery;
      * var users = [
      *   { 'user': 'fred',   'age': 48 },
      *   { 'user': 'barney', 'age': 36 },
-     *   { 'user': 'fred',   'age': 40 },
+     *   { 'user': 'fred',   'age': 30 },
      *   { 'user': 'barney', 'age': 34 }
      * ];
      *
      * _.sortBy(users, [function(o) { return o.user; }]);
-     * // => objects for [['barney', 36], ['barney', 34], ['fred', 48], ['fred', 40]]
+     * // => objects for [['barney', 36], ['barney', 34], ['fred', 48], ['fred', 30]]
      *
      * _.sortBy(users, ['user', 'age']);
-     * // => objects for [['barney', 34], ['barney', 36], ['fred', 40], ['fred', 48]]
+     * // => objects for [['barney', 34], ['barney', 36], ['fred', 30], ['fred', 48]]
      */
     var sortBy = baseRest(function(collection, iteratees) {
       if (collection == null) {
@@ -36767,11 +36852,11 @@ return jQuery;
 
       // Use a sourceURL for easier debugging.
       // The sourceURL gets injected into the source that's eval-ed, so be careful
-      // with lookup (in case of e.g. prototype pollution), and strip newlines if any.
-      // A newline wouldn't be a valid sourceURL anyway, and it'd enable code injection.
+      // to normalize all kinds of whitespace, so e.g. newlines (and unicode versions of it) can't sneak in
+      // and escape the comment, thus injecting code that gets evaled.
       var sourceURL = '//# sourceURL=' +
         (hasOwnProperty.call(options, 'sourceURL')
-          ? (options.sourceURL + '').replace(/[\r\n]/g, ' ')
+          ? (options.sourceURL + '').replace(/\s/g, ' ')
           : ('lodash.templateSources[' + (++templateCounter) + ']')
         ) + '\n';
 
@@ -36804,8 +36889,6 @@ return jQuery;
 
       // If `variable` is not specified wrap a with-statement around the generated
       // code to add the data object to the top of the scope chain.
-      // Like with sourceURL, we take care to not check the option's prototype,
-      // as this configuration is a code injection vector.
       var variable = hasOwnProperty.call(options, 'variable') && options.variable;
       if (!variable) {
         source = 'with (obj) {\n' + source + '\n}\n';
@@ -37512,6 +37595,9 @@ return jQuery;
      * values against any array or object value, respectively. See `_.isEqual`
      * for a list of supported value comparisons.
      *
+     * **Note:** Multiple values can be checked by combining several matchers
+     * using `_.overSome`
+     *
      * @static
      * @memberOf _
      * @since 3.0.0
@@ -37527,6 +37613,10 @@ return jQuery;
      *
      * _.filter(objects, _.matches({ 'a': 4, 'c': 6 }));
      * // => [{ 'a': 4, 'b': 5, 'c': 6 }]
+     *
+     * // Checking for several possible values
+     * _.filter(objects, _.overSome([_.matches({ 'a': 1 }), _.matches({ 'a': 4 })]));
+     * // => [{ 'a': 1, 'b': 2, 'c': 3 }, { 'a': 4, 'b': 5, 'c': 6 }]
      */
     function matches(source) {
       return baseMatches(baseClone(source, CLONE_DEEP_FLAG));
@@ -37540,6 +37630,9 @@ return jQuery;
      * **Note:** Partial comparisons will match empty array and empty object
      * `srcValue` values against any array or object value, respectively. See
      * `_.isEqual` for a list of supported value comparisons.
+     *
+     * **Note:** Multiple values can be checked by combining several matchers
+     * using `_.overSome`
      *
      * @static
      * @memberOf _
@@ -37557,6 +37650,10 @@ return jQuery;
      *
      * _.find(objects, _.matchesProperty('a', 4));
      * // => { 'a': 4, 'b': 5, 'c': 6 }
+     *
+     * // Checking for several possible values
+     * _.filter(objects, _.overSome([_.matchesProperty('a', 1), _.matchesProperty('a', 4)]));
+     * // => [{ 'a': 1, 'b': 2, 'c': 3 }, { 'a': 4, 'b': 5, 'c': 6 }]
      */
     function matchesProperty(path, srcValue) {
       return baseMatchesProperty(path, baseClone(srcValue, CLONE_DEEP_FLAG));
@@ -37780,6 +37877,10 @@ return jQuery;
      * Creates a function that checks if **all** of the `predicates` return
      * truthy when invoked with the arguments it receives.
      *
+     * Following shorthands are possible for providing predicates.
+     * Pass an `Object` and it will be used as an parameter for `_.matches` to create the predicate.
+     * Pass an `Array` of parameters for `_.matchesProperty` and the predicate will be created using them.
+     *
      * @static
      * @memberOf _
      * @since 4.0.0
@@ -37806,6 +37907,10 @@ return jQuery;
      * Creates a function that checks if **any** of the `predicates` return
      * truthy when invoked with the arguments it receives.
      *
+     * Following shorthands are possible for providing predicates.
+     * Pass an `Object` and it will be used as an parameter for `_.matches` to create the predicate.
+     * Pass an `Array` of parameters for `_.matchesProperty` and the predicate will be created using them.
+     *
      * @static
      * @memberOf _
      * @since 4.0.0
@@ -37825,6 +37930,9 @@ return jQuery;
      *
      * func(NaN);
      * // => false
+     *
+     * var matchesFunc = _.overSome([{ 'a': 1 }, { 'a': 2 }])
+     * var matchesPropertyFunc = _.overSome([['a', 1], ['a', 2]])
      */
     var overSome = createOver(arraySome);
 
@@ -39089,7 +39197,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -39163,7 +39271,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -39538,7 +39646,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -39852,7 +39960,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -39892,7 +40000,7 @@ var Property = {
 var GeolocationError = /** @class */ (function (_super) {
     __extends(GeolocationError, _super);
     /**
-     * @param {PositionError} error error object.
+     * @param {GeolocationPositionError} error error object.
      */
     function GeolocationError(error) {
         var _this = _super.call(this, _events_EventType_js__WEBPACK_IMPORTED_MODULE_2__["default"].ERROR) || this;
@@ -40011,7 +40119,7 @@ var Geolocation = /** @class */ (function (_super) {
     };
     /**
      * @private
-     * @param {Position} position position event.
+     * @param {GeolocationPosition} position position event.
      */
     Geolocation.prototype.positionChange_ = function (position) {
         var coords = position.coords;
@@ -40036,7 +40144,7 @@ var Geolocation = /** @class */ (function (_super) {
     };
     /**
      * @private
-     * @param {PositionError} error error object.
+     * @param {GeolocationPositionError} error error object.
      */
     Geolocation.prototype.positionError_ = function (error) {
         this.dispatchEvent(new GeolocationError(error));
@@ -40200,7 +40308,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -40404,7 +40512,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -40520,7 +40628,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -40662,7 +40770,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -40702,6 +40810,7 @@ var ImageTile = /** @class */ (function (_super) {
          * @type {string}
          */
         _this.src_ = src;
+        _this.key = src;
         /**
          * @private
          * @type {HTMLImageElement|HTMLCanvasElement}
@@ -40729,12 +40838,6 @@ var ImageTile = /** @class */ (function (_super) {
      */
     ImageTile.prototype.getImage = function () {
         return this.image_;
-    };
-    /**
-     * @return {string} Key.
-     */
-    ImageTile.prototype.getKey = function () {
-        return this.src_;
     };
     /**
      * Tracks loading or read errors.
@@ -40953,7 +41056,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -41060,7 +41163,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -41202,7 +41305,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -41237,6 +41340,11 @@ var MapBrowserEventHandler = /** @class */ (function (_super) {
          * @private
          */
         _this.clickTimeoutId_;
+        /**
+         * Emulate dblclick and singleclick. Will be true when only one pointer is active.
+         * @type {boolean}
+         */
+        _this.emulateClicks_ = false;
         /**
          * @type {boolean}
          * @private
@@ -41312,7 +41420,9 @@ var MapBrowserEventHandler = /** @class */ (function (_super) {
         }
         else {
             // click
-            this.clickTimeoutId_ = setTimeout(function () {
+            this.clickTimeoutId_ = setTimeout(
+            /** @this {MapBrowserEventHandler} */
+            function () {
                 this.clickTimeoutId_ = undefined;
                 var newEvent = new _MapBrowserEvent_js__WEBPACK_IMPORTED_MODULE_2__["default"](_MapBrowserEventType_js__WEBPACK_IMPORTED_MODULE_3__["default"].SINGLECLICK, this.map_, pointerEvent);
                 this.dispatchEvent(newEvent);
@@ -41352,7 +41462,8 @@ var MapBrowserEventHandler = /** @class */ (function (_super) {
         // See http://www.w3.org/TR/pointerevents/#button-states
         // We only fire click, singleclick, and doubleclick if nobody has called
         // event.stopPropagation() or event.preventDefault().
-        if (!newEvent.propagationStopped &&
+        if (this.emulateClicks_ &&
+            !newEvent.propagationStopped &&
             !this.dragging_ &&
             this.isMouseActionButton_(pointerEvent)) {
             this.emulateClick_(this.down_);
@@ -41379,12 +41490,14 @@ var MapBrowserEventHandler = /** @class */ (function (_super) {
      * @private
      */
     MapBrowserEventHandler.prototype.handlePointerDown_ = function (pointerEvent) {
+        this.emulateClicks_ = this.activePointers_ === 0;
         this.updateActivePointers_(pointerEvent);
         var newEvent = new _MapBrowserEvent_js__WEBPACK_IMPORTED_MODULE_2__["default"](_MapBrowserEventType_js__WEBPACK_IMPORTED_MODULE_3__["default"].POINTERDOWN, this.map_, pointerEvent);
         this.dispatchEvent(newEvent);
         this.down_ = pointerEvent;
         if (this.dragListenerKeys_.length === 0) {
-            this.dragListenerKeys_.push(Object(_events_js__WEBPACK_IMPORTED_MODULE_6__["listen"])(document, _MapBrowserEventType_js__WEBPACK_IMPORTED_MODULE_3__["default"].POINTERMOVE, this.handlePointerMove_, this), Object(_events_js__WEBPACK_IMPORTED_MODULE_6__["listen"])(document, _MapBrowserEventType_js__WEBPACK_IMPORTED_MODULE_3__["default"].POINTERUP, this.handlePointerUp_, this), 
+            var doc = this.map_.getOwnerDocument();
+            this.dragListenerKeys_.push(Object(_events_js__WEBPACK_IMPORTED_MODULE_6__["listen"])(doc, _MapBrowserEventType_js__WEBPACK_IMPORTED_MODULE_3__["default"].POINTERMOVE, this.handlePointerMove_, this), Object(_events_js__WEBPACK_IMPORTED_MODULE_6__["listen"])(doc, _MapBrowserEventType_js__WEBPACK_IMPORTED_MODULE_3__["default"].POINTERUP, this.handlePointerUp_, this), 
             /* Note that the listener for `pointercancel is set up on
              * `pointerEventHandler_` and not `documentPointerEventHandler_` like
              * the `pointerup` and `pointermove` listeners.
@@ -41399,8 +41512,7 @@ var MapBrowserEventHandler = /** @class */ (function (_super) {
              * only registered there.
              */
             Object(_events_js__WEBPACK_IMPORTED_MODULE_6__["listen"])(this.element_, _MapBrowserEventType_js__WEBPACK_IMPORTED_MODULE_3__["default"].POINTERCANCEL, this.handlePointerUp_, this));
-            if (this.element_.getRootNode &&
-                this.element_.getRootNode() !== document) {
+            if (this.element_.getRootNode && this.element_.getRootNode() !== doc) {
                 this.dragListenerKeys_.push(Object(_events_js__WEBPACK_IMPORTED_MODULE_6__["listen"])(this.element_.getRootNode(), _MapBrowserEventType_js__WEBPACK_IMPORTED_MODULE_3__["default"].POINTERUP, this.handlePointerUp_, this));
             }
         }
@@ -41562,7 +41674,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -41694,7 +41806,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -41886,6 +41998,17 @@ var BaseObject = /** @class */ (function (_super) {
         }
     };
     /**
+     * Apply any properties from another object without triggering events.
+     * @param {BaseObject} source The source object.
+     * @protected
+     */
+    BaseObject.prototype.applyProperties = function (source) {
+        if (!source.values_) {
+            return;
+        }
+        Object(_obj_js__WEBPACK_IMPORTED_MODULE_3__["assign"])(this.values_ || (this.values_ = {}), source.values_);
+    };
+    /**
      * Unsets a property.
      * @param {string} key Key name.
      * @param {boolean=} opt_silent Unset without triggering an event.
@@ -41967,7 +42090,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -42130,7 +42253,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -42533,6 +42656,9 @@ var Overlay = /** @class */ (function (_super) {
                     .getView()
                     .getCenterInternal());
                 var centerPx = map.getPixelFromCoordinateInternal(center);
+                if (!centerPx) {
+                    return;
+                }
                 var newCenterPx = [centerPx[0] + delta[0], centerPx[1] + delta[1]];
                 var panOptions = panIntoViewOptions.animation || {};
                 map.getView().animateInternal({
@@ -42720,7 +42846,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -42767,8 +42893,8 @@ var __extends = (undefined && undefined.__extends) || (function () {
  * @property {import("./View.js").State} viewState The state of the current view.
  * @property {boolean} animate
  * @property {import("./transform.js").Transform} coordinateToPixelTransform
+ * @property {import("rbush").default} declutterTree
  * @property {null|import("./extent.js").Extent} extent
- * @property {Array<DeclutterItems>} declutterItems
  * @property {number} index
  * @property {Array<import("./layer/Layer.js").State>} layerStatesArray
  * @property {number} layerIndex
@@ -42781,11 +42907,6 @@ var __extends = (undefined && undefined.__extends) || (function () {
  * @property {!Object<string, Object<string, boolean>>} wantedTiles
  */
 /**
- * @typedef {Object} DeclutterItems
- * @property {Array<*>} items Declutter items of an executor.
- * @property {number} opacity Layer opacity.
- */
-/**
  * @typedef {function(PluggableMap, ?FrameState): any} PostRenderFunction
  */
 /**
@@ -42795,7 +42916,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
  * {@link module:ol/layer/Layer layer-candidate} and it should return a boolean value.
  * Only layers which are visible and for which this function returns `true`
  * will be tested for features. By default, all visible layers will be tested.
- * @property {number} [hitTolerance=0] Hit-detection tolerance in pixels. Pixels
+ * @property {number} [hitTolerance=0] Hit-detection tolerance in css pixels. Pixels
  * inside the radius around the given position will be checked for features.
  * @property {boolean} [checkWrapped=true] Check-Wrapped Will check for for wrapped geometries inside the range of
  *   +/- 1 world width. Works only if a projection is used that can be wrapped.
@@ -42842,7 +42963,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
  * @property {HTMLElement|string} [target] The container for the map, either the
  * element itself or the `id` of the element. If not specified at construction
  * time, {@link module:ol/Map~Map#setTarget} must be called for the map to be
- * rendered.
+ * rendered. If passed by element, the container can be in a secondary document.
  * @property {View} [view] The map's view.  No layer sources will be
  * fetched unless this is specified at construction time or through
  * {@link module:ol/Map~Map#setView}.
@@ -42892,7 +43013,7 @@ var PluggableMap = /** @class */ (function (_super) {
         /**
          * @private
          */
-        _this.animationDelay_ = function () {
+        _this.animationDelay_ = /** @this {PluggableMap} */ function () {
             this.animationDelayKey_ = undefined;
             this.renderFrame_(Date.now());
         }.bind(_this);
@@ -43178,8 +43299,7 @@ var PluggableMap = /** @class */ (function (_super) {
      * callback with each intersecting feature. Layers included in the detection can
      * be configured through the `layerFilter` option in `opt_options`.
      * @param {import("./pixel.js").Pixel} pixel Pixel.
-     * @param {function(this: S, import("./Feature.js").FeatureLike,
-     *     import("./layer/Layer.js").default): T} callback Feature callback. The callback will be
+     * @param {function(import("./Feature.js").FeatureLike, import("./layer/Layer.js").default, import("./geom/SimpleGeometry.js").default): T} callback Feature callback. The callback will be
      *     called with two arguments. The first argument is one
      *     {@link module:ol/Feature feature} or
      *     {@link module:ol/render/Feature render feature} at the pixel, the second is
@@ -43198,9 +43318,7 @@ var PluggableMap = /** @class */ (function (_super) {
         }
         var coordinate = this.getCoordinateFromPixelInternal(pixel);
         opt_options = opt_options !== undefined ? opt_options : {};
-        var hitTolerance = opt_options.hitTolerance !== undefined
-            ? opt_options.hitTolerance * this.frameState_.pixelRatio
-            : 0;
+        var hitTolerance = opt_options.hitTolerance !== undefined ? opt_options.hitTolerance : 0;
         var layerFilter = opt_options.layerFilter !== undefined ? opt_options.layerFilter : _functions_js__WEBPACK_IMPORTED_MODULE_18__["TRUE"];
         var checkWrapped = opt_options.checkWrapped !== false;
         return this.renderer_.forEachFeatureAtCoordinate(coordinate, this.frameState_, hitTolerance, checkWrapped, callback, null, layerFilter, null);
@@ -43246,9 +43364,7 @@ var PluggableMap = /** @class */ (function (_super) {
             return;
         }
         var options = opt_options || {};
-        var hitTolerance = options.hitTolerance !== undefined
-            ? options.hitTolerance * this.frameState_.pixelRatio
-            : 0;
+        var hitTolerance = options.hitTolerance !== undefined ? options.hitTolerance : 0;
         var layerFilter = options.layerFilter || _functions_js__WEBPACK_IMPORTED_MODULE_18__["TRUE"];
         return this.renderer_.forEachLayerAtPixel(pixel, this.frameState_, hitTolerance, callback, layerFilter);
     };
@@ -43267,9 +43383,7 @@ var PluggableMap = /** @class */ (function (_super) {
         var coordinate = this.getCoordinateFromPixelInternal(pixel);
         opt_options = opt_options !== undefined ? opt_options : {};
         var layerFilter = opt_options.layerFilter !== undefined ? opt_options.layerFilter : _functions_js__WEBPACK_IMPORTED_MODULE_18__["TRUE"];
-        var hitTolerance = opt_options.hitTolerance !== undefined
-            ? opt_options.hitTolerance * this.frameState_.pixelRatio
-            : 0;
+        var hitTolerance = opt_options.hitTolerance !== undefined ? opt_options.hitTolerance : 0;
         var checkWrapped = opt_options.checkWrapped !== false;
         return this.renderer_.hasFeatureAtCoordinate(coordinate, this.frameState_, hitTolerance, checkWrapped, layerFilter, null);
     };
@@ -43517,6 +43631,14 @@ var PluggableMap = /** @class */ (function (_super) {
         return this.overlayContainerStopEvent_;
     };
     /**
+     * @return {!Document} The document where the map is displayed.
+     */
+    PluggableMap.prototype.getOwnerDocument = function () {
+        return this.getTargetElement()
+            ? this.getTargetElement().ownerDocument
+            : document;
+    };
+    /**
      * @param {import("./Tile.js").default} tile Tile.
      * @param {string} tileSourceKey Tile source key.
      * @param {import("./coordinate.js").Coordinate} tileCenter Tile center.
@@ -43549,12 +43671,13 @@ var PluggableMap = /** @class */ (function (_super) {
         if (eventType === _pointer_EventType_js__WEBPACK_IMPORTED_MODULE_12__["default"].POINTERDOWN ||
             eventType === _events_EventType_js__WEBPACK_IMPORTED_MODULE_3__["default"].WHEEL ||
             eventType === _events_EventType_js__WEBPACK_IMPORTED_MODULE_3__["default"].KEYDOWN) {
+            var doc = this.getOwnerDocument();
             var rootNode = this.viewport_.getRootNode
                 ? this.viewport_.getRootNode()
-                : document;
-            var target = rootNode === document
-                ? /** @type {Node} */ (originalEvent.target)
-                : /** @type {ShadowRoot} */ (rootNode).elementFromPoint(originalEvent.clientX, originalEvent.clientY);
+                : doc;
+            var target = 'host' in rootNode // ShadowRoot
+                ? /** @type {ShadowRoot} */ (rootNode).elementFromPoint(originalEvent.clientX, originalEvent.clientY)
+                : /** @type {Node} */ (originalEvent.target);
             if (
             // Abort if the target is a child of the container for elements whose events are not meant
             // to be handled by map interactions.
@@ -43563,20 +43686,22 @@ var PluggableMap = /** @class */ (function (_super) {
                 // It's possible for the target to no longer be in the page if it has been removed in an
                 // event listener, this might happen in a Control that recreates it's content based on
                 // user interaction either manually or via a render in something like https://reactjs.org/
-                !(rootNode === document ? document.documentElement : rootNode).contains(target)) {
+                !(rootNode === doc ? doc.documentElement : rootNode).contains(target)) {
                 return;
             }
         }
         mapBrowserEvent.frameState = this.frameState_;
-        var interactionsArray = this.getInteractions().getArray();
         if (this.dispatchEvent(mapBrowserEvent) !== false) {
+            var interactionsArray = this.getInteractions().getArray().slice();
             for (var i = interactionsArray.length - 1; i >= 0; i--) {
                 var interaction = interactionsArray[i];
-                if (!interaction.getActive()) {
+                if (interaction.getMap() !== this ||
+                    !interaction.getActive() ||
+                    !this.getTargetElement()) {
                     continue;
                 }
                 var cont = interaction.handleEvent(mapBrowserEvent);
-                if (!cont) {
+                if (!cont || mapBrowserEvent.propagationStopped) {
                     break;
                 }
             }
@@ -43665,6 +43790,7 @@ var PluggableMap = /** @class */ (function (_super) {
         if (!targetElement) {
             if (this.renderer_) {
                 clearTimeout(this.postRenderTimeoutHandle_);
+                this.postRenderTimeoutHandle_ = undefined;
                 this.postRenderFunctions_.length = 0;
                 this.renderer_.dispose();
                 this.renderer_ = null;
@@ -43834,6 +43960,7 @@ var PluggableMap = /** @class */ (function (_super) {
      * @private
      */
     PluggableMap.prototype.renderFrame_ = function (time) {
+        var _this = this;
         var size = this.getSize();
         var view = this.getView();
         var previousFrameState = this.frameState_;
@@ -43845,9 +43972,7 @@ var PluggableMap = /** @class */ (function (_super) {
             frameState = {
                 animate: false,
                 coordinateToPixelTransform: this.coordinateToPixelTransform_,
-                declutterItems: previousFrameState
-                    ? previousFrameState.declutterItems
-                    : [],
+                declutterTree: null,
                 extent: Object(_extent_js__WEBPACK_IMPORTED_MODULE_21__["getForViewAndSize"])(viewState.center, viewState.resolution, viewState.rotation, size),
                 index: this.frameIndex_++,
                 layerIndex: 0,
@@ -43890,7 +44015,12 @@ var PluggableMap = /** @class */ (function (_super) {
             }
         }
         this.dispatchEvent(new _MapEvent_js__WEBPACK_IMPORTED_MODULE_8__["default"](_MapEventType_js__WEBPACK_IMPORTED_MODULE_9__["default"].POSTRENDER, this, frameState));
-        this.postRenderTimeoutHandle_ = setTimeout(this.handlePostRender.bind(this), 0);
+        if (!this.postRenderTimeoutHandle_) {
+            this.postRenderTimeoutHandle_ = setTimeout(function () {
+                _this.postRenderTimeoutHandle_ = undefined;
+                _this.handlePostRender();
+            }, 0);
+        }
     };
     /**
      * Sets the layergroup of this map.
@@ -44068,7 +44198,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -44386,7 +44516,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -44460,7 +44590,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -44808,7 +44938,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -44859,6 +44989,11 @@ var VectorRenderTile = /** @class */ (function (_super) {
          * @type {Object<string, Array<import("./render/canvas/ExecutorGroup.js").default>>}
          */
         _this.executorGroups = {};
+        /**
+         * Executor groups for decluttering, by layer uid. Entries are read/written by the renderer.
+         * @type {Object<string, Array<import("./render/canvas/ExecutorGroup.js").default>>}
+         */
+        _this.declutterExecutorGroups = {};
         /**
          * Number of loading source tiles. Read/written by the source.
          * @type {number}
@@ -44964,6 +45099,7 @@ var VectorRenderTile = /** @class */ (function (_super) {
     VectorRenderTile.prototype.release = function () {
         for (var key in this.context_) {
             canvasPool.push(this.context_[key].canvas);
+            delete this.context_[key];
         }
         _super.prototype.release.call(this);
     };
@@ -44989,7 +45125,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -45055,6 +45191,7 @@ var VectorTile = /** @class */ (function (_super) {
          * @type {string}
          */
         _this.url_ = src;
+        _this.key = src;
         return _this;
     }
     /**
@@ -45072,12 +45209,6 @@ var VectorTile = /** @class */ (function (_super) {
      */
     VectorTile.prototype.getFeatures = function () {
         return this.features_;
-    };
-    /**
-     * @return {string} Key.
-     */
-    VectorTile.prototype.getKey = function () {
-        return this.url_;
     };
     /**
      * Load not yet loaded URI.
@@ -45166,7 +45297,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -45322,6 +45453,10 @@ var __extends = (undefined && undefined.__extends) || (function () {
  * level used to calculate the initial resolution for the view.
  * @property {number} [zoomFactor=2] The zoom factor used to compute the
  * corresponding resolution.
+ * @property {!Array<number>} [padding=[0, 0, 0, 0]] Padding (in css pixels).
+ * If the map viewport is partially covered with other content (overlays) along
+ * its edges, this setting allows to shift the center of the viewport away from
+ * that content. The order of the values is top, right, bottom, left.
  */
 /**
  * @typedef {Object} AnimationOptions
@@ -45520,6 +45655,16 @@ var View = /** @class */ (function (_super) {
          * @type {Array<number>|undefined}
          */
         this.resolutions_ = options.resolutions;
+        /**
+         * Padding (in css pixels).
+         * If the map viewport is partially covered with other content (overlays) along
+         * its edges, this setting allows to shift the center of the viewport away from that
+         * content. The order of the values in the array is top, right, bottom, left.
+         * The default is no padding, which is equivalent to `[0, 0, 0, 0]`.
+         * @type {Array<number>|undefined}
+         * @api
+         */
+        this.padding = options.padding;
         /**
          * @private
          * @type {number}
@@ -45966,8 +46111,8 @@ var View = /** @class */ (function (_super) {
         return Object(_proj_js__WEBPACK_IMPORTED_MODULE_6__["toUserExtent"])(extent, this.getProjection());
     };
     /**
-     * @param {import("./size.js").Size=} opt_size Box pixel size. If not provided, the size of the
-     * first map that uses this view will be used.
+     * @param {import("./size.js").Size=} opt_size Box pixel size. If not provided,
+     * the map's last known viewport size will be used.
      * @return {import("./extent.js").Extent} Extent.
      */
     View.prototype.calculateExtentInternal = function (opt_size) {
@@ -46138,13 +46283,35 @@ var View = /** @class */ (function (_super) {
         });
     };
     /**
+     * Returns the size of the viewport minus padding.
+     * @private
+     * @param {number=} opt_rotation Take into account the rotation of the viewport when giving the size
+     * @return {import("./size.js").Size} Viewport size reduced by the padding.
+     */
+    View.prototype.getViewportSizeMinusPadding_ = function (opt_rotation) {
+        var size = this.getViewportSize_(opt_rotation);
+        var padding = this.padding;
+        if (padding) {
+            size = [
+                size[0] - padding[1] - padding[3],
+                size[1] - padding[0] - padding[2],
+            ];
+        }
+        return size;
+    };
+    /**
      * @return {State} View state.
      */
     View.prototype.getState = function () {
-        var center = /** @type {import("./coordinate.js").Coordinate} */ (this.getCenterInternal());
         var projection = this.getProjection();
         var resolution = /** @type {number} */ (this.getResolution());
         var rotation = this.getRotation();
+        var center = /** @type {import("./coordinate.js").Coordinate} */ (this.getCenterInternal());
+        var padding = this.padding;
+        if (padding) {
+            var reducedSize = this.getViewportSizeMinusPadding_();
+            center = calculateCenterOn(center, this.getViewportSize_(), [reducedSize[0] / 2 + padding[3], reducedSize[1] / 2 + padding[0]], resolution, rotation);
+        }
         return {
             center: center.slice(0),
             projection: projection !== undefined ? projection : null,
@@ -46225,7 +46392,6 @@ var View = /** @class */ (function (_super) {
      * @api
      */
     View.prototype.fit = function (geometryOrExtent, opt_options) {
-        var options = Object(_obj_js__WEBPACK_IMPORTED_MODULE_10__["assign"])({ size: this.getViewportSize_() }, opt_options || {});
         /** @type {import("./geom/SimpleGeometry.js").default} */
         var geometry;
         Object(_asserts_js__WEBPACK_IMPORTED_MODULE_9__["assert"])(Array.isArray(geometryOrExtent) ||
@@ -46252,7 +46418,7 @@ var View = /** @class */ (function (_super) {
                 geometry = geometryOrExtent;
             }
         }
-        this.fitInternal(geometry, options);
+        this.fitInternal(geometry, opt_options);
     };
     /**
      * @param {import("./geom/SimpleGeometry.js").default} geometry The geometry.
@@ -46262,7 +46428,7 @@ var View = /** @class */ (function (_super) {
         var options = opt_options || {};
         var size = options.size;
         if (!size) {
-            size = this.getViewportSize_();
+            size = this.getViewportSizeMinusPadding_();
         }
         var padding = options.padding !== undefined ? options.padding : [0, 0, 0, 0];
         var nearest = options.nearest !== undefined ? options.nearest : false;
@@ -46308,12 +46474,12 @@ var View = /** @class */ (function (_super) {
         centerRotY += ((padding[0] - padding[2]) / 2) * resolution;
         var centerX = centerRotX * cosAngle - centerRotY * sinAngle;
         var centerY = centerRotY * cosAngle + centerRotX * sinAngle;
-        var center = [centerX, centerY];
+        var center = this.getConstrainedCenter([centerX, centerY], resolution);
         var callback = options.callback ? options.callback : _functions_js__WEBPACK_IMPORTED_MODULE_7__["VOID"];
         if (options.duration !== undefined) {
             this.animateInternal({
                 resolution: resolution,
-                center: this.getConstrainedCenter(center, resolution),
+                center: center,
                 duration: options.duration,
                 easing: options.easing,
             }, callback);
@@ -46341,20 +46507,28 @@ var View = /** @class */ (function (_super) {
      * @param {import("./pixel.js").Pixel} position Position on the view to center on.
      */
     View.prototype.centerOnInternal = function (coordinate, size, position) {
-        // calculate rotated position
-        var rotation = this.getRotation();
-        var cosAngle = Math.cos(-rotation);
-        var sinAngle = Math.sin(-rotation);
-        var rotX = coordinate[0] * cosAngle - coordinate[1] * sinAngle;
-        var rotY = coordinate[1] * cosAngle + coordinate[0] * sinAngle;
-        var resolution = this.getResolution();
-        rotX += (size[0] / 2 - position[0]) * resolution;
-        rotY += (position[1] - size[1] / 2) * resolution;
-        // go back to original angle
-        sinAngle = -sinAngle; // go back to original rotation
-        var centerX = rotX * cosAngle - rotY * sinAngle;
-        var centerY = rotY * cosAngle + rotX * sinAngle;
-        this.setCenterInternal([centerX, centerY]);
+        this.setCenterInternal(calculateCenterOn(coordinate, size, position, this.getResolution(), this.getRotation()));
+    };
+    /**
+     * Calculates the shift between map and viewport center.
+     * @param {import("./coordinate.js").Coordinate} center Center.
+     * @param {number} resolution Resolution.
+     * @param {number} rotation Rotation.
+     * @param {import("./size.js").Size} size Size.
+     * @return {Array<number>|undefined} Center shift.
+     */
+    View.prototype.calculateCenterShift = function (center, resolution, rotation, size) {
+        var centerShift;
+        var padding = this.padding;
+        if (padding && center) {
+            var reducedSize = this.getViewportSizeMinusPadding_(-rotation);
+            var shiftedCenter = calculateCenterOn(center, size, [reducedSize[0] / 2 + padding[3], reducedSize[1] / 2 + padding[0]], resolution, rotation);
+            centerShift = [
+                center[0] - shiftedCenter[0],
+                center[1] - shiftedCenter[1],
+            ];
+        }
+        return centerShift;
     };
     /**
      * @return {boolean} Is defined.
@@ -46517,7 +46691,7 @@ var View = /** @class */ (function (_super) {
         var newRotation = this.constraints_.rotation(this.targetRotation_, isMoving);
         var size = this.getViewportSize_(newRotation);
         var newResolution = this.constraints_.resolution(this.targetResolution_, 0, size, isMoving);
-        var newCenter = this.constraints_.center(this.targetCenter_, newResolution, size, isMoving);
+        var newCenter = this.constraints_.center(this.targetCenter_, newResolution, size, isMoving, this.calculateCenterShift(this.targetCenter_, newResolution, newRotation, size));
         if (this.get(_ViewProperty_js__WEBPACK_IMPORTED_MODULE_4__["default"].ROTATION) !== newRotation) {
             this.set(_ViewProperty_js__WEBPACK_IMPORTED_MODULE_4__["default"].ROTATION, newRotation);
         }
@@ -46548,7 +46722,7 @@ var View = /** @class */ (function (_super) {
         var newRotation = this.constraints_.rotation(this.targetRotation_);
         var size = this.getViewportSize_(newRotation);
         var newResolution = this.constraints_.resolution(this.targetResolution_, direction, size);
-        var newCenter = this.constraints_.center(this.targetCenter_, newResolution, size);
+        var newCenter = this.constraints_.center(this.targetCenter_, newResolution, size, false, this.calculateCenterShift(this.targetCenter_, newResolution, newRotation, size));
         if (duration === 0 && !this.cancelAnchor_) {
             this.targetResolution_ = newResolution;
             this.targetRotation_ = newRotation;
@@ -46815,6 +46989,28 @@ function isNoopAnimation(animation) {
         return false;
     }
     return true;
+}
+/**
+ * @param {import("./coordinate.js").Coordinate} coordinate Coordinate.
+ * @param {import("./size.js").Size} size Box pixel size.
+ * @param {import("./pixel.js").Pixel} position Position on the view to center on.
+ * @param {number} resolution Resolution.
+ * @param {number} rotation Rotation.
+ * @return {import("./coordinate.js").Coordinate} Shifted center.
+ */
+function calculateCenterOn(coordinate, size, position, resolution, rotation) {
+    // calculate rotated position
+    var cosAngle = Math.cos(-rotation);
+    var sinAngle = Math.sin(-rotation);
+    var rotX = coordinate[0] * cosAngle - coordinate[1] * sinAngle;
+    var rotY = coordinate[1] * cosAngle + coordinate[0] * sinAngle;
+    rotX += (size[0] / 2 - position[0]) * resolution;
+    rotY += (position[1] - size[1] / 2) * resolution;
+    // go back to original angle
+    sinAngle = -sinAngle; // go back to original rotation
+    var centerX = rotX * cosAngle - rotY * sinAngle;
+    var centerY = rotY * cosAngle + rotX * sinAngle;
+    return [centerX, centerY];
 }
 /* harmony default export */ __webpack_exports__["default"] = (View);
 //# sourceMappingURL=View.js.map
@@ -47167,7 +47363,7 @@ __webpack_require__.r(__webpack_exports__);
  */
 
 /**
- * @typedef {function((import("./coordinate.js").Coordinate|undefined), number, import("./size.js").Size, boolean=): (import("./coordinate.js").Coordinate|undefined)} Type
+ * @typedef {function((import("./coordinate.js").Coordinate|undefined), number, import("./size.js").Size, boolean=, Array<number>=): (import("./coordinate.js").Coordinate|undefined)} Type
  */
 /**
  * @param {import("./extent.js").Extent} extent Extent.
@@ -47183,16 +47379,19 @@ function createExtent(extent, onlyCenter, smooth) {
      * @param {number} resolution Resolution.
      * @param {import("./size.js").Size} size Viewport size; unused if `onlyCenter` was specified.
      * @param {boolean=} opt_isMoving True if an interaction or animation is in progress.
+     * @param {Array<number>=} opt_centerShift Shift between map center and viewport center.
      * @return {import("./coordinate.js").Coordinate|undefined} Center.
      */
-    function (center, resolution, size, opt_isMoving) {
+    function (center, resolution, size, opt_isMoving, opt_centerShift) {
         if (center) {
             var viewWidth = onlyCenter ? 0 : size[0] * resolution;
             var viewHeight = onlyCenter ? 0 : size[1] * resolution;
-            var minX = extent[0] + viewWidth / 2;
-            var maxX = extent[2] - viewWidth / 2;
-            var minY = extent[1] + viewHeight / 2;
-            var maxY = extent[3] - viewHeight / 2;
+            var shiftX = opt_centerShift ? opt_centerShift[0] : 0;
+            var shiftY = opt_centerShift ? opt_centerShift[1] : 0;
+            var minX = extent[0] + viewWidth / 2 + shiftX;
+            var maxX = extent[2] - viewWidth / 2 + shiftX;
+            var minY = extent[1] + viewHeight / 2 + shiftY;
+            var maxY = extent[3] - viewHeight / 2 + shiftY;
             // note: when zooming out of bounds, min and max values for x and y may
             // end up inverted (min > max); this has to be accounted for
             if (minX > maxX) {
@@ -47645,7 +47844,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -47678,9 +47877,13 @@ var __extends = (undefined && undefined.__extends) || (function () {
  * @property {string} [label='i'] Text label to use for the
  * collapsed attributions button.
  * Instead of text, also an element (e.g. a `span` element) can be used.
+ * @property {string} [expandClassName=className + '-expand'] CSS class name for the
+ * collapsed attributions button.
  * @property {string|HTMLElement} [collapseLabel='»'] Text label to use
  * for the expanded attributions button.
  * Instead of text, also an element (e.g. a `span` element) can be used.
+ * @property {string} [collapseClassName=className + '-collapse'] CSS class name for the
+ * expanded attributions button.
  * @property {function(import("../MapEvent.js").default):void} [render] Function called when
  * the control should be re-rendered. This is called in a `requestAnimationFrame`
  * callback.
@@ -47722,6 +47925,11 @@ var Attribution = /** @class */ (function (_super) {
          * @private
          * @type {boolean}
          */
+        _this.userCollapsed_ = _this.collapsed_;
+        /**
+         * @private
+         * @type {boolean}
+         */
         _this.overrideCollapsible_ = options.collapsible !== undefined;
         /**
          * @private
@@ -47734,7 +47942,13 @@ var Attribution = /** @class */ (function (_super) {
         }
         var className = options.className !== undefined ? options.className : 'ol-attribution';
         var tipLabel = options.tipLabel !== undefined ? options.tipLabel : 'Attributions';
+        var expandClassName = options.expandClassName !== undefined
+            ? options.expandClassName
+            : className + '-expand';
         var collapseLabel = options.collapseLabel !== undefined ? options.collapseLabel : '\u00BB';
+        var collapseClassName = options.collapseClassName !== undefined
+            ? options.collapseClassName
+            : className + '-collpase';
         if (typeof collapseLabel === 'string') {
             /**
              * @private
@@ -47742,6 +47956,7 @@ var Attribution = /** @class */ (function (_super) {
              */
             _this.collapseLabel_ = document.createElement('span');
             _this.collapseLabel_.textContent = collapseLabel;
+            _this.collapseLabel_.className = collapseClassName;
         }
         else {
             _this.collapseLabel_ = collapseLabel;
@@ -47754,6 +47969,7 @@ var Attribution = /** @class */ (function (_super) {
              */
             _this.label_ = document.createElement('span');
             _this.label_.textContent = label;
+            _this.label_.className = expandClassName;
         }
         else {
             _this.label_ = label;
@@ -47805,6 +48021,7 @@ var Attribution = /** @class */ (function (_super) {
          * @type {Array<string>}
          */
         var visibleAttributions = [];
+        var collapsible = true;
         var layerStatesArray = frameState.layerStatesArray;
         for (var i = 0, ii = layerStatesArray.length; i < ii; ++i) {
             var layerState = layerStatesArray[i];
@@ -47823,10 +48040,8 @@ var Attribution = /** @class */ (function (_super) {
             if (!attributions) {
                 continue;
             }
-            if (!this.overrideCollapsible_ &&
-                source.getAttributionsCollapsible() === false) {
-                this.setCollapsible(false);
-            }
+            collapsible =
+                collapsible && source.getAttributionsCollapsible() !== false;
             if (Array.isArray(attributions)) {
                 for (var j = 0, jj = attributions.length; j < jj; ++j) {
                     if (!(attributions[j] in lookup)) {
@@ -47841,6 +48056,9 @@ var Attribution = /** @class */ (function (_super) {
                     lookup[attributions] = true;
                 }
             }
+        }
+        if (!this.overrideCollapsible_) {
+            this.setCollapsible(collapsible);
         }
         return visibleAttributions;
     };
@@ -47881,6 +48099,7 @@ var Attribution = /** @class */ (function (_super) {
     Attribution.prototype.handleClick_ = function (event) {
         event.preventDefault();
         this.handleToggle_();
+        this.userCollapsed_ = this.collapsed_;
     };
     /**
      * @private
@@ -47914,7 +48133,7 @@ var Attribution = /** @class */ (function (_super) {
         }
         this.collapsible_ = collapsible;
         this.element.classList.toggle('ol-uncollapsible');
-        if (!collapsible && this.collapsed_) {
+        if (this.userCollapsed_) {
             this.handleToggle_();
         }
     };
@@ -47926,6 +48145,7 @@ var Attribution = /** @class */ (function (_super) {
      * @api
      */
     Attribution.prototype.setCollapsed = function (collapsed) {
+        this.userCollapsed_ = collapsed;
         if (!this.collapsible_ || this.collapsed_ === collapsed) {
             return;
         }
@@ -47973,7 +48193,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -48150,7 +48370,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -48196,6 +48416,10 @@ var FullScreenEventType = {
  * Instead of text, also an element (e.g. a `span` element) can be used.
  * @property {string|Text} [labelActive='\u00d7'] Text label to use for the
  * button when full-screen is active.
+ * @property {string} [activeClassName=className + '-true'] CSS class name for the button
+ * when full-screen is active.
+ * @property {string} [inactiveClassName=className + '-false'] CSS class name for the button
+ * when full-screen is inactive.
  * Instead of text, also an element (e.g. a `span` element) can be used.
  * @property {string} [tipLabel='Toggle full-screen'] Text label to use for the button tip.
  * @property {boolean} [keys=false] Full keyboard access.
@@ -48238,6 +48462,22 @@ var FullScreen = /** @class */ (function (_super) {
          */
         _this.cssClassName_ =
             options.className !== undefined ? options.className : 'ol-full-screen';
+        /**
+         * @private
+         * @type {Array<string>}
+         */
+        _this.activeClassName_ =
+            options.activeClassName !== undefined
+                ? options.activeClassName.split(' ')
+                : [_this.cssClassName_ + '-true'];
+        /**
+         * @private
+         * @type {Array<string>}
+         */
+        _this.inactiveClassName_ =
+            options.inactiveClassName !== undefined
+                ? options.inactiveClassName.split(' ')
+                : [_this.cssClassName_ + '-false'];
         var label = options.label !== undefined ? options.label : '\u2922';
         /**
          * @private
@@ -48353,12 +48593,13 @@ var FullScreen = /** @class */ (function (_super) {
      * @private
      */
     FullScreen.prototype.setClassName_ = function (element, fullscreen) {
-        var activeClassName = this.cssClassName_ + '-true';
-        var inactiveClassName = this.cssClassName_ + '-false';
+        var _a, _b, _c;
+        var activeClassName = this.activeClassName_;
+        var inactiveClassName = this.inactiveClassName_;
         var nextClassName = fullscreen ? activeClassName : inactiveClassName;
-        element.classList.remove(activeClassName);
-        element.classList.remove(inactiveClassName);
-        element.classList.add(nextClassName);
+        (_a = element.classList).remove.apply(_a, activeClassName);
+        (_b = element.classList).remove.apply(_b, inactiveClassName);
+        (_c = element.classList).add.apply(_c, nextClassName);
     };
     /**
      * Remove the control from its current map and attach it to the new map.
@@ -48461,7 +48702,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -48734,7 +48975,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -49308,7 +49549,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -49330,6 +49571,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
  * @property {string|HTMLElement} [label='⇧'] Text label to use for the rotate button.
  * Instead of text, also an element (e.g. a `span` element) can be used.
  * @property {string} [tipLabel='Reset rotation'] Text label to use for the rotate tip.
+ * @property {string} [compassClassName='ol-compass'] CSS class name for the compass.
  * @property {number} [duration=250] Animation duration in milliseconds.
  * @property {boolean} [autoHide=true] Hide the control when rotation is 0.
  * @property {function(import("../MapEvent.js").default):void} [render] Function called when the control should
@@ -49362,6 +49604,9 @@ var Rotate = /** @class */ (function (_super) {
         }) || this;
         var className = options.className !== undefined ? options.className : 'ol-rotate';
         var label = options.label !== undefined ? options.label : '\u21E7';
+        var compassClassName = options.compassClassName !== undefined
+            ? options.compassClassName
+            : 'ol-compass';
         /**
          * @type {HTMLElement}
          * @private
@@ -49369,12 +49614,12 @@ var Rotate = /** @class */ (function (_super) {
         _this.label_ = null;
         if (typeof label === 'string') {
             _this.label_ = document.createElement('span');
-            _this.label_.className = 'ol-compass';
+            _this.label_.className = compassClassName;
             _this.label_.textContent = label;
         }
         else {
             _this.label_ = label;
-            _this.label_.classList.add('ol-compass');
+            _this.label_.classList.add(compassClassName);
         }
         var tipLabel = options.tipLabel ? options.tipLabel : 'Reset rotation';
         var button = document.createElement('button');
@@ -49499,7 +49744,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -49936,7 +50181,7 @@ var ScaleLine = /** @class */ (function (_super) {
         var resolution = Object(_proj_js__WEBPACK_IMPORTED_MODULE_3__["getPointResolution"])(this.viewState_.projection, this.viewState_.resolution, this.viewState_.center);
         var dpi = this.dpi_ || DEFAULT_DPI;
         var mpu = this.viewState_.projection.getMetersPerUnit();
-        var inchesPerMeter = 39.37;
+        var inchesPerMeter = 1000 / 25.4;
         return parseFloat(resolution.toString()) * mpu * inchesPerMeter * dpi;
     };
     /**
@@ -49978,7 +50223,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -49998,6 +50243,8 @@ var __extends = (undefined && undefined.__extends) || (function () {
  * @typedef {Object} Options
  * @property {number} [duration=250] Animation duration in milliseconds.
  * @property {string} [className='ol-zoom'] CSS class name.
+ * @property {string} [zoomInClassName=className + '-in'] CSS class name for the zoom-in button.
+ * @property {string} [zoomOutClassName=className + '-out'] CSS class name for the zoom-out button.
  * @property {string|HTMLElement} [zoomInLabel='+'] Text label to use for the zoom-in
  * button. Instead of text, also an element (e.g. a `span` element) can be used.
  * @property {string|HTMLElement} [zoomOutLabel='-'] Text label to use for the zoom-out button.
@@ -50030,6 +50277,12 @@ var Zoom = /** @class */ (function (_super) {
         }) || this;
         var className = options.className !== undefined ? options.className : 'ol-zoom';
         var delta = options.delta !== undefined ? options.delta : 1;
+        var zoomInClassName = options.zoomInClassName !== undefined
+            ? options.zoomInClassName
+            : className + '-in';
+        var zoomOutClassName = options.zoomOutClassName !== undefined
+            ? options.zoomOutClassName
+            : className + '-out';
         var zoomInLabel = options.zoomInLabel !== undefined ? options.zoomInLabel : '+';
         var zoomOutLabel = options.zoomOutLabel !== undefined ? options.zoomOutLabel : '\u2212';
         var zoomInTipLabel = options.zoomInTipLabel !== undefined ? options.zoomInTipLabel : 'Zoom in';
@@ -50037,7 +50290,7 @@ var Zoom = /** @class */ (function (_super) {
             ? options.zoomOutTipLabel
             : 'Zoom out';
         var inElement = document.createElement('button');
-        inElement.className = className + '-in';
+        inElement.className = zoomInClassName;
         inElement.setAttribute('type', 'button');
         inElement.title = zoomInTipLabel;
         inElement.appendChild(typeof zoomInLabel === 'string'
@@ -50045,7 +50298,7 @@ var Zoom = /** @class */ (function (_super) {
             : zoomInLabel);
         inElement.addEventListener(_events_EventType_js__WEBPACK_IMPORTED_MODULE_1__["default"].CLICK, _this.handleClick_.bind(_this, delta), false);
         var outElement = document.createElement('button');
-        outElement.className = className + '-out';
+        outElement.className = zoomOutClassName;
         outElement.setAttribute('type', 'button');
         outElement.title = zoomOutTipLabel;
         outElement.appendChild(typeof zoomOutLabel === 'string'
@@ -50134,7 +50387,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -50345,7 +50598,8 @@ var ZoomSlider = /** @class */ (function (_super) {
             if (this.dragListenerKeys_.length === 0) {
                 var drag = this.handleDraggerDrag_;
                 var end = this.handleDraggerEnd_;
-                this.dragListenerKeys_.push(Object(_events_js__WEBPACK_IMPORTED_MODULE_6__["listen"])(document, _pointer_EventType_js__WEBPACK_IMPORTED_MODULE_2__["default"].POINTERMOVE, drag, this), Object(_events_js__WEBPACK_IMPORTED_MODULE_6__["listen"])(document, _pointer_EventType_js__WEBPACK_IMPORTED_MODULE_2__["default"].POINTERUP, end, this));
+                var doc = this.getMap().getOwnerDocument();
+                this.dragListenerKeys_.push(Object(_events_js__WEBPACK_IMPORTED_MODULE_6__["listen"])(doc, _pointer_EventType_js__WEBPACK_IMPORTED_MODULE_2__["default"].POINTERMOVE, drag, this), Object(_events_js__WEBPACK_IMPORTED_MODULE_6__["listen"])(doc, _pointer_EventType_js__WEBPACK_IMPORTED_MODULE_2__["default"].POINTERUP, end, this));
             }
         }
     };
@@ -50481,7 +50735,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -51633,7 +51887,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -53051,15 +53305,19 @@ var withCredentials = false;
  * load features.
  *
  * This function takes an {@link module:ol/extent~Extent} representing the area to be loaded,
- * a `{number}` representing the resolution (map units per pixel) and an
- * {@link module:ol/proj/Projection} for the projection  as
+ * a `{number}` representing the resolution (map units per pixel), an
+ * {@link module:ol/proj/Projection} for the projection and success and failure callbacks as
  * arguments. `this` within the function is bound to the
  * {@link module:ol/source/Vector} it's called from.
  *
  * The function is responsible for loading the features and adding them to the
  * source.
- * @typedef {function(this:(import("./source/Vector").default|import("./VectorTile.js").default), import("./extent.js").Extent, number,
- *                    import("./proj/Projection.js").default): void} FeatureLoader
+ * @typedef {function(this:(import("./source/Vector").default|import("./VectorTile.js").default),
+ *           import("./extent.js").Extent,
+ *           number,
+ *           import("./proj/Projection.js").default,
+ *           function(Array<import("./Feature.js").default>): void=,
+ *           function(): void=): void} FeatureLoader
  * @api
  */
 /**
@@ -53076,73 +53334,64 @@ var withCredentials = false;
 /**
  * @param {string|FeatureUrlFunction} url Feature URL service.
  * @param {import("./format/Feature.js").default} format Feature format.
- * @param {function(this:import("./VectorTile.js").default, Array<import("./Feature.js").default>, import("./proj/Projection.js").default, import("./extent.js").Extent): void|function(this:import("./source/Vector").default, Array<import("./Feature.js").default>): void} success
- *     Function called with the loaded features and optionally with the data
- *     projection. Called with the vector tile or source as `this`.
- * @param {function(this:import("./VectorTile.js").default): void|function(this:import("./source/Vector").default): void} failure
- *     Function called when loading failed. Called with the vector tile or
- *     source as `this`.
- * @return {FeatureLoader} The feature loader.
+ * @param {import("./extent.js").Extent} extent Extent.
+ * @param {number} resolution Resolution.
+ * @param {import("./proj/Projection.js").default} projection Projection.
+ * @param {function(Array<import("./Feature.js").default>, import("./proj/Projection.js").default): void} success Success
+ *      Function called with the loaded features and optionally with the data projection.
+ * @param {function(): void} failure Failure
+ *      Function called when loading failed.
  */
-function loadFeaturesXhr(url, format, success, failure) {
-    return (
+function loadFeaturesXhr(url, format, extent, resolution, projection, success, failure) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', typeof url === 'function' ? url(extent, resolution, projection) : url, true);
+    if (format.getType() == _format_FormatType_js__WEBPACK_IMPORTED_MODULE_0__["default"].ARRAY_BUFFER) {
+        xhr.responseType = 'arraybuffer';
+    }
+    xhr.withCredentials = withCredentials;
     /**
-     * @param {import("./extent.js").Extent} extent Extent.
-     * @param {number} resolution Resolution.
-     * @param {import("./proj/Projection.js").default} projection Projection.
-     * @this {import("./source/Vector").default|import("./VectorTile.js").default}
+     * @param {Event} event Event.
+     * @private
      */
-    function (extent, resolution, projection) {
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', typeof url === 'function' ? url(extent, resolution, projection) : url, true);
-        if (format.getType() == _format_FormatType_js__WEBPACK_IMPORTED_MODULE_0__["default"].ARRAY_BUFFER) {
-            xhr.responseType = 'arraybuffer';
-        }
-        xhr.withCredentials = withCredentials;
-        /**
-         * @param {Event} event Event.
-         * @private
-         */
-        xhr.onload = function (event) {
-            // status will be 0 for file:// urls
-            if (!xhr.status || (xhr.status >= 200 && xhr.status < 300)) {
-                var type = format.getType();
-                /** @type {Document|Node|Object|string|undefined} */
-                var source = void 0;
-                if (type == _format_FormatType_js__WEBPACK_IMPORTED_MODULE_0__["default"].JSON || type == _format_FormatType_js__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT) {
-                    source = xhr.responseText;
+    xhr.onload = function (event) {
+        // status will be 0 for file:// urls
+        if (!xhr.status || (xhr.status >= 200 && xhr.status < 300)) {
+            var type = format.getType();
+            /** @type {Document|Node|Object|string|undefined} */
+            var source = void 0;
+            if (type == _format_FormatType_js__WEBPACK_IMPORTED_MODULE_0__["default"].JSON || type == _format_FormatType_js__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT) {
+                source = xhr.responseText;
+            }
+            else if (type == _format_FormatType_js__WEBPACK_IMPORTED_MODULE_0__["default"].XML) {
+                source = xhr.responseXML;
+                if (!source) {
+                    source = new DOMParser().parseFromString(xhr.responseText, 'application/xml');
                 }
-                else if (type == _format_FormatType_js__WEBPACK_IMPORTED_MODULE_0__["default"].XML) {
-                    source = xhr.responseXML;
-                    if (!source) {
-                        source = new DOMParser().parseFromString(xhr.responseText, 'application/xml');
-                    }
-                }
-                else if (type == _format_FormatType_js__WEBPACK_IMPORTED_MODULE_0__["default"].ARRAY_BUFFER) {
-                    source = /** @type {ArrayBuffer} */ (xhr.response);
-                }
-                if (source) {
-                    success.call(this, format.readFeatures(source, {
-                        extent: extent,
-                        featureProjection: projection,
-                    }), format.readProjection(source));
-                }
-                else {
-                    failure.call(this);
-                }
+            }
+            else if (type == _format_FormatType_js__WEBPACK_IMPORTED_MODULE_0__["default"].ARRAY_BUFFER) {
+                source = /** @type {ArrayBuffer} */ (xhr.response);
+            }
+            if (source) {
+                success(
+                /** @type {Array<import("./Feature.js").default>} */
+                (format.readFeatures(source, {
+                    extent: extent,
+                    featureProjection: projection,
+                })), format.readProjection(source));
             }
             else {
-                failure.call(this);
+                failure();
             }
-        }.bind(this);
-        /**
-         * @private
-         */
-        xhr.onerror = function () {
-            failure.call(this);
-        }.bind(this);
-        xhr.send();
-    });
+        }
+        else {
+            failure();
+        }
+    };
+    /**
+     * @private
+     */
+    xhr.onerror = failure;
+    xhr.send();
 }
 /**
  * Create an XHR feature loader for a `url` and `format`. The feature loader
@@ -53154,20 +53403,32 @@ function loadFeaturesXhr(url, format, success, failure) {
  * @api
  */
 function xhr(url, format) {
-    return loadFeaturesXhr(url, format, 
     /**
-     * @param {Array<import("./Feature.js").default>} features The loaded features.
-     * @param {import("./proj/Projection.js").default} dataProjection Data
-     * projection.
-     * @this {import("./source/Vector").default|import("./VectorTile.js").default}
+     * @param {import("./extent.js").Extent} extent Extent.
+     * @param {number} resolution Resolution.
+     * @param {import("./proj/Projection.js").default} projection Projection.
+     * @param {function(): void=} success Success
+     *      Function called when loading succeeded.
+     * @param {function(): void=} failure Failure
+     *      Function called when loading failed.
+     * @this {import("./source/Vector").default}
      */
-    function (features, dataProjection) {
-        var sourceOrTile = /** @type {?} */ (this);
-        if (typeof sourceOrTile.addFeatures === 'function') {
-            /** @type {import("./source/Vector").default} */ (sourceOrTile).addFeatures(features);
-        }
-    }, 
-    /* FIXME handle error */ _functions_js__WEBPACK_IMPORTED_MODULE_1__["VOID"]);
+    return function (extent, resolution, projection, success, failure) {
+        var source = /** @type {import("./source/Vector").default} */ (this);
+        loadFeaturesXhr(url, format, extent, resolution, projection, 
+        /**
+         * @param {Array<import("./Feature.js").default>} features The loaded features.
+         * @param {import("./proj/Projection.js").default} dataProjection Data
+         * projection.
+         */
+        function (features, dataProjection) {
+            if (success !== undefined) {
+                success(features);
+            }
+            source.addFeatures(features);
+        }, 
+        /* FIXME handle error */ failure ? failure : _functions_js__WEBPACK_IMPORTED_MODULE_1__["VOID"]);
+    };
 }
 /**
  * Setter for the withCredentials configuration for the XHR.
@@ -53295,7 +53556,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -53344,7 +53605,9 @@ var Circle = /** @class */ (function (_super) {
      * @api
      */
     Circle.prototype.clone = function () {
-        return new Circle(this.flatCoordinates.slice(), undefined, this.layout);
+        var circle = new Circle(this.flatCoordinates.slice(), undefined, this.layout);
+        circle.applyProperties(this);
+        return circle;
     };
     /**
      * @param {number} x X.
@@ -53508,7 +53771,7 @@ var Circle = /** @class */ (function (_super) {
     /**
      * Rotate the geometry around a given coordinate. This modifies the geometry
      * coordinates in place.
-     * @param {number} angle Rotation angle in radians.
+     * @param {number} angle Rotation angle in counter-clockwise radians.
      * @param {import("../coordinate.js").Coordinate} anchor The rotation center.
      * @api
      */
@@ -53582,7 +53845,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -53958,7 +54221,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -54048,7 +54311,9 @@ var LineString = /** @class */ (function (_super) {
      * @api
      */
     LineString.prototype.clone = function () {
-        return new LineString(this.flatCoordinates.slice(), this.layout);
+        var lineString = new LineString(this.flatCoordinates.slice(), this.layout);
+        lineString.applyProperties(this);
+        return lineString;
     };
     /**
      * @param {number} x X.
@@ -54212,7 +54477,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -54383,7 +54648,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -54487,7 +54752,9 @@ var MultiLineString = /** @class */ (function (_super) {
      * @api
      */
     MultiLineString.prototype.clone = function () {
-        return new MultiLineString(this.flatCoordinates.slice(), this.layout, this.ends_.slice());
+        var multiLineString = new MultiLineString(this.flatCoordinates.slice(), this.layout, this.ends_.slice());
+        multiLineString.applyProperties(this);
+        return multiLineString;
     };
     /**
      * @param {number} x X.
@@ -54672,7 +54939,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -54738,6 +55005,7 @@ var MultiPoint = /** @class */ (function (_super) {
      */
     MultiPoint.prototype.clone = function () {
         var multiPoint = new MultiPoint(this.flatCoordinates.slice(), this.layout);
+        multiPoint.applyProperties(this);
         return multiPoint;
     };
     /**
@@ -54882,7 +55150,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -55030,7 +55298,9 @@ var MultiPolygon = /** @class */ (function (_super) {
         for (var i = 0; i < len; ++i) {
             newEndss[i] = this.endss_[i].slice();
         }
-        return new MultiPolygon(this.flatCoordinates.slice(), this.layout, newEndss);
+        var multiPolygon = new MultiPolygon(this.flatCoordinates.slice(), this.layout, newEndss);
+        multiPolygon.applyProperties(this);
+        return multiPolygon;
     };
     /**
      * @param {number} x X.
@@ -55259,7 +55529,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -55300,6 +55570,7 @@ var Point = /** @class */ (function (_super) {
      */
     Point.prototype.clone = function () {
         var point = new Point(this.flatCoordinates.slice(), this.layout);
+        point.applyProperties(this);
         return point;
     };
     /**
@@ -55412,7 +55683,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -55530,7 +55801,9 @@ var Polygon = /** @class */ (function (_super) {
      * @api
      */
     Polygon.prototype.clone = function () {
-        return new Polygon(this.flatCoordinates.slice(), this.layout, this.ends_.slice());
+        var polygon = new Polygon(this.flatCoordinates.slice(), this.layout, this.ends_.slice());
+        polygon.applyProperties(this);
+        return polygon;
     };
     /**
      * @param {number} x X.
@@ -55779,7 +56052,7 @@ function fromExtent(extent) {
  * @param {import("./Circle.js").default} circle Circle geometry.
  * @param {number=} opt_sides Number of sides of the polygon. Default is 32.
  * @param {number=} opt_angle Start angle for the first vertex of the polygon in
- *     radians. Default is 0.
+ *     counter-clockwise radians. 0 means East. Default is 0.
  * @return {Polygon} Polygon geometry.
  * @api
  */
@@ -55808,7 +56081,7 @@ function fromCircle(circle, opt_sides, opt_angle) {
  * @param {import("../coordinate.js").Coordinate} center Center of the regular polygon.
  * @param {number} radius Radius of the regular polygon.
  * @param {number=} opt_angle Start angle for the first vertex of the polygon in
- *     radians. Default is 0.
+ *     counter-clockwise radians. 0 means East. Default is 0.
  */
 function makeRegular(polygon, center, radius, opt_angle) {
     var flatCoordinates = polygon.getFlatCoordinates();
@@ -55847,7 +56120,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -56049,7 +56322,7 @@ var SimpleGeometry = /** @class */ (function (_super) {
     /**
      * Rotate the geometry around a given coordinate. This modifies the geometry
      * coordinates in place.
-     * @param {number} angle Rotation angle in radians.
+     * @param {number} angle Rotation angle in counter-clockwise radians.
      * @param {import("../coordinate.js").Coordinate} anchor The rotation center.
      * @api
      */
@@ -57488,63 +57761,19 @@ __webpack_require__.r(__webpack_exports__);
  * @return {boolean} Is clockwise.
  */
 function linearRingIsClockwise(flatCoordinates, offset, end, stride) {
-    // https://stackoverflow.com/a/1180256/2389327
-    // https://en.wikipedia.org/wiki/Curve_orientation#Orientation_of_a_simple_polygon
-    var firstVertexRepeated = true;
-    for (var i = 0; i < stride; ++i) {
-        if (flatCoordinates[offset + i] !== flatCoordinates[end - stride + i]) {
-            firstVertexRepeated = false;
-            break;
-        }
+    // http://tinyurl.com/clockwise-method
+    // https://github.com/OSGeo/gdal/blob/trunk/gdal/ogr/ogrlinearring.cpp
+    var edge = 0;
+    var x1 = flatCoordinates[end - stride];
+    var y1 = flatCoordinates[end - stride + 1];
+    for (; offset < end; offset += stride) {
+        var x2 = flatCoordinates[offset];
+        var y2 = flatCoordinates[offset + 1];
+        edge += (x2 - x1) * (y2 + y1);
+        x1 = x2;
+        y1 = y2;
     }
-    if (firstVertexRepeated) {
-        end -= stride;
-    }
-    var iMinVertex = findCornerVertex(flatCoordinates, offset, end, stride);
-    // Orientation matrix:
-    //     [ 1  xa  ya ]
-    // O = | 1  xb  yb |
-    //     [ 1  xc  yc ]
-    var iPreviousVertex = iMinVertex - stride;
-    if (iPreviousVertex < offset) {
-        iPreviousVertex = end - stride;
-    }
-    var iNextVertex = iMinVertex + stride;
-    if (iNextVertex >= end) {
-        iNextVertex = offset;
-    }
-    var aX = flatCoordinates[iPreviousVertex];
-    var aY = flatCoordinates[iPreviousVertex + 1];
-    var bX = flatCoordinates[iMinVertex];
-    var bY = flatCoordinates[iMinVertex + 1];
-    var cX = flatCoordinates[iNextVertex];
-    var cY = flatCoordinates[iNextVertex + 1];
-    var determinant = bX * cY + aX * bY + aY * cX - (aY * bX + bY * cX + aX * cY);
-    return determinant < 0;
-}
-// Find vertex along one edge of bounding box.
-// In this case, we find smallest y; in case of tie also smallest x.
-function findCornerVertex(flatCoordinates, offset, end, stride) {
-    var iMinVertex = -1;
-    var minY = Infinity;
-    var minXAtMinY = Infinity;
-    for (var i = offset; i < end; i += stride) {
-        var x = flatCoordinates[i];
-        var y = flatCoordinates[i + 1];
-        if (y > minY) {
-            continue;
-        }
-        if (y == minY) {
-            if (x >= minXAtMinY) {
-                continue;
-            }
-        }
-        // Minimum so far.
-        iMinVertex = i;
-        minY = y;
-        minXAtMinY = x;
-    }
-    return iMinVertex;
+    return edge === 0 ? undefined : edge > 0;
 }
 /**
  * Determines if linear rings are oriented.  By default, left-hand orientation
@@ -58201,66 +58430,105 @@ __webpack_require__.r(__webpack_exports__);
  * exceeded). Entries of the array are x, y, anchorX, angle, chunk.
  */
 function drawTextOnPath(flatCoordinates, offset, end, stride, text, startM, maxAngle, scale, measureAndCacheTextWidth, font, cache, rotation) {
-    var result = [];
+    var x2 = flatCoordinates[offset];
+    var y2 = flatCoordinates[offset + 1];
+    var x1 = 0;
+    var y1 = 0;
+    var segmentLength = 0;
+    var segmentM = 0;
+    function advance() {
+        x1 = x2;
+        y1 = y2;
+        offset += stride;
+        x2 = flatCoordinates[offset];
+        y2 = flatCoordinates[offset + 1];
+        segmentM += segmentLength;
+        segmentLength = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    }
+    do {
+        advance();
+    } while (offset < end - stride && segmentM + segmentLength < startM);
+    var interpolate = (startM - segmentM) / segmentLength;
+    var beginX = Object(_math_js__WEBPACK_IMPORTED_MODULE_0__["lerp"])(x1, x2, interpolate);
+    var beginY = Object(_math_js__WEBPACK_IMPORTED_MODULE_0__["lerp"])(y1, y2, interpolate);
+    var startOffset = offset - stride;
+    var startLength = segmentM;
+    var endM = startM + scale * measureAndCacheTextWidth(font, text, cache);
+    while (offset < end - stride && segmentM + segmentLength < endM) {
+        advance();
+    }
+    interpolate = (endM - segmentM) / segmentLength;
+    var endX = Object(_math_js__WEBPACK_IMPORTED_MODULE_0__["lerp"])(x1, x2, interpolate);
+    var endY = Object(_math_js__WEBPACK_IMPORTED_MODULE_0__["lerp"])(y1, y2, interpolate);
     // Keep text upright
     var reverse;
     if (rotation) {
-        var rotatedCoordinates = Object(_transform_js__WEBPACK_IMPORTED_MODULE_1__["rotate"])(flatCoordinates, offset, end, stride, rotation, [flatCoordinates[offset], flatCoordinates[offset + 1]]);
-        reverse =
-            rotatedCoordinates[0] >
-                rotatedCoordinates[rotatedCoordinates.length - stride];
+        var flat = [beginX, beginY, endX, endY];
+        Object(_transform_js__WEBPACK_IMPORTED_MODULE_1__["rotate"])(flat, 0, 4, 2, rotation, flat, flat);
+        reverse = flat[0] > flat[2];
     }
     else {
-        reverse = flatCoordinates[offset] > flatCoordinates[end - stride];
+        reverse = beginX > endX;
     }
-    var numChars = text.length;
-    var x1 = flatCoordinates[offset];
-    var y1 = flatCoordinates[offset + 1];
-    offset += stride;
-    var x2 = flatCoordinates[offset];
-    var y2 = flatCoordinates[offset + 1];
-    var segmentM = 0;
-    var segmentLength = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
-    var angleChanged = false;
-    var index, previousAngle;
-    for (var i = 0; i < numChars; ++i) {
-        index = reverse ? numChars - i - 1 : i;
-        var char = text[index];
-        var charLength = scale * measureAndCacheTextWidth(font, char, cache);
-        var charM = startM + charLength / 2;
-        while (offset < end - stride && segmentM + segmentLength < charM) {
-            x1 = x2;
-            y1 = y2;
-            offset += stride;
-            x2 = flatCoordinates[offset];
-            y2 = flatCoordinates[offset + 1];
-            segmentM += segmentLength;
-            segmentLength = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+    var PI = Math.PI;
+    var result = [];
+    var singleSegment = startOffset + stride === offset;
+    offset = startOffset;
+    segmentLength = 0;
+    segmentM = startLength;
+    x2 = flatCoordinates[offset];
+    y2 = flatCoordinates[offset + 1];
+    // All on the same segment
+    if (singleSegment) {
+        advance();
+        var previousAngle_1 = Math.atan2(y2 - y1, x2 - x1);
+        if (reverse) {
+            previousAngle_1 += previousAngle_1 > 0 ? -PI : PI;
         }
-        var segmentPos = charM - segmentM;
+        var x = (endX + beginX) / 2;
+        var y = (endY + beginY) / 2;
+        result[0] = [x, y, (endM - startM) / 2, previousAngle_1, text];
+        return result;
+    }
+    var previousAngle;
+    for (var i = 0, ii = text.length; i < ii;) {
+        advance();
         var angle = Math.atan2(y2 - y1, x2 - x1);
         if (reverse) {
-            angle += angle > 0 ? -Math.PI : Math.PI;
+            angle += angle > 0 ? -PI : PI;
         }
         if (previousAngle !== undefined) {
             var delta = angle - previousAngle;
-            angleChanged = angleChanged || delta !== 0;
-            delta +=
-                delta > Math.PI ? -2 * Math.PI : delta < -Math.PI ? 2 * Math.PI : 0;
+            delta += delta > PI ? -2 * PI : delta < -PI ? 2 * PI : 0;
             if (Math.abs(delta) > maxAngle) {
                 return null;
             }
         }
         previousAngle = angle;
-        var interpolate = segmentPos / segmentLength;
+        var iStart = i;
+        var charLength = 0;
+        for (; i < ii; ++i) {
+            var index = reverse ? ii - i - 1 : i;
+            var len = scale * measureAndCacheTextWidth(font, text[index], cache);
+            if (offset + stride < end &&
+                segmentM + segmentLength < startM + charLength + len / 2) {
+                break;
+            }
+            charLength += len;
+        }
+        if (i === iStart) {
+            continue;
+        }
+        var chars = reverse
+            ? text.substring(ii - iStart, ii - i)
+            : text.substring(iStart, i);
+        interpolate = (startM + charLength / 2 - segmentM) / segmentLength;
         var x = Object(_math_js__WEBPACK_IMPORTED_MODULE_0__["lerp"])(x1, x2, interpolate);
         var y = Object(_math_js__WEBPACK_IMPORTED_MODULE_0__["lerp"])(y1, y2, interpolate);
-        result[index] = [x, y, charLength / 2, angle, char];
+        result.push([x, y, charLength / 2, angle, chars]);
         startM += charLength;
     }
-    return angleChanged
-        ? result
-        : [[result[0][0], result[0][1], result[0][2], result[0][3], text]];
+    return result;
 }
 //# sourceMappingURL=textpath.js.map
 
@@ -58837,7 +59105,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -58896,7 +59164,7 @@ var DoubleClickZoom = /** @class */ (function (_super) {
             var delta = browserEvent.shiftKey ? -this.delta_ : this.delta_;
             var view = map.getView();
             Object(_Interaction_js__WEBPACK_IMPORTED_MODULE_0__["zoomByDelta"])(view, delta, anchor, this.duration_);
-            mapBrowserEvent.preventDefault();
+            browserEvent.preventDefault();
             stopEvent = true;
         }
         return !stopEvent;
@@ -58912,17 +59180,19 @@ var DoubleClickZoom = /** @class */ (function (_super) {
 /*!****************************************************!*\
   !*** ./node_modules/ol/interaction/DragAndDrop.js ***!
   \****************************************************/
-/*! exports provided: default */
+/*! exports provided: DragAndDropEvent, default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DragAndDropEvent", function() { return DragAndDropEvent; });
 /* harmony import */ var _events_Event_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../events/Event.js */ "./node_modules/ol/events/Event.js");
 /* harmony import */ var _events_EventType_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../events/EventType.js */ "./node_modules/ol/events/EventType.js");
-/* harmony import */ var _Interaction_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Interaction.js */ "./node_modules/ol/interaction/Interaction.js");
-/* harmony import */ var _functions_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../functions.js */ "./node_modules/ol/functions.js");
-/* harmony import */ var _proj_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../proj.js */ "./node_modules/ol/proj.js");
-/* harmony import */ var _events_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../events.js */ "./node_modules/ol/events.js");
+/* harmony import */ var _format_FormatType_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../format/FormatType.js */ "./node_modules/ol/format/FormatType.js");
+/* harmony import */ var _Interaction_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Interaction.js */ "./node_modules/ol/interaction/Interaction.js");
+/* harmony import */ var _functions_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../functions.js */ "./node_modules/ol/functions.js");
+/* harmony import */ var _proj_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../proj.js */ "./node_modules/ol/proj.js");
+/* harmony import */ var _events_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../events.js */ "./node_modules/ol/events.js");
 /**
  * @module ol/interaction/DragAndDrop
  */
@@ -58931,7 +59201,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -58946,9 +59216,11 @@ var __extends = (undefined && undefined.__extends) || (function () {
 
 
 
+
 /**
  * @typedef {Object} Options
- * @property {Array<typeof import("../format/Feature.js").default>} [formatConstructors] Format constructors.
+ * @property {Array<typeof import("../format/Feature.js").default|import("../format/Feature.js").default>} [formatConstructors] Format constructors
+ * (and/or formats pre-constructed with options).
  * @property {import("../source/Vector.js").default} [source] Optional vector source where features will be added.  If a source is provided
  * all existing features will be removed and new features will be added when
  * they are dropped on the target.  If you want to add features to a vector
@@ -59005,9 +59277,15 @@ var DragAndDropEvent = /** @class */ (function (_super) {
     }
     return DragAndDropEvent;
 }(_events_Event_js__WEBPACK_IMPORTED_MODULE_0__["default"]));
+
 /**
  * @classdesc
  * Handles input of vector data by drag and drop.
+ *
+ * Note that the DragAndDrop interaction uses the TextDecoder() constructor if the supplied
+ * combinnation of formats read both text string and ArrayBuffer sources. Older browsers such
+ * as IE which do not support this will need a TextDecoder polyfill to be loaded before use.
+ *
  * @api
  *
  * @fires DragAndDropEvent
@@ -59021,21 +59299,36 @@ var DragAndDrop = /** @class */ (function (_super) {
         var _this = this;
         var options = opt_options ? opt_options : {};
         _this = _super.call(this, {
-            handleEvent: _functions_js__WEBPACK_IMPORTED_MODULE_3__["TRUE"],
+            handleEvent: _functions_js__WEBPACK_IMPORTED_MODULE_4__["TRUE"],
         }) || this;
         /**
          * @private
-         * @type {Array<typeof import("../format/Feature.js").default>}
+         * @type {boolean}
          */
-        _this.formatConstructors_ = options.formatConstructors
+        _this.readAsBuffer_ = false;
+        /**
+         * @private
+         * @type {Array<import("../format/Feature.js").default>}
+         */
+        _this.formats_ = [];
+        var formatConstructors = options.formatConstructors
             ? options.formatConstructors
             : [];
+        for (var i = 0, ii = formatConstructors.length; i < ii; ++i) {
+            var format = formatConstructors[i];
+            if (typeof format === 'function') {
+                format = new format();
+            }
+            _this.formats_.push(format);
+            _this.readAsBuffer_ =
+                _this.readAsBuffer_ || format.getType() === _format_FormatType_js__WEBPACK_IMPORTED_MODULE_2__["default"].ARRAY_BUFFER;
+        }
         /**
          * @private
          * @type {import("../proj/Projection.js").default}
          */
         _this.projection_ = options.projection
-            ? Object(_proj_js__WEBPACK_IMPORTED_MODULE_4__["get"])(options.projection)
+            ? Object(_proj_js__WEBPACK_IMPORTED_MODULE_5__["get"])(options.projection)
             : null;
         /**
          * @private
@@ -59067,10 +59360,18 @@ var DragAndDrop = /** @class */ (function (_super) {
             var view = map.getView();
             projection = view.getProjection();
         }
-        var formatConstructors = this.formatConstructors_;
-        for (var i = 0, ii = formatConstructors.length; i < ii; ++i) {
-            var format = new formatConstructors[i]();
-            var features = this.tryReadFeatures_(format, result, {
+        var text;
+        var formats = this.formats_;
+        for (var i = 0, ii = formats.length; i < ii; ++i) {
+            var format = formats[i];
+            var input = result;
+            if (this.readAsBuffer_ && format.getType() !== _format_FormatType_js__WEBPACK_IMPORTED_MODULE_2__["default"].ARRAY_BUFFER) {
+                if (text === undefined) {
+                    text = new TextDecoder().decode(result);
+                }
+                input = text;
+            }
+            var features = this.tryReadFeatures_(format, input, {
                 featureProjection: projection,
             });
             if (features && features.length > 0) {
@@ -59091,10 +59392,10 @@ var DragAndDrop = /** @class */ (function (_super) {
         if (map) {
             var dropArea = this.target ? this.target : map.getViewport();
             this.dropListenKeys_ = [
-                Object(_events_js__WEBPACK_IMPORTED_MODULE_5__["listen"])(dropArea, _events_EventType_js__WEBPACK_IMPORTED_MODULE_1__["default"].DROP, this.handleDrop, this),
-                Object(_events_js__WEBPACK_IMPORTED_MODULE_5__["listen"])(dropArea, _events_EventType_js__WEBPACK_IMPORTED_MODULE_1__["default"].DRAGENTER, this.handleStop, this),
-                Object(_events_js__WEBPACK_IMPORTED_MODULE_5__["listen"])(dropArea, _events_EventType_js__WEBPACK_IMPORTED_MODULE_1__["default"].DRAGOVER, this.handleStop, this),
-                Object(_events_js__WEBPACK_IMPORTED_MODULE_5__["listen"])(dropArea, _events_EventType_js__WEBPACK_IMPORTED_MODULE_1__["default"].DROP, this.handleStop, this),
+                Object(_events_js__WEBPACK_IMPORTED_MODULE_6__["listen"])(dropArea, _events_EventType_js__WEBPACK_IMPORTED_MODULE_1__["default"].DROP, this.handleDrop, this),
+                Object(_events_js__WEBPACK_IMPORTED_MODULE_6__["listen"])(dropArea, _events_EventType_js__WEBPACK_IMPORTED_MODULE_1__["default"].DRAGENTER, this.handleStop, this),
+                Object(_events_js__WEBPACK_IMPORTED_MODULE_6__["listen"])(dropArea, _events_EventType_js__WEBPACK_IMPORTED_MODULE_1__["default"].DRAGOVER, this.handleStop, this),
+                Object(_events_js__WEBPACK_IMPORTED_MODULE_6__["listen"])(dropArea, _events_EventType_js__WEBPACK_IMPORTED_MODULE_1__["default"].DROP, this.handleStop, this),
             ];
         }
     };
@@ -59148,7 +59449,7 @@ var DragAndDrop = /** @class */ (function (_super) {
      */
     DragAndDrop.prototype.unregisterListeners_ = function () {
         if (this.dropListenKeys_) {
-            this.dropListenKeys_.forEach(_events_js__WEBPACK_IMPORTED_MODULE_5__["unlistenByKey"]);
+            this.dropListenKeys_.forEach(_events_js__WEBPACK_IMPORTED_MODULE_6__["unlistenByKey"]);
             this.dropListenKeys_ = null;
         }
     };
@@ -59161,7 +59462,12 @@ var DragAndDrop = /** @class */ (function (_super) {
             var file = files.item(i);
             var reader = new FileReader();
             reader.addEventListener(_events_EventType_js__WEBPACK_IMPORTED_MODULE_1__["default"].LOAD, this.handleResult_.bind(this, file));
-            reader.readAsText(file);
+            if (this.readAsBuffer_) {
+                reader.readAsArrayBuffer(file);
+            }
+            else {
+                reader.readAsText(file);
+            }
         }
     };
     /**
@@ -59173,7 +59479,7 @@ var DragAndDrop = /** @class */ (function (_super) {
         event.dataTransfer.dropEffect = 'copy';
     };
     return DragAndDrop;
-}(_Interaction_js__WEBPACK_IMPORTED_MODULE_2__["default"]));
+}(_Interaction_js__WEBPACK_IMPORTED_MODULE_3__["default"]));
 /* harmony default export */ __webpack_exports__["default"] = (DragAndDrop);
 //# sourceMappingURL=DragAndDrop.js.map
 
@@ -59183,11 +59489,12 @@ var DragAndDrop = /** @class */ (function (_super) {
 /*!************************************************!*\
   !*** ./node_modules/ol/interaction/DragBox.js ***!
   \************************************************/
-/*! exports provided: default */
+/*! exports provided: DragBoxEvent, default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DragBoxEvent", function() { return DragBoxEvent; });
 /* harmony import */ var _events_Event_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../events/Event.js */ "./node_modules/ol/events/Event.js");
 /* harmony import */ var _Pointer_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Pointer.js */ "./node_modules/ol/interaction/Pointer.js");
 /* harmony import */ var _render_Box_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../render/Box.js */ "./node_modules/ol/render/Box.js");
@@ -59196,7 +59503,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -59255,6 +59562,12 @@ var DragBoxEventType = {
      * @api
      */
     BOXEND: 'boxend',
+    /**
+     * Triggered upon drag box canceled.
+     * @event DragBoxEvent#boxcancel
+     * @api
+     */
+    BOXCANCEL: 'boxcancel',
 };
 /**
  * @classdesc
@@ -59287,6 +59600,7 @@ var DragBoxEvent = /** @class */ (function (_super) {
     }
     return DragBoxEvent;
 }(_events_Event_js__WEBPACK_IMPORTED_MODULE_0__["default"]));
+
 /**
  * @classdesc
  * Allows the user to draw a vector box by clicking and dragging on the map,
@@ -59376,10 +59690,11 @@ var DragBox = /** @class */ (function (_super) {
      */
     DragBox.prototype.handleUpEvent = function (mapBrowserEvent) {
         this.box_.setMap(null);
-        if (this.boxEndCondition_(mapBrowserEvent, this.startPixel_, mapBrowserEvent.pixel)) {
+        var completeBox = this.boxEndCondition_(mapBrowserEvent, this.startPixel_, mapBrowserEvent.pixel);
+        if (completeBox) {
             this.onBoxEnd(mapBrowserEvent);
-            this.dispatchEvent(new DragBoxEvent(DragBoxEventType.BOXEND, mapBrowserEvent.coordinate, mapBrowserEvent));
         }
+        this.dispatchEvent(new DragBoxEvent(completeBox ? DragBoxEventType.BOXEND : DragBoxEventType.BOXCANCEL, mapBrowserEvent.coordinate, mapBrowserEvent));
         return false;
     };
     /**
@@ -59429,7 +59744,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -59630,7 +59945,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -59769,7 +60084,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -59926,7 +60241,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -60030,11 +60345,12 @@ var DragZoom = /** @class */ (function (_super) {
 /*!*********************************************!*\
   !*** ./node_modules/ol/interaction/Draw.js ***!
   \*********************************************/
-/*! exports provided: createRegularPolygon, createBox, default */
+/*! exports provided: DrawEvent, createRegularPolygon, createBox, default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DrawEvent", function() { return DrawEvent; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createRegularPolygon", function() { return createRegularPolygon; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "createBox", function() { return createBox; });
 /* harmony import */ var _geom_Circle_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../geom/Circle.js */ "./node_modules/ol/geom/Circle.js");
@@ -60065,7 +60381,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -60117,7 +60433,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
  * @property {number} [dragVertexDelay=500] Delay in milliseconds after pointerdown
  * before the current vertex can be dragged to its exact position.
  * @property {number} [snapTolerance=12] Pixel distance for snapping to the
- * drawing finish.
+ * drawing finish. Must be greater than `0`.
  * @property {boolean} [stopClick=false] Stop click, singleclick, and
  * doubleclick events from firing during drawing.
  * @property {number} [maxPoints] The number of points that can be drawn before
@@ -60128,7 +60444,8 @@ var __extends = (undefined && undefined.__extends) || (function () {
  * polygon rings and `2` for line strings.
  * @property {import("../events/condition.js").Condition} [finishCondition] A function
  * that takes an {@link module:ol/MapBrowserEvent~MapBrowserEvent} and returns a
- * boolean to indicate whether the drawing can be finished.
+ * boolean to indicate whether the drawing can be finished. Not used when drawing
+ * POINT or MULTI_POINT geometries.
  * @property {import("../style/Style.js").StyleLike} [style]
  * Style for sketch features.
  * @property {GeometryFunction} [geometryFunction]
@@ -60173,8 +60490,8 @@ var __extends = (undefined && undefined.__extends) || (function () {
  * and a projection as arguments, and returns a geometry. The optional existing
  * geometry is the geometry that is returned when the function is called without
  * a second argument.
- * @typedef {function(!SketchCoordType, import("../geom/SimpleGeometry.js").default=,
- *     import("../proj/Projection.js").default=):
+ * @typedef {function(!SketchCoordType, import("../geom/SimpleGeometry.js").default,
+ *     import("../proj/Projection.js").default):
  *     import("../geom/SimpleGeometry.js").default} GeometryFunction
  */
 /**
@@ -60234,6 +60551,7 @@ var DrawEvent = /** @class */ (function (_super) {
     }
     return DrawEvent;
 }(_events_Event_js__WEBPACK_IMPORTED_MODULE_1__["default"]));
+
 /**
  * @classdesc
  * Interaction for drawing feature geometries.
@@ -60273,6 +60591,12 @@ var Draw = /** @class */ (function (_super) {
          * @private
          */
         _this.lastDragTime_;
+        /**
+         * Pointer type of the last pointermove event
+         * @type {string}
+         * @private
+         */
+        _this.pointerType_;
         /**
          * @type {boolean}
          * @private
@@ -60333,7 +60657,12 @@ var Draw = /** @class */ (function (_super) {
          * @type {number}
          * @private
          */
-        _this.maxPoints_ = options.maxPoints ? options.maxPoints : Infinity;
+        _this.maxPoints_ =
+            _this.mode_ === Mode.CIRCLE
+                ? 2
+                : options.maxPoints
+                    ? options.maxPoints
+                    : Infinity;
         /**
          * A function to decide if a potential finish coordinate is permissible
          * @private
@@ -60344,19 +60673,20 @@ var Draw = /** @class */ (function (_super) {
             : _functions_js__WEBPACK_IMPORTED_MODULE_17__["TRUE"];
         var geometryFunction = options.geometryFunction;
         if (!geometryFunction) {
-            if (_this.type_ === _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_4__["default"].CIRCLE) {
+            var mode_1 = _this.mode_;
+            if (mode_1 === Mode.CIRCLE) {
                 /**
                  * @param {!LineCoordType} coordinates The coordinates.
-                 * @param {import("../geom/SimpleGeometry.js").default=} opt_geometry Optional geometry.
+                 * @param {import("../geom/SimpleGeometry.js").default|undefined} geometry Optional geometry.
                  * @param {import("../proj/Projection.js").default} projection The view projection.
                  * @return {import("../geom/SimpleGeometry.js").default} A geometry.
                  */
-                geometryFunction = function (coordinates, opt_geometry, projection) {
-                    var circle = opt_geometry
-                        ? /** @type {Circle} */ (opt_geometry)
+                geometryFunction = function (coordinates, geometry, projection) {
+                    var circle = geometry
+                        ? /** @type {Circle} */ (geometry)
                         : new _geom_Circle_js__WEBPACK_IMPORTED_MODULE_0__["default"]([NaN, NaN]);
                     var center = Object(_proj_js__WEBPACK_IMPORTED_MODULE_21__["fromUserCoordinate"])(coordinates[0], projection);
-                    var squaredLength = Object(_coordinate_js__WEBPACK_IMPORTED_MODULE_23__["squaredDistance"])(center, Object(_proj_js__WEBPACK_IMPORTED_MODULE_21__["fromUserCoordinate"])(coordinates[1], projection));
+                    var squaredLength = Object(_coordinate_js__WEBPACK_IMPORTED_MODULE_23__["squaredDistance"])(center, Object(_proj_js__WEBPACK_IMPORTED_MODULE_21__["fromUserCoordinate"])(coordinates[coordinates.length - 1], projection));
                     circle.setCenterAndRadius(center, Math.sqrt(squaredLength));
                     var userProjection = Object(_proj_js__WEBPACK_IMPORTED_MODULE_21__["getUserProjection"])();
                     if (userProjection) {
@@ -60367,7 +60697,6 @@ var Draw = /** @class */ (function (_super) {
             }
             else {
                 var Constructor_1;
-                var mode_1 = _this.mode_;
                 if (mode_1 === Mode.POINT) {
                     Constructor_1 = _geom_Point_js__WEBPACK_IMPORTED_MODULE_12__["default"];
                 }
@@ -60379,12 +60708,11 @@ var Draw = /** @class */ (function (_super) {
                 }
                 /**
                  * @param {!LineCoordType} coordinates The coordinates.
-                 * @param {import("../geom/SimpleGeometry.js").default=} opt_geometry Optional geometry.
+                 * @param {import("../geom/SimpleGeometry.js").default|undefined} geometry Optional geometry.
                  * @param {import("../proj/Projection.js").default} projection The view projection.
                  * @return {import("../geom/SimpleGeometry.js").default} A geometry.
                  */
-                geometryFunction = function (coordinates, opt_geometry, projection) {
-                    var geometry = opt_geometry;
+                geometryFunction = function (coordinates, geometry, projection) {
                     if (geometry) {
                         if (mode_1 === Mode.POLYGON) {
                             if (coordinates[0].length) {
@@ -60533,7 +60861,7 @@ var Draw = /** @class */ (function (_super) {
     Draw.prototype.handleEvent = function (event) {
         if (event.originalEvent.type === _events_EventType_js__WEBPACK_IMPORTED_MODULE_2__["default"].CONTEXTMENU) {
             // Avoid context menu for long taps when drawing on mobile
-            event.preventDefault();
+            event.originalEvent.preventDefault();
         }
         this.freehand_ =
             this.mode_ !== Mode.POINT && this.freehandCondition_(event);
@@ -60566,16 +60894,16 @@ var Draw = /** @class */ (function (_super) {
             event.type === _MapBrowserEventType_js__WEBPACK_IMPORTED_MODULE_8__["default"].POINTERDOWN) {
             pass = false;
         }
-        else if (move) {
+        else if (move && this.getPointerCount() < 2) {
             pass = event.type === _MapBrowserEventType_js__WEBPACK_IMPORTED_MODULE_8__["default"].POINTERMOVE;
             if (pass && this.freehand_) {
                 this.handlePointerMove_(event);
                 if (this.shouldHandle_) {
                     // Avoid page scrolling when freehand drawing on mobile
-                    event.preventDefault();
+                    event.originalEvent.preventDefault();
                 }
             }
-            else if (event.originalEvent.pointerType == 'mouse' ||
+            else if (event.originalEvent.pointerType === 'mouse' ||
                 (event.type === _MapBrowserEventType_js__WEBPACK_IMPORTED_MODULE_8__["default"].POINTERDRAG &&
                     this.downTimeout_ === undefined)) {
                 this.handlePointerMove_(event);
@@ -60596,7 +60924,7 @@ var Draw = /** @class */ (function (_super) {
         if (this.freehand_) {
             this.downPx_ = event.pixel;
             if (!this.finishCoordinate_) {
-                this.startDrawing_(event);
+                this.startDrawing_(event.coordinate);
             }
             return true;
         }
@@ -60620,37 +60948,38 @@ var Draw = /** @class */ (function (_super) {
      */
     Draw.prototype.handleUpEvent = function (event) {
         var pass = true;
-        if (this.downTimeout_) {
-            clearTimeout(this.downTimeout_);
-            this.downTimeout_ = undefined;
-        }
-        this.handlePointerMove_(event);
-        var circleMode = this.mode_ === Mode.CIRCLE;
-        if (this.shouldHandle_) {
-            if (!this.finishCoordinate_) {
-                this.startDrawing_(event);
-                if (this.mode_ === Mode.POINT) {
-                    this.finishDrawing();
+        if (this.getPointerCount() === 0) {
+            if (this.downTimeout_) {
+                clearTimeout(this.downTimeout_);
+                this.downTimeout_ = undefined;
+            }
+            this.handlePointerMove_(event);
+            if (this.shouldHandle_) {
+                switch (true) {
+                    case !this.finishCoordinate_:
+                        this.startDrawing_(event.coordinate);
+                        if (this.mode_ !== Mode.POINT) {
+                            break;
+                        }
+                    // eslint-disable-next-line no-fallthrough
+                    case this.freehand_ ||
+                        (this.atFinish_(event.pixel) && this.finishCondition_(event)):
+                        this.finishDrawing();
+                        break;
+                    case !this.freehand_:
+                        this.addToDrawing_(event.coordinate);
+                        break;
+                    default:
+                        break;
                 }
+                pass = false;
             }
-            else if (this.freehand_ || circleMode) {
-                this.finishDrawing();
+            else if (this.freehand_) {
+                this.abortDrawing();
             }
-            else if (this.atFinish_(event)) {
-                if (this.finishCondition_(event)) {
-                    this.finishDrawing();
-                }
-            }
-            else {
-                this.addToDrawing_(event.coordinate);
-            }
-            pass = false;
-        }
-        else if (this.freehand_) {
-            this.abortDrawing();
         }
         if (!pass && this.stopClick_) {
-            event.stopPropagation();
+            event.originalEvent.stopPropagation();
         }
         return pass;
     };
@@ -60660,6 +60989,7 @@ var Draw = /** @class */ (function (_super) {
      * @private
      */
     Draw.prototype.handlePointerMove_ = function (event) {
+        this.pointerType_ = event.originalEvent.pointerType;
         if (this.downPx_ &&
             ((!this.freehand_ && this.shouldHandle_) ||
                 (this.freehand_ && !this.shouldHandle_))) {
@@ -60676,7 +61006,7 @@ var Draw = /** @class */ (function (_super) {
             }
         }
         if (this.finishCoordinate_) {
-            this.modifyDrawing_(event);
+            this.modifyDrawing_(event.coordinate);
         }
         else {
             this.createOrUpdateSketchPoint_(event);
@@ -60684,19 +61014,26 @@ var Draw = /** @class */ (function (_super) {
     };
     /**
      * Determine if an event is within the snapping tolerance of the start coord.
-     * @param {import("../MapBrowserEvent.js").default} event Event.
+     * @param {import("../pixel.js").Pixel} pixel Pixel.
      * @return {boolean} The event is within the snapping tolerance of the start.
      * @private
      */
-    Draw.prototype.atFinish_ = function (event) {
+    Draw.prototype.atFinish_ = function (pixel) {
         var at = false;
         if (this.sketchFeature_) {
             var potentiallyDone = false;
             var potentiallyFinishCoordinates = [this.finishCoordinate_];
-            if (this.mode_ === Mode.LINE_STRING) {
+            var mode = this.mode_;
+            if (mode === Mode.POINT) {
+                at = true;
+            }
+            else if (mode === Mode.CIRCLE) {
+                at = this.sketchCoords_.length === 2;
+            }
+            else if (mode === Mode.LINE_STRING) {
                 potentiallyDone = this.sketchCoords_.length > this.minPoints_;
             }
-            else if (this.mode_ === Mode.POLYGON) {
+            else if (mode === Mode.POLYGON) {
                 var sketchCoords = /** @type {PolyCoordType} */ (this.sketchCoords_);
                 potentiallyDone = sketchCoords[0].length > this.minPoints_;
                 potentiallyFinishCoordinates = [
@@ -60705,11 +61042,10 @@ var Draw = /** @class */ (function (_super) {
                 ];
             }
             if (potentiallyDone) {
-                var map = event.map;
+                var map = this.getMap();
                 for (var i = 0, ii = potentiallyFinishCoordinates.length; i < ii; i++) {
                     var finishCoordinate = potentiallyFinishCoordinates[i];
                     var finishPixel = map.getPixelFromCoordinate(finishCoordinate);
-                    var pixel = event.pixel;
                     var dx = pixel[0] - finishPixel[0];
                     var dy = pixel[1] - finishPixel[1];
                     var snapTolerance = this.freehand_ ? 1 : this.snapTolerance_;
@@ -60739,13 +61075,31 @@ var Draw = /** @class */ (function (_super) {
         }
     };
     /**
-     * Start the drawing.
-     * @param {import("../MapBrowserEvent.js").default} event Event.
+     * @param {import("../geom/Polygon.js").default} geometry Polygon geometry.
      * @private
      */
-    Draw.prototype.startDrawing_ = function (event) {
-        var start = event.coordinate;
-        var projection = event.map.getView().getProjection();
+    Draw.prototype.createOrUpdateCustomSketchLine_ = function (geometry) {
+        if (!this.sketchLine_) {
+            this.sketchLine_ = new _Feature_js__WEBPACK_IMPORTED_MODULE_3__["default"]();
+        }
+        var ring = geometry.getLinearRing(0);
+        var sketchLineGeom = this.sketchLine_.getGeometry();
+        if (!sketchLineGeom) {
+            sketchLineGeom = new _geom_LineString_js__WEBPACK_IMPORTED_MODULE_6__["default"](ring.getFlatCoordinates(), ring.getLayout());
+            this.sketchLine_.setGeometry(sketchLineGeom);
+        }
+        else {
+            sketchLineGeom.setFlatCoordinates(ring.getLayout(), ring.getFlatCoordinates());
+            sketchLineGeom.changed();
+        }
+    };
+    /**
+     * Start the drawing.
+     * @param {import("../coordinate.js").Coordinate} start Start coordinate.
+     * @private
+     */
+    Draw.prototype.startDrawing_ = function (start) {
+        var projection = this.getMap().getView().getProjection();
         this.finishCoordinate_ = start;
         if (this.mode_ === Mode.POINT) {
             this.sketchCoords_ = start.slice();
@@ -60771,13 +61125,13 @@ var Draw = /** @class */ (function (_super) {
     };
     /**
      * Modify the drawing.
-     * @param {import("../MapBrowserEvent.js").default} event Event.
+     * @param {import("../coordinate.js").Coordinate} coordinate Coordinate.
      * @private
      */
-    Draw.prototype.modifyDrawing_ = function (event) {
-        var coordinate = event.coordinate;
+    Draw.prototype.modifyDrawing_ = function (coordinate) {
+        var map = this.getMap();
         var geometry = this.sketchFeature_.getGeometry();
-        var projection = event.map.getView().getProjection();
+        var projection = map.getView().getProjection();
         var coordinates, last;
         if (this.mode_ === Mode.POINT) {
             last = this.sketchCoords_;
@@ -60785,7 +61139,7 @@ var Draw = /** @class */ (function (_super) {
         else if (this.mode_ === Mode.POLYGON) {
             coordinates = /** @type {PolyCoordType} */ (this.sketchCoords_)[0];
             last = coordinates[coordinates.length - 1];
-            if (this.atFinish_(event)) {
+            if (this.atFinish_(map.getPixelFromCoordinate(coordinate))) {
                 // snap to finish
                 coordinate = this.finishCoordinate_.slice();
             }
@@ -60802,26 +61156,12 @@ var Draw = /** @class */ (function (_super) {
             var sketchPointGeom = this.sketchPoint_.getGeometry();
             sketchPointGeom.setCoordinates(coordinate);
         }
-        /** @type {LineString} */
-        var sketchLineGeom;
-        if (geometry.getType() == _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_4__["default"].POLYGON &&
+        if (geometry.getType() === _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_4__["default"].POLYGON &&
             this.mode_ !== Mode.POLYGON) {
-            if (!this.sketchLine_) {
-                this.sketchLine_ = new _Feature_js__WEBPACK_IMPORTED_MODULE_3__["default"]();
-            }
-            var ring = geometry.getLinearRing(0);
-            sketchLineGeom = this.sketchLine_.getGeometry();
-            if (!sketchLineGeom) {
-                sketchLineGeom = new _geom_LineString_js__WEBPACK_IMPORTED_MODULE_6__["default"](ring.getFlatCoordinates(), ring.getLayout());
-                this.sketchLine_.setGeometry(sketchLineGeom);
-            }
-            else {
-                sketchLineGeom.setFlatCoordinates(ring.getLayout(), ring.getFlatCoordinates());
-                sketchLineGeom.changed();
-            }
+            this.createOrUpdateCustomSketchLine_(/** @type {Polygon} */ (geometry));
         }
         else if (this.sketchLineCoords_) {
-            sketchLineGeom = this.sketchLine_.getGeometry();
+            var sketchLineGeom = this.sketchLine_.getGeometry();
             sketchLineGeom.setCoordinates(this.sketchLineCoords_);
         }
         this.updateSketchFeatures_();
@@ -60836,7 +61176,8 @@ var Draw = /** @class */ (function (_super) {
         var projection = this.getMap().getView().getProjection();
         var done;
         var coordinates;
-        if (this.mode_ === Mode.LINE_STRING) {
+        var mode = this.mode_;
+        if (mode === Mode.LINE_STRING || mode === Mode.CIRCLE) {
             this.finishCoordinate_ = coordinate.slice();
             coordinates = /** @type {LineCoordType} */ (this.sketchCoords_);
             if (coordinates.length >= this.maxPoints_) {
@@ -60850,7 +61191,7 @@ var Draw = /** @class */ (function (_super) {
             coordinates.push(coordinate.slice());
             this.geometryFunction_(coordinates, geometry, projection);
         }
-        else if (this.mode_ === Mode.POLYGON) {
+        else if (mode === Mode.POLYGON) {
             coordinates = /** @type {PolyCoordType} */ (this.sketchCoords_)[0];
             if (coordinates.length >= this.maxPoints_) {
                 if (this.freehand_) {
@@ -60872,7 +61213,8 @@ var Draw = /** @class */ (function (_super) {
         }
     };
     /**
-     * Remove last point of the feature currently being drawn.
+     * Remove last point of the feature currently being drawn. Does not do anything when
+     * drawing POINT or MULTI_POINT geometries.
      * @api
      */
     Draw.prototype.removeLastPoint = function () {
@@ -60882,24 +61224,34 @@ var Draw = /** @class */ (function (_super) {
         var geometry = this.sketchFeature_.getGeometry();
         var projection = this.getMap().getView().getProjection();
         var coordinates;
-        /** @type {LineString} */
-        var sketchLineGeom;
-        if (this.mode_ === Mode.LINE_STRING) {
+        var mode = this.mode_;
+        if (mode === Mode.LINE_STRING || mode === Mode.CIRCLE) {
             coordinates = /** @type {LineCoordType} */ (this.sketchCoords_);
             coordinates.splice(-2, 1);
-            this.geometryFunction_(coordinates, geometry, projection);
             if (coordinates.length >= 2) {
                 this.finishCoordinate_ = coordinates[coordinates.length - 2].slice();
+                var finishCoordinate = this.finishCoordinate_.slice();
+                coordinates[coordinates.length - 1] = finishCoordinate;
+                this.sketchPoint_.setGeometry(new _geom_Point_js__WEBPACK_IMPORTED_MODULE_12__["default"](finishCoordinate));
+            }
+            this.geometryFunction_(coordinates, geometry, projection);
+            if (geometry.getType() === _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_4__["default"].POLYGON && this.sketchLine_) {
+                this.createOrUpdateCustomSketchLine_(/** @type {Polygon} */ (geometry));
             }
         }
-        else if (this.mode_ === Mode.POLYGON) {
+        else if (mode === Mode.POLYGON) {
             coordinates = /** @type {PolyCoordType} */ (this.sketchCoords_)[0];
             coordinates.splice(-2, 1);
-            sketchLineGeom = this.sketchLine_.getGeometry();
+            var sketchLineGeom = this.sketchLine_.getGeometry();
+            if (coordinates.length >= 2) {
+                var finishCoordinate = coordinates[coordinates.length - 2].slice();
+                coordinates[coordinates.length - 1] = finishCoordinate;
+                this.sketchPoint_.setGeometry(new _geom_Point_js__WEBPACK_IMPORTED_MODULE_12__["default"](finishCoordinate));
+            }
             sketchLineGeom.setCoordinates(coordinates);
             this.geometryFunction_(this.sketchCoords_, geometry, projection);
         }
-        if (coordinates.length === 0) {
+        if (coordinates.length === 1) {
             this.abortDrawing();
         }
         this.updateSketchFeatures_();
@@ -60977,16 +61329,21 @@ var Draw = /** @class */ (function (_super) {
      * Append coordinates to the end of the geometry that is currently being drawn.
      * This can be used when drawing LineStrings or Polygons. Coordinates will
      * either be appended to the current LineString or the outer ring of the current
-     * Polygon.
-     * @param {!LineCoordType} coordinates Linear coordinates to be appended into
+     * Polygon. If no geometry is being drawn, a new one will be created.
+     * @param {!LineCoordType} coordinates Linear coordinates to be appended to
      * the coordinate array.
      * @api
      */
     Draw.prototype.appendCoordinates = function (coordinates) {
         var mode = this.mode_;
-        var sketchCoords = [];
-        if (mode === Mode.LINE_STRING) {
-            sketchCoords = /** @type {LineCoordType} */ this.sketchCoords_;
+        var newDrawing = !this.sketchFeature_;
+        if (newDrawing) {
+            this.startDrawing_(coordinates[0]);
+        }
+        /** @type {LineCoordType} */
+        var sketchCoords;
+        if (mode === Mode.LINE_STRING || mode === Mode.CIRCLE) {
+            sketchCoords = /** @type {LineCoordType} */ (this.sketchCoords_);
         }
         else if (mode === Mode.POLYGON) {
             sketchCoords =
@@ -60994,14 +61351,22 @@ var Draw = /** @class */ (function (_super) {
                     ? /** @type {PolyCoordType} */ (this.sketchCoords_)[0]
                     : [];
         }
+        else {
+            return;
+        }
+        if (newDrawing) {
+            sketchCoords.shift();
+        }
         // Remove last coordinate from sketch drawing (this coordinate follows cursor position)
-        var ending = sketchCoords.pop();
+        sketchCoords.pop();
         // Append coordinate list
         for (var i = 0; i < coordinates.length; i++) {
             this.addToDrawing_(coordinates[i]);
         }
-        // Duplicate last coordinate for sketch drawing
+        var ending = coordinates[coordinates.length - 1];
+        // Duplicate last coordinate for sketch drawing (cursor position)
         this.addToDrawing_(ending);
+        this.modifyDrawing_(ending);
     };
     /**
      * Initiate draw mode by starting from an existing geometry which will
@@ -61023,6 +61388,7 @@ var Draw = /** @class */ (function (_super) {
         var last = this.sketchCoords_[this.sketchCoords_.length - 1];
         this.finishCoordinate_ = last.slice();
         this.sketchCoords_.push(last.slice());
+        this.sketchPoint_ = new _Feature_js__WEBPACK_IMPORTED_MODULE_3__["default"](new _geom_Point_js__WEBPACK_IMPORTED_MODULE_12__["default"](last));
         this.updateSketchFeatures_();
         this.dispatchEvent(new DrawEvent(DrawEventType.DRAWSTART, this.sketchFeature_));
     };
@@ -61069,15 +61435,15 @@ function getDefaultStyleFunction() {
 }
 /**
  * Create a `geometryFunction` for `type: 'Circle'` that will create a regular
- * polygon with a user specified number of sides and start angle instead of an
+ * polygon with a user specified number of sides and start angle instead of a
  * `import("../geom/Circle.js").Circle` geometry.
- * @param {number=} opt_sides Number of sides of the regular polygon. Default is
- *     32.
- * @param {number=} opt_angle Angle of the first point in radians. 0 means East.
+ * @param {number=} opt_sides Number of sides of the regular polygon.
+ *     Default is 32.
+ * @param {number=} opt_angle Angle of the first point in counter-clockwise
+ *     radians. 0 means East.
  *     Default is the angle defined by the heading from the center of the
  *     regular polygon to the current pointer position.
- * @return {GeometryFunction} Function that draws a
- *     polygon.
+ * @return {GeometryFunction} Function that draws a polygon.
  * @api
  */
 function createRegularPolygon(opt_sides, opt_angle) {
@@ -61085,16 +61451,16 @@ function createRegularPolygon(opt_sides, opt_angle) {
         var center = Object(_proj_js__WEBPACK_IMPORTED_MODULE_21__["fromUserCoordinate"])(
         /** @type {LineCoordType} */ (coordinates)[0], projection);
         var end = Object(_proj_js__WEBPACK_IMPORTED_MODULE_21__["fromUserCoordinate"])(
-        /** @type {LineCoordType} */ (coordinates)[1], projection);
+        /** @type {LineCoordType} */ (coordinates)[coordinates.length - 1], projection);
         var radius = Math.sqrt(Object(_coordinate_js__WEBPACK_IMPORTED_MODULE_23__["squaredDistance"])(center, end));
         var geometry = opt_geometry
             ? /** @type {Polygon} */ (opt_geometry)
             : Object(_geom_Polygon_js__WEBPACK_IMPORTED_MODULE_14__["fromCircle"])(new _geom_Circle_js__WEBPACK_IMPORTED_MODULE_0__["default"](center), opt_sides);
         var angle = opt_angle;
-        if (!opt_angle) {
+        if (!opt_angle && opt_angle !== 0) {
             var x = end[0] - center[0];
             var y = end[1] - center[1];
-            angle = Math.atan(y / x) - (x < 0 ? Math.PI : 0);
+            angle = Math.atan2(y, x);
         }
         Object(_geom_Polygon_js__WEBPACK_IMPORTED_MODULE_14__["makeRegular"])(geometry, center, radius, angle);
         var userProjection = Object(_proj_js__WEBPACK_IMPORTED_MODULE_21__["getUserProjection"])();
@@ -61114,7 +61480,10 @@ function createRegularPolygon(opt_sides, opt_angle) {
 function createBox() {
     return function (coordinates, opt_geometry, projection) {
         var extent = Object(_extent_js__WEBPACK_IMPORTED_MODULE_19__["boundingExtent"])(
-        /** @type {LineCoordType} */ (coordinates).map(function (coordinate) {
+        /** @type {LineCoordType} */ ([
+            coordinates[0],
+            coordinates[coordinates.length - 1],
+        ]).map(function (coordinate) {
             return Object(_proj_js__WEBPACK_IMPORTED_MODULE_21__["fromUserCoordinate"])(coordinate, projection);
         }));
         var boxCoordinates = [
@@ -61173,11 +61542,12 @@ function getMode(type) {
 /*!***********************************************!*\
   !*** ./node_modules/ol/interaction/Extent.js ***!
   \***********************************************/
-/*! exports provided: default */
+/*! exports provided: ExtentEvent, default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "ExtentEvent", function() { return ExtentEvent; });
 /* harmony import */ var _events_Event_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../events/Event.js */ "./node_modules/ol/events/Event.js");
 /* harmony import */ var _Feature_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../Feature.js */ "./node_modules/ol/Feature.js");
 /* harmony import */ var _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../geom/GeometryType.js */ "./node_modules/ol/geom/GeometryType.js");
@@ -61196,7 +61566,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -61274,6 +61644,7 @@ var ExtentEvent = /** @class */ (function (_super) {
     }
     return ExtentEvent;
 }(_events_Event_js__WEBPACK_IMPORTED_MODULE_0__["default"]));
+
 /**
  * @classdesc
  * Allows the user to draw a vector box by clicking and dragging on the map.
@@ -61709,7 +62080,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -61873,7 +62244,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -61988,7 +62359,7 @@ var KeyboardPan = /** @class */ (function (_super) {
                 var delta = [deltaX, deltaY];
                 Object(_coordinate_js__WEBPACK_IMPORTED_MODULE_4__["rotate"])(delta, view.getRotation());
                 Object(_Interaction_js__WEBPACK_IMPORTED_MODULE_1__["pan"])(view, delta, this.duration_);
-                mapBrowserEvent.preventDefault();
+                keyEvent.preventDefault();
                 stopEvent = true;
             }
         }
@@ -62017,7 +62388,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -62099,7 +62470,7 @@ var KeyboardZoom = /** @class */ (function (_super) {
                 var delta = charCode == '+'.charCodeAt(0) ? this.delta_ : -this.delta_;
                 var view = map.getView();
                 Object(_Interaction_js__WEBPACK_IMPORTED_MODULE_1__["zoomByDelta"])(view, delta, undefined, this.duration_);
-                mapBrowserEvent.preventDefault();
+                keyEvent.preventDefault();
                 stopEvent = true;
             }
         }
@@ -62147,7 +62518,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -62239,14 +62610,24 @@ var ModifyEventType = {
  * @property {number} [pixelTolerance=10] Pixel tolerance for considering the
  * pointer close enough to a segment or vertex for editing.
  * @property {import("../style/Style.js").StyleLike} [style]
- * Style used for the features being modified. By default the default edit
- * style is used (see {@link module:ol/style}).
+ * Style used for the modification point or vertex. For linestrings and polygons, this will
+ * be the affected vertex, for circles a point along the circle, and for points the actual
+ * point. If not configured, the default edit style is used (see {@link module:ol/style}).
+ * When using a style function, the point feature passed to the function will have a `features`
+ * property - an array whose entries are the features that are being modified, and a `geometries`
+ * property - an array whose entries are the geometries that are being modified. Both arrays are
+ * in the same order. The `geometries` are only useful when modifying geometry collections, where
+ * the geometry will be the particular geometry from the collection that is being modified.
  * @property {VectorSource} [source] The vector source with
  * features to modify.  If a vector source is not provided, a feature collection
- * must be provided with the features option.
+ * must be provided with the `features` option.
+ * @property {boolean|import("../layer/BaseVector").default} [hitDetection] When configured, point
+ * features will be considered for modification based on their visual appearance, instead of being within
+ * the `pixelTolerance` from the pointer location. When a {@link module:ol/layer/BaseVector} is
+ * provided, only the rendered representation of the features on that layer will be considered.
  * @property {Collection<Feature>} [features]
  * The features the interaction works on.  If a feature collection is not
- * provided, a vector source must be provided with the source option.
+ * provided, a vector source must be provided with the `source` option.
  * @property {boolean} [wrapX=false] Wrap the world horizontally on the sketch
  * overlay.
  */
@@ -62291,6 +62672,12 @@ var ModifyEvent = /** @class */ (function (_super) {
  * the collection used by a select interaction), construct the interaction with
  * the `features` option.  The interaction must be constructed with either a
  * `source` or `features` option.
+ *
+ * Cartesian distance from the pointer is used to determine the features that
+ * will be modified. This means that geometries will only be considered for
+ * modification when they are within the configured `pixelTolerane`. For point
+ * geometries, the `hitDetection` option can be used to match their visual
+ * appearance.
  *
  * By default, the interaction will allow deletion of vertices when the `alt`
  * key is pressed.  To configure the interaction with a different condition
@@ -62359,10 +62746,10 @@ var Modify = /** @class */ (function (_super) {
          */
         _this.ignoreNextSingleClick_ = false;
         /**
-         * @type {boolean}
+         * @type {Collection<Feature>}
          * @private
          */
-        _this.modified_ = false;
+        _this.featuresBeingModified_ = null;
         /**
          * Segment RTree for each layer
          * @type {RBush<SegmentData>}
@@ -62427,21 +62814,28 @@ var Modify = /** @class */ (function (_super) {
          * @private
          */
         _this.source_ = null;
+        /**
+         * @type {boolean|import("../layer/BaseVector").default}
+         */
+        _this.hitDetection_ = null;
         var features;
-        if (options.source) {
+        if (options.features) {
+            features = options.features;
+        }
+        else if (options.source) {
             _this.source_ = options.source;
             features = new _Collection_js__WEBPACK_IMPORTED_MODULE_0__["default"](_this.source_.getFeatures());
             _this.source_.addEventListener(_source_VectorEventType_js__WEBPACK_IMPORTED_MODULE_10__["default"].ADDFEATURE, _this.handleSourceAdd_.bind(_this));
             _this.source_.addEventListener(_source_VectorEventType_js__WEBPACK_IMPORTED_MODULE_10__["default"].REMOVEFEATURE, _this.handleSourceRemove_.bind(_this));
         }
-        else {
-            features = options.features;
-        }
         if (!features) {
-            throw new Error('The modify interaction requires features or a source');
+            throw new Error('The modify interaction requires features, a source or a layer');
+        }
+        if (options.hitDetection) {
+            _this.hitDetection_ = options.hitDetection;
         }
         /**
-         * @type {Collection<Feature>}
+         * @type {Collection<import("../Feature.js").FeatureLike>}
          * @private
          */
         _this.features_ = features;
@@ -62453,6 +62847,11 @@ var Modify = /** @class */ (function (_super) {
          * @private
          */
         _this.lastPointerEvent_ = null;
+        /**
+         * Delta (x, y in map units) between matched rtree vertex and pointer vertex.
+         * @type {Array<number>}
+         */
+        _this.delta_ = [0, 0];
         return _this;
     }
     /**
@@ -62474,13 +62873,21 @@ var Modify = /** @class */ (function (_super) {
         feature.addEventListener(_events_EventType_js__WEBPACK_IMPORTED_MODULE_3__["default"].CHANGE, this.boundHandleFeatureChange_);
     };
     /**
-     * @param {import("../MapBrowserEvent.js").default} evt Map browser event
+     * @param {import("../MapBrowserEvent.js").default} evt Map browser event.
+     * @param {Array<Array<SegmentData>>} segments The segments subject to modification.
      * @private
      */
-    Modify.prototype.willModifyFeatures_ = function (evt) {
-        if (!this.modified_) {
-            this.modified_ = true;
-            this.dispatchEvent(new ModifyEvent(ModifyEventType.MODIFYSTART, this.features_, evt));
+    Modify.prototype.willModifyFeatures_ = function (evt, segments) {
+        if (!this.featuresBeingModified_) {
+            this.featuresBeingModified_ = new _Collection_js__WEBPACK_IMPORTED_MODULE_0__["default"]();
+            var features = this.featuresBeingModified_.getArray();
+            for (var i = 0, ii = segments.length; i < ii; ++i) {
+                var feature = segments[i][0].feature;
+                if (features.indexOf(feature) === -1) {
+                    this.featuresBeingModified_.push(feature);
+                }
+            }
+            this.dispatchEvent(new ModifyEvent(ModifyEventType.MODIFYSTART, this.featuresBeingModified_, evt));
         }
     };
     /**
@@ -62547,7 +62954,7 @@ var Modify = /** @class */ (function (_super) {
         _super.prototype.setMap.call(this, map);
     };
     /**
-     * Get the overlay layer that this interaction renders sketch features to.
+     * Get the overlay layer that this interaction renders the modification point or vertex to.
      * @return {VectorLayer} Overlay layer.
      * @api
      */
@@ -62782,10 +63189,12 @@ var Modify = /** @class */ (function (_super) {
     };
     /**
      * @param {import("../coordinate.js").Coordinate} coordinates Coordinates.
+     * @param {Array<Feature>} features The features being modified.
+     * @param {Array<import("../geom/SimpleGeometry.js").default>} geometries The geometries being modified.
      * @return {Feature} Vertex feature.
      * @private
      */
-    Modify.prototype.createOrUpdateVertexFeature_ = function (coordinates) {
+    Modify.prototype.createOrUpdateVertexFeature_ = function (coordinates, features, geometries) {
         var vertexFeature = this.vertexFeature_;
         if (!vertexFeature) {
             vertexFeature = new _Feature_js__WEBPACK_IMPORTED_MODULE_4__["default"](new _geom_Point_js__WEBPACK_IMPORTED_MODULE_7__["default"](coordinates));
@@ -62796,6 +63205,8 @@ var Modify = /** @class */ (function (_super) {
             var geometry = vertexFeature.getGeometry();
             geometry.setCoordinates(coordinates);
         }
+        vertexFeature.set('features', features);
+        vertexFeature.set('geometries', geometries);
         return vertexFeature;
     };
     /**
@@ -62834,13 +63245,25 @@ var Modify = /** @class */ (function (_super) {
      */
     Modify.prototype.handleDragEvent = function (evt) {
         this.ignoreNextSingleClick_ = false;
-        this.willModifyFeatures_(evt);
-        var vertex = evt.coordinate;
+        this.willModifyFeatures_(evt, this.dragSegments_);
+        var vertex = [
+            evt.coordinate[0] + this.delta_[0],
+            evt.coordinate[1] + this.delta_[1],
+        ];
+        var features = [];
+        var geometries = [];
         for (var i = 0, ii = this.dragSegments_.length; i < ii; ++i) {
             var dragSegment = this.dragSegments_[i];
             var segmentData = dragSegment[0];
-            var depth = segmentData.depth;
+            var feature = segmentData.feature;
+            if (features.indexOf(feature) === -1) {
+                features.push(feature);
+            }
             var geometry = segmentData.geometry;
+            if (geometries.indexOf(geometry) === -1) {
+                geometries.push(geometry);
+            }
+            var depth = segmentData.depth;
             var coordinates = void 0;
             var segment = segmentData.segment;
             var index = dragSegment[1];
@@ -62913,7 +63336,7 @@ var Modify = /** @class */ (function (_super) {
                 this.setGeometryCoordinates_(geometry, coordinates);
             }
         }
-        this.createOrUpdateVertexFeature_(vertex);
+        this.createOrUpdateVertexFeature_(vertex, features, geometries);
     };
     /**
      * Handle pointer down events.
@@ -62927,7 +63350,7 @@ var Modify = /** @class */ (function (_super) {
         var pixelCoordinate = evt.coordinate;
         this.handlePointerAtPixel_(evt.pixel, evt.map, pixelCoordinate);
         this.dragSegments_.length = 0;
-        this.modified_ = false;
+        this.featuresBeingModified_ = null;
         var vertexFeature = this.vertexFeature_;
         if (vertexFeature) {
             var projection = evt.map.getView().getProjection();
@@ -62982,14 +63405,14 @@ var Modify = /** @class */ (function (_super) {
                     !componentSegments[uid][0] &&
                     !componentSegments[uid][1] &&
                     this.insertVertexCondition_(evt)) {
-                    insertVertices.push([segmentDataMatch, vertex]);
+                    insertVertices.push(segmentDataMatch);
                 }
             }
             if (insertVertices.length) {
-                this.willModifyFeatures_(evt);
+                this.willModifyFeatures_(evt, [insertVertices]);
             }
             for (var j = insertVertices.length - 1; j >= 0; --j) {
-                this.insertVertex_.apply(this, insertVertices[j]);
+                this.insertVertex_(insertVertices[j], vertex);
             }
         }
         return !!this.vertexFeature_;
@@ -63028,9 +63451,9 @@ var Modify = /** @class */ (function (_super) {
                 this.rBush_.update(Object(_extent_js__WEBPACK_IMPORTED_MODULE_14__["boundingExtent"])(segmentData.segment), segmentData);
             }
         }
-        if (this.modified_) {
-            this.dispatchEvent(new ModifyEvent(ModifyEventType.MODIFYEND, this.features_, evt));
-            this.modified_ = false;
+        if (this.featuresBeingModified_) {
+            this.dispatchEvent(new ModifyEvent(ModifyEventType.MODIFYEND, this.featuresBeingModified_, evt));
+            this.featuresBeingModified_ = null;
         }
         return false;
     };
@@ -63049,31 +63472,56 @@ var Modify = /** @class */ (function (_super) {
      * @private
      */
     Modify.prototype.handlePointerAtPixel_ = function (pixel, map, opt_coordinate) {
+        var _this = this;
         var pixelCoordinate = opt_coordinate || map.getCoordinateFromPixel(pixel);
         var projection = map.getView().getProjection();
         var sortByDistance = function (a, b) {
             return (projectedDistanceToSegmentDataSquared(pixelCoordinate, a, projection) -
                 projectedDistanceToSegmentDataSquared(pixelCoordinate, b, projection));
         };
-        var viewExtent = Object(_proj_js__WEBPACK_IMPORTED_MODULE_19__["fromUserExtent"])(Object(_extent_js__WEBPACK_IMPORTED_MODULE_14__["createOrUpdateFromCoordinate"])(pixelCoordinate, tempExtent), projection);
-        var buffer = map.getView().getResolution() * this.pixelTolerance_;
-        var box = Object(_proj_js__WEBPACK_IMPORTED_MODULE_19__["toUserExtent"])(Object(_extent_js__WEBPACK_IMPORTED_MODULE_14__["buffer"])(viewExtent, buffer, tempExtent), projection);
-        var rBush = this.rBush_;
-        var nodes = rBush.getInExtent(box);
-        if (nodes.length > 0) {
-            nodes.sort(sortByDistance);
-            var node = nodes[0];
+        var nodes, hitPointGeometry;
+        if (this.hitDetection_) {
+            var layerFilter = typeof this.hitDetection_ === 'object'
+                ? function (layer) { return layer === _this.hitDetection_; }
+                : undefined;
+            map.forEachFeatureAtPixel(pixel, function (feature, layer, geometry) {
+                geometry = geometry || feature.getGeometry();
+                if (geometry.getType() === _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_5__["default"].POINT) {
+                    hitPointGeometry = geometry;
+                    var coordinate = geometry.getCoordinates();
+                    nodes = [
+                        {
+                            feature: feature,
+                            geometry: geometry,
+                            segment: [coordinate, coordinate],
+                        },
+                    ];
+                }
+                return true;
+            }, { layerFilter: layerFilter });
+        }
+        if (!nodes) {
+            var viewExtent = Object(_proj_js__WEBPACK_IMPORTED_MODULE_19__["fromUserExtent"])(Object(_extent_js__WEBPACK_IMPORTED_MODULE_14__["createOrUpdateFromCoordinate"])(pixelCoordinate, tempExtent), projection);
+            var buffer = map.getView().getResolution() * this.pixelTolerance_;
+            var box = Object(_proj_js__WEBPACK_IMPORTED_MODULE_19__["toUserExtent"])(Object(_extent_js__WEBPACK_IMPORTED_MODULE_14__["buffer"])(viewExtent, buffer, tempExtent), projection);
+            nodes = this.rBush_.getInExtent(box);
+        }
+        if (nodes && nodes.length > 0) {
+            var node = nodes.sort(sortByDistance)[0];
             var closestSegment = node.segment;
             var vertex = closestOnSegmentData(pixelCoordinate, node, projection);
             var vertexPixel = map.getPixelFromCoordinate(vertex);
             var dist = Object(_coordinate_js__WEBPACK_IMPORTED_MODULE_15__["distance"])(pixel, vertexPixel);
-            if (dist <= this.pixelTolerance_) {
+            if (hitPointGeometry || dist <= this.pixelTolerance_) {
                 /** @type {Object<string, boolean>} */
                 var vertexSegments = {};
+                vertexSegments[Object(_util_js__WEBPACK_IMPORTED_MODULE_20__["getUid"])(closestSegment)] = true;
+                this.delta_[0] = vertex[0] - pixelCoordinate[0];
+                this.delta_[1] = vertex[1] - pixelCoordinate[1];
                 if (node.geometry.getType() === _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_5__["default"].CIRCLE &&
                     node.index === CIRCLE_CIRCUMFERENCE_INDEX) {
                     this.snappedToVertex_ = true;
-                    this.createOrUpdateVertexFeature_(vertex);
+                    this.createOrUpdateVertexFeature_(vertex, [node.feature], [node.geometry]);
                 }
                 else {
                     var pixel1 = map.getPixelFromCoordinate(closestSegment[0]);
@@ -63088,21 +63536,26 @@ var Modify = /** @class */ (function (_super) {
                                 ? closestSegment[1]
                                 : closestSegment[0];
                     }
-                    this.createOrUpdateVertexFeature_(vertex);
+                    this.createOrUpdateVertexFeature_(vertex, [node.feature], [node.geometry]);
+                    var geometries = {};
+                    geometries[Object(_util_js__WEBPACK_IMPORTED_MODULE_20__["getUid"])(node.geometry)] = true;
                     for (var i = 1, ii = nodes.length; i < ii; ++i) {
                         var segment = nodes[i].segment;
                         if ((Object(_coordinate_js__WEBPACK_IMPORTED_MODULE_15__["equals"])(closestSegment[0], segment[0]) &&
                             Object(_coordinate_js__WEBPACK_IMPORTED_MODULE_15__["equals"])(closestSegment[1], segment[1])) ||
                             (Object(_coordinate_js__WEBPACK_IMPORTED_MODULE_15__["equals"])(closestSegment[0], segment[1]) &&
                                 Object(_coordinate_js__WEBPACK_IMPORTED_MODULE_15__["equals"])(closestSegment[1], segment[0]))) {
-                            vertexSegments[Object(_util_js__WEBPACK_IMPORTED_MODULE_20__["getUid"])(segment)] = true;
+                            var geometryUid = Object(_util_js__WEBPACK_IMPORTED_MODULE_20__["getUid"])(nodes[i].geometry);
+                            if (!(geometryUid in geometries)) {
+                                geometries[geometryUid] = true;
+                                vertexSegments[Object(_util_js__WEBPACK_IMPORTED_MODULE_20__["getUid"])(segment)] = true;
+                            }
                         }
                         else {
                             break;
                         }
                     }
                 }
-                vertexSegments[Object(_util_js__WEBPACK_IMPORTED_MODULE_20__["getUid"])(closestSegment)] = true;
                 this.vertexSegments_ = vertexSegments;
                 return;
             }
@@ -63182,10 +63635,10 @@ var Modify = /** @class */ (function (_super) {
         if (this.lastPointerEvent_ &&
             this.lastPointerEvent_.type != _MapBrowserEventType_js__WEBPACK_IMPORTED_MODULE_6__["default"].POINTERDRAG) {
             var evt = this.lastPointerEvent_;
-            this.willModifyFeatures_(evt);
+            this.willModifyFeatures_(evt, this.dragSegments_);
             var removed = this.removeVertex_();
-            this.dispatchEvent(new ModifyEvent(ModifyEventType.MODIFYEND, this.features_, evt));
-            this.modified_ = false;
+            this.dispatchEvent(new ModifyEvent(ModifyEventType.MODIFYEND, this.featuresBeingModified_, evt));
+            this.featuresBeingModified_ = null;
             return removed;
         }
         return false;
@@ -63436,7 +63889,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -63600,9 +64053,9 @@ var MouseWheelZoom = /** @class */ (function (_super) {
         if (type !== _events_EventType_js__WEBPACK_IMPORTED_MODULE_0__["default"].WHEEL) {
             return true;
         }
-        mapBrowserEvent.preventDefault();
         var map = mapBrowserEvent.map;
         var wheelEvent = /** @type {WheelEvent} */ (mapBrowserEvent.originalEvent);
+        wheelEvent.preventDefault();
         if (this.useAnchor_) {
             this.lastAnchor_ = mapBrowserEvent.coordinate;
         }
@@ -63710,7 +64163,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -63879,7 +64332,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -64030,7 +64483,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -64166,7 +64619,7 @@ var PointerInteraction = /** @class */ (function (_super) {
             if (mapBrowserEvent.type == _MapBrowserEventType_js__WEBPACK_IMPORTED_MODULE_1__["default"].POINTERDRAG) {
                 this.handleDragEvent(mapBrowserEvent);
                 // prevent page scrolling during dragging
-                mapBrowserEvent.preventDefault();
+                mapBrowserEvent.originalEvent.preventDefault();
             }
             else if (mapBrowserEvent.type == _MapBrowserEventType_js__WEBPACK_IMPORTED_MODULE_1__["default"].POINTERUP) {
                 var handledUp = this.handleUpEvent(mapBrowserEvent);
@@ -64289,11 +64742,12 @@ __webpack_require__.r(__webpack_exports__);
 /*!***********************************************!*\
   !*** ./node_modules/ol/interaction/Select.js ***!
   \***********************************************/
-/*! exports provided: default */
+/*! exports provided: SelectEvent, default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "SelectEvent", function() { return SelectEvent; });
 /* harmony import */ var _Collection_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../Collection.js */ "./node_modules/ol/Collection.js");
 /* harmony import */ var _CollectionEventType_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../CollectionEventType.js */ "./node_modules/ol/CollectionEventType.js");
 /* harmony import */ var _events_Event_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../events/Event.js */ "./node_modules/ol/events/Event.js");
@@ -64309,7 +64763,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -64443,6 +64897,7 @@ var SelectEvent = /** @class */ (function (_super) {
     }
     return SelectEvent;
 }(_events_Event_js__WEBPACK_IMPORTED_MODULE_2__["default"]));
+
 /**
  * Original feature styles to reset to when features are no longer selected.
  * @type {Object.<number, import("../style/Style.js").default|Array.<import("../style/Style.js").default>|import("../style/Style.js").StyleFunction>}
@@ -64671,22 +65126,20 @@ var Select = /** @class */ (function (_super) {
      * @private
      */
     Select.prototype.restorePreviousStyle_ = function (feature) {
-        var key = Object(_util_js__WEBPACK_IMPORTED_MODULE_9__["getUid"])(feature);
-        var selectInteractions = /** @type {Array<Select>} */ (this.getMap()
-            .getInteractions()
-            .getArray()
-            .filter(function (interaction) {
-            return (interaction instanceof Select &&
+        var interactions = this.getMap().getInteractions().getArray();
+        for (var i = interactions.length - 1; i >= 0; --i) {
+            var interaction = interactions[i];
+            if (interaction !== this &&
+                interaction instanceof Select &&
                 interaction.getStyle() &&
-                interaction.getFeatures().getArray().indexOf(feature) !== -1);
-        }));
-        if (selectInteractions.length > 0) {
-            feature.setStyle(selectInteractions[selectInteractions.length - 1].getStyle());
+                interaction.getFeatures().getArray().lastIndexOf(feature) !== -1) {
+                feature.setStyle(interaction.getStyle());
+                return;
+            }
         }
-        else {
-            feature.setStyle(originalFeatureStyles[key]);
-            delete originalFeatureStyles[key];
-        }
+        var key = Object(_util_js__WEBPACK_IMPORTED_MODULE_9__["getUid"])(feature);
+        feature.setStyle(originalFeatureStyles[key]);
+        delete originalFeatureStyles[key];
     };
     /**
      * @param {import("../Feature.js").FeatureLike} feature Feature.
@@ -64834,7 +65287,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -65463,7 +65916,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -65812,7 +66265,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -66145,7 +66598,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -66270,13 +66723,15 @@ var BaseTileLayer = /** @class */ (function (_super) {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Layer_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Layer.js */ "./node_modules/ol/layer/Layer.js");
-/* harmony import */ var _obj_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../obj.js */ "./node_modules/ol/obj.js");
-/* harmony import */ var _style_Style_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../style/Style.js */ "./node_modules/ol/style/Style.js");
+/* harmony import */ var rbush__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! rbush */ "./node_modules/rbush/rbush.min.js");
+/* harmony import */ var rbush__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(rbush__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _obj_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../obj.js */ "./node_modules/ol/obj.js");
+/* harmony import */ var _style_Style_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../style/Style.js */ "./node_modules/ol/style/Style.js");
 var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -66288,6 +66743,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
 /**
  * @module ol/layer/BaseVector
  */
+
 
 
 
@@ -66362,7 +66818,7 @@ var BaseVectorLayer = /** @class */ (function (_super) {
     function BaseVectorLayer(opt_options) {
         var _this = this;
         var options = opt_options ? opt_options : {};
-        var baseOptions = Object(_obj_js__WEBPACK_IMPORTED_MODULE_1__["assign"])({}, options);
+        var baseOptions = Object(_obj_js__WEBPACK_IMPORTED_MODULE_2__["assign"])({}, options);
         delete baseOptions.style;
         delete baseOptions.renderBuffer;
         delete baseOptions.updateWhileAnimating;
@@ -66479,6 +66935,16 @@ var BaseVectorLayer = /** @class */ (function (_super) {
         return this.updateWhileInteracting_;
     };
     /**
+     * Render declutter items for this layer
+     * @param {import("../PluggableMap.js").FrameState} frameState Frame state.
+     */
+    BaseVectorLayer.prototype.renderDeclutter = function (frameState) {
+        if (!frameState.declutterTree) {
+            frameState.declutterTree = new rbush__WEBPACK_IMPORTED_MODULE_1___default.a(9);
+        }
+        /** @type {*} */ (this.getRenderer()).renderDeclutter(frameState);
+    };
+    /**
      * @param {import("../render.js").OrderFunction|null|undefined} renderOrder
      *     Render order.
      */
@@ -66496,9 +66962,9 @@ var BaseVectorLayer = /** @class */ (function (_super) {
      * @api
      */
     BaseVectorLayer.prototype.setStyle = function (opt_style) {
-        this.style_ = opt_style !== undefined ? opt_style : _style_Style_js__WEBPACK_IMPORTED_MODULE_2__["createDefaultStyle"];
+        this.style_ = opt_style !== undefined ? opt_style : _style_Style_js__WEBPACK_IMPORTED_MODULE_3__["createDefaultStyle"];
         this.styleFunction_ =
-            opt_style === null ? undefined : Object(_style_Style_js__WEBPACK_IMPORTED_MODULE_2__["toFunction"])(this.style_);
+            opt_style === null ? undefined : Object(_style_Style_js__WEBPACK_IMPORTED_MODULE_3__["toFunction"])(this.style_);
         this.changed();
     };
     return BaseVectorLayer;
@@ -66540,7 +67006,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -67593,7 +68059,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -67843,7 +68309,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -68205,7 +68671,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -68290,7 +68756,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -68982,20 +69448,26 @@ function getPointResolution(projection, resolution, point, opt_units) {
             // measuring its width and height on the normal sphere, and taking the
             // average of the width and height.
             var toEPSG4326_1 = getTransformFromProjections(projection, get('EPSG:4326'));
-            var vertices = [
-                point[0] - resolution / 2,
-                point[1],
-                point[0] + resolution / 2,
-                point[1],
-                point[0],
-                point[1] - resolution / 2,
-                point[0],
-                point[1] + resolution / 2,
-            ];
-            vertices = toEPSG4326_1(vertices, vertices, 2);
-            var width = Object(_sphere_js__WEBPACK_IMPORTED_MODULE_8__["getDistance"])(vertices.slice(0, 2), vertices.slice(2, 4));
-            var height = Object(_sphere_js__WEBPACK_IMPORTED_MODULE_8__["getDistance"])(vertices.slice(4, 6), vertices.slice(6, 8));
-            pointResolution = (width + height) / 2;
+            if (toEPSG4326_1 === identityTransform && units !== _proj_Units_js__WEBPACK_IMPORTED_MODULE_1__["default"].DEGREES) {
+                // no transform is available
+                pointResolution = resolution * projection.getMetersPerUnit();
+            }
+            else {
+                var vertices = [
+                    point[0] - resolution / 2,
+                    point[1],
+                    point[0] + resolution / 2,
+                    point[1],
+                    point[0],
+                    point[1] - resolution / 2,
+                    point[0],
+                    point[1] + resolution / 2,
+                ];
+                vertices = toEPSG4326_1(vertices, vertices, 2);
+                var width = Object(_sphere_js__WEBPACK_IMPORTED_MODULE_8__["getDistance"])(vertices.slice(0, 2), vertices.slice(2, 4));
+                var height = Object(_sphere_js__WEBPACK_IMPORTED_MODULE_8__["getDistance"])(vertices.slice(4, 6), vertices.slice(6, 8));
+                pointResolution = (width + height) / 2;
+            }
             var metersPerUnit = opt_units
                 ? _proj_Units_js__WEBPACK_IMPORTED_MODULE_1__["METERS_PER_UNIT"][opt_units]
                 : projection.getMetersPerUnit();
@@ -69677,11 +70149,35 @@ __webpack_require__.r(__webpack_exports__);
  * @enum {string}
  */
 var Units = {
+    /**
+     * Degrees
+     * @api
+     */
     DEGREES: 'degrees',
+    /**
+     * Feet
+     * @api
+     */
     FEET: 'ft',
+    /**
+     * Meters
+     * @api
+     */
     METERS: 'm',
+    /**
+     * Pixels
+     * @api
+     */
     PIXELS: 'pixels',
+    /**
+     * Tile Pixels
+     * @api
+     */
     TILE_PIXELS: 'tile-pixels',
+    /**
+     * US Feet
+     * @api
+     */
     USFEET: 'us-ft',
 };
 /**
@@ -69705,7 +70201,7 @@ METERS_PER_UNIT[Units.USFEET] = 1200 / 3937;
 /*!******************************************!*\
   !*** ./node_modules/ol/proj/epsg3857.js ***!
   \******************************************/
-/*! exports provided: RADIUS, HALF_SIZE, EXTENT, WORLD_EXTENT, PROJECTIONS, fromEPSG4326, toEPSG4326 */
+/*! exports provided: RADIUS, HALF_SIZE, EXTENT, WORLD_EXTENT, MAX_SAFE_Y, PROJECTIONS, fromEPSG4326, toEPSG4326 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -69714,6 +70210,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "HALF_SIZE", function() { return HALF_SIZE; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "EXTENT", function() { return EXTENT; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "WORLD_EXTENT", function() { return WORLD_EXTENT; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "MAX_SAFE_Y", function() { return MAX_SAFE_Y; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "PROJECTIONS", function() { return PROJECTIONS; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fromEPSG4326", function() { return fromEPSG4326; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toEPSG4326", function() { return toEPSG4326; });
@@ -69724,7 +70221,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -69762,6 +70259,12 @@ var EXTENT = [-HALF_SIZE, -HALF_SIZE, HALF_SIZE, HALF_SIZE];
  */
 var WORLD_EXTENT = [-180, -85, 180, 85];
 /**
+ * Maximum safe value in y direction
+ * @const
+ * @type {number}
+ */
+var MAX_SAFE_Y = RADIUS * Math.log(Math.tan(Math.PI / 2));
+/**
  * @classdesc
  * Projection object for web/spherical Mercator (EPSG:3857).
  */
@@ -69795,8 +70298,6 @@ var PROJECTIONS = [
     new EPSG3857Projection('EPSG:102100'),
     new EPSG3857Projection('EPSG:102113'),
     new EPSG3857Projection('EPSG:900913'),
-    new EPSG3857Projection('urn:ogc:def:crs:EPSG:6.18:3:3857'),
-    new EPSG3857Projection('urn:ogc:def:crs:EPSG::3857'),
     new EPSG3857Projection('http://www.opengis.net/gml/srs/epsg.xml#3857'),
 ];
 /**
@@ -69820,15 +70321,14 @@ function fromEPSG4326(input, opt_output, opt_dimension) {
             output = new Array(length);
         }
     }
-    var halfSize = HALF_SIZE;
     for (var i = 0; i < length; i += dimension) {
-        output[i] = (halfSize * input[i]) / 180;
+        output[i] = (HALF_SIZE * input[i]) / 180;
         var y = RADIUS * Math.log(Math.tan((Math.PI * (+input[i + 1] + 90)) / 360));
-        if (y > halfSize) {
-            y = halfSize;
+        if (y > MAX_SAFE_Y) {
+            y = MAX_SAFE_Y;
         }
-        else if (y < -halfSize) {
-            y = -halfSize;
+        else if (y < -MAX_SAFE_Y) {
+            y = -MAX_SAFE_Y;
         }
         output[i + 1] = y;
     }
@@ -69885,7 +70385,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -69954,12 +70454,9 @@ var EPSG4326Projection = /** @class */ (function (_super) {
 var PROJECTIONS = [
     new EPSG4326Projection('CRS:84'),
     new EPSG4326Projection('EPSG:4326', 'neu'),
-    new EPSG4326Projection('urn:ogc:def:crs:EPSG::4326', 'neu'),
-    new EPSG4326Projection('urn:ogc:def:crs:EPSG:6.6:4326', 'neu'),
     new EPSG4326Projection('urn:ogc:def:crs:OGC:1.3:CRS84'),
     new EPSG4326Projection('urn:ogc:def:crs:OGC:2:84'),
     new EPSG4326Projection('http://www.opengis.net/gml/srs/epsg.xml#4326', 'neu'),
-    new EPSG4326Projection('urn:x-ogc:def:crs:EPSG:4326', 'neu'),
 ];
 //# sourceMappingURL=epsg4326.js.map
 
@@ -69996,7 +70493,9 @@ function clear() {
  * @return {import("./Projection.js").default} The projection (if cached).
  */
 function get(code) {
-    return cache[code] || null;
+    return (cache[code] ||
+        cache[code.replace(/urn:(x-)?ogc:def:crs:EPSG:(.*:)?(\w+)$/, 'EPSG:$3')] ||
+        null);
 }
 /**
  * Add a projection to the cache.
@@ -70095,7 +70594,7 @@ function get(sourceCode, destinationCode) {
 /*!***********************************!*\
   !*** ./node_modules/ol/render.js ***!
   \***********************************/
-/*! exports provided: toContext, getVectorContext, getRenderPixel, renderDeclutterItems */
+/*! exports provided: toContext, getVectorContext, getRenderPixel */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -70103,7 +70602,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "toContext", function() { return toContext; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getVectorContext", function() { return getVectorContext; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getRenderPixel", function() { return getRenderPixel; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "renderDeclutterItems", function() { return renderDeclutterItems; });
 /* harmony import */ var _render_canvas_Immediate_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./render/canvas/Immediate.js */ "./node_modules/ol/render/canvas/Immediate.js");
 /* harmony import */ var _has_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./has.js */ "./node_modules/ol/has.js");
 /* harmony import */ var _transform_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./transform.js */ "./node_modules/ol/transform.js");
@@ -70212,26 +70710,6 @@ function getRenderPixel(event, pixel) {
     Object(_transform_js__WEBPACK_IMPORTED_MODULE_2__["apply"])(event.inversePixelTransform.slice(), result);
     return result;
 }
-/**
- * @param {import("./PluggableMap.js").FrameState} frameState Frame state.
- * @param {?} declutterTree Declutter tree.
- * @returns {?} Declutter tree.
- */
-function renderDeclutterItems(frameState, declutterTree) {
-    if (declutterTree) {
-        declutterTree.clear();
-    }
-    var items = frameState.declutterItems;
-    for (var z = items.length - 1; z >= 0; --z) {
-        var item = items[z];
-        var zIndexItems = item.items;
-        for (var i = 0, ii = zIndexItems.length; i < ii; i += 3) {
-            declutterTree = zIndexItems[i].renderDeclutter(zIndexItems[i + 1], zIndexItems[i + 2], item.opacity, declutterTree);
-        }
-    }
-    items.length = 0;
-    return declutterTree;
-}
 //# sourceMappingURL=render.js.map
 
 /***/ }),
@@ -70254,7 +70732,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -70400,7 +70878,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -70423,7 +70901,7 @@ var RenderEvent = /** @class */ (function (_super) {
         var _this = _super.call(this, type) || this;
         /**
          * Transform from CSS pixels (relative to the top-left corner of the map viewport)
-         * to rendered pixels on this event's `context`.
+         * to rendered pixels on this event's `context`. Only available when a Canvas renderer is used, null otherwise.
          * @type {import("../transform.js").Transform|undefined}
          * @api
          */
@@ -70603,14 +71081,14 @@ var VectorContext = /** @class */ (function () {
     VectorContext.prototype.setFillStrokeStyle = function (fillStyle, strokeStyle) { };
     /**
      * @param {import("../style/Image.js").default} imageStyle Image style.
-     * @param {import("./canvas.js").DeclutterGroup=} opt_declutterGroup Declutter.
+     * @param {import("../render/canvas.js").DeclutterImageWithText=} opt_declutterImageWithText Shared data for combined decluttering with a text style.
      */
-    VectorContext.prototype.setImageStyle = function (imageStyle, opt_declutterGroup) { };
+    VectorContext.prototype.setImageStyle = function (imageStyle, opt_declutterImageWithText) { };
     /**
      * @param {import("../style/Text.js").default} textStyle Text style.
-     * @param {import("./canvas.js").DeclutterGroups=} opt_declutterGroups Declutter.
+     * @param {import("../render/canvas.js").DeclutterImageWithText=} opt_declutterImageWithText Shared data for combined decluttering with an image style.
      */
-    VectorContext.prototype.setTextStyle = function (textStyle, opt_declutterGroups) { };
+    VectorContext.prototype.setTextStyle = function (textStyle, opt_declutterImageWithText) { };
     return VectorContext;
 }());
 /* harmony default export */ __webpack_exports__["default"] = (VectorContext);
@@ -70721,19 +71199,16 @@ __webpack_require__.r(__webpack_exports__);
  * @property {Array<number>} [padding]
  */
 /**
- * Container for decluttered replay instructions that need to be rendered or
- * omitted together, i.e. when styles render both an image and text, or for the
- * characters that form text along lines. The basic elements of this array are
- * `[minX, minY, maxX, maxY, count]`, where the first four entries are the
- * rendered extent of the group in pixel space. `count` is the number of styles
- * in the group, i.e. 2 when an image and a text are grouped, or 1 otherwise.
- * In addition to these four elements, declutter instruction arrays (i.e. the
- * arguments to {@link module:ol/render/canvas~drawImage} are appended to the array.
- * @typedef {Array<*>} DeclutterGroup
+ * @typedef {Object} SerializableInstructions
+ * @property {Array<*>} instructions The rendering instructions.
+ * @property {Array<*>} hitDetectionInstructions The rendering hit detection instructions.
+ * @property {Array<number>} coordinates The array of all coordinates.
+ * @property {!Object<string, TextState>} [textStates] The text states (decluttering).
+ * @property {!Object<string, FillState>} [fillStates] The fill states (decluttering).
+ * @property {!Object<string, StrokeState>} [strokeStates] The stroke states (decluttering).
  */
 /**
- * Declutter groups for support of multi geometries.
- * @typedef {Array<DeclutterGroup>} DeclutterGroups
+ * @typedef {Object<number, import("./canvas/Executor.js").ReplayImageOrLabelArgs>} DeclutterImageWithText
  */
 /**
  * @const
@@ -70918,9 +71393,8 @@ var measureTextHeight = (function () {
      * @type {HTMLDivElement}
      */
     var div;
-    var heights = textHeights;
     return function (fontSpec) {
-        var height = heights[fontSpec];
+        var height = textHeights[fontSpec];
         if (height == undefined) {
             if (_has_js__WEBPACK_IMPORTED_MODULE_2__["WORKER_OFFSCREEN_CANVAS"]) {
                 var font = Object(_css_js__WEBPACK_IMPORTED_MODULE_5__["getFontParameters"])(fontSpec);
@@ -70928,7 +71402,7 @@ var measureTextHeight = (function () {
                 var lineHeight = isNaN(Number(font.lineHeight))
                     ? 1.2
                     : Number(font.lineHeight);
-                textHeights[fontSpec] =
+                height =
                     lineHeight *
                         (metrics.actualBoundingBoxAscent + metrics.actualBoundingBoxDescent);
             }
@@ -70944,9 +71418,9 @@ var measureTextHeight = (function () {
                 div.style.font = fontSpec;
                 document.body.appendChild(div);
                 height = div.offsetHeight;
-                heights[fontSpec] = height;
                 document.body.removeChild(div);
             }
+            textHeights[fontSpec] = height;
         }
         return height;
     };
@@ -71122,7 +71596,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -71143,15 +71617,6 @@ var __extends = (undefined && undefined.__extends) || (function () {
 
 
 
-/**
- * @typedef {Object} SerializableInstructions
- * @property {Array<*>} instructions The rendering instructions.
- * @property {Array<*>} hitDetectionInstructions The rendering hit detection instructions.
- * @property {Array<number>} coordinates The array of all coordinates.
- * @property {!Object<string, import("../canvas.js").TextState>} [textStates] The text states (decluttering).
- * @property {!Object<string, import("../canvas.js").FillState>} [fillStates] The fill states (decluttering).
- * @property {!Object<string, import("../canvas.js").StrokeState>} [strokeStates] The stroke states (decluttering).
- */
 var CanvasBuilder = /** @class */ (function (_super) {
     __extends(CanvasBuilder, _super);
     /**
@@ -71246,6 +71711,27 @@ var CanvasBuilder = /** @class */ (function (_super) {
     };
     /**
      * @param {Array<number>} flatCoordinates Flat coordinates.
+     * @param {number} stride Stride.
+     * @protected
+     * @return {number} My end
+     */
+    CanvasBuilder.prototype.appendFlatPointCoordinates = function (flatCoordinates, stride) {
+        var extent = this.getBufferedMaxExtent();
+        var tmpCoord = this.tmpCoordinate_;
+        var coordinates = this.coordinates;
+        var myEnd = coordinates.length;
+        for (var i = 0, ii = flatCoordinates.length; i < ii; i += stride) {
+            tmpCoord[0] = flatCoordinates[i];
+            tmpCoord[1] = flatCoordinates[i + 1];
+            if (Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["containsCoordinate"])(extent, tmpCoord)) {
+                coordinates[myEnd++] = tmpCoord[0];
+                coordinates[myEnd++] = tmpCoord[1];
+            }
+        }
+        return myEnd;
+    };
+    /**
+     * @param {Array<number>} flatCoordinates Flat coordinates.
      * @param {number} offset Offset.
      * @param {number} end End.
      * @param {number} stride Stride.
@@ -71254,8 +71740,9 @@ var CanvasBuilder = /** @class */ (function (_super) {
      * @protected
      * @return {number} My end.
      */
-    CanvasBuilder.prototype.appendFlatCoordinates = function (flatCoordinates, offset, end, stride, closed, skipFirst) {
-        var myEnd = this.coordinates.length;
+    CanvasBuilder.prototype.appendFlatLineCoordinates = function (flatCoordinates, offset, end, stride, closed, skipFirst) {
+        var coordinates = this.coordinates;
+        var myEnd = coordinates.length;
         var extent = this.getBufferedMaxExtent();
         if (skipFirst) {
             offset += stride;
@@ -71271,16 +71758,16 @@ var CanvasBuilder = /** @class */ (function (_super) {
             nextRel = Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["coordinateRelationship"])(extent, nextCoord);
             if (nextRel !== lastRel) {
                 if (skipped) {
-                    this.coordinates[myEnd++] = lastXCoord;
-                    this.coordinates[myEnd++] = lastYCoord;
+                    coordinates[myEnd++] = lastXCoord;
+                    coordinates[myEnd++] = lastYCoord;
+                    skipped = false;
                 }
-                this.coordinates[myEnd++] = nextCoord[0];
-                this.coordinates[myEnd++] = nextCoord[1];
-                skipped = false;
+                coordinates[myEnd++] = nextCoord[0];
+                coordinates[myEnd++] = nextCoord[1];
             }
             else if (nextRel === _extent_Relationship_js__WEBPACK_IMPORTED_MODULE_2__["default"].INTERSECTING) {
-                this.coordinates[myEnd++] = nextCoord[0];
-                this.coordinates[myEnd++] = nextCoord[1];
+                coordinates[myEnd++] = nextCoord[0];
+                coordinates[myEnd++] = nextCoord[1];
                 skipped = false;
             }
             else {
@@ -71292,8 +71779,8 @@ var CanvasBuilder = /** @class */ (function (_super) {
         }
         // Last coordinate equals first or only one point to append:
         if ((closed && skipped) || i === offset + stride) {
-            this.coordinates[myEnd++] = lastXCoord;
-            this.coordinates[myEnd++] = lastYCoord;
+            coordinates[myEnd++] = lastXCoord;
+            coordinates[myEnd++] = lastYCoord;
         }
         return myEnd;
     };
@@ -71308,7 +71795,7 @@ var CanvasBuilder = /** @class */ (function (_super) {
     CanvasBuilder.prototype.drawCustomCoordinates_ = function (flatCoordinates, offset, ends, stride, builderEnds) {
         for (var i = 0, ii = ends.length; i < ii; ++i) {
             var end = ends[i];
-            var builderEnd = this.appendFlatCoordinates(flatCoordinates, offset, end, stride, false, false);
+            var builderEnd = this.appendFlatLineCoordinates(flatCoordinates, offset, end, stride, false, false);
             builderEnds.push(builderEnd);
             offset = end;
         }
@@ -71364,9 +71851,9 @@ var CanvasBuilder = /** @class */ (function (_super) {
             ]);
         }
         else if (type == _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_1__["default"].LINE_STRING ||
-            type == _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_1__["default"].MULTI_POINT) {
+            type == _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_1__["default"].CIRCLE) {
             flatCoordinates = geometry.getFlatCoordinates();
-            builderEnd = this.appendFlatCoordinates(flatCoordinates, 0, flatCoordinates.length, stride, false, false);
+            builderEnd = this.appendFlatLineCoordinates(flatCoordinates, 0, flatCoordinates.length, stride, false, false);
             this.instructions.push([
                 _Instruction_js__WEBPACK_IMPORTED_MODULE_0__["default"].CUSTOM,
                 builderBegin,
@@ -71375,6 +71862,20 @@ var CanvasBuilder = /** @class */ (function (_super) {
                 renderer,
                 _geom_flat_inflate_js__WEBPACK_IMPORTED_MODULE_8__["inflateCoordinates"],
             ]);
+        }
+        else if (type == _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_1__["default"].MULTI_POINT) {
+            flatCoordinates = geometry.getFlatCoordinates();
+            builderEnd = this.appendFlatPointCoordinates(flatCoordinates, stride);
+            if (builderEnd > builderBegin) {
+                this.instructions.push([
+                    _Instruction_js__WEBPACK_IMPORTED_MODULE_0__["default"].CUSTOM,
+                    builderBegin,
+                    builderEnd,
+                    geometry,
+                    renderer,
+                    _geom_flat_inflate_js__WEBPACK_IMPORTED_MODULE_8__["inflateCoordinates"],
+                ]);
+            }
         }
         else if (type == _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_1__["default"].POINT) {
             flatCoordinates = geometry.getFlatCoordinates();
@@ -71396,24 +71897,23 @@ var CanvasBuilder = /** @class */ (function (_super) {
      * @param {import("../../Feature.js").FeatureLike} feature Feature.
      */
     CanvasBuilder.prototype.beginGeometry = function (geometry, feature) {
-        var extent = geometry.getExtent();
         this.beginGeometryInstruction1_ = [
             _Instruction_js__WEBPACK_IMPORTED_MODULE_0__["default"].BEGIN_GEOMETRY,
             feature,
             0,
-            extent,
+            geometry,
         ];
         this.instructions.push(this.beginGeometryInstruction1_);
         this.beginGeometryInstruction2_ = [
             _Instruction_js__WEBPACK_IMPORTED_MODULE_0__["default"].BEGIN_GEOMETRY,
             feature,
             0,
-            extent,
+            geometry,
         ];
         this.hitDetectionInstructions.push(this.beginGeometryInstruction2_);
     };
     /**
-     * @return {SerializableInstructions} the serializable instructions.
+     * @return {import("../canvas.js").SerializableInstructions} the serializable instructions.
      */
     CanvasBuilder.prototype.finish = function () {
         return {
@@ -71660,19 +72160,8 @@ var BuilderGroup = /** @class */ (function () {
      * @param {import("../../extent.js").Extent} maxExtent Max extent.
      * @param {number} resolution Resolution.
      * @param {number} pixelRatio Pixel ratio.
-     * @param {boolean} declutter Decluttering enabled.
      */
-    function BuilderGroup(tolerance, maxExtent, resolution, pixelRatio, declutter) {
-        /**
-         * @type {boolean}
-         * @private
-         */
-        this.declutter_ = declutter;
-        /**
-         * @type {import("../canvas.js").DeclutterGroups}
-         * @private
-         */
-        this.declutterGroups_ = null;
+    function BuilderGroup(tolerance, maxExtent, resolution, pixelRatio) {
         /**
          * @private
          * @type {number}
@@ -71699,25 +72188,6 @@ var BuilderGroup = /** @class */ (function () {
          */
         this.buildersByZIndex_ = {};
     }
-    /**
-     * @param {boolean} group Group with previous builder.
-     * @return {import("../canvas").DeclutterGroups} The resulting instruction groups.
-     */
-    BuilderGroup.prototype.addDeclutter = function (group) {
-        /** @type {Array<*>} */
-        var declutter = null;
-        if (this.declutter_) {
-            if (group) {
-                declutter = this.declutterGroups_;
-                /** @type {number} */ (declutter[0][0])++;
-            }
-            else {
-                declutter = [[1]];
-                this.declutterGroups_ = declutter;
-            }
-        }
-        return declutter;
-    };
     /**
      * @return {!Object<string, !Object<import("./BuilderType").default, import("./Builder.js").SerializableInstructions>>} The serializable instructions
      */
@@ -71797,17 +72267,15 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _Instruction_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Instruction.js */ "./node_modules/ol/render/canvas/Instruction.js");
-/* harmony import */ var rbush_rbush_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! rbush/rbush.js */ "./node_modules/rbush/rbush.js");
-/* harmony import */ var rbush_rbush_js__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(rbush_rbush_js__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _TextBuilder_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./TextBuilder.js */ "./node_modules/ol/render/canvas/TextBuilder.js");
-/* harmony import */ var _has_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../has.js */ "./node_modules/ol/has.js");
-/* harmony import */ var _transform_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../transform.js */ "./node_modules/ol/transform.js");
-/* harmony import */ var _extent_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../extent.js */ "./node_modules/ol/extent.js");
-/* harmony import */ var _canvas_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../canvas.js */ "./node_modules/ol/render/canvas.js");
-/* harmony import */ var _geom_flat_textpath_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../geom/flat/textpath.js */ "./node_modules/ol/geom/flat/textpath.js");
-/* harmony import */ var _array_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../array.js */ "./node_modules/ol/array.js");
-/* harmony import */ var _geom_flat_length_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../geom/flat/length.js */ "./node_modules/ol/geom/flat/length.js");
-/* harmony import */ var _geom_flat_transform_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../../geom/flat/transform.js */ "./node_modules/ol/geom/flat/transform.js");
+/* harmony import */ var _TextBuilder_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./TextBuilder.js */ "./node_modules/ol/render/canvas/TextBuilder.js");
+/* harmony import */ var _has_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../has.js */ "./node_modules/ol/has.js");
+/* harmony import */ var _transform_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../transform.js */ "./node_modules/ol/transform.js");
+/* harmony import */ var _extent_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../extent.js */ "./node_modules/ol/extent.js");
+/* harmony import */ var _canvas_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../canvas.js */ "./node_modules/ol/render/canvas.js");
+/* harmony import */ var _geom_flat_textpath_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../geom/flat/textpath.js */ "./node_modules/ol/geom/flat/textpath.js");
+/* harmony import */ var _array_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../../array.js */ "./node_modules/ol/array.js");
+/* harmony import */ var _geom_flat_length_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../../geom/flat/length.js */ "./node_modules/ol/geom/flat/length.js");
+/* harmony import */ var _geom_flat_transform_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../../geom/flat/transform.js */ "./node_modules/ol/geom/flat/transform.js");
 /**
  * @module ol/render/canvas/Executor
  */
@@ -71822,24 +72290,37 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
-
 /**
- * @typedef {Object} SerializableInstructions
- * @property {Array<*>} instructions The rendering instructions.
- * @property {Array<*>} hitDetectionInstructions The rendering hit detection instructions.
- * @property {Array<number>} coordinates The array of all coordinates.
- * @property {!Object<string, import("../canvas.js").TextState>} textStates The text states (decluttering).
- * @property {!Object<string, import("../canvas.js").FillState>} fillStates The fill states (decluttering).
- * @property {!Object<string, import("../canvas.js").StrokeState>} strokeStates The stroke states (decluttering).
+ * @typedef {Object} BBox
+ * @property {number} minX
+ * @property {number} minY
+ * @property {number} maxX
+ * @property {number} maxY
+ * @property {*} value
+ */
+/**
+ * @typedef {Object} ImageOrLabelDimensions
+ * @property {number} drawImageX
+ * @property {number} drawImageY
+ * @property {number} drawImageW
+ * @property {number} drawImageH
+ * @property {number} originX
+ * @property {number} originY
+ * @property {Array<number>} scale
+ * @property {BBox} declutterBox
+ * @property {import("../../transform.js").Transform} canvasTransform
+ */
+/**
+ * @typedef {{0: CanvasRenderingContext2D, 1: number, 2: import("../canvas.js").Label|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement, 3: ImageOrLabelDimensions, 4: number, 5: Array<*>, 6: Array<*>}} ReplayImageOrLabelArgs
+ */
+/**
+ * @template T
+ * @typedef {function(import("../../Feature.js").FeatureLike, import("../../geom/SimpleGeometry.js").default): T} FeatureCallback
  */
 /**
  * @type {import("../../extent.js").Extent}
  */
-var tmpExtent = Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["createEmpty"])();
-/**
- * @type {!import("../../transform.js").Transform}
- */
-var tmpTransform = Object(_transform_js__WEBPACK_IMPORTED_MODULE_4__["create"])();
+var tmpExtent = Object(_extent_js__WEBPACK_IMPORTED_MODULE_4__["createEmpty"])();
 /** @type {import("../../coordinate.js").Coordinate} */
 var p1 = [];
 /** @type {import("../../coordinate.js").Coordinate} */
@@ -71848,12 +72329,41 @@ var p2 = [];
 var p3 = [];
 /** @type {import("../../coordinate.js").Coordinate} */
 var p4 = [];
+/**
+ * @param {ReplayImageOrLabelArgs} replayImageOrLabelArgs Arguments to replayImageOrLabel
+ * @return {BBox} Declutter bbox.
+ */
+function getDeclutterBox(replayImageOrLabelArgs) {
+    return replayImageOrLabelArgs[3].declutterBox;
+}
+var rtlRegEx = new RegExp(
+/* eslint-disable prettier/prettier */
+'[' +
+    String.fromCharCode(0x00591) + '-' + String.fromCharCode(0x008ff) +
+    String.fromCharCode(0x0fb1d) + '-' + String.fromCharCode(0x0fdff) +
+    String.fromCharCode(0x0fe70) + '-' + String.fromCharCode(0x0fefc) +
+    String.fromCharCode(0x10800) + '-' + String.fromCharCode(0x10fff) +
+    String.fromCharCode(0x1e800) + '-' + String.fromCharCode(0x1efff) +
+    ']'
+/* eslint-enable prettier/prettier */
+);
+/**
+ * @param {string} text Text.
+ * @param {string} align Alignment.
+ * @return {number} Text alignment.
+ */
+function horizontalTextAlign(text, align) {
+    if ((align === 'start' || align === 'end') && !rtlRegEx.test(text)) {
+        align = align === 'start' ? 'left' : 'right';
+    }
+    return _TextBuilder_js__WEBPACK_IMPORTED_MODULE_1__["TEXT_ALIGN"][align];
+}
 var Executor = /** @class */ (function () {
     /**
      * @param {number} resolution Resolution.
      * @param {number} pixelRatio Pixel ratio.
      * @param {boolean} overlaps The replay can have overlapping geometries.
-     * @param {SerializableInstructions} instructions The serializable instructions
+     * @param {import("../canvas.js").SerializableInstructions} instructions The serializable instructions
      * @param {import("../../size.js").Size} renderBuffer Render buffer (width/height) in pixels.
      */
     function Executor(resolution, pixelRatio, overlaps, instructions, renderBuffer) {
@@ -71879,10 +72389,6 @@ var Executor = /** @class */ (function () {
          */
         this.alignFill_;
         /**
-         * @type {Array<*>}
-         */
-        this.declutterItems = [];
-        /**
          * @protected
          * @type {Array<*>}
          */
@@ -71906,7 +72412,7 @@ var Executor = /** @class */ (function () {
          * @private
          * @type {!import("../../transform.js").Transform}
          */
-        this.renderedTransform_ = Object(_transform_js__WEBPACK_IMPORTED_MODULE_4__["create"])();
+        this.renderedTransform_ = Object(_transform_js__WEBPACK_IMPORTED_MODULE_3__["create"])();
         /**
          * @protected
          * @type {Array<*>}
@@ -71965,13 +72471,13 @@ var Executor = /** @class */ (function () {
             textState.scale[0] * pixelRatio,
             textState.scale[1] * pixelRatio,
         ];
-        var align = _TextBuilder_js__WEBPACK_IMPORTED_MODULE_2__["TEXT_ALIGN"][textState.textAlign || _canvas_js__WEBPACK_IMPORTED_MODULE_6__["defaultTextAlign"]];
+        var align = horizontalTextAlign(text, textState.textAlign || _canvas_js__WEBPACK_IMPORTED_MODULE_5__["defaultTextAlign"]);
         var strokeWidth = strokeKey && strokeState.lineWidth ? strokeState.lineWidth : 0;
         var lines = text.split('\n');
         var numLines = lines.length;
         var widths = [];
-        var width = Object(_canvas_js__WEBPACK_IMPORTED_MODULE_6__["measureTextWidths"])(textState.font, lines, widths);
-        var lineHeight = Object(_canvas_js__WEBPACK_IMPORTED_MODULE_6__["measureTextHeight"])(textState.font);
+        var width = Object(_canvas_js__WEBPACK_IMPORTED_MODULE_5__["measureTextWidths"])(textState.font, lines, widths);
+        var lineHeight = Object(_canvas_js__WEBPACK_IMPORTED_MODULE_5__["measureTextHeight"])(textState.font);
         var height = lineHeight * numLines;
         var renderWidth = width + strokeWidth;
         var contextInstructions = [];
@@ -71995,7 +72501,7 @@ var Executor = /** @class */ (function () {
             contextInstructions.push('lineJoin', strokeState.lineJoin);
             contextInstructions.push('miterLimit', strokeState.miterLimit);
             // eslint-disable-next-line
-            var Context = _has_js__WEBPACK_IMPORTED_MODULE_3__["WORKER_OFFSCREEN_CANVAS"] ? OffscreenCanvasRenderingContext2D : CanvasRenderingContext2D;
+            var Context = _has_js__WEBPACK_IMPORTED_MODULE_2__["WORKER_OFFSCREEN_CANVAS"] ? OffscreenCanvasRenderingContext2D : CanvasRenderingContext2D;
             if (Context.prototype.setLineDash) {
                 contextInstructions.push('setLineDash', [strokeState.lineDash]);
                 contextInstructions.push('lineDashOffset', strokeState.lineDashOffset);
@@ -72038,9 +72544,8 @@ var Executor = /** @class */ (function () {
      * @param {import("../../coordinate.js").Coordinate} p4 4th point of the background box.
      * @param {Array<*>} fillInstruction Fill instruction.
      * @param {Array<*>} strokeInstruction Stroke instruction.
-     * @param {boolean} declutter Declutter.
      */
-    Executor.prototype.replayTextBackground_ = function (context, p1, p2, p3, p4, fillInstruction, strokeInstruction, declutter) {
+    Executor.prototype.replayTextBackground_ = function (context, p1, p2, p3, p4, fillInstruction, strokeInstruction) {
         context.beginPath();
         context.moveTo.apply(context, p1);
         context.lineTo.apply(context, p2);
@@ -72049,9 +72554,6 @@ var Executor = /** @class */ (function () {
         context.lineTo.apply(context, p1);
         if (fillInstruction) {
             this.alignFill_ = /** @type {boolean} */ (fillInstruction[2]);
-            if (declutter) {
-                context.fillStyle = /** @type {import("../../colorlike.js").ColorLike} */ (fillInstruction[1]);
-            }
             this.fill_(context);
         }
         if (strokeInstruction) {
@@ -72062,39 +72564,31 @@ var Executor = /** @class */ (function () {
     };
     /**
      * @private
-     * @param {CanvasRenderingContext2D} context Context.
-     * @param {number} contextScale Scale of the context.
-     * @param {number} x X.
-     * @param {number} y Y.
-     * @param {import("../canvas.js").Label|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement} imageOrLabel Image.
+     * @param {number} sheetWidth Width of the sprite sheet.
+     * @param {number} sheetHeight Height of the sprite sheet.
+     * @param {number} centerX X.
+     * @param {number} centerY Y.
+     * @param {number} width Width.
+     * @param {number} height Height.
      * @param {number} anchorX Anchor X.
      * @param {number} anchorY Anchor Y.
-     * @param {import("../canvas.js").DeclutterGroup} declutterGroup Declutter group.
-     * @param {number} height Height.
-     * @param {number} opacity Opacity.
      * @param {number} originX Origin X.
      * @param {number} originY Origin Y.
      * @param {number} rotation Rotation.
      * @param {import("../../size.js").Size} scale Scale.
      * @param {boolean} snapToPixel Snap to pixel.
-     * @param {number} width Width.
      * @param {Array<number>} padding Padding.
-     * @param {Array<*>} fillInstruction Fill instruction.
-     * @param {Array<*>} strokeInstruction Stroke instruction.
-     * @return {boolean} The image or label was rendered.
+     * @param {boolean} fillStroke Background fill or stroke.
+     * @param {import("../../Feature.js").FeatureLike} feature Feature.
+     * @return {ImageOrLabelDimensions} Dimensions for positioning and decluttering the image or label.
      */
-    Executor.prototype.replayImageOrLabel_ = function (context, contextScale, x, y, imageOrLabel, anchorX, anchorY, declutterGroup, height, opacity, originX, originY, rotation, scale, snapToPixel, width, padding, fillInstruction, strokeInstruction) {
-        var fillStroke = fillInstruction || strokeInstruction;
+    Executor.prototype.calculateImageOrLabelDimensions_ = function (sheetWidth, sheetHeight, centerX, centerY, width, height, anchorX, anchorY, originX, originY, rotation, scale, snapToPixel, padding, fillStroke, feature) {
         anchorX *= scale[0];
         anchorY *= scale[1];
-        x -= anchorX;
-        y -= anchorY;
-        var w = width + originX > imageOrLabel.width
-            ? imageOrLabel.width - originX
-            : width;
-        var h = height + originY > imageOrLabel.height
-            ? imageOrLabel.height - originY
-            : height;
+        var x = centerX - anchorX;
+        var y = centerY - anchorY;
+        var w = width + originX > sheetWidth ? sheetWidth - originX : width;
+        var h = height + originY > sheetHeight ? sheetHeight - originY : height;
         var boxW = padding[3] + w * scale[0] + padding[1];
         var boxH = padding[0] + h * scale[1] + padding[2];
         var boxX = x - padding[3];
@@ -72109,77 +72603,69 @@ var Executor = /** @class */ (function () {
             p3[1] = boxY + boxH;
             p4[1] = p3[1];
         }
-        var transform = null;
+        var transform;
         if (rotation !== 0) {
-            var centerX = x + anchorX;
-            var centerY = y + anchorY;
-            transform = Object(_transform_js__WEBPACK_IMPORTED_MODULE_4__["compose"])(tmpTransform, centerX, centerY, 1, 1, rotation, -centerX, -centerY);
-            Object(_transform_js__WEBPACK_IMPORTED_MODULE_4__["apply"])(tmpTransform, p1);
-            Object(_transform_js__WEBPACK_IMPORTED_MODULE_4__["apply"])(tmpTransform, p2);
-            Object(_transform_js__WEBPACK_IMPORTED_MODULE_4__["apply"])(tmpTransform, p3);
-            Object(_transform_js__WEBPACK_IMPORTED_MODULE_4__["apply"])(tmpTransform, p4);
-            Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["createOrUpdate"])(Math.min(p1[0], p2[0], p3[0], p4[0]), Math.min(p1[1], p2[1], p3[1], p4[1]), Math.max(p1[0], p2[0], p3[0], p4[0]), Math.max(p1[1], p2[1], p3[1], p4[1]), tmpExtent);
+            transform = Object(_transform_js__WEBPACK_IMPORTED_MODULE_3__["compose"])(Object(_transform_js__WEBPACK_IMPORTED_MODULE_3__["create"])(), centerX, centerY, 1, 1, rotation, -centerX, -centerY);
+            Object(_transform_js__WEBPACK_IMPORTED_MODULE_3__["apply"])(transform, p1);
+            Object(_transform_js__WEBPACK_IMPORTED_MODULE_3__["apply"])(transform, p2);
+            Object(_transform_js__WEBPACK_IMPORTED_MODULE_3__["apply"])(transform, p3);
+            Object(_transform_js__WEBPACK_IMPORTED_MODULE_3__["apply"])(transform, p4);
+            Object(_extent_js__WEBPACK_IMPORTED_MODULE_4__["createOrUpdate"])(Math.min(p1[0], p2[0], p3[0], p4[0]), Math.min(p1[1], p2[1], p3[1], p4[1]), Math.max(p1[0], p2[0], p3[0], p4[0]), Math.max(p1[1], p2[1], p3[1], p4[1]), tmpExtent);
         }
         else {
-            Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["createOrUpdate"])(boxX, boxY, boxX + boxW, boxY + boxH, tmpExtent);
+            Object(_extent_js__WEBPACK_IMPORTED_MODULE_4__["createOrUpdate"])(Math.min(boxX, boxX + boxW), Math.min(boxY, boxY + boxH), Math.max(boxX, boxX + boxW), Math.max(boxY, boxY + boxH), tmpExtent);
         }
-        var renderBufferX = 0;
-        var renderBufferY = 0;
-        if (declutterGroup) {
-            var renderBuffer = this.renderBuffer_;
-            renderBuffer[0] = Math.max(renderBuffer[0], Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["getWidth"])(tmpExtent));
-            renderBufferX = renderBuffer[0];
-            renderBuffer[1] = Math.max(renderBuffer[1], Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["getHeight"])(tmpExtent));
-            renderBufferY = renderBuffer[1];
-        }
-        var canvas = context.canvas;
-        var strokePadding = strokeInstruction
-            ? (strokeInstruction[2] * scale[0]) / 2
-            : 0;
-        var intersects = tmpExtent[0] - strokePadding <=
-            (canvas.width + renderBufferX) / contextScale &&
-            tmpExtent[2] + strokePadding >= -renderBufferX / contextScale &&
-            tmpExtent[1] - strokePadding <=
-                (canvas.height + renderBufferY) / contextScale &&
-            tmpExtent[3] + strokePadding >= -renderBufferY / contextScale;
         if (snapToPixel) {
             x = Math.round(x);
             y = Math.round(y);
         }
-        if (declutterGroup) {
-            if (!intersects && declutterGroup[0] == 1) {
-                return false;
-            }
-            var declutterArgs = intersects
-                ? [
-                    context,
-                    transform ? transform.slice(0) : null,
-                    opacity,
-                    imageOrLabel,
-                    originX,
-                    originY,
-                    w,
-                    h,
-                    x,
-                    y,
-                    scale,
-                    tmpExtent.slice(),
-                ]
-                : null;
-            if (declutterArgs) {
-                if (fillStroke) {
-                    declutterArgs.push(fillInstruction, strokeInstruction, p1.slice(0), p2.slice(0), p3.slice(0), p4.slice(0));
-                }
-                declutterGroup.push(declutterArgs);
-            }
-        }
-        else if (intersects) {
+        return {
+            drawImageX: x,
+            drawImageY: y,
+            drawImageW: w,
+            drawImageH: h,
+            originX: originX,
+            originY: originY,
+            declutterBox: {
+                minX: tmpExtent[0],
+                minY: tmpExtent[1],
+                maxX: tmpExtent[2],
+                maxY: tmpExtent[3],
+                value: feature,
+            },
+            canvasTransform: transform,
+            scale: scale,
+        };
+    };
+    /**
+     * @private
+     * @param {CanvasRenderingContext2D} context Context.
+     * @param {number} contextScale Scale of the context.
+     * @param {import("../canvas.js").Label|HTMLImageElement|HTMLCanvasElement|HTMLVideoElement} imageOrLabel Image.
+     * @param {ImageOrLabelDimensions} dimensions Dimensions.
+     * @param {number} opacity Opacity.
+     * @param {Array<*>} fillInstruction Fill instruction.
+     * @param {Array<*>} strokeInstruction Stroke instruction.
+     * @return {boolean} The image or label was rendered.
+     */
+    Executor.prototype.replayImageOrLabel_ = function (context, contextScale, imageOrLabel, dimensions, opacity, fillInstruction, strokeInstruction) {
+        var fillStroke = !!(fillInstruction || strokeInstruction);
+        var box = dimensions.declutterBox;
+        var canvas = context.canvas;
+        var strokePadding = strokeInstruction
+            ? (strokeInstruction[2] * dimensions.scale[0]) / 2
+            : 0;
+        var intersects = box.minX - strokePadding <= canvas.width / contextScale &&
+            box.maxX + strokePadding >= 0 &&
+            box.minY - strokePadding <= canvas.height / contextScale &&
+            box.maxY + strokePadding >= 0;
+        if (intersects) {
             if (fillStroke) {
                 this.replayTextBackground_(context, p1, p2, p3, p4, 
                 /** @type {Array<*>} */ (fillInstruction), 
-                /** @type {Array<*>} */ (strokeInstruction), false);
+                /** @type {Array<*>} */ (strokeInstruction));
             }
-            Object(_canvas_js__WEBPACK_IMPORTED_MODULE_6__["drawImageOrLabel"])(context, transform, opacity, imageOrLabel, originX, originY, w, h, x, y, scale);
+            Object(_canvas_js__WEBPACK_IMPORTED_MODULE_5__["drawImageOrLabel"])(context, dimensions.canvasTransform, opacity, imageOrLabel, dimensions.originX, dimensions.originY, dimensions.drawImageW, dimensions.drawImageH, dimensions.drawImageX, dimensions.drawImageY, dimensions.scale);
         }
         return true;
     };
@@ -72189,7 +72675,7 @@ var Executor = /** @class */ (function () {
      */
     Executor.prototype.fill_ = function (context) {
         if (this.alignFill_) {
-            var origin_1 = Object(_transform_js__WEBPACK_IMPORTED_MODULE_4__["apply"])(this.renderedTransform_, [0, 0]);
+            var origin_1 = Object(_transform_js__WEBPACK_IMPORTED_MODULE_3__["apply"])(this.renderedTransform_, [0, 0]);
             var repeatSize = 512 * this.pixelRatio;
             context.save();
             context.translate(origin_1[0] % repeatSize, origin_1[1] % repeatSize);
@@ -72206,7 +72692,7 @@ var Executor = /** @class */ (function () {
      * @param {Array<*>} instruction Instruction.
      */
     Executor.prototype.setStrokeStyle_ = function (context, instruction) {
-        context.strokeStyle = /** @type {import("../../colorlike.js").ColorLike} */ (instruction[1]);
+        context['strokeStyle'] = /** @type {import("../../colorlike.js").ColorLike} */ (instruction[1]);
         context.lineWidth = /** @type {number} */ (instruction[2]);
         context.lineCap = /** @type {CanvasLineCap} */ (instruction[3]);
         context.lineJoin = /** @type {CanvasLineJoin} */ (instruction[4]);
@@ -72215,58 +72701,6 @@ var Executor = /** @class */ (function () {
             context.lineDashOffset = /** @type {number} */ (instruction[7]);
             context.setLineDash(/** @type {Array<number>} */ (instruction[6]));
         }
-    };
-    /**
-     * @param {import("../canvas.js").DeclutterGroup} declutterGroup Declutter group.
-     * @param {import("../../Feature.js").FeatureLike} feature Feature.
-     * @param {number} opacity Layer opacity.
-     * @param {?} declutterTree Declutter tree.
-     * @return {?} Declutter tree.
-     */
-    Executor.prototype.renderDeclutter = function (declutterGroup, feature, opacity, declutterTree) {
-        /** @type {Array<import("../../structs/RBush.js").Entry>} */
-        var boxes = [];
-        for (var i = 1, ii = declutterGroup.length; i < ii; ++i) {
-            var declutterData = declutterGroup[i];
-            var box = declutterData[11];
-            boxes.push({
-                minX: box[0],
-                minY: box[1],
-                maxX: box[2],
-                maxY: box[3],
-                value: feature,
-            });
-        }
-        if (!declutterTree) {
-            declutterTree = new rbush_rbush_js__WEBPACK_IMPORTED_MODULE_1___default.a(9);
-        }
-        var collides = false;
-        for (var i = 0, ii = boxes.length; i < ii; ++i) {
-            if (declutterTree.collides(boxes[i])) {
-                collides = true;
-                break;
-            }
-        }
-        if (!collides) {
-            declutterTree.load(boxes);
-            for (var j = 1, jj = declutterGroup.length; j < jj; ++j) {
-                var declutterData = /** @type {Array} */ (declutterGroup[j]);
-                var context = declutterData[0];
-                var currentAlpha = context.globalAlpha;
-                if (currentAlpha !== opacity) {
-                    context.globalAlpha = opacity;
-                }
-                if (declutterData.length > 12) {
-                    this.replayTextBackground_(declutterData[0], declutterData[14], declutterData[15], declutterData[16], declutterData[17], declutterData[12], declutterData[13], true);
-                }
-                _canvas_js__WEBPACK_IMPORTED_MODULE_6__["drawImageOrLabel"].apply(undefined, declutterData);
-                if (currentAlpha !== opacity) {
-                    context.globalAlpha = currentAlpha;
-                }
-            }
-        }
-        declutterGroup.length = 1;
-        return declutterTree;
     };
     /**
      * @private
@@ -72281,8 +72715,8 @@ var Executor = /** @class */ (function () {
         var label = this.createLabel(text, textKey, fillKey, strokeKey);
         var strokeState = this.strokeStates[strokeKey];
         var pixelRatio = this.pixelRatio;
-        var align = _TextBuilder_js__WEBPACK_IMPORTED_MODULE_2__["TEXT_ALIGN"][textState.textAlign || _canvas_js__WEBPACK_IMPORTED_MODULE_6__["defaultTextAlign"]];
-        var baseline = _TextBuilder_js__WEBPACK_IMPORTED_MODULE_2__["TEXT_ALIGN"][textState.textBaseline || _canvas_js__WEBPACK_IMPORTED_MODULE_6__["defaultTextBaseline"]];
+        var align = horizontalTextAlign(text, textState.textAlign || _canvas_js__WEBPACK_IMPORTED_MODULE_5__["defaultTextAlign"]);
+        var baseline = _TextBuilder_js__WEBPACK_IMPORTED_MODULE_1__["TEXT_ALIGN"][textState.textBaseline || _canvas_js__WEBPACK_IMPORTED_MODULE_5__["defaultTextBaseline"]];
         var strokeWidth = strokeState && strokeState.lineWidth ? strokeState.lineWidth : 0;
         // Remove the 2 pixels we added in createLabel() for the anchor
         var width = label.width / pixelRatio - 2 * textState.scale[0];
@@ -72302,32 +72736,31 @@ var Executor = /** @class */ (function () {
      * @param {import("../../transform.js").Transform} transform Transform.
      * @param {Array<*>} instructions Instructions array.
      * @param {boolean} snapToPixel Snap point symbols and text to integer pixels.
-     * @param {function(import("../../Feature.js").FeatureLike): T|undefined} featureCallback Feature callback.
-     * @param {import("../../extent.js").Extent=} opt_hitExtent Only check features that intersect this
-     *     extent.
+     * @param {FeatureCallback<T>=} opt_featureCallback Feature callback.
+     * @param {import("../../extent.js").Extent=} opt_hitExtent Only check
+     *     features that intersect this extent.
+     * @param {import("rbush").default=} opt_declutterTree Declutter tree.
      * @return {T|undefined} Callback result.
      * @template T
      */
-    Executor.prototype.execute_ = function (context, contextScale, transform, instructions, snapToPixel, featureCallback, opt_hitExtent) {
-        this.declutterItems.length = 0;
+    Executor.prototype.execute_ = function (context, contextScale, transform, instructions, snapToPixel, opt_featureCallback, opt_hitExtent, opt_declutterTree) {
         /** @type {Array<number>} */
         var pixelCoordinates;
-        if (this.pixelCoordinates_ && Object(_array_js__WEBPACK_IMPORTED_MODULE_8__["equals"])(transform, this.renderedTransform_)) {
+        if (this.pixelCoordinates_ && Object(_array_js__WEBPACK_IMPORTED_MODULE_7__["equals"])(transform, this.renderedTransform_)) {
             pixelCoordinates = this.pixelCoordinates_;
         }
         else {
             if (!this.pixelCoordinates_) {
                 this.pixelCoordinates_ = [];
             }
-            pixelCoordinates = Object(_geom_flat_transform_js__WEBPACK_IMPORTED_MODULE_10__["transform2D"])(this.coordinates, 0, this.coordinates.length, 2, transform, this.pixelCoordinates_);
-            Object(_transform_js__WEBPACK_IMPORTED_MODULE_4__["setFromArray"])(this.renderedTransform_, transform);
+            pixelCoordinates = Object(_geom_flat_transform_js__WEBPACK_IMPORTED_MODULE_9__["transform2D"])(this.coordinates, 0, this.coordinates.length, 2, transform, this.pixelCoordinates_);
+            Object(_transform_js__WEBPACK_IMPORTED_MODULE_3__["setFromArray"])(this.renderedTransform_, transform);
         }
         var i = 0; // instruction index
         var ii = instructions.length; // end of instructions
         var d = 0; // data index
         var dd; // end of per-instruction data
-        var anchorX, anchorY, prevX, prevY, roundX, roundY, declutterGroup, declutterGroups, image, text, textKey;
-        var strokeKey, fillKey;
+        var anchorX, anchorY, prevX, prevY, roundX, roundY, image, text, textKey, strokeKey, fillKey;
         var pendingFill = 0;
         var pendingStroke = 0;
         var lastFillInstruction = null;
@@ -72345,18 +72778,19 @@ var Executor = /** @class */ (function () {
         // balance between batch size and number of fill/stroke instructions.
         var batchSize = this.instructions != instructions || this.overlaps ? 0 : 200;
         var /** @type {import("../../Feature.js").FeatureLike} */ feature;
-        var x, y;
+        var x, y, currentGeometry;
         while (i < ii) {
             var instruction = instructions[i];
             var type = /** @type {import("./Instruction.js").default} */ (instruction[0]);
             switch (type) {
                 case _Instruction_js__WEBPACK_IMPORTED_MODULE_0__["default"].BEGIN_GEOMETRY:
                     feature = /** @type {import("../../Feature.js").FeatureLike} */ (instruction[1]);
+                    currentGeometry = instruction[3];
                     if (!feature.getGeometry()) {
                         i = /** @type {number} */ (instruction[2]);
                     }
                     else if (opt_hitExtent !== undefined &&
-                        !Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["intersects"])(opt_hitExtent, instruction[3])) {
+                        !Object(_extent_js__WEBPACK_IMPORTED_MODULE_4__["intersects"])(opt_hitExtent, currentGeometry.getExtent())) {
                         i = /** @type {number} */ (instruction[2]) + 1;
                     }
                     else {
@@ -72426,15 +72860,15 @@ var Executor = /** @class */ (function () {
                     // Remaining arguments in DRAW_IMAGE are in alphabetical order
                     anchorX = /** @type {number} */ (instruction[4]);
                     anchorY = /** @type {number} */ (instruction[5]);
-                    declutterGroups = featureCallback ? null : instruction[6];
-                    var height = /** @type {number} */ (instruction[7]);
-                    var opacity = /** @type {number} */ (instruction[8]);
-                    var originX = /** @type {number} */ (instruction[9]);
-                    var originY = /** @type {number} */ (instruction[10]);
-                    var rotateWithView = /** @type {boolean} */ (instruction[11]);
-                    var rotation = /** @type {number} */ (instruction[12]);
-                    var scale = /** @type {import("../../size.js").Size} */ (instruction[13]);
-                    var width = /** @type {number} */ (instruction[14]);
+                    var height = /** @type {number} */ (instruction[6]);
+                    var opacity = /** @type {number} */ (instruction[7]);
+                    var originX = /** @type {number} */ (instruction[8]);
+                    var originY = /** @type {number} */ (instruction[9]);
+                    var rotateWithView = /** @type {boolean} */ (instruction[10]);
+                    var rotation = /** @type {number} */ (instruction[11]);
+                    var scale = /** @type {import("../../size.js").Size} */ (instruction[12]);
+                    var width = /** @type {number} */ (instruction[13]);
+                    var declutterImageWithText = /** @type {import("../canvas.js").DeclutterImageWithText} */ (instruction[14]);
                     if (!image && instruction.length >= 19) {
                         // create label images
                         text = /** @type {string} */ (instruction[18]);
@@ -72451,9 +72885,9 @@ var Executor = /** @class */ (function () {
                         anchorY = (labelWithAnchor.anchorY - textOffsetY) * this.pixelRatio;
                         instruction[5] = anchorY;
                         height = image.height;
-                        instruction[7] = height;
+                        instruction[6] = height;
                         width = image.width;
-                        instruction[14] = width;
+                        instruction[13] = width;
                     }
                     var geometryWidths = void 0;
                     if (instruction.length > 24) {
@@ -72466,7 +72900,7 @@ var Executor = /** @class */ (function () {
                         backgroundStroke = /** @type {boolean} */ (instruction[17]);
                     }
                     else {
-                        padding = _canvas_js__WEBPACK_IMPORTED_MODULE_6__["defaultPadding"];
+                        padding = _canvas_js__WEBPACK_IMPORTED_MODULE_5__["defaultPadding"];
                         backgroundFill = false;
                         backgroundStroke = false;
                     }
@@ -72479,35 +72913,58 @@ var Executor = /** @class */ (function () {
                         rotation -= viewRotation;
                     }
                     var widthIndex = 0;
-                    var declutterGroupIndex = 0;
                     for (; d < dd; d += 2) {
                         if (geometryWidths &&
                             geometryWidths[widthIndex++] < width / this.pixelRatio) {
                             continue;
                         }
-                        if (declutterGroups) {
-                            var index = Math.floor(declutterGroupIndex);
-                            declutterGroup =
-                                declutterGroups.length < index + 1
-                                    ? [declutterGroups[0][0]]
-                                    : declutterGroups[index];
-                        }
-                        var rendered = this.replayImageOrLabel_(context, contextScale, pixelCoordinates[d], pixelCoordinates[d + 1], image, anchorX, anchorY, declutterGroup, height, opacity, originX, originY, rotation, scale, snapToPixel, width, padding, backgroundFill
-                            ? /** @type {Array<*>} */ (lastFillInstruction)
-                            : null, backgroundStroke
-                            ? /** @type {Array<*>} */ (lastStrokeInstruction)
-                            : null);
-                        if (rendered &&
-                            declutterGroup &&
-                            declutterGroups[declutterGroups.length - 1] !== declutterGroup) {
-                            declutterGroups.push(declutterGroup);
-                        }
-                        if (declutterGroup) {
-                            if (declutterGroup.length - 1 === declutterGroup[0]) {
-                                this.declutterItems.push(this, declutterGroup, feature);
+                        var dimensions = this.calculateImageOrLabelDimensions_(image.width, image.height, pixelCoordinates[d], pixelCoordinates[d + 1], width, height, anchorX, anchorY, originX, originY, rotation, scale, snapToPixel, padding, backgroundFill || backgroundStroke, feature);
+                        /** @type {ReplayImageOrLabelArgs} */
+                        var args = [
+                            context,
+                            contextScale,
+                            image,
+                            dimensions,
+                            opacity,
+                            backgroundFill
+                                ? /** @type {Array<*>} */ (lastFillInstruction)
+                                : null,
+                            backgroundStroke
+                                ? /** @type {Array<*>} */ (lastStrokeInstruction)
+                                : null,
+                        ];
+                        var imageArgs = void 0;
+                        var imageDeclutterBox = void 0;
+                        if (opt_declutterTree && declutterImageWithText) {
+                            if (!declutterImageWithText[d]) {
+                                // We now have the image for an image+text combination.
+                                declutterImageWithText[d] = args;
+                                // Don't render anything for now, wait for the text.
+                                continue;
                             }
-                            declutterGroupIndex += 1 / declutterGroup[0];
+                            imageArgs = declutterImageWithText[d];
+                            delete declutterImageWithText[d];
+                            imageDeclutterBox = getDeclutterBox(imageArgs);
+                            if (opt_declutterTree.collides(imageDeclutterBox)) {
+                                continue;
+                            }
                         }
+                        if (opt_declutterTree &&
+                            opt_declutterTree.collides(dimensions.declutterBox)) {
+                            continue;
+                        }
+                        if (imageArgs) {
+                            // We now have image and text for an image+text combination.
+                            if (opt_declutterTree) {
+                                opt_declutterTree.insert(imageDeclutterBox);
+                            }
+                            // Render the image before we render the text.
+                            this.replayImageOrLabel_.apply(this, imageArgs);
+                        }
+                        if (opt_declutterTree) {
+                            opt_declutterTree.insert(dimensions.declutterBox);
+                        }
+                        this.replayImageOrLabel_.apply(this, args);
                     }
                     ++i;
                     break;
@@ -72515,19 +72972,18 @@ var Executor = /** @class */ (function () {
                     var begin = /** @type {number} */ (instruction[1]);
                     var end = /** @type {number} */ (instruction[2]);
                     var baseline = /** @type {number} */ (instruction[3]);
-                    declutterGroup = featureCallback ? null : instruction[4];
-                    var overflow = /** @type {number} */ (instruction[5]);
-                    fillKey = /** @type {string} */ (instruction[6]);
-                    var maxAngle = /** @type {number} */ (instruction[7]);
-                    var measurePixelRatio = /** @type {number} */ (instruction[8]);
-                    var offsetY = /** @type {number} */ (instruction[9]);
-                    strokeKey = /** @type {string} */ (instruction[10]);
-                    var strokeWidth = /** @type {number} */ (instruction[11]);
-                    text = /** @type {string} */ (instruction[12]);
-                    textKey = /** @type {string} */ (instruction[13]);
+                    var overflow = /** @type {number} */ (instruction[4]);
+                    fillKey = /** @type {string} */ (instruction[5]);
+                    var maxAngle = /** @type {number} */ (instruction[6]);
+                    var measurePixelRatio = /** @type {number} */ (instruction[7]);
+                    var offsetY = /** @type {number} */ (instruction[8]);
+                    strokeKey = /** @type {string} */ (instruction[9]);
+                    var strokeWidth = /** @type {number} */ (instruction[10]);
+                    text = /** @type {string} */ (instruction[11]);
+                    textKey = /** @type {string} */ (instruction[12]);
                     var pixelRatioScale = [
-                        /** @type {number} */ (instruction[14]),
-                        /** @type {number} */ (instruction[14]),
+                        /** @type {number} */ (instruction[13]),
+                        /** @type {number} */ (instruction[13]),
                     ];
                     var textState = this.textStates[textKey];
                     var font = textState.font;
@@ -72543,32 +72999,44 @@ var Executor = /** @class */ (function () {
                         cachedWidths = {};
                         this.widths_[font] = cachedWidths;
                     }
-                    var pathLength = Object(_geom_flat_length_js__WEBPACK_IMPORTED_MODULE_9__["lineStringLength"])(pixelCoordinates, begin, end, 2);
+                    var pathLength = Object(_geom_flat_length_js__WEBPACK_IMPORTED_MODULE_8__["lineStringLength"])(pixelCoordinates, begin, end, 2);
                     var textLength = Math.abs(textScale[0]) *
-                        Object(_canvas_js__WEBPACK_IMPORTED_MODULE_6__["measureAndCacheTextWidth"])(font, text, cachedWidths);
+                        Object(_canvas_js__WEBPACK_IMPORTED_MODULE_5__["measureAndCacheTextWidth"])(font, text, cachedWidths);
                     if (overflow || textLength <= pathLength) {
                         var textAlign = this.textStates[textKey].textAlign;
-                        var startM = (pathLength - textLength) * _TextBuilder_js__WEBPACK_IMPORTED_MODULE_2__["TEXT_ALIGN"][textAlign];
-                        var parts = Object(_geom_flat_textpath_js__WEBPACK_IMPORTED_MODULE_7__["drawTextOnPath"])(pixelCoordinates, begin, end, 2, text, startM, maxAngle, Math.abs(textScale[0]), _canvas_js__WEBPACK_IMPORTED_MODULE_6__["measureAndCacheTextWidth"], font, cachedWidths, viewRotationFromTransform ? 0 : this.viewRotation_);
-                        if (parts) {
-                            var rendered = false;
+                        var startM = (pathLength - textLength) * _TextBuilder_js__WEBPACK_IMPORTED_MODULE_1__["TEXT_ALIGN"][textAlign];
+                        var parts = Object(_geom_flat_textpath_js__WEBPACK_IMPORTED_MODULE_6__["drawTextOnPath"])(pixelCoordinates, begin, end, 2, text, startM, maxAngle, Math.abs(textScale[0]), _canvas_js__WEBPACK_IMPORTED_MODULE_5__["measureAndCacheTextWidth"], font, cachedWidths, viewRotationFromTransform ? 0 : this.viewRotation_);
+                        drawChars: if (parts) {
+                            /** @type {Array<ReplayImageOrLabelArgs>} */
+                            var replayImageOrLabelArgs = [];
                             var c = void 0, cc = void 0, chars = void 0, label = void 0, part = void 0;
                             if (strokeKey) {
                                 for (c = 0, cc = parts.length; c < cc; ++c) {
                                     part = parts[c]; // x, y, anchorX, rotation, chunk
                                     chars = /** @type {string} */ (part[4]);
                                     label = this.createLabel(chars, textKey, '', strokeKey);
-                                    anchorX = /** @type {number} */ (part[2]) + strokeWidth;
+                                    anchorX =
+                                        /** @type {number} */ (part[2]) +
+                                            (textScale[0] < 0 ? -strokeWidth : strokeWidth);
                                     anchorY =
                                         baseline * label.height +
                                             ((0.5 - baseline) * 2 * strokeWidth * textScale[1]) /
                                                 textScale[0] -
                                             offsetY;
-                                    rendered =
-                                        this.replayImageOrLabel_(context, contextScale, 
-                                        /** @type {number} */ (part[0]), 
-                                        /** @type {number} */ (part[1]), label, anchorX, anchorY, declutterGroup, label.height, 1, 0, 0, 
-                                        /** @type {number} */ (part[3]), pixelRatioScale, false, label.width, _canvas_js__WEBPACK_IMPORTED_MODULE_6__["defaultPadding"], null, null) || rendered;
+                                    var dimensions = this.calculateImageOrLabelDimensions_(label.width, label.height, part[0], part[1], label.width, label.height, anchorX, anchorY, 0, 0, part[3], pixelRatioScale, false, _canvas_js__WEBPACK_IMPORTED_MODULE_5__["defaultPadding"], false, feature);
+                                    if (opt_declutterTree &&
+                                        opt_declutterTree.collides(dimensions.declutterBox)) {
+                                        break drawChars;
+                                    }
+                                    replayImageOrLabelArgs.push([
+                                        context,
+                                        contextScale,
+                                        label,
+                                        dimensions,
+                                        1,
+                                        null,
+                                        null,
+                                    ]);
                                 }
                             }
                             if (fillKey) {
@@ -72578,24 +73046,36 @@ var Executor = /** @class */ (function () {
                                     label = this.createLabel(chars, textKey, fillKey, '');
                                     anchorX = /** @type {number} */ (part[2]);
                                     anchorY = baseline * label.height - offsetY;
-                                    rendered =
-                                        this.replayImageOrLabel_(context, contextScale, 
-                                        /** @type {number} */ (part[0]), 
-                                        /** @type {number} */ (part[1]), label, anchorX, anchorY, declutterGroup, label.height, 1, 0, 0, 
-                                        /** @type {number} */ (part[3]), pixelRatioScale, false, label.width, _canvas_js__WEBPACK_IMPORTED_MODULE_6__["defaultPadding"], null, null) || rendered;
+                                    var dimensions = this.calculateImageOrLabelDimensions_(label.width, label.height, part[0], part[1], label.width, label.height, anchorX, anchorY, 0, 0, part[3], pixelRatioScale, false, _canvas_js__WEBPACK_IMPORTED_MODULE_5__["defaultPadding"], false, feature);
+                                    if (opt_declutterTree &&
+                                        opt_declutterTree.collides(dimensions.declutterBox)) {
+                                        break drawChars;
+                                    }
+                                    replayImageOrLabelArgs.push([
+                                        context,
+                                        contextScale,
+                                        label,
+                                        dimensions,
+                                        1,
+                                        null,
+                                        null,
+                                    ]);
                                 }
                             }
-                            if (rendered) {
-                                this.declutterItems.push(this, declutterGroup, feature);
+                            if (opt_declutterTree) {
+                                opt_declutterTree.load(replayImageOrLabelArgs.map(getDeclutterBox));
+                            }
+                            for (var i_1 = 0, ii_1 = replayImageOrLabelArgs.length; i_1 < ii_1; ++i_1) {
+                                this.replayImageOrLabel_.apply(this, replayImageOrLabelArgs[i_1]);
                             }
                         }
                     }
                     ++i;
                     break;
                 case _Instruction_js__WEBPACK_IMPORTED_MODULE_0__["default"].END_GEOMETRY:
-                    if (featureCallback !== undefined) {
+                    if (opt_featureCallback !== undefined) {
                         feature = /** @type {import("../../Feature.js").FeatureLike} */ (instruction[1]);
-                        var result = featureCallback(feature);
+                        var result = opt_featureCallback(feature, currentGeometry);
                         if (result) {
                             return result;
                         }
@@ -72687,19 +73167,19 @@ var Executor = /** @class */ (function () {
      * @param {import("../../transform.js").Transform} transform Transform.
      * @param {number} viewRotation View rotation.
      * @param {boolean} snapToPixel Snap point symbols and text to integer pixels.
+     * @param {import("rbush").default=} opt_declutterTree Declutter tree.
      */
-    Executor.prototype.execute = function (context, contextScale, transform, viewRotation, snapToPixel) {
+    Executor.prototype.execute = function (context, contextScale, transform, viewRotation, snapToPixel, opt_declutterTree) {
         this.viewRotation_ = viewRotation;
-        this.execute_(context, contextScale, transform, this.instructions, snapToPixel, undefined, undefined);
+        this.execute_(context, contextScale, transform, this.instructions, snapToPixel, undefined, undefined, opt_declutterTree);
     };
     /**
      * @param {CanvasRenderingContext2D} context Context.
      * @param {import("../../transform.js").Transform} transform Transform.
      * @param {number} viewRotation View rotation.
-     * @param {function(import("../../Feature.js").FeatureLike): T=} opt_featureCallback
-     *     Feature callback.
-     * @param {import("../../extent.js").Extent=} opt_hitExtent Only check features that intersect this
-     *     extent.
+     * @param {FeatureCallback<T>=} opt_featureCallback Feature callback.
+     * @param {import("../../extent.js").Extent=} opt_hitExtent Only check
+     *     features that intersect this extent.
      * @return {T|undefined} Callback result.
      * @template T
      */
@@ -72718,13 +73198,12 @@ var Executor = /** @class */ (function () {
 /*!********************************************************!*\
   !*** ./node_modules/ol/render/canvas/ExecutorGroup.js ***!
   \********************************************************/
-/*! exports provided: getCircleArray, replayDeclutter, default */
+/*! exports provided: getPixelIndexArray, default */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getCircleArray", function() { return getCircleArray; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "replayDeclutter", function() { return replayDeclutter; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getPixelIndexArray", function() { return getPixelIndexArray; });
 /* harmony import */ var _BuilderType_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./BuilderType.js */ "./node_modules/ol/render/canvas/BuilderType.js");
 /* harmony import */ var _Executor_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Executor.js */ "./node_modules/ol/render/canvas/Executor.js");
 /* harmony import */ var _extent_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../extent.js */ "./node_modules/ol/extent.js");
@@ -72765,7 +73244,7 @@ var ExecutorGroup = /** @class */ (function () {
      * @param {number} resolution Resolution.
      * @param {number} pixelRatio Pixel ratio.
      * @param {boolean} overlaps The executor group can have overlapping geometries.
-     * @param {!Object<string, !Object<import("./BuilderType.js").default, import("./Builder.js").SerializableInstructions>>} allInstructions
+     * @param {!Object<string, !Object<import("./BuilderType.js").default, import("../canvas.js").SerializableInstructions>>} allInstructions
      * The serializable instructions.
      * @param {number=} opt_renderBuffer Optional rendering buffer.
      */
@@ -72828,7 +73307,7 @@ var ExecutorGroup = /** @class */ (function () {
     /**
      * Create executors and populate them using the provided instructions.
      * @private
-     * @param {!Object<string, !Object<import("./BuilderType.js").default, import("./Builder.js").SerializableInstructions>>} allInstructions The serializable instructions
+     * @param {!Object<string, !Object<import("./BuilderType.js").default, import("../canvas.js").SerializableInstructions>>} allInstructions The serializable instructions
      */
     ExecutorGroup.prototype.createExecutors_ = function (allInstructions) {
         for (var zIndex in allInstructions) {
@@ -72865,7 +73344,7 @@ var ExecutorGroup = /** @class */ (function () {
      * @param {number} resolution Resolution.
      * @param {number} rotation Rotation.
      * @param {number} hitTolerance Hit tolerance in pixels.
-     * @param {function(import("../../Feature.js").FeatureLike): T} callback Feature callback.
+     * @param {function(import("../../Feature.js").FeatureLike, import("../../geom/SimpleGeometry.js").default, number): T} callback Feature callback.
      * @param {Array<import("../../Feature.js").FeatureLike>} declutteredFeatures Decluttered features.
      * @return {T|undefined} Callback result.
      * @template T
@@ -72874,7 +73353,8 @@ var ExecutorGroup = /** @class */ (function () {
         hitTolerance = Math.round(hitTolerance);
         var contextSize = hitTolerance * 2 + 1;
         var transform = Object(_transform_js__WEBPACK_IMPORTED_MODULE_3__["compose"])(this.hitDetectionTransform_, hitTolerance + 0.5, hitTolerance + 0.5, 1 / resolution, -1 / resolution, -rotation, -coordinate[0], -coordinate[1]);
-        if (!this.hitDetectionContext_) {
+        var newContext = !this.hitDetectionContext_;
+        if (newContext) {
             this.hitDetectionContext_ = Object(_dom_js__WEBPACK_IMPORTED_MODULE_4__["createCanvasContext2D"])(contextSize, contextSize);
         }
         var context = this.hitDetectionContext_;
@@ -72883,7 +73363,7 @@ var ExecutorGroup = /** @class */ (function () {
             context.canvas.width = contextSize;
             context.canvas.height = contextSize;
         }
-        else {
+        else if (!newContext) {
             context.clearRect(0, 0, contextSize, contextSize);
         }
         /**
@@ -72895,37 +73375,35 @@ var ExecutorGroup = /** @class */ (function () {
             Object(_extent_js__WEBPACK_IMPORTED_MODULE_2__["extendCoordinate"])(hitExtent, coordinate);
             Object(_extent_js__WEBPACK_IMPORTED_MODULE_2__["buffer"])(hitExtent, resolution * (this.renderBuffer_ + hitTolerance), hitExtent);
         }
-        var mask = getCircleArray(hitTolerance);
+        var indexes = getPixelIndexArray(hitTolerance);
         var builderType;
         /**
          * @param {import("../../Feature.js").FeatureLike} feature Feature.
-         * @return {?} Callback result.
+         * @param {import("../../geom/SimpleGeometry.js").default} geometry Geometry.
+         * @return {T|undefined} Callback result.
          */
-        function featureCallback(feature) {
+        function featureCallback(feature, geometry) {
             var imageData = context.getImageData(0, 0, contextSize, contextSize)
                 .data;
-            for (var i_1 = 0; i_1 < contextSize; i_1++) {
-                for (var j_1 = 0; j_1 < contextSize; j_1++) {
-                    if (mask[i_1][j_1]) {
-                        if (imageData[(j_1 * contextSize + i_1) * 4 + 3] > 0) {
-                            var result_1 = void 0;
-                            if (!(declutteredFeatures &&
-                                (builderType == _BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].IMAGE ||
-                                    builderType == _BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT)) ||
-                                declutteredFeatures.indexOf(feature) !== -1) {
-                                result_1 = callback(feature);
-                            }
-                            if (result_1) {
-                                return result_1;
-                            }
-                            else {
-                                context.clearRect(0, 0, contextSize, contextSize);
-                                return undefined;
-                            }
+            for (var i_1 = 0, ii = indexes.length; i_1 < ii; i_1++) {
+                if (imageData[indexes[i_1]] > 0) {
+                    if (!declutteredFeatures ||
+                        (builderType !== _BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].IMAGE &&
+                            builderType !== _BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT) ||
+                        declutteredFeatures.indexOf(feature) !== -1) {
+                        var idx = (indexes[i_1] - 3) / 4;
+                        var x = hitTolerance - (idx % contextSize);
+                        var y = hitTolerance - ((idx / contextSize) | 0);
+                        var result_1 = callback(feature, geometry, x * x + y * y);
+                        if (result_1) {
+                            return result_1;
                         }
                     }
+                    context.clearRect(0, 0, contextSize, contextSize);
+                    break;
                 }
             }
+            return undefined;
         }
         /** @type {Array<number>} */
         var zs = Object.keys(this.executorsByZIndex_).map(Number);
@@ -72978,9 +73456,9 @@ var ExecutorGroup = /** @class */ (function () {
      * @param {boolean} snapToPixel Snap point symbols and test to integer pixel.
      * @param {Array<import("./BuilderType.js").default>=} opt_builderTypes Ordered replay types to replay.
      *     Default is {@link module:ol/render/replay~ORDER}
-     * @param {Object<string, import("../canvas.js").DeclutterGroup>=} opt_declutterReplays Declutter replays.
+     * @param {import("rbush").default=} opt_declutterTree Declutter tree.
      */
-    ExecutorGroup.prototype.execute = function (context, contextScale, transform, viewRotation, snapToPixel, opt_builderTypes, opt_declutterReplays) {
+    ExecutorGroup.prototype.execute = function (context, contextScale, transform, viewRotation, snapToPixel, opt_builderTypes, opt_declutterTree) {
         /** @type {Array<number>} */
         var zs = Object.keys(this.executorsByZIndex_).map(Number);
         zs.sort(_array_js__WEBPACK_IMPORTED_MODULE_6__["numberSafeCompareFunction"]);
@@ -72992,6 +73470,9 @@ var ExecutorGroup = /** @class */ (function () {
         }
         var builderTypes = opt_builderTypes ? opt_builderTypes : ORDER;
         var i, ii, j, jj, replays, replay;
+        if (opt_declutterTree) {
+            zs.reverse();
+        }
         for (i = 0, ii = zs.length; i < ii; ++i) {
             var zIndexKey = zs[i].toString();
             replays = this.executorsByZIndex_[zIndexKey];
@@ -72999,20 +73480,7 @@ var ExecutorGroup = /** @class */ (function () {
                 var builderType = builderTypes[j];
                 replay = replays[builderType];
                 if (replay !== undefined) {
-                    if (opt_declutterReplays &&
-                        (builderType == _BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].IMAGE ||
-                            builderType == _BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT)) {
-                        var declutter = opt_declutterReplays[zIndexKey];
-                        if (!declutter) {
-                            opt_declutterReplays[zIndexKey] = [replay, transform.slice(0)];
-                        }
-                        else {
-                            declutter.push(replay, transform.slice(0));
-                        }
-                    }
-                    else {
-                        replay.execute(context, contextScale, transform, viewRotation, snapToPixel);
-                    }
+                    replay.execute(context, contextScale, transform, viewRotation, snapToPixel, opt_declutterTree);
                 }
             }
         }
@@ -73023,101 +73491,57 @@ var ExecutorGroup = /** @class */ (function () {
     return ExecutorGroup;
 }());
 /**
- * This cache is used for storing calculated pixel circles for increasing performance.
+ * This cache is used to store arrays of indexes for calculated pixel circles
+ * to increase performance.
  * It is a static property to allow each Replaygroup to access it.
- * @type {Object<number, Array<Array<(boolean|undefined)>>>}
+ * @type {Object<number, Array<number>>}
  */
-var circleArrayCache = {
-    0: [[true]],
-};
+var circlePixelIndexArrayCache = {};
 /**
- * This method fills a row in the array from the given coordinate to the
- * middle with `true`.
- * @param {Array<Array<(boolean|undefined)>>} array The array that will be altered.
- * @param {number} x X coordinate.
- * @param {number} y Y coordinate.
- */
-function fillCircleArrayRowToMiddle(array, x, y) {
-    var i;
-    var radius = Math.floor(array.length / 2);
-    if (x >= radius) {
-        for (i = radius; i < x; i++) {
-            array[i][y] = true;
-        }
-    }
-    else if (x < radius) {
-        for (i = x + 1; i < radius; i++) {
-            array[i][y] = true;
-        }
-    }
-}
-/**
- * This methods creates a circle inside a fitting array. Points inside the
- * circle are marked by true, points on the outside are undefined.
- * It uses the midpoint circle algorithm.
+ * This methods creates an array with indexes of all pixels within a circle,
+ * ordered by how close they are to the center.
  * A cache is used to increase performance.
  * @param {number} radius Radius.
- * @returns {Array<Array<(boolean|undefined)>>} An array with marked circle points.
+ * @returns {Array<number>} An array with indexes within a circle.
  */
-function getCircleArray(radius) {
-    if (circleArrayCache[radius] !== undefined) {
-        return circleArrayCache[radius];
+function getPixelIndexArray(radius) {
+    if (circlePixelIndexArrayCache[radius] !== undefined) {
+        return circlePixelIndexArrayCache[radius];
     }
-    var arraySize = radius * 2 + 1;
-    var arr = new Array(arraySize);
-    for (var i = 0; i < arraySize; i++) {
-        arr[i] = new Array(arraySize);
-    }
-    var x = radius;
-    var y = 0;
-    var error = 0;
-    while (x >= y) {
-        fillCircleArrayRowToMiddle(arr, radius + x, radius + y);
-        fillCircleArrayRowToMiddle(arr, radius + y, radius + x);
-        fillCircleArrayRowToMiddle(arr, radius - y, radius + x);
-        fillCircleArrayRowToMiddle(arr, radius - x, radius + y);
-        fillCircleArrayRowToMiddle(arr, radius - x, radius - y);
-        fillCircleArrayRowToMiddle(arr, radius - y, radius - x);
-        fillCircleArrayRowToMiddle(arr, radius + y, radius - x);
-        fillCircleArrayRowToMiddle(arr, radius + x, radius - y);
-        y++;
-        error += 1 + 2 * y;
-        if (2 * (error - x) + 1 > 0) {
-            x -= 1;
-            error += 1 - 2 * x;
-        }
-    }
-    circleArrayCache[radius] = arr;
-    return arr;
-}
-/**
- * @param {!Object<string, Array<*>>} declutterReplays Declutter replays.
- * @param {CanvasRenderingContext2D} context Context.
- * @param {number} rotation Rotation.
- * @param {number} opacity Opacity.
- * @param {boolean} snapToPixel Snap point symbols and text to integer pixels.
- * @param {Array<import("../../PluggableMap.js").DeclutterItems>} declutterItems Declutter items.
- */
-function replayDeclutter(declutterReplays, context, rotation, opacity, snapToPixel, declutterItems) {
-    var zs = Object.keys(declutterReplays)
-        .map(Number)
-        .sort(_array_js__WEBPACK_IMPORTED_MODULE_6__["numberSafeCompareFunction"]);
-    for (var z = 0, zz = zs.length; z < zz; ++z) {
-        var executorData = declutterReplays[zs[z].toString()];
-        var currentExecutor = void 0;
-        for (var i = 0, ii = executorData.length; i < ii;) {
-            var executor = executorData[i++];
-            var transform = executorData[i++];
-            executor.execute(context, 1, transform, rotation, snapToPixel);
-            if (executor !== currentExecutor && executor.declutterItems.length > 0) {
-                currentExecutor = executor;
-                declutterItems.push({
-                    items: executor.declutterItems,
-                    opacity: opacity,
-                });
+    var size = radius * 2 + 1;
+    var maxDistanceSq = radius * radius;
+    var distances = new Array(maxDistanceSq + 1);
+    for (var i = 0; i <= radius; ++i) {
+        for (var j = 0; j <= radius; ++j) {
+            var distanceSq = i * i + j * j;
+            if (distanceSq > maxDistanceSq) {
+                break;
+            }
+            var distance = distances[distanceSq];
+            if (!distance) {
+                distance = [];
+                distances[distanceSq] = distance;
+            }
+            distance.push(((radius + i) * size + (radius + j)) * 4 + 3);
+            if (i > 0) {
+                distance.push(((radius - i) * size + (radius + j)) * 4 + 3);
+            }
+            if (j > 0) {
+                distance.push(((radius + i) * size + (radius - j)) * 4 + 3);
+                if (i > 0) {
+                    distance.push(((radius - i) * size + (radius - j)) * 4 + 3);
+                }
             }
         }
     }
+    var pixelIndex = [];
+    for (var i = 0, ii = distances.length; i < ii; ++i) {
+        if (distances[i]) {
+            pixelIndex.push.apply(pixelIndex, distances[i]);
+        }
+    }
+    circlePixelIndexArrayCache[radius] = pixelIndex;
+    return pixelIndex;
 }
 /* harmony default export */ __webpack_exports__["default"] = (ExecutorGroup);
 //# sourceMappingURL=ExecutorGroup.js.map
@@ -73139,7 +73563,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -73163,11 +73587,6 @@ var CanvasImageBuilder = /** @class */ (function (_super) {
      */
     function CanvasImageBuilder(tolerance, maxExtent, resolution, pixelRatio) {
         var _this = _super.call(this, tolerance, maxExtent, resolution, pixelRatio) || this;
-        /**
-         * @private
-         * @type {import("../canvas.js").DeclutterGroups}
-         */
-        _this.declutterGroups_ = null;
         /**
          * @private
          * @type {HTMLCanvasElement|HTMLVideoElement|HTMLImageElement}
@@ -73233,19 +73652,14 @@ var CanvasImageBuilder = /** @class */ (function (_super) {
          * @type {number|undefined}
          */
         _this.width_ = undefined;
+        /**
+         * Data shared with a text builder for combined decluttering.
+         * @private
+         * @type {import("../canvas.js").DeclutterImageWithText}
+         */
+        _this.declutterImageWithText_ = undefined;
         return _this;
     }
-    /**
-     * @param {Array<number>} flatCoordinates Flat coordinates.
-     * @param {number} offset Offset.
-     * @param {number} end End.
-     * @param {number} stride Stride.
-     * @private
-     * @return {number} My end.
-     */
-    CanvasImageBuilder.prototype.drawCoordinates_ = function (flatCoordinates, offset, end, stride) {
-        return this.appendFlatCoordinates(flatCoordinates, offset, end, stride, false, false);
-    };
     /**
      * @param {import("../../geom/Point.js").default|import("../Feature.js").default} pointGeometry Point geometry.
      * @param {import("../../Feature.js").FeatureLike} feature Feature.
@@ -73258,7 +73672,7 @@ var CanvasImageBuilder = /** @class */ (function (_super) {
         var flatCoordinates = pointGeometry.getFlatCoordinates();
         var stride = pointGeometry.getStride();
         var myBegin = this.coordinates.length;
-        var myEnd = this.drawCoordinates_(flatCoordinates, 0, flatCoordinates.length, stride);
+        var myEnd = this.appendFlatPointCoordinates(flatCoordinates, stride);
         this.instructions.push([
             _Instruction_js__WEBPACK_IMPORTED_MODULE_1__["default"].DRAW_IMAGE,
             myBegin,
@@ -73267,7 +73681,6 @@ var CanvasImageBuilder = /** @class */ (function (_super) {
             // Remaining arguments to DRAW_IMAGE are in alphabetical order
             this.anchorX_ * this.imagePixelRatio_,
             this.anchorY_ * this.imagePixelRatio_,
-            this.declutterGroups_,
             Math.ceil(this.height_ * this.imagePixelRatio_),
             this.opacity_,
             this.originX_,
@@ -73279,6 +73692,7 @@ var CanvasImageBuilder = /** @class */ (function (_super) {
                 (this.scale_[1] * this.pixelRatio) / this.imagePixelRatio_,
             ],
             Math.ceil(this.width_ * this.imagePixelRatio_),
+            this.declutterImageWithText_,
         ]);
         this.hitDetectionInstructions.push([
             _Instruction_js__WEBPACK_IMPORTED_MODULE_1__["default"].DRAW_IMAGE,
@@ -73288,7 +73702,6 @@ var CanvasImageBuilder = /** @class */ (function (_super) {
             // Remaining arguments to DRAW_IMAGE are in alphabetical order
             this.anchorX_,
             this.anchorY_,
-            this.declutterGroups_,
             this.height_,
             this.opacity_,
             this.originX_,
@@ -73297,6 +73710,7 @@ var CanvasImageBuilder = /** @class */ (function (_super) {
             this.rotation_,
             this.scale_,
             this.width_,
+            this.declutterImageWithText_,
         ]);
         this.endGeometry(feature);
     };
@@ -73312,7 +73726,7 @@ var CanvasImageBuilder = /** @class */ (function (_super) {
         var flatCoordinates = multiPointGeometry.getFlatCoordinates();
         var stride = multiPointGeometry.getStride();
         var myBegin = this.coordinates.length;
-        var myEnd = this.drawCoordinates_(flatCoordinates, 0, flatCoordinates.length, stride);
+        var myEnd = this.appendFlatPointCoordinates(flatCoordinates, stride);
         this.instructions.push([
             _Instruction_js__WEBPACK_IMPORTED_MODULE_1__["default"].DRAW_IMAGE,
             myBegin,
@@ -73321,7 +73735,6 @@ var CanvasImageBuilder = /** @class */ (function (_super) {
             // Remaining arguments to DRAW_IMAGE are in alphabetical order
             this.anchorX_ * this.imagePixelRatio_,
             this.anchorY_ * this.imagePixelRatio_,
-            this.declutterGroups_,
             Math.ceil(this.height_ * this.imagePixelRatio_),
             this.opacity_,
             this.originX_,
@@ -73333,6 +73746,7 @@ var CanvasImageBuilder = /** @class */ (function (_super) {
                 (this.scale_[1] * this.pixelRatio) / this.imagePixelRatio_,
             ],
             Math.ceil(this.width_ * this.imagePixelRatio_),
+            this.declutterImageWithText_,
         ]);
         this.hitDetectionInstructions.push([
             _Instruction_js__WEBPACK_IMPORTED_MODULE_1__["default"].DRAW_IMAGE,
@@ -73342,7 +73756,6 @@ var CanvasImageBuilder = /** @class */ (function (_super) {
             // Remaining arguments to DRAW_IMAGE are in alphabetical order
             this.anchorX_,
             this.anchorY_,
-            this.declutterGroups_,
             this.height_,
             this.opacity_,
             this.originX_,
@@ -73351,11 +73764,12 @@ var CanvasImageBuilder = /** @class */ (function (_super) {
             this.rotation_,
             this.scale_,
             this.width_,
+            this.declutterImageWithText_,
         ]);
         this.endGeometry(feature);
     };
     /**
-     * @return {import("./Builder.js").SerializableInstructions} the serializable instructions.
+     * @return {import("../canvas.js").SerializableInstructions} the serializable instructions.
      */
     CanvasImageBuilder.prototype.finish = function () {
         this.reverseHitDetectionInstructions();
@@ -73377,9 +73791,9 @@ var CanvasImageBuilder = /** @class */ (function (_super) {
     };
     /**
      * @param {import("../../style/Image.js").default} imageStyle Image style.
-     * @param {import("../canvas.js").DeclutterGroup} declutterGroups Declutter.
+     * @param {Object=} opt_sharedData Shared data.
      */
-    CanvasImageBuilder.prototype.setImageStyle = function (imageStyle, declutterGroups) {
+    CanvasImageBuilder.prototype.setImageStyle = function (imageStyle, opt_sharedData) {
         var anchor = imageStyle.getAnchor();
         var size = imageStyle.getSize();
         var hitDetectionImage = imageStyle.getHitDetectionImage();
@@ -73388,7 +73802,6 @@ var CanvasImageBuilder = /** @class */ (function (_super) {
         this.imagePixelRatio_ = imageStyle.getPixelRatio(this.pixelRatio);
         this.anchorX_ = anchor[0];
         this.anchorY_ = anchor[1];
-        this.declutterGroups_ = declutterGroups;
         this.hitDetectionImage_ = hitDetectionImage;
         this.image_ = image;
         this.height_ = size[1];
@@ -73399,6 +73812,7 @@ var CanvasImageBuilder = /** @class */ (function (_super) {
         this.rotation_ = imageStyle.getRotation();
         this.scale_ = imageStyle.getScaleArray();
         this.width_ = size[0];
+        this.declutterImageWithText_ = opt_sharedData;
     };
     return CanvasImageBuilder;
 }(_Builder_js__WEBPACK_IMPORTED_MODULE_0__["default"]));
@@ -73435,7 +73849,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -74449,7 +74863,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -74484,7 +74898,7 @@ var CanvasLineStringBuilder = /** @class */ (function (_super) {
      */
     CanvasLineStringBuilder.prototype.drawFlatCoordinates_ = function (flatCoordinates, offset, end, stride) {
         var myBegin = this.coordinates.length;
-        var myEnd = this.appendFlatCoordinates(flatCoordinates, offset, end, stride, false, false);
+        var myEnd = this.appendFlatLineCoordinates(flatCoordinates, offset, end, stride, false, false);
         var moveToLineToInstruction = [
             _Instruction_js__WEBPACK_IMPORTED_MODULE_1__["default"].MOVE_TO_LINE_TO,
             myBegin,
@@ -74558,7 +74972,7 @@ var CanvasLineStringBuilder = /** @class */ (function (_super) {
         this.endGeometry(feature);
     };
     /**
-     * @return {import("./Builder.js").SerializableInstructions} the serializable instructions.
+     * @return {import("../canvas.js").SerializableInstructions} the serializable instructions.
      */
     CanvasLineStringBuilder.prototype.finish = function () {
         var state = this.state;
@@ -74607,7 +75021,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -74652,7 +75066,7 @@ var CanvasPolygonBuilder = /** @class */ (function (_super) {
         for (var i = 0; i < numEnds; ++i) {
             var end = ends[i];
             var myBegin = this.coordinates.length;
-            var myEnd = this.appendFlatCoordinates(flatCoordinates, offset, end, stride, true, !stroke);
+            var myEnd = this.appendFlatLineCoordinates(flatCoordinates, offset, end, stride, true, !stroke);
             var moveToLineToInstruction = [
                 _Instruction_js__WEBPACK_IMPORTED_MODULE_1__["default"].MOVE_TO_LINE_TO,
                 myBegin,
@@ -74662,7 +75076,7 @@ var CanvasPolygonBuilder = /** @class */ (function (_super) {
             this.hitDetectionInstructions.push(moveToLineToInstruction);
             if (stroke) {
                 // Performance optimization: only call closePath() when we have a stroke.
-                // Otherwise the ring is closed already (see appendFlatCoordinates above).
+                // Otherwise the ring is closed already (see appendFlatLineCoordinates above).
                 this.instructions.push(_Instruction_js__WEBPACK_IMPORTED_MODULE_1__["closePathInstruction"]);
                 this.hitDetectionInstructions.push(_Instruction_js__WEBPACK_IMPORTED_MODULE_1__["closePathInstruction"]);
             }
@@ -74712,7 +75126,7 @@ var CanvasPolygonBuilder = /** @class */ (function (_super) {
         var flatCoordinates = circleGeometry.getFlatCoordinates();
         var stride = circleGeometry.getStride();
         var myBegin = this.coordinates.length;
-        this.appendFlatCoordinates(flatCoordinates, 0, flatCoordinates.length, stride, false, false);
+        this.appendFlatLineCoordinates(flatCoordinates, 0, flatCoordinates.length, stride, false, false);
         var circleInstruction = [_Instruction_js__WEBPACK_IMPORTED_MODULE_1__["default"].CIRCLE, myBegin];
         this.instructions.push(_Instruction_js__WEBPACK_IMPORTED_MODULE_1__["beginPathInstruction"], circleInstruction);
         this.hitDetectionInstructions.push(_Instruction_js__WEBPACK_IMPORTED_MODULE_1__["beginPathInstruction"], circleInstruction);
@@ -74805,7 +75219,7 @@ var CanvasPolygonBuilder = /** @class */ (function (_super) {
         this.endGeometry(feature);
     };
     /**
-     * @return {import("./Builder.js").SerializableInstructions} the serializable instructions.
+     * @return {import("../canvas.js").SerializableInstructions} the serializable instructions.
      */
     CanvasPolygonBuilder.prototype.finish = function () {
         this.reverseHitDetectionInstructions();
@@ -74866,7 +75280,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -74914,11 +75328,6 @@ var CanvasTextBuilder = /** @class */ (function (_super) {
      */
     function CanvasTextBuilder(tolerance, maxExtent, resolution, pixelRatio) {
         var _this = _super.call(this, tolerance, maxExtent, resolution, pixelRatio) || this;
-        /**
-         * @private
-         * @type {import("../canvas.js").DeclutterGroups}
-         */
-        _this.declutterGroups_;
         /**
          * @private
          * @type {Array<HTMLCanvasElement>}
@@ -74991,10 +75400,16 @@ var CanvasTextBuilder = /** @class */ (function (_super) {
          * @type {string}
          */
         _this.strokeKey_ = '';
+        /**
+         * Data shared with an image builder for combined decluttering.
+         * @private
+         * @type {import("../canvas.js").DeclutterImageWithText}
+         */
+        _this.declutterImageWithText_ = undefined;
         return _this;
     }
     /**
-     * @return {import("./Builder.js").SerializableInstructions} the serializable instructions.
+     * @return {import("../canvas.js").SerializableInstructions} the serializable instructions.
      */
     CanvasTextBuilder.prototype.finish = function () {
         var instructions = _super.prototype.finish.call(this);
@@ -75014,13 +75429,16 @@ var CanvasTextBuilder = /** @class */ (function (_super) {
         if (this.text_ === '' || !textState || (!fillState && !strokeState)) {
             return;
         }
-        var begin = this.coordinates.length;
+        var coordinates = this.coordinates;
+        var begin = coordinates.length;
         var geometryType = geometry.getType();
         var flatCoordinates = null;
-        var end = 2;
         var stride = geometry.getStride();
-        var i, ii;
-        if (textState.placement === _style_TextPlacement_js__WEBPACK_IMPORTED_MODULE_3__["default"].LINE) {
+        if (textState.placement === _style_TextPlacement_js__WEBPACK_IMPORTED_MODULE_3__["default"].LINE &&
+            (geometryType == _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_2__["default"].LINE_STRING ||
+                geometryType == _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_2__["default"].MULTI_LINE_STRING ||
+                geometryType == _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_2__["default"].POLYGON ||
+                geometryType == _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_2__["default"].MULTI_POLYGON)) {
             if (!Object(_extent_js__WEBPACK_IMPORTED_MODULE_7__["intersects"])(this.getBufferedMaxExtent(), geometry.getExtent())) {
                 return;
             }
@@ -75040,7 +75458,7 @@ var CanvasTextBuilder = /** @class */ (function (_super) {
             else if (geometryType == _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_2__["default"].MULTI_POLYGON) {
                 var endss = /** @type {import("../../geom/MultiPolygon.js").default} */ (geometry).getEndss();
                 ends = [];
-                for (i = 0, ii = endss.length; i < ii; ++i) {
+                for (var i = 0, ii = endss.length; i < ii; ++i) {
                     ends.push(endss[i][0]);
                 }
             }
@@ -75057,31 +75475,22 @@ var CanvasTextBuilder = /** @class */ (function (_super) {
                 else {
                     flatEnd = ends[o];
                 }
-                for (i = flatOffset; i < flatEnd; i += stride) {
-                    this.coordinates.push(flatCoordinates[i], flatCoordinates[i + 1]);
+                for (var i = flatOffset; i < flatEnd; i += stride) {
+                    coordinates.push(flatCoordinates[i], flatCoordinates[i + 1]);
                 }
-                end = this.coordinates.length;
+                var end = coordinates.length;
                 flatOffset = ends[o];
-                var declutterGroup = this.declutterGroups_
-                    ? o === 0
-                        ? this.declutterGroups_[0]
-                        : [].concat(this.declutterGroups_[0])
-                    : null;
-                this.drawChars_(begin, end, declutterGroup);
+                this.drawChars_(begin, end);
                 begin = end;
             }
             this.endGeometry(feature);
         }
         else {
-            var geometryWidths = null;
-            if (!textState.overflow) {
-                geometryWidths = [];
-            }
+            var geometryWidths = textState.overflow ? null : [];
             switch (geometryType) {
                 case _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_2__["default"].POINT:
                 case _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_2__["default"].MULTI_POINT:
                     flatCoordinates = /** @type {import("../../geom/MultiPoint.js").default} */ (geometry).getFlatCoordinates();
-                    end = flatCoordinates.length;
                     break;
                 case _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_2__["default"].LINE_STRING:
                     flatCoordinates = /** @type {import("../../geom/LineString.js").default} */ (geometry).getFlatMidpoint();
@@ -75092,7 +75501,6 @@ var CanvasTextBuilder = /** @class */ (function (_super) {
                 case _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_2__["default"].MULTI_LINE_STRING:
                     flatCoordinates = /** @type {import("../../geom/MultiLineString.js").default} */ (geometry).getFlatMidpoints();
                     stride = 2;
-                    end = flatCoordinates.length;
                     break;
                 case _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_2__["default"].POLYGON:
                     flatCoordinates = /** @type {import("../../geom/Polygon.js").default} */ (geometry).getFlatInteriorPoint();
@@ -75104,21 +75512,23 @@ var CanvasTextBuilder = /** @class */ (function (_super) {
                 case _geom_GeometryType_js__WEBPACK_IMPORTED_MODULE_2__["default"].MULTI_POLYGON:
                     var interiorPoints = /** @type {import("../../geom/MultiPolygon.js").default} */ (geometry).getFlatInteriorPoints();
                     flatCoordinates = [];
-                    for (i = 0, ii = interiorPoints.length; i < ii; i += 3) {
+                    for (var i = 0, ii = interiorPoints.length; i < ii; i += 3) {
                         if (!textState.overflow) {
                             geometryWidths.push(interiorPoints[i + 2] / this.resolution);
                         }
                         flatCoordinates.push(interiorPoints[i], interiorPoints[i + 1]);
                     }
-                    stride = 2;
-                    end = flatCoordinates.length;
-                    if (end == 0) {
+                    if (flatCoordinates.length === 0) {
                         return;
                     }
+                    stride = 2;
                     break;
                 default:
             }
-            end = this.appendFlatCoordinates(flatCoordinates, 0, end, stride, false, false);
+            var end = this.appendFlatPointCoordinates(flatCoordinates, stride);
+            if (end === begin) {
+                return;
+            }
             this.saveTextStates_();
             if (textState.backgroundFill || textState.backgroundStroke) {
                 this.setFillStrokeStyle(textState.backgroundFill, textState.backgroundStroke);
@@ -75161,7 +75571,6 @@ var CanvasTextBuilder = /** @class */ (function (_super) {
                 null,
                 NaN,
                 NaN,
-                this.declutterGroups_,
                 NaN,
                 1,
                 0,
@@ -75170,6 +75579,7 @@ var CanvasTextBuilder = /** @class */ (function (_super) {
                 this.textRotation_,
                 [1, 1],
                 NaN,
+                this.declutterImageWithText_,
                 padding == _canvas_js__WEBPACK_IMPORTED_MODULE_5__["defaultPadding"]
                     ? _canvas_js__WEBPACK_IMPORTED_MODULE_5__["defaultPadding"]
                     : padding.map(function (p) {
@@ -75193,7 +75603,6 @@ var CanvasTextBuilder = /** @class */ (function (_super) {
                 null,
                 NaN,
                 NaN,
-                this.declutterGroups_,
                 NaN,
                 1,
                 0,
@@ -75202,6 +75611,7 @@ var CanvasTextBuilder = /** @class */ (function (_super) {
                 this.textRotation_,
                 [scale, scale],
                 NaN,
+                this.declutterImageWithText_,
                 padding,
                 !!textState.backgroundFill,
                 !!textState.backgroundStroke,
@@ -75259,9 +75669,8 @@ var CanvasTextBuilder = /** @class */ (function (_super) {
      * @private
      * @param {number} begin Begin.
      * @param {number} end End.
-     * @param {import("../canvas.js").DeclutterGroup} declutterGroup Declutter group.
      */
-    CanvasTextBuilder.prototype.drawChars_ = function (begin, end, declutterGroup) {
+    CanvasTextBuilder.prototype.drawChars_ = function (begin, end) {
         var strokeState = this.textStrokeState_;
         var textState = this.textState_;
         var strokeKey = this.strokeKey_;
@@ -75280,7 +75689,6 @@ var CanvasTextBuilder = /** @class */ (function (_super) {
             begin,
             end,
             baseline,
-            declutterGroup,
             textState.overflow,
             fillKey,
             textState.maxAngle,
@@ -75297,7 +75705,6 @@ var CanvasTextBuilder = /** @class */ (function (_super) {
             begin,
             end,
             baseline,
-            declutterGroup,
             textState.overflow,
             fillKey,
             textState.maxAngle,
@@ -75312,15 +75719,14 @@ var CanvasTextBuilder = /** @class */ (function (_super) {
     };
     /**
      * @param {import("../../style/Text.js").default} textStyle Text style.
-     * @param {import("../canvas.js").DeclutterGroups} declutterGroups Declutter.
+     * @param {Object=} opt_sharedData Shared data.
      */
-    CanvasTextBuilder.prototype.setTextStyle = function (textStyle, declutterGroups) {
+    CanvasTextBuilder.prototype.setTextStyle = function (textStyle, opt_sharedData) {
         var textState, fillState, strokeState;
         if (!textStyle) {
             this.text_ = '';
         }
         else {
-            this.declutterGroups_ = declutterGroups;
             var textFillStyle = textStyle.getFill();
             if (!textFillStyle) {
                 fillState = null;
@@ -75410,6 +75816,7 @@ var CanvasTextBuilder = /** @class */ (function (_super) {
                     : '|' + Object(_util_js__WEBPACK_IMPORTED_MODULE_6__["getUid"])(fillState.fillStyle)
                 : '';
         }
+        this.declutterImageWithText_ = opt_sharedData;
     };
     return CanvasTextBuilder;
 }(_Builder_js__WEBPACK_IMPORTED_MODULE_0__["default"]));
@@ -75437,7 +75844,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _extent_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../extent.js */ "./node_modules/ol/extent.js");
 /* harmony import */ var _array_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../array.js */ "./node_modules/ol/array.js");
 /**
- * @module ol/render/canvas/hitdetet
+ * @module ol/render/canvas/hitdetect
  */
 
 
@@ -75615,7 +76022,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -75713,6 +76120,10 @@ var CompositeMapRenderer = /** @class */ (function (_super) {
         });
         var viewState = frameState.viewState;
         this.children_.length = 0;
+        /**
+         * @type {Array<import("../layer/BaseVector.js").default>}
+         */
+        var declutterLayers = [];
         var previousElement = null;
         for (var i = 0, ii = layerStatesArray.length; i < ii; ++i) {
             var layerState = layerStatesArray[i];
@@ -75731,8 +76142,13 @@ var CompositeMapRenderer = /** @class */ (function (_super) {
                 this.children_.push(element);
                 previousElement = element;
             }
+            if ('getDeclutter' in layer) {
+                declutterLayers.push(layer);
+            }
         }
-        _super.prototype.renderFrame.call(this, frameState);
+        for (var i = declutterLayers.length - 1; i >= 0; --i) {
+            declutterLayers[i].renderDeclutter(frameState);
+        }
         Object(_dom_js__WEBPACK_IMPORTED_MODULE_9__["replaceChildren"])(this.element_, this.children_);
         this.dispatchRenderEvent(_render_EventType_js__WEBPACK_IMPORTED_MODULE_3__["default"].POSTCOMPOSE, frameState);
         if (!this.renderedVisible_) {
@@ -75801,7 +76217,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -75835,6 +76251,10 @@ var LayerRenderer = /** @class */ (function (_super) {
          * @type {LayerType}
          */
         _this.layer_ = layer;
+        /**
+         * @type {import("../render/canvas/ExecutorGroup").default}
+         */
+        _this.declutterExecutorGroup = null;
         return _this;
     }
     /**
@@ -75905,12 +76325,14 @@ var LayerRenderer = /** @class */ (function (_super) {
      * @param {import("../coordinate.js").Coordinate} coordinate Coordinate.
      * @param {import("../PluggableMap.js").FrameState} frameState Frame state.
      * @param {number} hitTolerance Hit tolerance in pixels.
-     * @param {function(import("../Feature.js").FeatureLike, import("../layer/Layer.js").default): T} callback Feature callback.
-     * @param {Array<import("../Feature.js").FeatureLike>} declutteredFeatures Decluttered features.
-     * @return {T|void} Callback result.
+     * @param {import("./vector.js").FeatureCallback<T>} callback Feature callback.
+     * @param {Array<import("./Map.js").HitMatch<T>>} matches The hit detected matches with tolerance.
+     * @return {T|undefined} Callback result.
      * @template T
      */
-    LayerRenderer.prototype.forEachFeatureAtCoordinate = function (coordinate, frameState, hitTolerance, callback, declutteredFeatures) { };
+    LayerRenderer.prototype.forEachFeatureAtCoordinate = function (coordinate, frameState, hitTolerance, callback, matches) {
+        return undefined;
+    };
     /**
      * @abstract
      * @param {import("../pixel.js").Pixel} pixel Pixel.
@@ -75995,13 +76417,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _extent_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../extent.js */ "./node_modules/ol/extent.js");
 /* harmony import */ var _style_IconImageCache_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../style/IconImageCache.js */ "./node_modules/ol/style/IconImageCache.js");
 /* harmony import */ var _layer_Layer_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../layer/Layer.js */ "./node_modules/ol/layer/Layer.js");
-/* harmony import */ var _render_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../render.js */ "./node_modules/ol/render.js");
-/* harmony import */ var _coordinate_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../coordinate.js */ "./node_modules/ol/coordinate.js");
+/* harmony import */ var _coordinate_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../coordinate.js */ "./node_modules/ol/coordinate.js");
 var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -76021,7 +76442,15 @@ var __extends = (undefined && undefined.__extends) || (function () {
 
 
 
-
+/**
+ * @typedef HitMatch
+ * @property {import("../Feature.js").FeatureLike} feature
+ * @property {import("../layer/Layer.js").default} layer
+ * @property {import("../geom/SimpleGeometry.js").default} geometry
+ * @property {number} distanceSq
+ * @property {import("./vector.js").FeatureCallback<T>} callback
+ * @template T
+ */
 /**
  * @abstract
  */
@@ -76037,10 +76466,6 @@ var MapRenderer = /** @class */ (function (_super) {
          * @type {import("../PluggableMap.js").default}
          */
         _this.map_ = map;
-        /**
-         * @private
-         */
-        _this.declutterTree_ = null;
         return _this;
     }
     /**
@@ -76067,8 +76492,7 @@ var MapRenderer = /** @class */ (function (_super) {
      * @param {import("../PluggableMap.js").FrameState} frameState FrameState.
      * @param {number} hitTolerance Hit tolerance in pixels.
      * @param {boolean} checkWrapped Check for wrapped geometries.
-     * @param {function(this: S, import("../Feature.js").FeatureLike,
-     *     import("../layer/Layer.js").default): T} callback Feature callback.
+     * @param {import("./vector.js").FeatureCallback<T>} callback Feature callback.
      * @param {S} thisArg Value to use as `this` when executing `callback`.
      * @param {function(this: U, import("../layer/Layer.js").default): boolean} layerFilter Layer filter
      *     function, only layers which are visible and for which this function
@@ -76085,13 +76509,14 @@ var MapRenderer = /** @class */ (function (_super) {
          * @param {boolean} managed Managed layer.
          * @param {import("../Feature.js").FeatureLike} feature Feature.
          * @param {import("../layer/Layer.js").default} layer Layer.
-         * @return {?} Callback result.
+         * @param {import("../geom/Geometry.js").default} geometry Geometry.
+         * @return {T|undefined} Callback result.
          */
-        function forEachFeatureAtCoordinate(managed, feature, layer) {
-            return callback.call(thisArg, feature, managed ? layer : null);
+        function forEachFeatureAtCoordinate(managed, feature, layer, geometry) {
+            return callback.call(thisArg, feature, managed ? layer : null, geometry);
         }
         var projection = viewState.projection;
-        var translatedCoordinate = Object(_coordinate_js__WEBPACK_IMPORTED_MODULE_8__["wrapX"])(coordinate.slice(), projection);
+        var translatedCoordinate = Object(_coordinate_js__WEBPACK_IMPORTED_MODULE_7__["wrapX"])(coordinate.slice(), projection);
         var offsets = [[0, 0]];
         if (projection.canWrapX() && checkWrapped) {
             var projectionExtent = projection.getExtent();
@@ -76100,17 +76525,12 @@ var MapRenderer = /** @class */ (function (_super) {
         }
         var layerStates = frameState.layerStatesArray;
         var numLayers = layerStates.length;
-        var declutteredFeatures;
-        if (this.declutterTree_) {
-            declutteredFeatures = this.declutterTree_.all().map(function (entry) {
-                return entry.value;
-            });
-        }
+        var matches = /** @type {Array<HitMatch<T>>} */ ([]);
         var tmpCoord = [];
         for (var i = 0; i < offsets.length; i++) {
             for (var j = numLayers - 1; j >= 0; --j) {
                 var layerState = layerStates[j];
-                var layer = /** @type {import("../layer/Layer.js").default} */ (layerState.layer);
+                var layer = layerState.layer;
                 if (layer.hasRenderer() &&
                     Object(_layer_Layer_js__WEBPACK_IMPORTED_MODULE_6__["inView"])(layerState, viewState) &&
                     layerFilter.call(thisArg2, layer)) {
@@ -76123,7 +76543,7 @@ var MapRenderer = /** @class */ (function (_super) {
                         var callback_1 = forEachFeatureAtCoordinate.bind(null, layerState.managed);
                         tmpCoord[0] = coordinates[0] + offsets[i][0];
                         tmpCoord[1] = coordinates[1] + offsets[i][1];
-                        result = layerRenderer.forEachFeatureAtCoordinate(tmpCoord, frameState, hitTolerance, callback_1, declutteredFeatures);
+                        result = layerRenderer.forEachFeatureAtCoordinate(tmpCoord, frameState, hitTolerance, callback_1, matches);
                     }
                     if (result) {
                         return result;
@@ -76131,7 +76551,16 @@ var MapRenderer = /** @class */ (function (_super) {
                 }
             }
         }
-        return undefined;
+        if (matches.length === 0) {
+            return undefined;
+        }
+        var order = 1 / matches.length;
+        matches.forEach(function (m, i) { return (m.distanceSq += i * order); });
+        matches.sort(function (a, b) { return a.distanceSq - b.distanceSq; });
+        matches.some(function (m) {
+            return (result = m.callback(m.feature, m.layer, m.geometry));
+        });
+        return result;
     };
     /**
      * @abstract
@@ -76175,10 +76604,11 @@ var MapRenderer = /** @class */ (function (_super) {
     };
     /**
      * Render.
+     * @abstract
      * @param {?import("../PluggableMap.js").FrameState} frameState Frame state.
      */
     MapRenderer.prototype.renderFrame = function (frameState) {
-        this.declutterTree_ = Object(_render_js__WEBPACK_IMPORTED_MODULE_7__["renderDeclutterItems"])(frameState, this.declutterTree_);
+        Object(_util_js__WEBPACK_IMPORTED_MODULE_2__["abstract"])();
     };
     /**
      * @param {import("../PluggableMap.js").FrameState} frameState Frame state.
@@ -76216,14 +76646,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _render_Event_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../render/Event.js */ "./node_modules/ol/render/Event.js");
 /* harmony import */ var _render_EventType_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../render/EventType.js */ "./node_modules/ol/render/EventType.js");
 /* harmony import */ var _transform_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../transform.js */ "./node_modules/ol/transform.js");
-/* harmony import */ var _dom_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../dom.js */ "./node_modules/ol/dom.js");
-/* harmony import */ var _extent_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../extent.js */ "./node_modules/ol/extent.js");
+/* harmony import */ var _extent_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../extent.js */ "./node_modules/ol/extent.js");
+/* harmony import */ var _dom_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../../dom.js */ "./node_modules/ol/dom.js");
 /* harmony import */ var _render_canvas_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../../render/canvas.js */ "./node_modules/ol/render/canvas.js");
 var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -76332,7 +76762,7 @@ var CanvasLayerRenderer = /** @class */ (function (_super) {
             style.position = 'absolute';
             style.width = '100%';
             style.height = '100%';
-            context = Object(_dom_js__WEBPACK_IMPORTED_MODULE_4__["createCanvasContext2D"])();
+            context = Object(_dom_js__WEBPACK_IMPORTED_MODULE_5__["createCanvasContext2D"])();
             var canvas = context.canvas;
             container.appendChild(canvas);
             style = canvas.style;
@@ -76354,10 +76784,10 @@ var CanvasLayerRenderer = /** @class */ (function (_super) {
         var halfWidth = (frameState.size[0] * pixelRatio) / 2;
         var halfHeight = (frameState.size[1] * pixelRatio) / 2;
         var rotation = frameState.viewState.rotation;
-        var topLeft = Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["getTopLeft"])(extent);
-        var topRight = Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["getTopRight"])(extent);
-        var bottomRight = Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["getBottomRight"])(extent);
-        var bottomLeft = Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["getBottomLeft"])(extent);
+        var topLeft = Object(_extent_js__WEBPACK_IMPORTED_MODULE_4__["getTopLeft"])(extent);
+        var topRight = Object(_extent_js__WEBPACK_IMPORTED_MODULE_4__["getTopRight"])(extent);
+        var bottomRight = Object(_extent_js__WEBPACK_IMPORTED_MODULE_4__["getBottomRight"])(extent);
+        var bottomLeft = Object(_extent_js__WEBPACK_IMPORTED_MODULE_4__["getBottomLeft"])(extent);
         Object(_transform_js__WEBPACK_IMPORTED_MODULE_3__["apply"])(frameState.coordinateToPixelTransform, topLeft);
         Object(_transform_js__WEBPACK_IMPORTED_MODULE_3__["apply"])(frameState.coordinateToPixelTransform, topRight);
         Object(_transform_js__WEBPACK_IMPORTED_MODULE_3__["apply"])(frameState.coordinateToPixelTransform, bottomRight);
@@ -76379,10 +76809,10 @@ var CanvasLayerRenderer = /** @class */ (function (_super) {
      * @protected
      */
     CanvasLayerRenderer.prototype.clipUnrotated = function (context, frameState, extent) {
-        var topLeft = Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["getTopLeft"])(extent);
-        var topRight = Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["getTopRight"])(extent);
-        var bottomRight = Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["getBottomRight"])(extent);
-        var bottomLeft = Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["getBottomLeft"])(extent);
+        var topLeft = Object(_extent_js__WEBPACK_IMPORTED_MODULE_4__["getTopLeft"])(extent);
+        var topRight = Object(_extent_js__WEBPACK_IMPORTED_MODULE_4__["getTopRight"])(extent);
+        var bottomRight = Object(_extent_js__WEBPACK_IMPORTED_MODULE_4__["getBottomRight"])(extent);
+        var bottomLeft = Object(_extent_js__WEBPACK_IMPORTED_MODULE_4__["getBottomLeft"])(extent);
         Object(_transform_js__WEBPACK_IMPORTED_MODULE_3__["apply"])(frameState.coordinateToPixelTransform, topLeft);
         Object(_transform_js__WEBPACK_IMPORTED_MODULE_3__["apply"])(frameState.coordinateToPixelTransform, topRight);
         Object(_transform_js__WEBPACK_IMPORTED_MODULE_3__["apply"])(frameState.coordinateToPixelTransform, bottomRight);
@@ -76461,6 +76891,15 @@ var CanvasLayerRenderer = /** @class */ (function (_super) {
     CanvasLayerRenderer.prototype.getDataAtPixel = function (pixel, frameState, hitTolerance) {
         var renderPixel = Object(_transform_js__WEBPACK_IMPORTED_MODULE_3__["apply"])(this.inversePixelTransform, pixel.slice());
         var context = this.context;
+        var layer = this.getLayer();
+        var layerExtent = layer.getExtent();
+        if (layerExtent) {
+            var renderCoordinate = Object(_transform_js__WEBPACK_IMPORTED_MODULE_3__["apply"])(frameState.pixelToCoordinateTransform, pixel.slice());
+            /** get only data inside of the layer extent */
+            if (!Object(_extent_js__WEBPACK_IMPORTED_MODULE_4__["containsCoordinate"])(layerExtent, renderCoordinate)) {
+                return null;
+            }
+        }
         var data;
         try {
             var x = Math.round(renderPixel[0]);
@@ -76515,7 +76954,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -77041,7 +77480,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -77141,6 +77580,10 @@ var CanvasVectorLayerRenderer = /** @class */ (function (_super) {
          */
         _this.replayGroupChanged = true;
         /**
+         * @type {import("../../render/canvas/ExecutorGroup").default}
+         */
+        _this.declutterExecutorGroup = null;
+        /**
          * Clipping to be performed by `renderFrame()`
          * @type {boolean}
          */
@@ -77160,6 +77603,48 @@ var CanvasVectorLayerRenderer = /** @class */ (function (_super) {
         _super.prototype.useContainer.call(this, target, transform, opacity);
     };
     /**
+     * @param {ExecutorGroup} executorGroup Executor group.
+     * @param {import("../../PluggableMap.js").FrameState} frameState Frame state.
+     * @param {import("rbush").default=} opt_declutterTree Declutter tree.
+     */
+    CanvasVectorLayerRenderer.prototype.renderWorlds = function (executorGroup, frameState, opt_declutterTree) {
+        var extent = frameState.extent;
+        var viewState = frameState.viewState;
+        var center = viewState.center;
+        var resolution = viewState.resolution;
+        var projection = viewState.projection;
+        var rotation = viewState.rotation;
+        var projectionExtent = projection.getExtent();
+        var vectorSource = this.getLayer().getSource();
+        var pixelRatio = frameState.pixelRatio;
+        var viewHints = frameState.viewHints;
+        var snapToPixel = !(viewHints[_ViewHint_js__WEBPACK_IMPORTED_MODULE_3__["default"].ANIMATING] || viewHints[_ViewHint_js__WEBPACK_IMPORTED_MODULE_3__["default"].INTERACTING]);
+        var context = this.context;
+        var width = Math.round(frameState.size[0] * pixelRatio);
+        var height = Math.round(frameState.size[1] * pixelRatio);
+        var multiWorld = vectorSource.getWrapX() && projection.canWrapX();
+        var worldWidth = multiWorld ? Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["getWidth"])(projectionExtent) : null;
+        var endWorld = multiWorld
+            ? Math.ceil((extent[2] - projectionExtent[2]) / worldWidth) + 1
+            : 1;
+        var world = multiWorld
+            ? Math.floor((extent[0] - projectionExtent[0]) / worldWidth)
+            : 0;
+        do {
+            var transform = this.getRenderTransform(center, resolution, rotation, pixelRatio, width, height, world * worldWidth);
+            executorGroup.execute(context, 1, transform, rotation, snapToPixel, undefined, opt_declutterTree);
+        } while (++world < endWorld);
+    };
+    /**
+     * Render declutter items for this layer
+     * @param {import("../../PluggableMap.js").FrameState} frameState Frame state.
+     */
+    CanvasVectorLayerRenderer.prototype.renderDeclutter = function (frameState) {
+        if (this.declutterExecutorGroup) {
+            this.renderWorlds(this.declutterExecutorGroup, frameState, frameState.declutterTree);
+        }
+    };
+    /**
      * Render the layer.
      * @param {import("../../PluggableMap.js").FrameState} frameState Frame state.
      * @param {HTMLElement} target Target that may be used to render content to.
@@ -77176,7 +77661,9 @@ var CanvasVectorLayerRenderer = /** @class */ (function (_super) {
         var context = this.context;
         var canvas = context.canvas;
         var replayGroup = this.replayGroup_;
-        if (!replayGroup || replayGroup.isEmpty()) {
+        var declutterExecutorGroup = this.declutterExecutorGroup;
+        if ((!replayGroup || replayGroup.isEmpty()) &&
+            (!declutterExecutorGroup || declutterExecutorGroup.isEmpty())) {
             if (!this.containerReused && canvas.width > 0) {
                 canvas.width = 0;
             }
@@ -77196,14 +77683,8 @@ var CanvasVectorLayerRenderer = /** @class */ (function (_super) {
             context.clearRect(0, 0, width, height);
         }
         this.preRender(context, frameState);
-        var extent = frameState.extent;
         var viewState = frameState.viewState;
-        var center = viewState.center;
-        var resolution = viewState.resolution;
         var projection = viewState.projection;
-        var rotation = viewState.rotation;
-        var projectionExtent = projection.getExtent();
-        var vectorSource = this.getLayer().getSource();
         // clipped rendering if layer extent is set
         var clipped = false;
         if (layerState.extent && this.clipping) {
@@ -77215,40 +77696,7 @@ var CanvasVectorLayerRenderer = /** @class */ (function (_super) {
                 this.clipUnrotated(context, frameState, layerExtent);
             }
         }
-        var viewHints = frameState.viewHints;
-        var snapToPixel = !(viewHints[_ViewHint_js__WEBPACK_IMPORTED_MODULE_3__["default"].ANIMATING] || viewHints[_ViewHint_js__WEBPACK_IMPORTED_MODULE_3__["default"].INTERACTING]);
-        var transform = this.getRenderTransform(center, resolution, rotation, pixelRatio, width, height, 0);
-        var declutterReplays = this.getLayer().getDeclutter() ? {} : null;
-        replayGroup.execute(context, 1, transform, rotation, snapToPixel, undefined, declutterReplays);
-        if (vectorSource.getWrapX() &&
-            projection.canWrapX() &&
-            !Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["containsExtent"])(projectionExtent, extent)) {
-            var startX = extent[0];
-            var worldWidth = Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["getWidth"])(projectionExtent);
-            var world = 0;
-            var offsetX = void 0;
-            while (startX < projectionExtent[0]) {
-                --world;
-                offsetX = worldWidth * world;
-                var transform_1 = this.getRenderTransform(center, resolution, rotation, pixelRatio, width, height, offsetX);
-                replayGroup.execute(context, 1, transform_1, rotation, snapToPixel, undefined, declutterReplays);
-                startX += worldWidth;
-            }
-            world = 0;
-            startX = extent[2];
-            while (startX > projectionExtent[2]) {
-                ++world;
-                offsetX = worldWidth * world;
-                var transform_2 = this.getRenderTransform(center, resolution, rotation, pixelRatio, width, height, offsetX);
-                replayGroup.execute(context, 1, transform_2, rotation, snapToPixel, undefined, declutterReplays);
-                startX -= worldWidth;
-            }
-        }
-        if (declutterReplays) {
-            var viewHints_1 = frameState.viewHints;
-            var hifi = !(viewHints_1[_ViewHint_js__WEBPACK_IMPORTED_MODULE_3__["default"].ANIMATING] || viewHints_1[_ViewHint_js__WEBPACK_IMPORTED_MODULE_3__["default"].INTERACTING]);
-            Object(_render_canvas_ExecutorGroup_js__WEBPACK_IMPORTED_MODULE_2__["replayDeclutter"])(declutterReplays, context, rotation, 1, hifi, frameState.declutterItems);
-        }
+        this.renderWorlds(replayGroup, frameState);
         if (clipped) {
             context.restore();
         }
@@ -77270,7 +77718,12 @@ var CanvasVectorLayerRenderer = /** @class */ (function (_super) {
      * @return {Promise<Array<import("../../Feature").default>>} Promise that resolves with an array of features.
      */
     CanvasVectorLayerRenderer.prototype.getFeatures = function (pixel) {
-        return new Promise(function (resolve, reject) {
+        return new Promise(
+        /**
+         * @param {function(Array<import("../../Feature").default|import("../../render/Feature").default>): void} resolve Resolver function.
+         * @this {CanvasVectorLayerRenderer}
+         */
+        function (resolve) {
             if (!this.hitDetectionImageData_ && !this.animatingOrInteracting_) {
                 var size = [this.context.canvas.width, this.context.canvas.height];
                 Object(_transform_js__WEBPACK_IMPORTED_MODULE_4__["apply"])(this.pixelTransform, size);
@@ -77317,35 +77770,65 @@ var CanvasVectorLayerRenderer = /** @class */ (function (_super) {
      * @param {import("../../coordinate.js").Coordinate} coordinate Coordinate.
      * @param {import("../../PluggableMap.js").FrameState} frameState Frame state.
      * @param {number} hitTolerance Hit tolerance in pixels.
-     * @param {function(import("../../Feature.js").FeatureLike, import("../../layer/Layer.js").default): T} callback Feature callback.
-     * @param {Array<import("../../Feature.js").FeatureLike>} declutteredFeatures Decluttered features.
-     * @return {T|void} Callback result.
+     * @param {import("../vector.js").FeatureCallback<T>} callback Feature callback.
+     * @param {Array<import("../Map.js").HitMatch<T>>} matches The hit detected matches with tolerance.
+     * @return {T|undefined} Callback result.
      * @template T
      */
-    CanvasVectorLayerRenderer.prototype.forEachFeatureAtCoordinate = function (coordinate, frameState, hitTolerance, callback, declutteredFeatures) {
+    CanvasVectorLayerRenderer.prototype.forEachFeatureAtCoordinate = function (coordinate, frameState, hitTolerance, callback, matches) {
+        var _this = this;
         if (!this.replayGroup_) {
             return undefined;
         }
-        else {
-            var resolution = frameState.viewState.resolution;
-            var rotation = frameState.viewState.rotation;
-            var layer_1 = this.getLayer();
-            /** @type {!Object<string, boolean>} */
-            var features_1 = {};
-            var result = this.replayGroup_.forEachFeatureAtCoordinate(coordinate, resolution, rotation, hitTolerance, 
-            /**
-             * @param {import("../../Feature.js").FeatureLike} feature Feature.
-             * @return {?} Callback result.
-             */
-            function (feature) {
-                var key = Object(_util_js__WEBPACK_IMPORTED_MODULE_9__["getUid"])(feature);
-                if (!(key in features_1)) {
-                    features_1[key] = true;
-                    return callback(feature, layer_1);
+        var resolution = frameState.viewState.resolution;
+        var rotation = frameState.viewState.rotation;
+        var layer = this.getLayer();
+        /** @type {!Object<string, import("../Map.js").HitMatch<T>|true>} */
+        var features = {};
+        /**
+         * @param {import("../../Feature.js").FeatureLike} feature Feature.
+         * @param {import("../../geom/SimpleGeometry.js").default} geometry Geometry.
+         * @param {number} distanceSq The squared distance to the click position
+         * @return {T|undefined} Callback result.
+         */
+        var featureCallback = function (feature, geometry, distanceSq) {
+            var key = Object(_util_js__WEBPACK_IMPORTED_MODULE_9__["getUid"])(feature);
+            var match = features[key];
+            if (!match) {
+                if (distanceSq === 0) {
+                    features[key] = true;
+                    return callback(feature, layer, geometry);
                 }
-            }, layer_1.getDeclutter() ? declutteredFeatures : null);
-            return result;
+                matches.push((features[key] = {
+                    feature: feature,
+                    layer: layer,
+                    geometry: geometry,
+                    distanceSq: distanceSq,
+                    callback: callback,
+                }));
+            }
+            else if (match !== true && distanceSq < match.distanceSq) {
+                if (distanceSq === 0) {
+                    features[key] = true;
+                    matches.splice(matches.lastIndexOf(match), 1);
+                    return callback(feature, layer, geometry);
+                }
+                match.geometry = geometry;
+                match.distanceSq = distanceSq;
+            }
+            return undefined;
+        };
+        var result;
+        var executorGroups = [this.replayGroup_];
+        if (this.declutterExecutorGroup) {
+            executorGroups.push(this.declutterExecutorGroup);
         }
+        executorGroups.some(function (executorGroup) {
+            return (result = executorGroup.forEachFeatureAtCoordinate(coordinate, resolution, rotation, hitTolerance, featureCallback, executorGroup === _this.declutterExecutorGroup
+                ? frameState.declutterTree.all().map(function (item) { return item.value; })
+                : null));
+        });
+        return result;
     };
     /**
      * Perform action necessary to get the layer rendered after new fonts have loaded
@@ -77444,7 +77927,11 @@ var CanvasVectorLayerRenderer = /** @class */ (function (_super) {
         }
         this.replayGroup_ = null;
         this.dirty_ = false;
-        var replayGroup = new _render_canvas_BuilderGroup_js__WEBPACK_IMPORTED_MODULE_0__["default"](Object(_vector_js__WEBPACK_IMPORTED_MODULE_7__["getTolerance"])(resolution, pixelRatio), extent, resolution, pixelRatio, vectorLayer.getDeclutter());
+        var replayGroup = new _render_canvas_BuilderGroup_js__WEBPACK_IMPORTED_MODULE_0__["default"](Object(_vector_js__WEBPACK_IMPORTED_MODULE_7__["getTolerance"])(resolution, pixelRatio), extent, resolution, pixelRatio);
+        var declutterBuilderGroup;
+        if (this.getLayer().getDeclutter()) {
+            declutterBuilderGroup = new _render_canvas_BuilderGroup_js__WEBPACK_IMPORTED_MODULE_0__["default"](Object(_vector_js__WEBPACK_IMPORTED_MODULE_7__["getTolerance"])(resolution, pixelRatio), extent, resolution, pixelRatio);
+        }
         var userProjection = Object(_proj_js__WEBPACK_IMPORTED_MODULE_8__["getUserProjection"])();
         var userTransform;
         if (userProjection) {
@@ -77459,18 +77946,19 @@ var CanvasVectorLayerRenderer = /** @class */ (function (_super) {
             }
         }
         var squaredTolerance = Object(_vector_js__WEBPACK_IMPORTED_MODULE_7__["getSquaredTolerance"])(resolution, pixelRatio);
+        var render = 
         /**
          * @param {import("../../Feature.js").default} feature Feature.
          * @this {CanvasVectorLayerRenderer}
          */
-        var render = function (feature) {
+        function (feature) {
             var styles;
             var styleFunction = feature.getStyleFunction() || vectorLayer.getStyleFunction();
             if (styleFunction) {
                 styles = styleFunction(feature, resolution);
             }
             if (styles) {
-                var dirty = this.renderFeature(feature, squaredTolerance, styles, replayGroup, userTransform);
+                var dirty = this.renderFeature(feature, squaredTolerance, styles, replayGroup, userTransform, declutterBuilderGroup);
                 this.dirty_ = this.dirty_ || dirty;
             }
         }.bind(this);
@@ -77486,6 +77974,9 @@ var CanvasVectorLayerRenderer = /** @class */ (function (_super) {
         this.renderedFeatures_ = features;
         var replayGroupInstructions = replayGroup.finish();
         var executorGroup = new _render_canvas_ExecutorGroup_js__WEBPACK_IMPORTED_MODULE_2__["default"](extent, resolution, pixelRatio, vectorSource.getOverlaps(), replayGroupInstructions, vectorLayer.getRenderBuffer());
+        if (declutterBuilderGroup) {
+            this.declutterExecutorGroup = new _render_canvas_ExecutorGroup_js__WEBPACK_IMPORTED_MODULE_2__["default"](extent, resolution, pixelRatio, vectorSource.getOverlaps(), declutterBuilderGroup.finish(), vectorLayer.getRenderBuffer());
+        }
         this.renderedResolution_ = resolution;
         this.renderedRevision_ = vectorLayerRevision;
         this.renderedRenderOrder_ = vectorLayerRenderOrder;
@@ -77503,9 +77994,10 @@ var CanvasVectorLayerRenderer = /** @class */ (function (_super) {
      * @param {import("../../style/Style.js").default|Array<import("../../style/Style.js").default>} styles The style or array of styles.
      * @param {import("../../render/canvas/BuilderGroup.js").default} builderGroup Builder group.
      * @param {import("../../proj.js").TransformFunction=} opt_transform Transform from user to view projection.
+     * @param {import("../../render/canvas/BuilderGroup.js").default=} opt_declutterBuilderGroup Builder for decluttering.
      * @return {boolean} `true` if an image is loading.
      */
-    CanvasVectorLayerRenderer.prototype.renderFeature = function (feature, squaredTolerance, styles, builderGroup, opt_transform) {
+    CanvasVectorLayerRenderer.prototype.renderFeature = function (feature, squaredTolerance, styles, builderGroup, opt_transform, opt_declutterBuilderGroup) {
         if (!styles) {
             return false;
         }
@@ -77513,11 +78005,11 @@ var CanvasVectorLayerRenderer = /** @class */ (function (_super) {
         if (Array.isArray(styles)) {
             for (var i = 0, ii = styles.length; i < ii; ++i) {
                 loading =
-                    Object(_vector_js__WEBPACK_IMPORTED_MODULE_7__["renderFeature"])(builderGroup, feature, styles[i], squaredTolerance, this.boundHandleStyleImageChange_, opt_transform) || loading;
+                    Object(_vector_js__WEBPACK_IMPORTED_MODULE_7__["renderFeature"])(builderGroup, feature, styles[i], squaredTolerance, this.boundHandleStyleImageChange_, opt_transform, opt_declutterBuilderGroup) || loading;
             }
         }
         else {
-            loading = Object(_vector_js__WEBPACK_IMPORTED_MODULE_7__["renderFeature"])(builderGroup, feature, styles, squaredTolerance, this.boundHandleStyleImageChange_, opt_transform);
+            loading = Object(_vector_js__WEBPACK_IMPORTED_MODULE_7__["renderFeature"])(builderGroup, feature, styles, squaredTolerance, this.boundHandleStyleImageChange_, opt_transform, opt_declutterBuilderGroup);
         }
         return loading;
     };
@@ -77552,6 +78044,15 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+/**
+ * Feature callback. The callback will be called with three arguments. The first
+ * argument is one {@link module:ol/Feature feature} or {@link module:ol/render/Feature render feature}
+ * at the pixel, the second is the {@link module:ol/layer/Layer layer} of the feature and will be null for
+ * unmanaged layers. The third is the {@link module:ol/geom/SimpleGeometry} of the feature. For features
+ * with a GeometryCollection geometry, it will be the first detected geometry from the collection.
+ * @template T
+ * @typedef {function(import("../Feature.js").FeatureLike, import("../layer/Layer.js").default, import("../geom/SimpleGeometry.js").default): T} FeatureCallback
+ */
 /**
  * Tolerance for geometry simplification in device pixels.
  * @type {number}
@@ -77603,8 +78104,9 @@ function getTolerance(resolution, pixelRatio) {
  * @param {import("../geom/Circle.js").default} geometry Geometry.
  * @param {import("../style/Style.js").default} style Style.
  * @param {import("../Feature.js").default} feature Feature.
+ * @param {import("../render/canvas/BuilderGroup.js").default=} opt_declutterBuilderGroup Builder for decluttering.
  */
-function renderCircleGeometry(builderGroup, geometry, style, feature) {
+function renderCircleGeometry(builderGroup, geometry, style, feature, opt_declutterBuilderGroup) {
     var fillStyle = style.getFill();
     var strokeStyle = style.getStroke();
     if (fillStyle || strokeStyle) {
@@ -77613,9 +78115,9 @@ function renderCircleGeometry(builderGroup, geometry, style, feature) {
         circleReplay.drawCircle(geometry, feature);
     }
     var textStyle = style.getText();
-    if (textStyle) {
-        var textReplay = builderGroup.getBuilder(style.getZIndex(), _render_canvas_BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT);
-        textReplay.setTextStyle(textStyle, builderGroup.addDeclutter(false));
+    if (textStyle && textStyle.getText()) {
+        var textReplay = (opt_declutterBuilderGroup || builderGroup).getBuilder(style.getZIndex(), _render_canvas_BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT);
+        textReplay.setTextStyle(textStyle);
         textReplay.drawText(geometry, feature);
     }
 }
@@ -77626,10 +78128,10 @@ function renderCircleGeometry(builderGroup, geometry, style, feature) {
  * @param {number} squaredTolerance Squared tolerance.
  * @param {function(import("../events/Event.js").default): void} listener Listener function.
  * @param {import("../proj.js").TransformFunction} [opt_transform] Transform from user to view projection.
+ * @param {import("../render/canvas/BuilderGroup.js").default=} opt_declutterBuilderGroup Builder for decluttering.
  * @return {boolean} `true` if style is loading.
- * @template T
  */
-function renderFeature(replayGroup, feature, style, squaredTolerance, listener, opt_transform) {
+function renderFeature(replayGroup, feature, style, squaredTolerance, listener, opt_transform, opt_declutterBuilderGroup) {
     var loading = false;
     var imageStyle = style.getImage();
     if (imageStyle) {
@@ -77646,7 +78148,7 @@ function renderFeature(replayGroup, feature, style, squaredTolerance, listener, 
             loading = true;
         }
     }
-    renderFeatureInternal(replayGroup, feature, style, squaredTolerance, opt_transform);
+    renderFeatureInternal(replayGroup, feature, style, squaredTolerance, opt_transform, opt_declutterBuilderGroup);
     return loading;
 }
 /**
@@ -77655,8 +78157,9 @@ function renderFeature(replayGroup, feature, style, squaredTolerance, listener, 
  * @param {import("../style/Style.js").default} style Style.
  * @param {number} squaredTolerance Squared tolerance.
  * @param {import("../proj.js").TransformFunction} [opt_transform] Optional transform function.
+ * @param {import("../render/canvas/BuilderGroup.js").default=} opt_declutterBuilderGroup Builder for decluttering.
  */
-function renderFeatureInternal(replayGroup, feature, style, squaredTolerance, opt_transform) {
+function renderFeatureInternal(replayGroup, feature, style, squaredTolerance, opt_transform, opt_declutterBuilderGroup) {
     var geometry = style.getGeometryFunction()(feature);
     if (!geometry) {
         return;
@@ -77668,7 +78171,7 @@ function renderFeatureInternal(replayGroup, feature, style, squaredTolerance, op
     }
     else {
         var geometryRenderer = GEOMETRY_RENDERERS[simplifiedGeometry.getType()];
-        geometryRenderer(replayGroup, simplifiedGeometry, style, feature);
+        geometryRenderer(replayGroup, simplifiedGeometry, style, feature, opt_declutterBuilderGroup);
     }
 }
 /**
@@ -77694,13 +78197,14 @@ function renderGeometry(replayGroup, geometry, style, feature) {
  * @param {import("../geom/GeometryCollection.js").default} geometry Geometry.
  * @param {import("../style/Style.js").default} style Style.
  * @param {import("../Feature.js").default} feature Feature.
+ * @param {import("../render/canvas/BuilderGroup.js").default=} opt_declutterBuilderGroup Builder for decluttering.
  */
-function renderGeometryCollectionGeometry(replayGroup, geometry, style, feature) {
+function renderGeometryCollectionGeometry(replayGroup, geometry, style, feature, opt_declutterBuilderGroup) {
     var geometries = geometry.getGeometriesArray();
     var i, ii;
     for (i = 0, ii = geometries.length; i < ii; ++i) {
         var geometryRenderer = GEOMETRY_RENDERERS[geometries[i].getType()];
-        geometryRenderer(replayGroup, geometries[i], style, feature);
+        geometryRenderer(replayGroup, geometries[i], style, feature, opt_declutterBuilderGroup);
     }
 }
 /**
@@ -77708,8 +78212,9 @@ function renderGeometryCollectionGeometry(replayGroup, geometry, style, feature)
  * @param {import("../geom/LineString.js").default|import("../render/Feature.js").default} geometry Geometry.
  * @param {import("../style/Style.js").default} style Style.
  * @param {import("../Feature.js").FeatureLike} feature Feature.
+ * @param {import("../render/canvas/BuilderGroup.js").default=} opt_declutterBuilderGroup Builder for decluttering.
  */
-function renderLineStringGeometry(builderGroup, geometry, style, feature) {
+function renderLineStringGeometry(builderGroup, geometry, style, feature, opt_declutterBuilderGroup) {
     var strokeStyle = style.getStroke();
     if (strokeStyle) {
         var lineStringReplay = builderGroup.getBuilder(style.getZIndex(), _render_canvas_BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].LINE_STRING);
@@ -77717,9 +78222,9 @@ function renderLineStringGeometry(builderGroup, geometry, style, feature) {
         lineStringReplay.drawLineString(geometry, feature);
     }
     var textStyle = style.getText();
-    if (textStyle) {
-        var textReplay = builderGroup.getBuilder(style.getZIndex(), _render_canvas_BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT);
-        textReplay.setTextStyle(textStyle, builderGroup.addDeclutter(false));
+    if (textStyle && textStyle.getText()) {
+        var textReplay = (opt_declutterBuilderGroup || builderGroup).getBuilder(style.getZIndex(), _render_canvas_BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT);
+        textReplay.setTextStyle(textStyle);
         textReplay.drawText(geometry, feature);
     }
 }
@@ -77728,8 +78233,9 @@ function renderLineStringGeometry(builderGroup, geometry, style, feature) {
  * @param {import("../geom/MultiLineString.js").default|import("../render/Feature.js").default} geometry Geometry.
  * @param {import("../style/Style.js").default} style Style.
  * @param {import("../Feature.js").FeatureLike} feature Feature.
+ * @param {import("../render/canvas/BuilderGroup.js").default=} opt_declutterBuilderGroup Builder for decluttering.
  */
-function renderMultiLineStringGeometry(builderGroup, geometry, style, feature) {
+function renderMultiLineStringGeometry(builderGroup, geometry, style, feature, opt_declutterBuilderGroup) {
     var strokeStyle = style.getStroke();
     if (strokeStyle) {
         var lineStringReplay = builderGroup.getBuilder(style.getZIndex(), _render_canvas_BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].LINE_STRING);
@@ -77737,9 +78243,9 @@ function renderMultiLineStringGeometry(builderGroup, geometry, style, feature) {
         lineStringReplay.drawMultiLineString(geometry, feature);
     }
     var textStyle = style.getText();
-    if (textStyle) {
-        var textReplay = builderGroup.getBuilder(style.getZIndex(), _render_canvas_BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT);
-        textReplay.setTextStyle(textStyle, builderGroup.addDeclutter(false));
+    if (textStyle && textStyle.getText()) {
+        var textReplay = (opt_declutterBuilderGroup || builderGroup).getBuilder(style.getZIndex(), _render_canvas_BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT);
+        textReplay.setTextStyle(textStyle);
         textReplay.drawText(geometry, feature);
     }
 }
@@ -77748,8 +78254,9 @@ function renderMultiLineStringGeometry(builderGroup, geometry, style, feature) {
  * @param {import("../geom/MultiPolygon.js").default} geometry Geometry.
  * @param {import("../style/Style.js").default} style Style.
  * @param {import("../Feature.js").default} feature Feature.
+ * @param {import("../render/canvas/BuilderGroup.js").default=} opt_declutterBuilderGroup Builder for decluttering.
  */
-function renderMultiPolygonGeometry(builderGroup, geometry, style, feature) {
+function renderMultiPolygonGeometry(builderGroup, geometry, style, feature, opt_declutterBuilderGroup) {
     var fillStyle = style.getFill();
     var strokeStyle = style.getStroke();
     if (strokeStyle || fillStyle) {
@@ -77758,9 +78265,9 @@ function renderMultiPolygonGeometry(builderGroup, geometry, style, feature) {
         polygonReplay.drawMultiPolygon(geometry, feature);
     }
     var textStyle = style.getText();
-    if (textStyle) {
-        var textReplay = builderGroup.getBuilder(style.getZIndex(), _render_canvas_BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT);
-        textReplay.setTextStyle(textStyle, builderGroup.addDeclutter(false));
+    if (textStyle && textStyle.getText()) {
+        var textReplay = (opt_declutterBuilderGroup || builderGroup).getBuilder(style.getZIndex(), _render_canvas_BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT);
+        textReplay.setTextStyle(textStyle);
         textReplay.drawText(geometry, feature);
     }
 }
@@ -77769,21 +78276,29 @@ function renderMultiPolygonGeometry(builderGroup, geometry, style, feature) {
  * @param {import("../geom/Point.js").default|import("../render/Feature.js").default} geometry Geometry.
  * @param {import("../style/Style.js").default} style Style.
  * @param {import("../Feature.js").FeatureLike} feature Feature.
+ * @param {import("../render/canvas/BuilderGroup.js").default=} opt_declutterBuilderGroup Builder for decluttering.
  */
-function renderPointGeometry(builderGroup, geometry, style, feature) {
+function renderPointGeometry(builderGroup, geometry, style, feature, opt_declutterBuilderGroup) {
     var imageStyle = style.getImage();
+    var textStyle = style.getText();
+    /** @type {import("../render/canvas.js").DeclutterImageWithText} */
+    var declutterImageWithText;
+    if (opt_declutterBuilderGroup) {
+        builderGroup = opt_declutterBuilderGroup;
+        declutterImageWithText =
+            imageStyle && textStyle && textStyle.getText() ? {} : undefined;
+    }
     if (imageStyle) {
         if (imageStyle.getImageState() != _ImageState_js__WEBPACK_IMPORTED_MODULE_2__["default"].LOADED) {
             return;
         }
         var imageReplay = builderGroup.getBuilder(style.getZIndex(), _render_canvas_BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].IMAGE);
-        imageReplay.setImageStyle(imageStyle, builderGroup.addDeclutter(false));
+        imageReplay.setImageStyle(imageStyle, declutterImageWithText);
         imageReplay.drawPoint(geometry, feature);
     }
-    var textStyle = style.getText();
-    if (textStyle) {
+    if (textStyle && textStyle.getText()) {
         var textReplay = builderGroup.getBuilder(style.getZIndex(), _render_canvas_BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT);
-        textReplay.setTextStyle(textStyle, builderGroup.addDeclutter(!!imageStyle));
+        textReplay.setTextStyle(textStyle, declutterImageWithText);
         textReplay.drawText(geometry, feature);
     }
 }
@@ -77792,21 +78307,29 @@ function renderPointGeometry(builderGroup, geometry, style, feature) {
  * @param {import("../geom/MultiPoint.js").default|import("../render/Feature.js").default} geometry Geometry.
  * @param {import("../style/Style.js").default} style Style.
  * @param {import("../Feature.js").FeatureLike} feature Feature.
+ * @param {import("../render/canvas/BuilderGroup.js").default=} opt_declutterBuilderGroup Builder for decluttering.
  */
-function renderMultiPointGeometry(builderGroup, geometry, style, feature) {
+function renderMultiPointGeometry(builderGroup, geometry, style, feature, opt_declutterBuilderGroup) {
     var imageStyle = style.getImage();
+    var textStyle = style.getText();
+    /** @type {import("../render/canvas.js").DeclutterImageWithText} */
+    var declutterImageWithText;
+    if (opt_declutterBuilderGroup) {
+        builderGroup = opt_declutterBuilderGroup;
+        declutterImageWithText =
+            imageStyle && textStyle && textStyle.getText() ? {} : undefined;
+    }
     if (imageStyle) {
         if (imageStyle.getImageState() != _ImageState_js__WEBPACK_IMPORTED_MODULE_2__["default"].LOADED) {
             return;
         }
         var imageReplay = builderGroup.getBuilder(style.getZIndex(), _render_canvas_BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].IMAGE);
-        imageReplay.setImageStyle(imageStyle, builderGroup.addDeclutter(false));
+        imageReplay.setImageStyle(imageStyle, declutterImageWithText);
         imageReplay.drawMultiPoint(geometry, feature);
     }
-    var textStyle = style.getText();
-    if (textStyle) {
-        var textReplay = builderGroup.getBuilder(style.getZIndex(), _render_canvas_BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT);
-        textReplay.setTextStyle(textStyle, builderGroup.addDeclutter(!!imageStyle));
+    if (textStyle && textStyle.getText()) {
+        var textReplay = (opt_declutterBuilderGroup || builderGroup).getBuilder(style.getZIndex(), _render_canvas_BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT);
+        textReplay.setTextStyle(textStyle, declutterImageWithText);
         textReplay.drawText(geometry, feature);
     }
 }
@@ -77815,8 +78338,9 @@ function renderMultiPointGeometry(builderGroup, geometry, style, feature) {
  * @param {import("../geom/Polygon.js").default|import("../render/Feature.js").default} geometry Geometry.
  * @param {import("../style/Style.js").default} style Style.
  * @param {import("../Feature.js").FeatureLike} feature Feature.
+ * @param {import("../render/canvas/BuilderGroup.js").default=} opt_declutterBuilderGroup Builder for decluttering.
  */
-function renderPolygonGeometry(builderGroup, geometry, style, feature) {
+function renderPolygonGeometry(builderGroup, geometry, style, feature, opt_declutterBuilderGroup) {
     var fillStyle = style.getFill();
     var strokeStyle = style.getStroke();
     if (fillStyle || strokeStyle) {
@@ -77825,9 +78349,9 @@ function renderPolygonGeometry(builderGroup, geometry, style, feature) {
         polygonReplay.drawPolygon(geometry, feature);
     }
     var textStyle = style.getText();
-    if (textStyle) {
-        var textReplay = builderGroup.getBuilder(style.getZIndex(), _render_canvas_BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT);
-        textReplay.setTextStyle(textStyle, builderGroup.addDeclutter(false));
+    if (textStyle && textStyle.getText()) {
+        var textReplay = (opt_declutterBuilderGroup || builderGroup).getBuilder(style.getZIndex(), _render_canvas_BuilderType_js__WEBPACK_IMPORTED_MODULE_0__["default"].TEXT);
+        textReplay.setTextStyle(textStyle);
         textReplay.drawText(geometry, feature);
     }
 }
@@ -78170,7 +78694,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -78874,7 +79398,7 @@ __webpack_require__.r(__webpack_exports__);
  * Returns a modified resolution taking into account the viewport size and maximum
  * allowed extent.
  * @param {number} resolution Resolution
- * @param {import("./extent.js").Extent=} maxExtent Maximum allowed extent.
+ * @param {import("./extent.js").Extent} maxExtent Maximum allowed extent.
  * @param {import("./size.js").Size} viewportSize Viewport size.
  * @param {boolean} showFullExtent Whether to show the full extent.
  * @return {number} Capped resolution.
@@ -79248,7 +79772,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -79286,6 +79810,8 @@ var ATTRIBUTION = '&#169; ' +
  *   imageTile.getImage().src = src;
  * };
  * ```
+ * @property {number} [transition=250] Duration of the opacity transition for rendering.
+ * To disable the opacity transition, pass `transition: 0`.
  * @property {string} [url='https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png'] URL template.
  * Must include `{x}`, `{y}` or `{-y}`, and `{z}` placeholders.
  * @property {boolean} [wrapX=true] Whether to wrap the world horizontally.
@@ -79316,16 +79842,17 @@ var OSM = /** @class */ (function (_super) {
             : 'https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png';
         _this = _super.call(this, {
             attributions: attributions,
+            attributionsCollapsible: false,
             cacheSize: options.cacheSize,
             crossOrigin: crossOrigin,
             imageSmoothing: options.imageSmoothing,
-            opaque: options.opaque !== undefined ? options.opaque : true,
             maxZoom: options.maxZoom !== undefined ? options.maxZoom : 19,
+            opaque: options.opaque !== undefined ? options.opaque : true,
             reprojectionErrorThreshold: options.reprojectionErrorThreshold,
             tileLoadFunction: options.tileLoadFunction,
+            transition: options.transition,
             url: url,
             wrapX: options.wrapX,
-            attributionsCollapsible: false,
         }) || this;
         return _this;
     }
@@ -79353,7 +79880,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -79590,15 +80117,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _TileCache_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../TileCache.js */ "./node_modules/ol/TileCache.js");
 /* harmony import */ var _TileState_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../TileState.js */ "./node_modules/ol/TileState.js");
 /* harmony import */ var _util_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../util.js */ "./node_modules/ol/util.js");
-/* harmony import */ var _proj_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../proj.js */ "./node_modules/ol/proj.js");
-/* harmony import */ var _tilecoord_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../tilecoord.js */ "./node_modules/ol/tilecoord.js");
-/* harmony import */ var _tilegrid_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../tilegrid.js */ "./node_modules/ol/tilegrid.js");
-/* harmony import */ var _size_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../size.js */ "./node_modules/ol/size.js");
+/* harmony import */ var _asserts_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../asserts.js */ "./node_modules/ol/asserts.js");
+/* harmony import */ var _proj_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../proj.js */ "./node_modules/ol/proj.js");
+/* harmony import */ var _tilecoord_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../tilecoord.js */ "./node_modules/ol/tilecoord.js");
+/* harmony import */ var _tilegrid_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../tilegrid.js */ "./node_modules/ol/tilegrid.js");
+/* harmony import */ var _size_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../size.js */ "./node_modules/ol/size.js");
 var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -79610,6 +80138,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
 /**
  * @module ol/source/Tile
  */
+
 
 
 
@@ -79674,7 +80203,7 @@ var TileSource = /** @class */ (function (_super) {
         var tileSize = [256, 256];
         var tileGrid = options.tileGrid;
         if (tileGrid) {
-            Object(_size_js__WEBPACK_IMPORTED_MODULE_8__["toSize"])(tileGrid.getTileSize(tileGrid.getMinZoom()), tileSize);
+            Object(_size_js__WEBPACK_IMPORTED_MODULE_9__["toSize"])(tileGrid.getTileSize(tileGrid.getMinZoom()), tileSize);
         }
         /**
          * @protected
@@ -79740,7 +80269,7 @@ var TileSource = /** @class */ (function (_super) {
         var tile, tileCoordKey, loaded;
         for (var x = tileRange.minX; x <= tileRange.maxX; ++x) {
             for (var y = tileRange.minY; y <= tileRange.maxY; ++y) {
-                tileCoordKey = Object(_tilecoord_js__WEBPACK_IMPORTED_MODULE_6__["getKeyZXY"])(z, x, y);
+                tileCoordKey = Object(_tilecoord_js__WEBPACK_IMPORTED_MODULE_7__["getKeyZXY"])(z, x, y);
                 loaded = false;
                 if (tileCache.containsKey(tileCoordKey)) {
                     tile = /** @type {!import("../Tile.js").default} */ (tileCache.get(tileCoordKey));
@@ -79821,7 +80350,7 @@ var TileSource = /** @class */ (function (_super) {
      */
     TileSource.prototype.getTileGridForProjection = function (projection) {
         if (!this.tileGrid) {
-            return Object(_tilegrid_js__WEBPACK_IMPORTED_MODULE_7__["getForProjection"])(projection);
+            return Object(_tilegrid_js__WEBPACK_IMPORTED_MODULE_8__["getForProjection"])(projection);
         }
         else {
             return this.tileGrid;
@@ -79833,13 +80362,9 @@ var TileSource = /** @class */ (function (_super) {
      * @protected
      */
     TileSource.prototype.getTileCacheForProjection = function (projection) {
-        var thisProj = this.getProjection();
-        if (thisProj && !Object(_proj_js__WEBPACK_IMPORTED_MODULE_5__["equivalent"])(thisProj, projection)) {
-            return null;
-        }
-        else {
-            return this.tileCache;
-        }
+        Object(_asserts_js__WEBPACK_IMPORTED_MODULE_5__["assert"])(Object(_proj_js__WEBPACK_IMPORTED_MODULE_6__["equivalent"])(this.getProjection(), projection), 68 // A VectorTile source can only be rendered if it has a projection compatible with the view projection.
+        );
+        return this.tileCache;
     };
     /**
      * Get the tile pixel ratio for this source. Subclasses may override this
@@ -79860,12 +80385,12 @@ var TileSource = /** @class */ (function (_super) {
     TileSource.prototype.getTilePixelSize = function (z, pixelRatio, projection) {
         var tileGrid = this.getTileGridForProjection(projection);
         var tilePixelRatio = this.getTilePixelRatio(pixelRatio);
-        var tileSize = Object(_size_js__WEBPACK_IMPORTED_MODULE_8__["toSize"])(tileGrid.getTileSize(z), this.tmpSize);
+        var tileSize = Object(_size_js__WEBPACK_IMPORTED_MODULE_9__["toSize"])(tileGrid.getTileSize(z), this.tmpSize);
         if (tilePixelRatio == 1) {
             return tileSize;
         }
         else {
-            return Object(_size_js__WEBPACK_IMPORTED_MODULE_8__["scale"])(tileSize, tilePixelRatio, this.tmpSize);
+            return Object(_size_js__WEBPACK_IMPORTED_MODULE_9__["scale"])(tileSize, tilePixelRatio, this.tmpSize);
         }
     };
     /**
@@ -79881,9 +80406,9 @@ var TileSource = /** @class */ (function (_super) {
         var projection = opt_projection !== undefined ? opt_projection : this.getProjection();
         var tileGrid = this.getTileGridForProjection(projection);
         if (this.getWrapX() && projection.isGlobal()) {
-            tileCoord = Object(_tilegrid_js__WEBPACK_IMPORTED_MODULE_7__["wrapX"])(tileGrid, tileCoord, projection);
+            tileCoord = Object(_tilegrid_js__WEBPACK_IMPORTED_MODULE_8__["wrapX"])(tileGrid, tileCoord, projection);
         }
-        return Object(_tilecoord_js__WEBPACK_IMPORTED_MODULE_6__["withinExtentAndZ"])(tileCoord, tileGrid) ? tileCoord : null;
+        return Object(_tilecoord_js__WEBPACK_IMPORTED_MODULE_7__["withinExtentAndZ"])(tileCoord, tileGrid) ? tileCoord : null;
     };
     /**
      * Remove all cached tiles from the source. The next render cycle will fetch new tiles.
@@ -80012,7 +80537,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -80459,7 +80984,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -80534,7 +81059,7 @@ var UrlTile = /** @class */ (function (_super) {
          */
         _this.tileLoadFunction = options.tileLoadFunction;
         if (options.tileUrlFunction) {
-            _this.tileUrlFunction = options.tileUrlFunction.bind(_this);
+            _this.tileUrlFunction = options.tileUrlFunction;
         }
         /**
          * @protected
@@ -80568,7 +81093,9 @@ var UrlTile = /** @class */ (function (_super) {
      * @api
      */
     UrlTile.prototype.getTileUrlFunction = function () {
-        return this.tileUrlFunction;
+        return Object.getPrototypeOf(this).tileUrlFunction === this.tileUrlFunction
+            ? this.tileUrlFunction.bind(this)
+            : this.tileUrlFunction;
     };
     /**
      * Return the URLs used for this source.
@@ -80721,7 +81248,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -80767,15 +81294,22 @@ var VectorSourceEvent = /** @class */ (function (_super) {
     /**
      * @param {string} type Type.
      * @param {import("../Feature.js").default<Geometry>=} opt_feature Feature.
+     * @param {Array<import("../Feature.js").default<Geometry>>=} opt_features Features.
      */
-    function VectorSourceEvent(type, opt_feature) {
+    function VectorSourceEvent(type, opt_feature, opt_features) {
         var _this = _super.call(this, type) || this;
         /**
-         * The feature being added or removed.
+         * The added or removed feature for the `ADDFEATURE` and `REMOVEFEATURE` events, `undefined` otherwise.
          * @type {import("../Feature.js").default<Geometry>|undefined}
          * @api
          */
         _this.feature = opt_feature;
+        /**
+         * The loaded features for the `FEATURESLOADED` event, `undefined` otherwise.
+         * @type {Array<import("../Feature.js").default<Geometry>>|undefined}
+         * @api
+         */
+        _this.features = opt_features;
         return _this;
     }
     return VectorSourceEvent;
@@ -81562,7 +82096,12 @@ var VectorSource = /** @class */ (function (_super) {
                 return Object(_extent_js__WEBPACK_IMPORTED_MODULE_12__["containsExtent"])(object.extent, extentToLoad);
             });
             if (!alreadyLoaded) {
-                this_1.loader_.call(this_1, extentToLoad, resolution, projection);
+                this_1.dispatchEvent(new VectorSourceEvent(_VectorEventType_js__WEBPACK_IMPORTED_MODULE_8__["default"].FEATURESLOADSTART));
+                this_1.loader_.call(this_1, extentToLoad, resolution, projection, function (features) {
+                    this.dispatchEvent(new VectorSourceEvent(_VectorEventType_js__WEBPACK_IMPORTED_MODULE_8__["default"].FEATURESLOADEND, undefined, features));
+                }.bind(this_1), function () {
+                    this.dispatchEvent(new VectorSourceEvent(_VectorEventType_js__WEBPACK_IMPORTED_MODULE_8__["default"].FEATURESLOADERROR));
+                }.bind(this_1));
                 loadedExtentsRtree.insert(extentToLoad, { extent: extentToLoad.slice() });
                 this_1.loading = this_1.loader_ !== _functions_js__WEBPACK_IMPORTED_MODULE_9__["VOID"];
             }
@@ -81715,6 +82254,24 @@ __webpack_require__.r(__webpack_exports__);
      * @api
      */
     REMOVEFEATURE: 'removefeature',
+    /**
+     * Triggered when features starts loading.
+     * @event module:ol/source/Vector.VectorSourceEvent#featuresloadstart
+     * @api
+     */
+    FEATURESLOADSTART: 'featuresloadstart',
+    /**
+     * Triggered when features finishes loading.
+     * @event module:ol/source/Vector.VectorSourceEvent#featuresloadend
+     * @api
+     */
+    FEATURESLOADEND: 'featuresloadend',
+    /**
+     * Triggered if feature loading results in an error.
+     * @event module:ol/source/Vector.VectorSourceEvent#featuresloaderror
+     * @api
+     */
+    FEATURESLOADERROR: 'featuresloaderror',
 });
 //# sourceMappingURL=VectorEventType.js.map
 
@@ -81738,7 +82295,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -81786,7 +82343,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
  * may be used instead of defining each one separately in the `urls` option.
  * @property {Array<string>} [urls] An array of URL templates.
  * @property {boolean} [wrapX=true] Whether to wrap the world horizontally.
- * @property {number} [transition] Duration of the opacity transition for rendering.
+ * @property {number} [transition=250] Duration of the opacity transition for rendering.
  * To disable the opacity transition, pass `transition: 0`.
  * @property {number} [zDirection=0] Indicate which resolution should be used
  * by a renderer if the view resolution does not match any resolution of the tile source.
@@ -81800,15 +82357,14 @@ var __extends = (undefined && undefined.__extends) || (function () {
  * Google grid where `x` 0 and `y` 0 are in the top left. Grids like
  * TMS where `x` 0 and `y` 0 are in the bottom left can be used by
  * using the `{-y}` placeholder in the URL template, so long as the
- * source does not have a custom tile grid. In this case,
- * {@link module:ol/source/TileImage} can be used with a `tileUrlFunction`
- * such as:
- *
+ * source does not have a custom tile grid. In this case
+ * a `tileUrlFunction` can be used, such as:
+ * ```js
  *  tileUrlFunction: function(coordinate) {
  *    return 'http://mapserver.com/' + coordinate[0] + '/' +
- *        coordinate[1] + '/' + coordinate[2] + '.png';
- *    }
- *
+ *      coordinate[1] + '/' + (-coordinate[2] - 1) + '.png';
+ *  }
+ * ```
  * @api
  */
 var XYZ = /** @class */ (function (_super) {
@@ -82719,8 +83275,8 @@ var PriorityQueue = /** @class */ (function () {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var rbush_rbush_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! rbush/rbush.js */ "./node_modules/rbush/rbush.js");
-/* harmony import */ var rbush_rbush_js__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(rbush_rbush_js__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var rbush__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! rbush */ "./node_modules/rbush/rbush.min.js");
+/* harmony import */ var rbush__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(rbush__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _extent_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../extent.js */ "./node_modules/ol/extent.js");
 /* harmony import */ var _util_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../util.js */ "./node_modules/ol/util.js");
 /* harmony import */ var _obj_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../obj.js */ "./node_modules/ol/obj.js");
@@ -82754,7 +83310,7 @@ var RBush = /** @class */ (function () {
         /**
          * @private
          */
-        this.rbush_ = new rbush_rbush_js__WEBPACK_IMPORTED_MODULE_0___default.a(opt_maxEntries);
+        this.rbush_ = new rbush__WEBPACK_IMPORTED_MODULE_0___default.a(opt_maxEntries);
         /**
          * A mapping between the objects added to this rbush wrapper
          * and the objects that are actually added to the internal rbush.
@@ -82998,7 +83554,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -83014,6 +83570,12 @@ var __extends = (undefined && undefined.__extends) || (function () {
  * @property {number} radius Circle radius.
  * @property {import("./Stroke.js").default} [stroke] Stroke style.
  * @property {Array<number>} [displacement=[0,0]] displacement
+ * @property {number|import("../size.js").Size} [scale=1] Scale. A two dimensional scale will produce an ellipse.
+ * Unless two dimensional scaling is required a better result may be obtained with an appropriate setting for `radius`.
+ * @property {number} [rotation=0] Rotation in radians
+ * (positive rotation clockwise, meaningful only when used in conjunction with a two dimensional scale).
+ * @property {boolean} [rotateWithView=false] Whether to rotate the shape with the view
+ * (meaningful only when used in conjunction with a two dimensional scale).
  */
 /**
  * @classdesc
@@ -83033,6 +83595,9 @@ var CircleStyle = /** @class */ (function (_super) {
             fill: options.fill,
             radius: options.radius,
             stroke: options.stroke,
+            scale: options.scale !== undefined ? options.scale : 1,
+            rotation: options.rotation !== undefined ? options.rotation : 0,
+            rotateWithView: options.rotateWithView !== undefined ? options.rotateWithView : false,
             displacement: options.displacement !== undefined ? options.displacement : [0, 0],
         }) || this;
         return _this;
@@ -83043,14 +83608,17 @@ var CircleStyle = /** @class */ (function (_super) {
      * @api
      */
     CircleStyle.prototype.clone = function () {
+        var scale = this.getScale();
         var style = new CircleStyle({
             fill: this.getFill() ? this.getFill().clone() : undefined,
             stroke: this.getStroke() ? this.getStroke().clone() : undefined,
             radius: this.getRadius(),
+            scale: Array.isArray(scale) ? scale.slice() : scale,
+            rotation: this.getRotation(),
+            rotateWithView: this.getRotateWithView(),
             displacement: this.getDisplacement().slice(),
         });
         style.setOpacity(this.getOpacity());
-        style.setScale(this.getScale());
         return style;
     };
     /**
@@ -83162,7 +83730,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -83604,9 +84172,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _events_Target_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../events/Target.js */ "./node_modules/ol/events/Target.js");
 /* harmony import */ var _events_EventType_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../events/EventType.js */ "./node_modules/ol/events/EventType.js");
 /* harmony import */ var _ImageState_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../ImageState.js */ "./node_modules/ol/ImageState.js");
-/* harmony import */ var _dom_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../dom.js */ "./node_modules/ol/dom.js");
-/* harmony import */ var _IconImageCache_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./IconImageCache.js */ "./node_modules/ol/style/IconImageCache.js");
-/* harmony import */ var _Image_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../Image.js */ "./node_modules/ol/Image.js");
+/* harmony import */ var _color_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../color.js */ "./node_modules/ol/color.js");
+/* harmony import */ var _dom_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../dom.js */ "./node_modules/ol/dom.js");
+/* harmony import */ var _IconImageCache_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./IconImageCache.js */ "./node_modules/ol/style/IconImageCache.js");
+/* harmony import */ var _Image_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../Image.js */ "./node_modules/ol/Image.js");
 /**
  * @module ol/style/IconImage
  */
@@ -83614,7 +84183,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -83623,6 +84192,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
+
 
 
 
@@ -83701,7 +84271,7 @@ var IconImage = /** @class */ (function (_super) {
     IconImage.prototype.isTainted_ = function () {
         if (this.tainted_ === undefined && this.imageState_ === _ImageState_js__WEBPACK_IMPORTED_MODULE_2__["default"].LOADED) {
             if (!taintedTestContext) {
-                taintedTestContext = Object(_dom_js__WEBPACK_IMPORTED_MODULE_3__["createCanvasContext2D"])(1, 1);
+                taintedTestContext = Object(_dom_js__WEBPACK_IMPORTED_MODULE_4__["createCanvasContext2D"])(1, 1);
             }
             taintedTestContext.drawImage(this.image_, 0, 0);
             try {
@@ -83774,7 +84344,7 @@ var IconImage = /** @class */ (function (_super) {
             if (this.isTainted_()) {
                 var width = this.size_[0];
                 var height = this.size_[1];
-                var context = Object(_dom_js__WEBPACK_IMPORTED_MODULE_3__["createCanvasContext2D"])(width, height);
+                var context = Object(_dom_js__WEBPACK_IMPORTED_MODULE_4__["createCanvasContext2D"])(width, height);
                 context.fillRect(0, 0, width, height);
                 this.hitDetectionImage_ = context.canvas;
             }
@@ -83809,7 +84379,7 @@ var IconImage = /** @class */ (function (_super) {
             catch (e) {
                 this.handleImageError_();
             }
-            this.unlisten_ = Object(_Image_js__WEBPACK_IMPORTED_MODULE_5__["listenImage"])(this.image_, this.handleImageLoad_.bind(this), this.handleImageError_.bind(this));
+            this.unlisten_ = Object(_Image_js__WEBPACK_IMPORTED_MODULE_6__["listenImage"])(this.image_, this.handleImageLoad_.bind(this), this.handleImageError_.bind(this));
         }
     };
     /**
@@ -83827,34 +84397,31 @@ var IconImage = /** @class */ (function (_super) {
         var ctx = canvas.getContext('2d');
         ctx.scale(pixelRatio, pixelRatio);
         ctx.drawImage(this.image_, 0, 0);
-        if (this.isTainted_()) {
-            // If reading from the canvas throws a SecurityError the same effect can be
-            // achieved with globalCompositeOperation.
-            // This could be used as the default, but it is not fully supported by all
-            // browsers. E. g. Internet Explorer 11 does not support the multiply
-            // operation and the resulting image shape will be completelly filled with
-            // the provided color.
-            // So this is only used as a fallback. It is still better than having no icon
-            // at all.
-            var c = this.color_;
-            ctx.globalCompositeOperation = 'multiply';
-            ctx.fillStyle = 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')';
+        ctx.globalCompositeOperation = 'multiply';
+        // Internet Explorer 11 does not support the multiply operation.
+        // If the canvas is tainted in Internet Explorer this still produces
+        // a solid color image with the shape of the icon.
+        if (ctx.globalCompositeOperation === 'multiply' || this.isTainted_()) {
+            ctx.fillStyle = Object(_color_js__WEBPACK_IMPORTED_MODULE_3__["asString"])(this.color_);
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.globalCompositeOperation = 'destination-in';
             ctx.drawImage(this.image_, 0, 0);
-            return;
         }
-        var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        var data = imgData.data;
-        var r = this.color_[0] / 255.0;
-        var g = this.color_[1] / 255.0;
-        var b = this.color_[2] / 255.0;
-        for (var i = 0, ii = data.length; i < ii; i += 4) {
-            data[i] *= r;
-            data[i + 1] *= g;
-            data[i + 2] *= b;
+        else {
+            var imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            var data = imgData.data;
+            var r = this.color_[0] / 255.0;
+            var g = this.color_[1] / 255.0;
+            var b = this.color_[2] / 255.0;
+            var a = this.color_[3];
+            for (var i = 0, ii = data.length; i < ii; i += 4) {
+                data[i] *= r;
+                data[i + 1] *= g;
+                data[i + 2] *= b;
+                data[i + 3] *= a;
+            }
+            ctx.putImageData(imgData, 0, 0);
         }
-        ctx.putImageData(imgData, 0, 0);
     };
     /**
      * Discards event handlers which listen for load completion or errors.
@@ -83879,10 +84446,10 @@ var IconImage = /** @class */ (function (_super) {
  * @return {IconImage} Icon image.
  */
 function get(image, src, size, crossOrigin, imageState, color) {
-    var iconImage = _IconImageCache_js__WEBPACK_IMPORTED_MODULE_4__["shared"].get(src, crossOrigin, color);
+    var iconImage = _IconImageCache_js__WEBPACK_IMPORTED_MODULE_5__["shared"].get(src, crossOrigin, color);
     if (!iconImage) {
         iconImage = new IconImage(image, src, size, crossOrigin, imageState, color);
-        _IconImageCache_js__WEBPACK_IMPORTED_MODULE_4__["shared"].set(src, crossOrigin, color, iconImage);
+        _IconImageCache_js__WEBPACK_IMPORTED_MODULE_5__["shared"].set(src, crossOrigin, color, iconImage);
     }
     return iconImage;
 }
@@ -84339,7 +84906,7 @@ var __extends = (undefined && undefined.__extends) || (function () {
     var extendStatics = function (d, b) {
         extendStatics = Object.setPrototypeOf ||
             ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
         return extendStatics(d, b);
     };
     return function (d, b) {
@@ -84368,6 +84935,8 @@ var __extends = (undefined && undefined.__extends) || (function () {
  * @property {import("./Stroke.js").default} [stroke] Stroke style.
  * @property {number} [rotation=0] Rotation in radians (positive rotation clockwise).
  * @property {boolean} [rotateWithView=false] Whether to rotate the shape with the view.
+ * @property {number|import("../size.js").Size} [scale=1] Scale. Unless two dimensional scaling is required a better
+ * result may be obtained with appropriate settings for `radius`, `radius1` and `radius2`.
  */
 /**
  * @typedef {Object} RenderOptions
@@ -84402,7 +84971,7 @@ var RegularShape = /** @class */ (function (_super) {
             opacity: 1,
             rotateWithView: rotateWithView,
             rotation: options.rotation !== undefined ? options.rotation : 0,
-            scale: 1,
+            scale: options.scale !== undefined ? options.scale : 1,
             displacement: options.displacement !== undefined ? options.displacement : [0, 0],
         }) || this;
         /**
@@ -84480,6 +85049,7 @@ var RegularShape = /** @class */ (function (_super) {
      * @api
      */
     RegularShape.prototype.clone = function () {
+        var scale = this.getScale();
         var style = new RegularShape({
             fill: this.getFill() ? this.getFill().clone() : undefined,
             points: this.getPoints(),
@@ -84489,10 +85059,10 @@ var RegularShape = /** @class */ (function (_super) {
             stroke: this.getStroke() ? this.getStroke().clone() : undefined,
             rotation: this.getRotation(),
             rotateWithView: this.getRotateWithView(),
+            scale: Array.isArray(scale) ? scale.slice() : scale,
             displacement: this.getDisplacement().slice(),
         });
         style.setOpacity(this.getOpacity());
-        style.setScale(this.getScale());
         return style;
     };
     /**
@@ -84686,6 +85256,7 @@ var RegularShape = /** @class */ (function (_super) {
         var renderOptions = this.createRenderOptions();
         var context = Object(_dom_js__WEBPACK_IMPORTED_MODULE_4__["createCanvasContext2D"])(renderOptions.size, renderOptions.size);
         this.draw_(renderOptions, context, 0, 0, 1);
+        this.canvas_ = {};
         this.canvas_[1] = context.canvas;
         // canvas.width and height are rounded to the closest integer
         var size = context.canvas.width;
@@ -86170,14 +86741,7 @@ function withinExtentAndZ(tileCoord, tileGrid) {
     if (tileGrid.getMinZoom() > z || z > tileGrid.getMaxZoom()) {
         return false;
     }
-    var extent = tileGrid.getExtent();
-    var tileRange;
-    if (!extent) {
-        tileRange = tileGrid.getFullTileRange(z);
-    }
-    else {
-        tileRange = tileGrid.getTileRangeForExtentAndZ(extent, z);
-    }
+    var tileRange = tileGrid.getFullTileRange(z);
     if (!tileRange) {
         return true;
     }
@@ -86528,6 +87092,13 @@ var TileGrid = /** @class */ (function () {
         if (options.sizes !== undefined) {
             this.fullTileRanges_ = options.sizes.map(function (size, z) {
                 var tileRange = new _TileRange_js__WEBPACK_IMPORTED_MODULE_0__["default"](Math.min(0, size[0]), Math.max(size[0] - 1, -1), Math.min(0, size[1]), Math.max(size[1] - 1, -1));
+                if (extent) {
+                    var restrictedTileRange = this.getTileRangeForExtentAndZ(extent, z);
+                    tileRange.minX = Math.max(restrictedTileRange.minX, tileRange.minX);
+                    tileRange.maxX = Math.min(restrictedTileRange.maxX, tileRange.maxX);
+                    tileRange.minY = Math.max(restrictedTileRange.minY, tileRange.minY);
+                    tileRange.maxY = Math.min(restrictedTileRange.maxY, tileRange.maxY);
+                }
                 return tileRange;
             }, this);
         }
@@ -86844,7 +87415,9 @@ var TileGrid = /** @class */ (function () {
      */
     TileGrid.prototype.getFullTileRange = function (z) {
         if (!this.fullTileRanges_) {
-            return null;
+            return this.extent_
+                ? this.getTileRangeForExtentAndZ(this.extent_, z)
+                : null;
         }
         else {
             return this.fullTileRanges_[z];
@@ -87375,7 +87948,7 @@ function getUid(obj) {
  * OpenLayers version.
  * @type {string}
  */
-var VERSION = '6.4.3';
+var VERSION = '6.5.0';
 //# sourceMappingURL=util.js.map
 
 /***/ }),
@@ -90205,586 +90778,14 @@ process.umask = function() { return 0; };
 
 /***/ }),
 
-/***/ "./node_modules/rbush/rbush.js":
-/*!*************************************!*\
-  !*** ./node_modules/rbush/rbush.js ***!
-  \*************************************/
+/***/ "./node_modules/rbush/rbush.min.js":
+/*!*****************************************!*\
+  !*** ./node_modules/rbush/rbush.min.js ***!
+  \*****************************************/
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-(function (global, factory) {
- true ? module.exports = factory() :
-undefined;
-}(this, function () { 'use strict';
-
-function quickselect(arr, k, left, right, compare) {
-    quickselectStep(arr, k, left || 0, right || (arr.length - 1), compare || defaultCompare);
-}
-
-function quickselectStep(arr, k, left, right, compare) {
-
-    while (right > left) {
-        if (right - left > 600) {
-            var n = right - left + 1;
-            var m = k - left + 1;
-            var z = Math.log(n);
-            var s = 0.5 * Math.exp(2 * z / 3);
-            var sd = 0.5 * Math.sqrt(z * s * (n - s) / n) * (m - n / 2 < 0 ? -1 : 1);
-            var newLeft = Math.max(left, Math.floor(k - m * s / n + sd));
-            var newRight = Math.min(right, Math.floor(k + (n - m) * s / n + sd));
-            quickselectStep(arr, k, newLeft, newRight, compare);
-        }
-
-        var t = arr[k];
-        var i = left;
-        var j = right;
-
-        swap(arr, left, k);
-        if (compare(arr[right], t) > 0) { swap(arr, left, right); }
-
-        while (i < j) {
-            swap(arr, i, j);
-            i++;
-            j--;
-            while (compare(arr[i], t) < 0) { i++; }
-            while (compare(arr[j], t) > 0) { j--; }
-        }
-
-        if (compare(arr[left], t) === 0) { swap(arr, left, j); }
-        else {
-            j++;
-            swap(arr, j, right);
-        }
-
-        if (j <= k) { left = j + 1; }
-        if (k <= j) { right = j - 1; }
-    }
-}
-
-function swap(arr, i, j) {
-    var tmp = arr[i];
-    arr[i] = arr[j];
-    arr[j] = tmp;
-}
-
-function defaultCompare(a, b) {
-    return a < b ? -1 : a > b ? 1 : 0;
-}
-
-var RBush = function RBush(maxEntries) {
-    if ( maxEntries === void 0 ) maxEntries = 9;
-
-    // max entries in a node is 9 by default; min node fill is 40% for best performance
-    this._maxEntries = Math.max(4, maxEntries);
-    this._minEntries = Math.max(2, Math.ceil(this._maxEntries * 0.4));
-    this.clear();
-};
-
-RBush.prototype.all = function all () {
-    return this._all(this.data, []);
-};
-
-RBush.prototype.search = function search (bbox) {
-    var node = this.data;
-    var result = [];
-
-    if (!intersects(bbox, node)) { return result; }
-
-    var toBBox = this.toBBox;
-    var nodesToSearch = [];
-
-    while (node) {
-        for (var i = 0; i < node.children.length; i++) {
-            var child = node.children[i];
-            var childBBox = node.leaf ? toBBox(child) : child;
-
-            if (intersects(bbox, childBBox)) {
-                if (node.leaf) { result.push(child); }
-                else if (contains(bbox, childBBox)) { this._all(child, result); }
-                else { nodesToSearch.push(child); }
-            }
-        }
-        node = nodesToSearch.pop();
-    }
-
-    return result;
-};
-
-RBush.prototype.collides = function collides (bbox) {
-    var node = this.data;
-
-    if (!intersects(bbox, node)) { return false; }
-
-    var nodesToSearch = [];
-    while (node) {
-        for (var i = 0; i < node.children.length; i++) {
-            var child = node.children[i];
-            var childBBox = node.leaf ? this.toBBox(child) : child;
-
-            if (intersects(bbox, childBBox)) {
-                if (node.leaf || contains(bbox, childBBox)) { return true; }
-                nodesToSearch.push(child);
-            }
-        }
-        node = nodesToSearch.pop();
-    }
-
-    return false;
-};
-
-RBush.prototype.load = function load (data) {
-    if (!(data && data.length)) { return this; }
-
-    if (data.length < this._minEntries) {
-        for (var i = 0; i < data.length; i++) {
-            this.insert(data[i]);
-        }
-        return this;
-    }
-
-    // recursively build the tree with the given data from scratch using OMT algorithm
-    var node = this._build(data.slice(), 0, data.length - 1, 0);
-
-    if (!this.data.children.length) {
-        // save as is if tree is empty
-        this.data = node;
-
-    } else if (this.data.height === node.height) {
-        // split root if trees have the same height
-        this._splitRoot(this.data, node);
-
-    } else {
-        if (this.data.height < node.height) {
-            // swap trees if inserted one is bigger
-            var tmpNode = this.data;
-            this.data = node;
-            node = tmpNode;
-        }
-
-        // insert the small tree into the large tree at appropriate level
-        this._insert(node, this.data.height - node.height - 1, true);
-    }
-
-    return this;
-};
-
-RBush.prototype.insert = function insert (item) {
-    if (item) { this._insert(item, this.data.height - 1); }
-    return this;
-};
-
-RBush.prototype.clear = function clear () {
-    this.data = createNode([]);
-    return this;
-};
-
-RBush.prototype.remove = function remove (item, equalsFn) {
-    if (!item) { return this; }
-
-    var node = this.data;
-    var bbox = this.toBBox(item);
-    var path = [];
-    var indexes = [];
-    var i, parent, goingUp;
-
-    // depth-first iterative tree traversal
-    while (node || path.length) {
-
-        if (!node) { // go up
-            node = path.pop();
-            parent = path[path.length - 1];
-            i = indexes.pop();
-            goingUp = true;
-        }
-
-        if (node.leaf) { // check current node
-            var index = findItem(item, node.children, equalsFn);
-
-            if (index !== -1) {
-                // item found, remove the item and condense tree upwards
-                node.children.splice(index, 1);
-                path.push(node);
-                this._condense(path);
-                return this;
-            }
-        }
-
-        if (!goingUp && !node.leaf && contains(node, bbox)) { // go down
-            path.push(node);
-            indexes.push(i);
-            i = 0;
-            parent = node;
-            node = node.children[0];
-
-        } else if (parent) { // go right
-            i++;
-            node = parent.children[i];
-            goingUp = false;
-
-        } else { node = null; } // nothing found
-    }
-
-    return this;
-};
-
-RBush.prototype.toBBox = function toBBox (item) { return item; };
-
-RBush.prototype.compareMinX = function compareMinX (a, b) { return a.minX - b.minX; };
-RBush.prototype.compareMinY = function compareMinY (a, b) { return a.minY - b.minY; };
-
-RBush.prototype.toJSON = function toJSON () { return this.data; };
-
-RBush.prototype.fromJSON = function fromJSON (data) {
-    this.data = data;
-    return this;
-};
-
-RBush.prototype._all = function _all (node, result) {
-    var nodesToSearch = [];
-    while (node) {
-        if (node.leaf) { result.push.apply(result, node.children); }
-        else { nodesToSearch.push.apply(nodesToSearch, node.children); }
-
-        node = nodesToSearch.pop();
-    }
-    return result;
-};
-
-RBush.prototype._build = function _build (items, left, right, height) {
-
-    var N = right - left + 1;
-    var M = this._maxEntries;
-    var node;
-
-    if (N <= M) {
-        // reached leaf level; return leaf
-        node = createNode(items.slice(left, right + 1));
-        calcBBox(node, this.toBBox);
-        return node;
-    }
-
-    if (!height) {
-        // target height of the bulk-loaded tree
-        height = Math.ceil(Math.log(N) / Math.log(M));
-
-        // target number of root entries to maximize storage utilization
-        M = Math.ceil(N / Math.pow(M, height - 1));
-    }
-
-    node = createNode([]);
-    node.leaf = false;
-    node.height = height;
-
-    // split the items into M mostly square tiles
-
-    var N2 = Math.ceil(N / M);
-    var N1 = N2 * Math.ceil(Math.sqrt(M));
-
-    multiSelect(items, left, right, N1, this.compareMinX);
-
-    for (var i = left; i <= right; i += N1) {
-
-        var right2 = Math.min(i + N1 - 1, right);
-
-        multiSelect(items, i, right2, N2, this.compareMinY);
-
-        for (var j = i; j <= right2; j += N2) {
-
-            var right3 = Math.min(j + N2 - 1, right2);
-
-            // pack each entry recursively
-            node.children.push(this._build(items, j, right3, height - 1));
-        }
-    }
-
-    calcBBox(node, this.toBBox);
-
-    return node;
-};
-
-RBush.prototype._chooseSubtree = function _chooseSubtree (bbox, node, level, path) {
-    while (true) {
-        path.push(node);
-
-        if (node.leaf || path.length - 1 === level) { break; }
-
-        var minArea = Infinity;
-        var minEnlargement = Infinity;
-        var targetNode = (void 0);
-
-        for (var i = 0; i < node.children.length; i++) {
-            var child = node.children[i];
-            var area = bboxArea(child);
-            var enlargement = enlargedArea(bbox, child) - area;
-
-            // choose entry with the least area enlargement
-            if (enlargement < minEnlargement) {
-                minEnlargement = enlargement;
-                minArea = area < minArea ? area : minArea;
-                targetNode = child;
-
-            } else if (enlargement === minEnlargement) {
-                // otherwise choose one with the smallest area
-                if (area < minArea) {
-                    minArea = area;
-                    targetNode = child;
-                }
-            }
-        }
-
-        node = targetNode || node.children[0];
-    }
-
-    return node;
-};
-
-RBush.prototype._insert = function _insert (item, level, isNode) {
-    var bbox = isNode ? item : this.toBBox(item);
-    var insertPath = [];
-
-    // find the best node for accommodating the item, saving all nodes along the path too
-    var node = this._chooseSubtree(bbox, this.data, level, insertPath);
-
-    // put the item into the node
-    node.children.push(item);
-    extend(node, bbox);
-
-    // split on node overflow; propagate upwards if necessary
-    while (level >= 0) {
-        if (insertPath[level].children.length > this._maxEntries) {
-            this._split(insertPath, level);
-            level--;
-        } else { break; }
-    }
-
-    // adjust bboxes along the insertion path
-    this._adjustParentBBoxes(bbox, insertPath, level);
-};
-
-// split overflowed node into two
-RBush.prototype._split = function _split (insertPath, level) {
-    var node = insertPath[level];
-    var M = node.children.length;
-    var m = this._minEntries;
-
-    this._chooseSplitAxis(node, m, M);
-
-    var splitIndex = this._chooseSplitIndex(node, m, M);
-
-    var newNode = createNode(node.children.splice(splitIndex, node.children.length - splitIndex));
-    newNode.height = node.height;
-    newNode.leaf = node.leaf;
-
-    calcBBox(node, this.toBBox);
-    calcBBox(newNode, this.toBBox);
-
-    if (level) { insertPath[level - 1].children.push(newNode); }
-    else { this._splitRoot(node, newNode); }
-};
-
-RBush.prototype._splitRoot = function _splitRoot (node, newNode) {
-    // split root node
-    this.data = createNode([node, newNode]);
-    this.data.height = node.height + 1;
-    this.data.leaf = false;
-    calcBBox(this.data, this.toBBox);
-};
-
-RBush.prototype._chooseSplitIndex = function _chooseSplitIndex (node, m, M) {
-    var index;
-    var minOverlap = Infinity;
-    var minArea = Infinity;
-
-    for (var i = m; i <= M - m; i++) {
-        var bbox1 = distBBox(node, 0, i, this.toBBox);
-        var bbox2 = distBBox(node, i, M, this.toBBox);
-
-        var overlap = intersectionArea(bbox1, bbox2);
-        var area = bboxArea(bbox1) + bboxArea(bbox2);
-
-        // choose distribution with minimum overlap
-        if (overlap < minOverlap) {
-            minOverlap = overlap;
-            index = i;
-
-            minArea = area < minArea ? area : minArea;
-
-        } else if (overlap === minOverlap) {
-            // otherwise choose distribution with minimum area
-            if (area < minArea) {
-                minArea = area;
-                index = i;
-            }
-        }
-    }
-
-    return index || M - m;
-};
-
-// sorts node children by the best axis for split
-RBush.prototype._chooseSplitAxis = function _chooseSplitAxis (node, m, M) {
-    var compareMinX = node.leaf ? this.compareMinX : compareNodeMinX;
-    var compareMinY = node.leaf ? this.compareMinY : compareNodeMinY;
-    var xMargin = this._allDistMargin(node, m, M, compareMinX);
-    var yMargin = this._allDistMargin(node, m, M, compareMinY);
-
-    // if total distributions margin value is minimal for x, sort by minX,
-    // otherwise it's already sorted by minY
-    if (xMargin < yMargin) { node.children.sort(compareMinX); }
-};
-
-// total margin of all possible split distributions where each node is at least m full
-RBush.prototype._allDistMargin = function _allDistMargin (node, m, M, compare) {
-    node.children.sort(compare);
-
-    var toBBox = this.toBBox;
-    var leftBBox = distBBox(node, 0, m, toBBox);
-    var rightBBox = distBBox(node, M - m, M, toBBox);
-    var margin = bboxMargin(leftBBox) + bboxMargin(rightBBox);
-
-    for (var i = m; i < M - m; i++) {
-        var child = node.children[i];
-        extend(leftBBox, node.leaf ? toBBox(child) : child);
-        margin += bboxMargin(leftBBox);
-    }
-
-    for (var i$1 = M - m - 1; i$1 >= m; i$1--) {
-        var child$1 = node.children[i$1];
-        extend(rightBBox, node.leaf ? toBBox(child$1) : child$1);
-        margin += bboxMargin(rightBBox);
-    }
-
-    return margin;
-};
-
-RBush.prototype._adjustParentBBoxes = function _adjustParentBBoxes (bbox, path, level) {
-    // adjust bboxes along the given tree path
-    for (var i = level; i >= 0; i--) {
-        extend(path[i], bbox);
-    }
-};
-
-RBush.prototype._condense = function _condense (path) {
-    // go through the path, removing empty nodes and updating bboxes
-    for (var i = path.length - 1, siblings = (void 0); i >= 0; i--) {
-        if (path[i].children.length === 0) {
-            if (i > 0) {
-                siblings = path[i - 1].children;
-                siblings.splice(siblings.indexOf(path[i]), 1);
-
-            } else { this.clear(); }
-
-        } else { calcBBox(path[i], this.toBBox); }
-    }
-};
-
-function findItem(item, items, equalsFn) {
-    if (!equalsFn) { return items.indexOf(item); }
-
-    for (var i = 0; i < items.length; i++) {
-        if (equalsFn(item, items[i])) { return i; }
-    }
-    return -1;
-}
-
-// calculate node's bbox from bboxes of its children
-function calcBBox(node, toBBox) {
-    distBBox(node, 0, node.children.length, toBBox, node);
-}
-
-// min bounding rectangle of node children from k to p-1
-function distBBox(node, k, p, toBBox, destNode) {
-    if (!destNode) { destNode = createNode(null); }
-    destNode.minX = Infinity;
-    destNode.minY = Infinity;
-    destNode.maxX = -Infinity;
-    destNode.maxY = -Infinity;
-
-    for (var i = k; i < p; i++) {
-        var child = node.children[i];
-        extend(destNode, node.leaf ? toBBox(child) : child);
-    }
-
-    return destNode;
-}
-
-function extend(a, b) {
-    a.minX = Math.min(a.minX, b.minX);
-    a.minY = Math.min(a.minY, b.minY);
-    a.maxX = Math.max(a.maxX, b.maxX);
-    a.maxY = Math.max(a.maxY, b.maxY);
-    return a;
-}
-
-function compareNodeMinX(a, b) { return a.minX - b.minX; }
-function compareNodeMinY(a, b) { return a.minY - b.minY; }
-
-function bboxArea(a)   { return (a.maxX - a.minX) * (a.maxY - a.minY); }
-function bboxMargin(a) { return (a.maxX - a.minX) + (a.maxY - a.minY); }
-
-function enlargedArea(a, b) {
-    return (Math.max(b.maxX, a.maxX) - Math.min(b.minX, a.minX)) *
-           (Math.max(b.maxY, a.maxY) - Math.min(b.minY, a.minY));
-}
-
-function intersectionArea(a, b) {
-    var minX = Math.max(a.minX, b.minX);
-    var minY = Math.max(a.minY, b.minY);
-    var maxX = Math.min(a.maxX, b.maxX);
-    var maxY = Math.min(a.maxY, b.maxY);
-
-    return Math.max(0, maxX - minX) *
-           Math.max(0, maxY - minY);
-}
-
-function contains(a, b) {
-    return a.minX <= b.minX &&
-           a.minY <= b.minY &&
-           b.maxX <= a.maxX &&
-           b.maxY <= a.maxY;
-}
-
-function intersects(a, b) {
-    return b.minX <= a.maxX &&
-           b.minY <= a.maxY &&
-           b.maxX >= a.minX &&
-           b.maxY >= a.minY;
-}
-
-function createNode(children) {
-    return {
-        children: children,
-        height: 1,
-        leaf: true,
-        minX: Infinity,
-        minY: Infinity,
-        maxX: -Infinity,
-        maxY: -Infinity
-    };
-}
-
-// sort an array so that items come in groups of n unsorted items, with groups sorted between each other;
-// combines selection algorithm with binary divide & conquer approach
-
-function multiSelect(arr, left, right, n, compare) {
-    var stack = [left, right];
-
-    while (stack.length) {
-        right = stack.pop();
-        left = stack.pop();
-
-        if (right - left <= n) { continue; }
-
-        var mid = left + Math.ceil((right - left) / n / 2) * n;
-        quickselect(arr, mid, left, right, compare);
-
-        stack.push(left, mid, mid, right);
-    }
-}
-
-return RBush;
-
-}));
+!function(t,i){ true?module.exports=i():undefined}(this,function(){"use strict";function t(t,r,e,a,h){!function t(n,r,e,a,h){for(;a>e;){if(a-e>600){var o=a-e+1,s=r-e+1,l=Math.log(o),f=.5*Math.exp(2*l/3),u=.5*Math.sqrt(l*f*(o-f)/o)*(s-o/2<0?-1:1),m=Math.max(e,Math.floor(r-s*f/o+u)),c=Math.min(a,Math.floor(r+(o-s)*f/o+u));t(n,r,m,c,h)}var p=n[r],d=e,x=a;for(i(n,e,r),h(n[a],p)>0&&i(n,e,a);d<x;){for(i(n,d,x),d++,x--;h(n[d],p)<0;)d++;for(;h(n[x],p)>0;)x--}0===h(n[e],p)?i(n,e,x):i(n,++x,a),x<=r&&(e=x+1),r<=x&&(a=x-1)}}(t,r,e||0,a||t.length-1,h||n)}function i(t,i,n){var r=t[i];t[i]=t[n],t[n]=r}function n(t,i){return t<i?-1:t>i?1:0}var r=function(t){void 0===t&&(t=9),this._maxEntries=Math.max(4,t),this._minEntries=Math.max(2,Math.ceil(.4*this._maxEntries)),this.clear()};function e(t,i,n){if(!n)return i.indexOf(t);for(var r=0;r<i.length;r++)if(n(t,i[r]))return r;return-1}function a(t,i){h(t,0,t.children.length,i,t)}function h(t,i,n,r,e){e||(e=p(null)),e.minX=1/0,e.minY=1/0,e.maxX=-1/0,e.maxY=-1/0;for(var a=i;a<n;a++){var h=t.children[a];o(e,t.leaf?r(h):h)}return e}function o(t,i){return t.minX=Math.min(t.minX,i.minX),t.minY=Math.min(t.minY,i.minY),t.maxX=Math.max(t.maxX,i.maxX),t.maxY=Math.max(t.maxY,i.maxY),t}function s(t,i){return t.minX-i.minX}function l(t,i){return t.minY-i.minY}function f(t){return(t.maxX-t.minX)*(t.maxY-t.minY)}function u(t){return t.maxX-t.minX+(t.maxY-t.minY)}function m(t,i){return t.minX<=i.minX&&t.minY<=i.minY&&i.maxX<=t.maxX&&i.maxY<=t.maxY}function c(t,i){return i.minX<=t.maxX&&i.minY<=t.maxY&&i.maxX>=t.minX&&i.maxY>=t.minY}function p(t){return{children:t,height:1,leaf:!0,minX:1/0,minY:1/0,maxX:-1/0,maxY:-1/0}}function d(i,n,r,e,a){for(var h=[n,r];h.length;)if(!((r=h.pop())-(n=h.pop())<=e)){var o=n+Math.ceil((r-n)/e/2)*e;t(i,o,n,r,a),h.push(n,o,o,r)}}return r.prototype.all=function(){return this._all(this.data,[])},r.prototype.search=function(t){var i=this.data,n=[];if(!c(t,i))return n;for(var r=this.toBBox,e=[];i;){for(var a=0;a<i.children.length;a++){var h=i.children[a],o=i.leaf?r(h):h;c(t,o)&&(i.leaf?n.push(h):m(t,o)?this._all(h,n):e.push(h))}i=e.pop()}return n},r.prototype.collides=function(t){var i=this.data;if(!c(t,i))return!1;for(var n=[];i;){for(var r=0;r<i.children.length;r++){var e=i.children[r],a=i.leaf?this.toBBox(e):e;if(c(t,a)){if(i.leaf||m(t,a))return!0;n.push(e)}}i=n.pop()}return!1},r.prototype.load=function(t){if(!t||!t.length)return this;if(t.length<this._minEntries){for(var i=0;i<t.length;i++)this.insert(t[i]);return this}var n=this._build(t.slice(),0,t.length-1,0);if(this.data.children.length)if(this.data.height===n.height)this._splitRoot(this.data,n);else{if(this.data.height<n.height){var r=this.data;this.data=n,n=r}this._insert(n,this.data.height-n.height-1,!0)}else this.data=n;return this},r.prototype.insert=function(t){return t&&this._insert(t,this.data.height-1),this},r.prototype.clear=function(){return this.data=p([]),this},r.prototype.remove=function(t,i){if(!t)return this;for(var n,r,a,h=this.data,o=this.toBBox(t),s=[],l=[];h||s.length;){if(h||(h=s.pop(),r=s[s.length-1],n=l.pop(),a=!0),h.leaf){var f=e(t,h.children,i);if(-1!==f)return h.children.splice(f,1),s.push(h),this._condense(s),this}a||h.leaf||!m(h,o)?r?(n++,h=r.children[n],a=!1):h=null:(s.push(h),l.push(n),n=0,r=h,h=h.children[0])}return this},r.prototype.toBBox=function(t){return t},r.prototype.compareMinX=function(t,i){return t.minX-i.minX},r.prototype.compareMinY=function(t,i){return t.minY-i.minY},r.prototype.toJSON=function(){return this.data},r.prototype.fromJSON=function(t){return this.data=t,this},r.prototype._all=function(t,i){for(var n=[];t;)t.leaf?i.push.apply(i,t.children):n.push.apply(n,t.children),t=n.pop();return i},r.prototype._build=function(t,i,n,r){var e,h=n-i+1,o=this._maxEntries;if(h<=o)return a(e=p(t.slice(i,n+1)),this.toBBox),e;r||(r=Math.ceil(Math.log(h)/Math.log(o)),o=Math.ceil(h/Math.pow(o,r-1))),(e=p([])).leaf=!1,e.height=r;var s=Math.ceil(h/o),l=s*Math.ceil(Math.sqrt(o));d(t,i,n,l,this.compareMinX);for(var f=i;f<=n;f+=l){var u=Math.min(f+l-1,n);d(t,f,u,s,this.compareMinY);for(var m=f;m<=u;m+=s){var c=Math.min(m+s-1,u);e.children.push(this._build(t,m,c,r-1))}}return a(e,this.toBBox),e},r.prototype._chooseSubtree=function(t,i,n,r){for(;r.push(i),!i.leaf&&r.length-1!==n;){for(var e=1/0,a=1/0,h=void 0,o=0;o<i.children.length;o++){var s=i.children[o],l=f(s),u=(m=t,c=s,(Math.max(c.maxX,m.maxX)-Math.min(c.minX,m.minX))*(Math.max(c.maxY,m.maxY)-Math.min(c.minY,m.minY))-l);u<a?(a=u,e=l<e?l:e,h=s):u===a&&l<e&&(e=l,h=s)}i=h||i.children[0]}var m,c;return i},r.prototype._insert=function(t,i,n){var r=n?t:this.toBBox(t),e=[],a=this._chooseSubtree(r,this.data,i,e);for(a.children.push(t),o(a,r);i>=0&&e[i].children.length>this._maxEntries;)this._split(e,i),i--;this._adjustParentBBoxes(r,e,i)},r.prototype._split=function(t,i){var n=t[i],r=n.children.length,e=this._minEntries;this._chooseSplitAxis(n,e,r);var h=this._chooseSplitIndex(n,e,r),o=p(n.children.splice(h,n.children.length-h));o.height=n.height,o.leaf=n.leaf,a(n,this.toBBox),a(o,this.toBBox),i?t[i-1].children.push(o):this._splitRoot(n,o)},r.prototype._splitRoot=function(t,i){this.data=p([t,i]),this.data.height=t.height+1,this.data.leaf=!1,a(this.data,this.toBBox)},r.prototype._chooseSplitIndex=function(t,i,n){for(var r,e,a,o,s,l,u,m=1/0,c=1/0,p=i;p<=n-i;p++){var d=h(t,0,p,this.toBBox),x=h(t,p,n,this.toBBox),v=(e=d,a=x,o=void 0,s=void 0,l=void 0,u=void 0,o=Math.max(e.minX,a.minX),s=Math.max(e.minY,a.minY),l=Math.min(e.maxX,a.maxX),u=Math.min(e.maxY,a.maxY),Math.max(0,l-o)*Math.max(0,u-s)),M=f(d)+f(x);v<m?(m=v,r=p,c=M<c?M:c):v===m&&M<c&&(c=M,r=p)}return r||n-i},r.prototype._chooseSplitAxis=function(t,i,n){var r=t.leaf?this.compareMinX:s,e=t.leaf?this.compareMinY:l;this._allDistMargin(t,i,n,r)<this._allDistMargin(t,i,n,e)&&t.children.sort(r)},r.prototype._allDistMargin=function(t,i,n,r){t.children.sort(r);for(var e=this.toBBox,a=h(t,0,i,e),s=h(t,n-i,n,e),l=u(a)+u(s),f=i;f<n-i;f++){var m=t.children[f];o(a,t.leaf?e(m):m),l+=u(a)}for(var c=n-i-1;c>=i;c--){var p=t.children[c];o(s,t.leaf?e(p):p),l+=u(s)}return l},r.prototype._adjustParentBBoxes=function(t,i,n){for(var r=n;r>=0;r--)o(i[r],t)},r.prototype._condense=function(t){for(var i=t.length-1,n=void 0;i>=0;i--)0===t[i].children.length?i>0?(n=t[i-1].children).splice(n.indexOf(t[i]),1):this.clear():a(t[i],this.toBBox)},r});
 
 
 /***/ }),
