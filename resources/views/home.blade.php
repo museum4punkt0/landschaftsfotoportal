@@ -24,7 +24,7 @@
                             <span class="fa-stack fa-2x">
                                 <a href="{{ route('cart.index') }}" title="@lang('cart.header')">
                                     <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                                    <i class="fas fa-shopping-basket fa-stack-1x fa-inverse"></i>
+                                    <i class="fas fa-images fa-stack-1x fa-inverse"></i>
                                 </a>
                             </span>
                             <span class="fa-stack fa-2x">
