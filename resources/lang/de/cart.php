@@ -11,8 +11,9 @@ return [
     |
     */
 
-    'header' => 'Meine Sammlung',
+    'header' => 'Sammlungen',
     'list' => 'Sammlung',
+    'my_own' => 'Meine Sammlung',
     'add' => 'Zur Sammlung hinzufügen',
     'remove' => 'Aus der Sammlung entfernen',
     'added' => 'Foto wurde zur Sammlung hinzugefügt.',

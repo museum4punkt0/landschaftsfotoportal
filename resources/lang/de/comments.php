@@ -13,6 +13,7 @@ return [
 
     'header' => 'Kommentare',
     'list' => 'Kommentar',
+    'my_own' => 'Meine Kommentare',
     'unpublished' => 'Unveröffentlichte Kommentare',
     'new' => 'Neuer Kommentar',
     'edit' => 'Kommentar bearbeiten',

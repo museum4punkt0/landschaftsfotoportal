@@ -42,17 +42,17 @@
             <div class="collapse navbar-collapse" id="navbarResponsive">
                 <ul class="navbar-nav text-uppercase ml-auto">
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.gallery') }}#portfolio">Portal</a></li>
-                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#portfolio">Bildersuche</a></li>
+                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#portfolio">@lang('search.header')</a></li>
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.timeline') }}#timeline">Zeitstrahl</a></li>
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#">Karte</a></li>
                     @guest
-                        <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('login') }}">{{ __('Login') }}</a></li>
+                        <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('login') }}">@lang('Login') </a></li>
                     @else
-                        <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('home') }}">{{ __('users.profile') }}</a></li>
+                        <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('home') }}">@lang('users.profile')</a></li>
                         <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('logout') }}"
                            onclick="event.preventDefault();
                                          document.getElementById('logout-form').submit();">
-                            {{ __('Logout') }}
+                            @lang('Logout')
                         </a></li>
                         <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                             @csrf
@@ -89,7 +89,7 @@
                         <i class="fas fa-circle fa-stack-2x text-primary"></i>
                         <i class="fas fa-images fa-stack-1x fa-inverse"></i>
                     </span>
-                    <h4 class="my-3">Meine Sammlung</h4>
+                    <h4 class="my-3">@lang('cart.my_own')</h4>
                     <p class="text-muted">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minima maxime quam architecto quo inventore harum ex magni, dicta impedit.</p>
                 </div>
                 <div class="col-md-4">

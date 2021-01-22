@@ -22,13 +22,13 @@
                     @if(Config::get('ui.frontend_layout') == 'landschaftsfotoportal')
                         <div class="my-3">
                             <span class="fa-stack fa-2x">
-                                <a href="{{ route('cart.index') }}" title="@lang('cart.header')">
+                                <a href="{{ route('cart.index') }}" title="@lang('cart.my_own')">
                                     <i class="fas fa-circle fa-stack-2x text-primary"></i>
                                     <i class="fas fa-images fa-stack-1x fa-inverse"></i>
                                 </a>
                             </span>
                             <span class="fa-stack fa-2x">
-                                <a href="#" title="@lang('comments.header')">
+                                <a href="#" title="@lang('comments.my_own')">
                                     <i class="fas fa-circle fa-stack-2x text-primary"></i>
                                     <i class="fas fa-comment fa-stack-1x fa-inverse"></i>
                                 </a>
