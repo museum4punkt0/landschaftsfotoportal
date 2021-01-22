@@ -41,4 +41,17 @@ class AjaxCartController extends Controller
         
         return response()->json(['success' => __('cart.added')]);
     }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Cart  $cart
+     * @return \Illuminate\Http\Response
+     */
+    public function remove(Cart $cart)
+    {
+        $cart->delete();
+        
+        return response()->json(['success' => __('cart.removed')]);
+    }
 }

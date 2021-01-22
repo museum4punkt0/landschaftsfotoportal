@@ -14,7 +14,8 @@ return [
     'header' => 'Meine Sammlung',
     'list' => 'Sammlung',
     'add' => 'Zur Sammlung hinzufügen',
+    'remove' => 'Aus der Sammlung entfernen',
     'added' => 'Foto wurde zur Sammlung hinzugefügt.',
-    'deleted' => 'Foto wurde aus der Sammlung gelöscht.',
+    'removed' => 'Foto wurde aus der Sammlung entfernt.',
     
 ];

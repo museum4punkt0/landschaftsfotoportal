@@ -33,6 +33,8 @@ Route::get('timeline', 'ItemController@timeline')->name('item.timeline');
 
 Route::post('comment/{item}/store', 'AjaxCommentController@store')->name('comment.store');
 Route::post('cart/{item}/add', 'AjaxCartController@add')->name('cart.add');
+Route::post('cart/{cart}/remove', 'AjaxCartController@remove')->name('cart.remove');
+Route::get('cart', 'CartController@index')->name('cart.index');
 
 Route::get('/admin/import/csv/upload', 'Admin\ImportCSVController@index')->name('import.csv.upload');
 Route::post('/admin/import/csv/save', 'Admin\ImportCSVController@save')->name('import.csv.save');
