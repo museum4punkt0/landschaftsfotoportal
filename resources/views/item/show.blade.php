@@ -92,6 +92,9 @@
         </div>
     </div>
     
+    @include('includes.modal_alert')
+    @include('includes.modal_cart_remove')
+    
     <!-- Modal for adding a comment -->
     <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -180,11 +183,19 @@
                     <span class="fa-stack fa-2x">
                     @guest
                         <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('cart.add')">
-                    @else
-                        <a href="#" id="btn-cart-add" title="@lang('cart.add')">
-                    @endguest
                             <i class="fas fa-circle fa-stack-2x text-primary"></i>
                             <i class="fas fa-images fa-stack-1x fa-inverse"></i>
+                    @else
+                        @if(!$item->carts->firstWhere('created_by', Auth::id()))
+                            <a href="#" id="btn-cart-add" title="@lang('cart.add')">
+                                <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                <i class="fas fa-images fa-stack-1x fa-inverse"></i>
+                        @else
+                            <a href="#" data-toggle="modal" data-target="#cartRemoveModal" data-href="{{ route('cart.remove', $item->carts->firstWhere('created_by', Auth::id())->cart_id) }}" title="@lang('cart.remove')">
+                                <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                <i class="fas fa-trash fa-stack-1x fa-inverse"></i>
+                        @endif
+                    @endguest
                         </a>
                     </span>
                     <span class="fa-stack fa-2x">
