@@ -76,22 +76,6 @@
         </div>
     </div>
     
-    <!-- Modal for adding an item to cart -->
-    <div class="modal fade" id="cartModal" tabindex="-1" aria-labelledby="cartModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="cartModalLabel">@lang('cart.add')</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body" id="alert-cart-add">
-                </div>
-            </div>
-        </div>
-    </div>
-    
     @include('includes.modal_alert')
     @include('includes.modal_cart_remove')
     
@@ -129,7 +113,7 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
-        
+        // Adding a comment to item
         $(".btn-submit").click(function (xhr) {
             xhr.preventDefault();
             var message = $("textarea[name=message]").val();
@@ -187,7 +171,7 @@
                             <i class="fas fa-images fa-stack-1x fa-inverse"></i>
                     @else
                         @if(!$item->carts->firstWhere('created_by', Auth::id()))
-                            <a href="#" id="btn-cart-add" title="@lang('cart.add')">
+                            <a href="#" id="cartAddBtn" title="@lang('cart.add')">
                                 <i class="fas fa-circle fa-stack-2x text-primary"></i>
                                 <i class="fas fa-images fa-stack-1x fa-inverse"></i>
                         @else
@@ -539,23 +523,29 @@
     </section>
     <script type="text/javascript">
         // Adding items to cart
-        $("#btn-cart-add").click(function (xhr) {
+        $('#cartAddBtn').click(function (xhr) {
             xhr.preventDefault();
             
             $.ajax({
                 type:'POST',
                 url:"{{ route('cart.add', $item->item_id) }}",
-                data:{foo:null},
                 success:function (data) {
-                    $('#alert-cart-add').html('<div class="alert alert-success">' + data.success + '</div>');
-                    $('#cartModal').modal('show');
+                    // Show alert model with status message
+                    $('#alertModalLabel').text('@lang("cart.add")');
+                    $('#alertModalContent').html('<div class="alert alert-success">' + data.success + '</div>');
+                    $('#alertModal').modal('show');
+                    // Close modal dialog
+                    window.setTimeout(function () {
+                        $('#alertModal').modal('hide');
+                        location.reload();
+                    }, 2500);
                 },
                 error:function (xhr) {
                     $.each(xhr.responseJSON.errors, function (field, error) {
                         // Render the error messages
-                        $('#alert-cart-add').append('<div class="alert alert-danger">' + error + '</div>');
+                        $('#alertModalContent').append('<div class="alert alert-danger">' + error + '</div>');
                     });
-                    $('#cartModal').modal('show');
+                    $('#alertModal').modal('show');
                 },
             });
         });

@@ -53,6 +53,7 @@
                     // Render the error messages
                     $('#alertModalContent').append('<div class="alert alert-danger">' + error + '</div>');
                 });
+                $('#alertModal').modal('show');
             },
         });
     });
