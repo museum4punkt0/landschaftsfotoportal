@@ -90,50 +90,63 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    
                     <div class="form-group">
                         <span>@lang('comments.message')</span>
                         <textarea name="message" class="form-control" rows=3>{{old('message')}}</textarea>
+                        <input type="hidden" id="url" value="" />
                         <span class="text-danger">{{ $errors->first('message') }}</span>
                     </div>
                     {{ csrf_field() }}
                 </div>
-                <div class="modal-footer" id="alert-success">
+                <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('common.cancel')</button>
                     <div class="form-group">
-                        <button type="submit" class="btn btn-primary btn-submit">@lang('common.save')</button>
+                        <button type="submit" class="btn btn-primary" id="commentSubmitBtn" data-href="">@lang('common.save')</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
     <script type="text/javascript">
+        // Triggered when comment modal is shown
+        $('#commentModal').on('shown.bs.modal', function(event) {
+            // Store the URL for the AJAX request
+            var url = $(event.relatedTarget).data('href');
+            $('.modal-body #url').val(url);
+        });
+        
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
-        // Adding a comment to item
-        $(".btn-submit").click(function (xhr) {
+        
+        // Submit and store comment
+        $('#commentSubmitBtn').click(function (xhr) {
             xhr.preventDefault();
-            var message = $("textarea[name=message]").val();
+            var message = $('textarea[name=message]').val();
             
             $.ajax({
                 type:'POST',
-                url:"{{ route('comment.store', $item->item_id) }}",
+                url:$('.modal-body #url').val(),
                 data:{message:message},
                 success:function (data) {
-                    $('#alert-success').html('<div class="alert alert-success">' + data.success + '</div>');
+                    $('#commentModal').modal('hide');
+                    // Show alert model with status message
+                    $('#alertModalLabel').text('@lang("comments.new")');
+                    $('#alertModalContent').html('<div class="alert alert-success">' + data.success + '</div>');
+                    $('#alertModal').modal('show');
                     // Close modal dialog
                     window.setTimeout(function () {
-                        $('#commentModal').modal('hide');
+                        $('#alertModal').modal('hide');
                     }, 2500);
                 },
                 error:function (xhr) {
                     $.each(xhr.responseJSON.errors, function (field, error) {
                         // Render the error messages below each form field
                         $(document).find('[name='+field+']').after('<span class="text-danger">' + error + '</span>')
-                    }); 
+                    });
+                    $('#alertModal').modal('show');
                 },
             });
         });
@@ -186,7 +199,7 @@
                     @guest
                         <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('comments.new')">
                     @else
-                        <a href="#" data-toggle="modal" data-target="#commentModal" title="@lang('comments.new')">
+                        <a href="#" data-toggle="modal" data-target="#commentModal" data-href="{{ route('comment.store', $item->item_id) }}" title="@lang('comments.new')">
                     @endguest
                             <i class="fas fa-circle fa-stack-2x text-primary"></i>
                             <i class="fas fa-comment fa-stack-1x fa-inverse"></i>
