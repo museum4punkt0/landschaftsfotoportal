@@ -18,10 +18,10 @@
                 {{ csrf_field() }}
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('common.cancel')</button>
                 <div class="form-group">
                     <button type="submit" class="btn btn-primary" id="commentSubmitBtn" data-href="">@lang('common.save')</button>
                 </div>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('common.cancel')</button>
             </div>
         </div>
     </div>

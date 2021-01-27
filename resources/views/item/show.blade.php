@@ -48,8 +48,8 @@
                     <p>Mit dem Herunterladen akzeptieren Sie die Lizenzbedingungen!</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('common.cancel')</button>
                     <a class="btn btn-primary" href="{{ route('item.download', $item->item_id) }}" onClick="$('#downloadModal').modal('hide')">@lang('common.download')</a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('common.cancel')</button>
                 </div>
             </div>
         </div>
@@ -69,8 +69,8 @@
                     <p>Um diese Funktion zu nutzen, müssen Sie sich anmelden!</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('common.cancel')</button>
                     <a class="btn btn-primary" href="{{ route('login') }}">@lang('Login')</a>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('common.cancel')</button>
                 </div>
             </div>
         </div>
