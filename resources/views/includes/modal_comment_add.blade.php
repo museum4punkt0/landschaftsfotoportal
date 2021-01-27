@@ -51,7 +51,7 @@
             data:{message:message},
             success:function (data) {
                 $('#commentModal').modal('hide');
-                // Show alert model with status message
+                // Show alert modal with status message
                 $('#alertModalLabel').text('@lang("comments.new")');
                 $('#alertModalContent').html('<div class="alert alert-success">' + data.success + '</div>');
                 $('#alertModal').modal('show');
@@ -61,11 +61,20 @@
                 }, 2500);
             },
             error:function (xhr) {
-                $.each(xhr.responseJSON.errors, function (field, error) {
-                    // Render the error messages below each form field
-                    $(document).find('[name='+field+']').after('<span class="text-danger">' + error + '</span>')
-                });
-                $('#alertModal').modal('show');
+                // Form validation errors
+                if (xhr.responseJSON.errors) {
+                    $.each(xhr.responseJSON.errors, function (field, error) {
+                        // Render the error messages below each form field
+                        $(document).find('[name='+field+']').after('<span class="text-danger">' + error + '</span>')
+                    });
+                }
+                // Laravel error message
+                else {
+                    $('#commentModal').modal('hide');
+                    $('#alertModalLabel').text('@lang("common.laravel_error")');
+                    $('#alertModalContent').html('<div class="alert alert-danger">' + xhr.responseJSON.message + '</div>');
+                    $('#alertModal').modal('show');
+                }
             },
         });
     });

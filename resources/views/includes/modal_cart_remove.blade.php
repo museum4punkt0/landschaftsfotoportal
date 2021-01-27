@@ -14,7 +14,7 @@
             <div class="modal-footer">
                 <div class="form-group">
                     <input type="hidden" id="cartRemoveUrl" value="" />
-                    <button type="submit" class="btn btn-danger btn-submit" id="cartRemoveBtn">@lang('common.delete')</button>
+                    <button type="submit" class="btn btn-danger" id="cartRemoveBtn">@lang('common.delete')</button>
                 </div>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('common.cancel')</button>
             </div>
@@ -37,7 +37,7 @@
             url:$('#cartRemoveUrl').val(),
             success:function (data) {
                 $('#cartRemoveModal').modal('hide');
-                // Show alert model with status message
+                // Show alert modal with status message
                 $('#alertModalLabel').text('@lang("cart.remove")');
                 $('#alertModalContent').html('<div class="alert alert-success">' + data.success + '</div>');
                 $('#alertModal').modal('show');
@@ -46,13 +46,12 @@
                     $('#alertModal').modal('hide');
                     location.reload();
                 }, 2500);
-                
             },
             error:function (xhr) {
-                $.each(xhr.responseJSON.errors, function (field, error) {
-                    // Render the error messages
-                    $('#alertModalContent').append('<div class="alert alert-danger">' + error + '</div>');
-                });
+                $('#cartRemoveModal').modal('hide');
+                // Render the Laravel error message
+                $('#alertModalLabel').text('@lang("common.laravel_error")');
+                $('#alertModalContent').html('<div class="alert alert-danger">' + xhr.responseJSON.message + '</div>');
                 $('#alertModal').modal('show');
             },
         });

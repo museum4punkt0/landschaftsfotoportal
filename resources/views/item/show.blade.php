@@ -482,10 +482,9 @@
                     }, 2500);
                 },
                 error:function (xhr) {
-                    $.each(xhr.responseJSON.errors, function (field, error) {
-                        // Render the error messages
-                        $('#alertModalContent').append('<div class="alert alert-danger">' + error + '</div>');
-                    });
+                    // Render the Laravel error message
+                    $('#alertModalLabel').text('@lang("common.laravel_error")');
+                    $('#alertModalContent').html('<div class="alert alert-danger">' + xhr.responseJSON.message + '</div>');
                     $('#alertModal').modal('show');
                 },
             });

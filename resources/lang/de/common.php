@@ -43,4 +43,6 @@ return [
     'updated' => 'bearbeitet',
     'published' => 'veröffentlicht',
     'unpublished' => 'unveröffentlicht',
+    
+    'laravel_error' => 'System-Fehler!',
 ];
