@@ -34,52 +34,7 @@
 
 {{-- Quick hack for LFP mock-up --}}
 @if(Config::get('ui.frontend_layout') == 'landschaftsfotoportal')
-    <!-- Modal for download -->
-    <div class="modal fade" id="downloadModal" tabindex="-1" aria-labelledby="downloadModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="downloadModalLabel">Foto in Originalgröße herunterladen</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>Mit dem Herunterladen akzeptieren Sie die Lizenzbedingungen!</p>
-                </div>
-                <div class="modal-footer">
-                    <a class="btn btn-primary" href="{{ route('item.download', $item->item_id) }}" onClick="$('#downloadModal').modal('hide')">@lang('common.download')</a>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('common.cancel')</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Modal for requesting login -->
-    <div class="modal fade" id="requestLoginModal" tabindex="-1" aria-labelledby="requestLoginModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="requestLoginModalLabel">@lang('Login')</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <p>Um diese Funktion zu nutzen, müssen Sie sich anmelden!</p>
-                </div>
-                <div class="modal-footer">
-                    <a class="btn btn-primary" href="{{ route('login') }}">@lang('Login')</a>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('common.cancel')</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    @include('includes.modal_alert')
-    @include('includes.modal_cart_remove')
-    @include('includes.modal_comment_add')
-    
+
     <!-- Image details -->
     <section class="page-section" id="details">
         <div class="container">
@@ -462,6 +417,13 @@
             </div>
         </div>
     </section>
+    
+    @include('includes.modal_login_request')
+    @include('includes.modal_download')
+    @include('includes.modal_alert')
+    @include('includes.modal_cart_remove')
+    @include('includes.modal_comment_add')
+    
     <script type="text/javascript">
         // Adding items to cart
         $('#cartAddBtn').click(function (xhr) {
