@@ -425,34 +425,6 @@
     @include('includes.modal_cart_remove')
     @include('includes.modal_comment_add')
     
-    <script type="text/javascript">
-        // Adding items to cart
-        $('#cartAddBtn').click(function (xhr) {
-            xhr.preventDefault();
-            
-            $.ajax({
-                type:'POST',
-                url:$(this).data('href'),
-                success:function (data) {
-                    // Show alert model with status message
-                    $('#alertModalLabel').text('@lang("cart.add")');
-                    $('#alertModalContent').html('<div class="alert alert-success">' + data.success + '</div>');
-                    $('#alertModal').modal('show');
-                    // Close modal dialog
-                    window.setTimeout(function () {
-                        $('#alertModal').modal('hide');
-                        location.reload();
-                    }, 2500);
-                },
-                error:function (xhr) {
-                    // Render the Laravel error message
-                    $('#alertModalLabel').text('@lang("common.laravel_error")');
-                    $('#alertModalContent').html('<div class="alert alert-danger">' + xhr.responseJSON.message + '</div>');
-                    $('#alertModal').modal('show');
-                },
-            });
-        });
-    </script>
 @endif
 
 @endsection

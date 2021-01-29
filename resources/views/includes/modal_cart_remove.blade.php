@@ -22,7 +22,7 @@
     </div>
 </div>
 <script type="text/javascript">
-    // Triggered when comment modal is shown
+    // Triggered when cart modal is shown
     $('#cartRemoveModal').on('shown.bs.modal', function(event) {
         // Store the URL for the AJAX request
         var url = $(event.relatedTarget).data('href');
@@ -49,6 +49,33 @@
             },
             error:function (xhr) {
                 $('#cartRemoveModal').modal('hide');
+                // Render the Laravel error message
+                $('#alertModalLabel').text('@lang("common.laravel_error")');
+                $('#alertModalContent').html('<div class="alert alert-danger">' + xhr.responseJSON.message + '</div>');
+                $('#alertModal').modal('show');
+            },
+        });
+    });
+    
+    // Adding items to cart
+    $('#cartAddBtn').click(function (xhr) {
+        xhr.preventDefault();
+        
+        $.ajax({
+            type:'POST',
+            url:$(this).data('href'),
+            success:function (data) {
+                // Show alert model with status message
+                $('#alertModalLabel').text('@lang("cart.add")');
+                $('#alertModalContent').html('<div class="alert alert-success">' + data.success + '</div>');
+                $('#alertModal').modal('show');
+                // Close modal dialog
+                window.setTimeout(function () {
+                    $('#alertModal').modal('hide');
+                    location.reload();
+                }, 2500);
+            },
+            error:function (xhr) {
                 // Render the Laravel error message
                 $('#alertModalLabel').text('@lang("common.laravel_error")');
                 $('#alertModalContent').html('<div class="alert alert-danger">' + xhr.responseJSON.message + '</div>');
