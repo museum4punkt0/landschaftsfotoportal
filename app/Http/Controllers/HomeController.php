@@ -31,7 +31,12 @@ class HomeController extends Controller
         // Get the currently authenticated user
         $user = Auth::user();
         
-        return view('home', compact('user'));
+        if (Gate::allows('show-admin')) {
+            return view('admin.home', compact('user'));
+        }
+        else {
+            return view('home', compact('user'));
+        }
     }
     
     /**
