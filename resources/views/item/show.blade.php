@@ -50,6 +50,7 @@
             <div class="card">
                 <div class="card-body">
                 <div>
+                    <!-- Icons for user interaction -->
                     <span class="fa-stack fa-2x">
                     @guest
                         <a href="#" data-toggle="modal" data-target="#downloadModal" title="@lang('common.download')">
@@ -67,7 +68,7 @@
                             <i class="fas fa-images fa-stack-1x fa-inverse"></i>
                     @else
                         @if(!$item->carts->firstWhere('created_by', Auth::id()))
-                            <a href="#" id="cartAddBtn" title="@lang('cart.add')">
+                            <a href="#" id="cartAddBtn" data-href="{{ route('cart.add', $item->item_id) }}" title="@lang('cart.add')">
                                 <i class="fas fa-circle fa-stack-2x text-primary"></i>
                                 <i class="fas fa-images fa-stack-1x fa-inverse"></i>
                         @else
@@ -431,7 +432,7 @@
             
             $.ajax({
                 type:'POST',
-                url:"{{ route('cart.add', $item->item_id) }}",
+                url:$(this).data('href'),
                 success:function (data) {
                     // Show alert model with status message
                     $('#alertModalLabel').text('@lang("cart.add")');
