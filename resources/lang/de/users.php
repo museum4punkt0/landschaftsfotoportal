@@ -32,4 +32,8 @@ return [
     'group_publisher' => 'Publisher',
     'group_admin' => 'Admin',
     'group_super-admin' => 'Super-Admin',
+    
+    'change_email' => 'Emailadresse ändern',
+    'current_email' => 'Aktuelle Emailadresse',
+    'new_email' => 'Neue Emailadresse',
 ];

@@ -39,6 +39,12 @@
                                         <i class="fas fa-comment fa-stack-1x fa-inverse"></i>
                                     </a>
                                 </span>
+                                <span class="fa-stack fa-2x">
+                                    <a href="{{ route('email.change') }}" title="@lang('users.change_email')">
+                                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                        <i class="fas fa-at fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
                             </div>
                         @endif
                     </div>
