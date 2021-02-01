@@ -26,12 +26,12 @@
                         </a>
                         <div class="portfolio-caption">
                             <div class="portfolio-caption-heading">
-                                {{ $item->details->firstWhere('column_fk', 5)->value_string }}
-                            </div>
-                            <div class="portfolio-caption-subheading text-muted">
                                 {{ $item->details->firstWhere('column_fk', 22)->value_string }},
                                 {{ $item->details->firstWhere('column_fk', 20)->value_string }},
                                 {{ $item->details->firstWhere('column_fk', 19)->value_string }}
+                            </div>
+                            <div class="portfolio-caption-subheading text-muted">
+                                {{ $item->details->firstWhere('column_fk', 5)->value_string }}
                             </div>
                             <!-- Icons for user interaction -->
                             <div class="my-2" style="font-size: 0.6rem;">
