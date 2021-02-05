@@ -35,6 +35,7 @@ Route::get('gallery', 'ItemController@gallery')->name('item.gallery');
 Route::get('timeline', 'ItemController@timeline')->name('item.timeline');
 
 Route::post('comment/{item}/store', 'AjaxCommentController@store')->name('comment.store');
+Route::get('comment', 'CommentController@index')->name('comment.index');
 Route::post('cart/{item}/add', 'AjaxCartController@add')->name('cart.add');
 Route::post('cart/{cart}/remove', 'AjaxCartController@remove')->name('cart.remove');
 Route::get('cart', 'CartController@index')->name('cart.index');

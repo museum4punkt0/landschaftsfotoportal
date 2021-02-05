@@ -34,7 +34,7 @@
                                     </a>
                                 </span>
                                 <span class="fa-stack fa-2x">
-                                    <a href="#" title="@lang('comments.my_own')">
+                                    <a href="{{ route('comment.index') }}" title="@lang('comments.my_own')">
                                         <i class="fas fa-circle fa-stack-2x text-primary"></i>
                                         <i class="fas fa-comment fa-stack-1x fa-inverse"></i>
                                     </a>
