@@ -13,6 +13,11 @@
     </div>
 @endif
 
+@include('includes.modal_alert')
+@include('includes.modal_comment_edit')
+@include('includes.modal_comment_delete')
+
+<!-- My comments table -->
 <div class="page-section bg-light">
 <div class="container">
     <div class="card">
@@ -54,18 +59,26 @@
                             {{$comment->updated_at}}
                         </td>
                         <td>
-                            <form action="{{route('comment.edit', $comment)}}" method="GET">
-                                {{ csrf_field() }}
-                                
-                                <button class="btn btn-primary" type="submit">@lang('common.edit')</button>
-                            </form>
+                            <!-- Icon and button for editing -->
+                            <div style="font-size: 0.6rem;">
+                                <span class="fa-stack fa-2x">
+                                    <a href="#" data-toggle="modal" data-target="#commentModal" data-href="{{ route('ajax.comment.update', $comment->comment_id) }}" data-message="{{ $comment->message }}" title="@lang('common.edit')">
+                                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                        <i class="fas fa-pencil-alt fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </div>
                         </td>
                         <td>
-                            <form action="{{route('comment.destroy', $comment)}}" method="POST">
-                                {{ csrf_field() }}
-                                @method('DELETE')
-                                <button class="btn btn-danger" type="submit">@lang('common.delete')</button>
-                            </form>
+                            <!-- Icons and button for deleting -->
+                            <div style="font-size: 0.6rem;">
+                                <span class="fa-stack fa-2x">
+                                    <a href="#" data-toggle="modal" data-target="#commentDeleteModal" data-href="{{ route('ajax.comment.destroy', $comment->comment_id) }}" title="@lang('common.delete')">
+                                        <i class="fas fa-circle fa-stack-2x text-danger"></i>
+                                        <i class="fas fa-trash fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </div>
                         </td>
                     </tr>
                 @endforeach

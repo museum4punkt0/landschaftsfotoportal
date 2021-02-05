@@ -44,4 +44,38 @@ class AjaxCommentController extends Controller
         
         return response()->json(['success' => __('comments.created')]);
     }
+
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \App\Comment  $comment
+     * @return \Illuminate\Http\Response
+     */
+    public function update(Request $request, Comment $comment)
+    {
+        $request->validate([
+            'message' => 'required|string',
+        ]);
+        
+        $comment->message = $request->input('message');
+        $comment->public = 0;
+        $comment->updated_by = $request->user()->id;
+        $comment->save();
+        
+        return response()->json(['success' => __('comments.updated')]);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Comment  $comment
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Comment $comment)
+    {
+        $comment->delete();
+        
+        return response()->json(['success' => __('comments.deleted')]);
+    }
 }
