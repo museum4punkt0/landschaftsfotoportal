@@ -38,25 +38,25 @@
                                 <span class="fa-stack fa-2x">
                                     <a href="{{ route('item.download', $item->item_id) }}" title="@lang('common.download')">
                                         <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                                        <i class="fas fa-download fa-stack-1x fa-inverse"></i>
+                                        <i class="fas {{ Config::get('ui.icon_download') }} fa-stack-1x fa-inverse"></i>
                                     </a>
                                 </span>
                                 <span class="fa-stack fa-2x">
                                 @if(!$item->carts->firstWhere('created_by', Auth::id()))
                                     <a href="#" class="cartAddBtn" data-href="{{ route('cart.add', $item->item_id) }}" title="@lang('cart.add')">
                                         <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                                        <i class="fas fa-images fa-stack-1x fa-inverse"></i>
+                                        <i class="fas {{ Config::get('ui.icon_cart_add') }} fa-stack-1x fa-inverse"></i>
                                 @else
                                     <a href="#" data-toggle="modal" data-target="#cartRemoveModal" data-href="{{ route('cart.remove', $item->carts->firstWhere('created_by', Auth::id())->cart_id) }}" title="@lang('cart.remove')">
                                         <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                                        <i class="fas fa-trash fa-stack-1x fa-inverse"></i>
+                                        <i class="fas {{ Config::get('ui.icon_cart_remove') }} fa-stack-1x fa-inverse"></i>
                                 @endif
                                     </a>
                                 </span>
                                 <span class="fa-stack fa-2x">
                                     <a href="#" data-toggle="modal" data-target="#commentModal" data-href="{{ route('comment.store', $item->item_id) }}" title="@lang('comments.new')">
                                         <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                                        <i class="fas fa-comment fa-stack-1x fa-inverse"></i>
+                                        <i class="fas {{ Config::get('ui.icon_comment') }} fa-stack-1x fa-inverse"></i>
                                     </a>
                                 </span>
                             </div>

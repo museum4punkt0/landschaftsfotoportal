@@ -22,25 +22,25 @@
                     <span class="fa-stack fa-2x">
                         <a href="{{ route('item.show.own') }}" title="@lang('items.my_own')">
                             <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                            <i class="fas fa-images fa-stack-1x fa-inverse"></i>
+                            <i class="fas {{ Config::get('ui.icon_items_own') }} fa-stack-1x fa-inverse"></i>
                         </a>
                     </span>
                     <span class="fa-stack fa-2x">
                         <a href="{{ route('cart.index') }}" title="@lang('cart.my_own')">
                             <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                            <i class="fas fa-images fa-stack-1x fa-inverse"></i>
+                            <i class="fas {{ Config::get('ui.icon_cart_add') }} fa-stack-1x fa-inverse"></i>
                         </a>
                     </span>
                     <span class="fa-stack fa-2x">
                         <a href="{{ route('comment.index') }}" title="@lang('comments.my_own')">
                             <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                            <i class="fas fa-comment fa-stack-1x fa-inverse"></i>
+                            <i class="fas {{ Config::get('ui.icon_comment') }} fa-stack-1x fa-inverse"></i>
                         </a>
                     </span>
                     <span class="fa-stack fa-2x">
                         <a href="{{ route('email.change') }}" title="@lang('users.change_email')">
                             <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                            <i class="fas fa-at fa-stack-1x fa-inverse"></i>
+                            <i class="fas {{ Config::get('ui.icon_email_address') }} fa-stack-1x fa-inverse"></i>
                         </a>
                     </span>
                 </div>

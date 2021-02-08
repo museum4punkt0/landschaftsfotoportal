@@ -64,7 +64,7 @@
                                 <span class="fa-stack fa-2x">
                                     <a href="#" data-toggle="modal" data-target="#commentModal" data-href="{{ route('ajax.comment.update', $comment->comment_id) }}" data-message="{{ $comment->message }}" title="@lang('common.edit')">
                                         <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                                        <i class="fas fa-pencil-alt fa-stack-1x fa-inverse"></i>
+                                        <i class="fas {{ Config::get('ui.icon_edit') }} fa-stack-1x fa-inverse"></i>
                                     </a>
                                 </span>
                             </div>
@@ -75,7 +75,7 @@
                                 <span class="fa-stack fa-2x">
                                     <a href="#" data-toggle="modal" data-target="#commentDeleteModal" data-href="{{ route('ajax.comment.destroy', $comment->comment_id) }}" title="@lang('common.delete')">
                                         <i class="fas fa-circle fa-stack-2x text-danger"></i>
-                                        <i class="fas fa-trash fa-stack-1x fa-inverse"></i>
+                                        <i class="fas {{ Config::get('ui.icon_delete') }} fa-stack-1x fa-inverse"></i>
                                     </a>
                                 </span>
                             </div>

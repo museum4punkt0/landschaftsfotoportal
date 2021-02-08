@@ -25,6 +25,25 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Name of some icons, mainly used for buttons
+    |--------------------------------------------------------------------------
+    |
+    | You can choose any Font Awesome icon, always prefixed with 'fa-'
+    | please see https://fontawesome.com/icons
+    |
+    */
+    
+    'icon_cart_add' => 'fa-bookmark',
+    'icon_cart_remove' => 'fa-trash',
+    'icon_comment' => 'fa-comment',
+    'icon_download' => 'fa-download',
+    'icon_items_own' => 'fa-images',
+    'icon_email_address' => 'fa-at',
+    'icon_edit' => 'fa-pencil-alt',
+    'icon_delete' => 'fa-trash',
+
+    /*
+    |--------------------------------------------------------------------------
     | Number of search results for autocomplete
     |--------------------------------------------------------------------------
     |
