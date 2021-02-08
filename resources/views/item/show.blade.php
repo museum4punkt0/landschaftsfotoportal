@@ -68,7 +68,7 @@
                             <i class="fas fa-images fa-stack-1x fa-inverse"></i>
                     @else
                         @if(!$item->carts->firstWhere('created_by', Auth::id()))
-                            <a href="#" id="cartAddBtn" data-href="{{ route('cart.add', $item->item_id) }}" title="@lang('cart.add')">
+                            <a href="#" class="cartAddBtn" data-href="{{ route('cart.add', $item->item_id) }}" title="@lang('cart.add')">
                                 <i class="fas fa-circle fa-stack-2x text-primary"></i>
                                 <i class="fas fa-images fa-stack-1x fa-inverse"></i>
                         @else

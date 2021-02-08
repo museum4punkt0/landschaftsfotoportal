@@ -58,7 +58,7 @@
     });
     
     // Adding items to cart
-    $('#cartAddBtn').click(function (xhr) {
+    $('.cartAddBtn').click(function (xhr) {
         xhr.preventDefault();
         
         $.ajax({
