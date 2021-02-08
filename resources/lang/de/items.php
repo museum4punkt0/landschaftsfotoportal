@@ -13,6 +13,7 @@ return [
 
     'header' => 'Datensätze',
     'list' => 'Datensatz',
+    'my_own' => 'Meine eigenen Datensätze',
     'unpublished' => 'Unveröffentlichte Datensätze',
     'new' => 'Neuer Datensatz',
     'edit' => 'Datensatz bearbeiten',

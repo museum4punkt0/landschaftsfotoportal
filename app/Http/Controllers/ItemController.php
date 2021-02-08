@@ -8,12 +8,23 @@ use App\ColumnMapping;
 use App\Selectlist;
 use App\Element;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Redirect;
 
 class ItemController extends Controller
 {
+    /**
+     * Instantiate a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('verified')->only('own');
+    }
+
     /**
      * Display the specified resource.
      *
@@ -73,6 +84,18 @@ class ItemController extends Controller
         $translations = Element::where('list_fk', $l10n_list->list_id)->get();
                 
         return view('item.show', compact('item', 'items', 'details', 'menu_root', 'path', 'colmap', 'lists', 'translations'));
+    }
+
+    /**
+     * Display items owned by the current authenticated user.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function own()
+    {
+        $items = Item::myOwn(Auth::user()->id)->with('details')->orderBy('created_at')->paginate(12);
+        #dd($items);
+        return view('item.own', compact('items'));
     }
 
     /**
