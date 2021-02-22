@@ -94,7 +94,7 @@ class CommentController extends Controller
     {
         //$this->authorize('unpublished', Comment::class);
         
-        $comments = Comment::where('public', 0)->orderByDesc('updated_at')->paginate(10);
+        $comments = Comment::where('public', 0)->with('item')->orderByDesc('updated_at')->paginate(10);
         
         return view('admin.comment.publish', compact('comments'));
     }

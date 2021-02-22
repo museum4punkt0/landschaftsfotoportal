@@ -23,6 +23,7 @@
                 <thead>
                     <tr>
                         <th colspan="1">@lang('common.id')</th>
+                        <th colspan="1"></th>
                         <th colspan="1">@lang('comments.message')</th>
                         <th colspan="1">@lang('common.published')</th>
                         <th colspan="1">@lang('common.updated')</th>
@@ -34,6 +35,14 @@
                     <tr>
                         <td>
                             {{$comment->comment_id}}
+                        </td>
+                        <td>
+                            <div class="portfolio-item">
+                            <a class="portfolio-link d-flex justify-content-center" href="{{route('item.show.public', $comment->item->item_id)}}#details">
+                                <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
+                                    $comment->item->details->firstWhere('column_fk', 13)->value_string .'.jpg') }}" height=100 alt="" title="{{ $comment->item->details->firstWhere('column_fk', 23)->value_string }}"/>
+                            </a>
+                            </div>
                         </td>
                         <td>
                             {{$comment->message}}
