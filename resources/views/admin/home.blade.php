@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
+<!-- Admin dashboard -->
 <div class="container">
     <div class="card">
         <div class="card-header">@lang('users.dashboard')</div>
@@ -45,6 +46,18 @@
                     </span>
                 </div>
             @endif
+            
+            <!-- Statistics -->
+            <div class="container">
+                <div class="row py-1">
+                    <div class="col">
+                        @lang('items.unpublished'): {{ $items }}
+                    </div>
+                    <div class="col">
+                        <a href="{{route('item.unpublished')}}" class="btn btn-primary">@lang('common.show')</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

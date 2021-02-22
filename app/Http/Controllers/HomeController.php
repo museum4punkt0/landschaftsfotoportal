@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Comment;
 use App\Item;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -31,9 +32,16 @@ class HomeController extends Controller
         // Get the currently authenticated user
         $user = Auth::user();
         
+        // Get some statistics for admin dashboard
         if (Gate::allows('show-admin')) {
-            return view('admin.home', compact('user'));
+            // Number of unpublished items
+            $items = Item::where('public', 0)->count();
+            // Number of unpublished items
+            $comments = Comment::where('public', 0)->count();
+            
+            return view('admin.home', compact('user', 'items', 'comments'));
         }
+        // User dashboard
         else {
             return view('home', compact('user'));
         }
