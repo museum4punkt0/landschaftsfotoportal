@@ -24,4 +24,5 @@ return [
     'deleted' => 'Kommentar wurde gelöscht.',
     
     'message' => 'Kommentartext',
+    'published' => ':count Kommentare wurden veröffentlicht.',
 ];

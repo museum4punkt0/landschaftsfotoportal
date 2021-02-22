@@ -3,7 +3,7 @@
 @section('content')
 
 <div class="container">
-<h2>@lang('users.edit')</h2>
+<h2>@lang('comments.edit')</h2>
 
 <form action="{{ route('comment.update', $comment->comment_id) }}" method="POST">
     

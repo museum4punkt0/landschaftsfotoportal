@@ -25,6 +25,8 @@ return [
     'download' => 'herunterladen',
     'upload' => 'hochladen',
     'sort' => 'sortieren',
+    'publish' => 'veröffentlichen',
+    'publish_all' => 'alle veröffentlichen',
     'export' => 'exportieren',
     'batch' => 'Stapelverarbeitung',
     'ignore' => 'ignorieren',

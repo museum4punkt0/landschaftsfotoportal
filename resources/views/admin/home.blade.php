@@ -57,6 +57,14 @@
                         <a href="{{route('item.unpublished')}}" class="btn btn-primary">@lang('common.show')</a>
                     </div>
                 </div>
+                <div class="row py-1">
+                    <div class="col">
+                        @lang('comments.unpublished'): {{ $comments }}
+                    </div>
+                    <div class="col">
+                        <a href="{{route('comment.unpublished')}}" class="btn btn-primary">@lang('common.show')</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

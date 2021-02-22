@@ -86,6 +86,49 @@ class CommentController extends Controller
     }
 
     /**
+     * Display a listing of non-public comments for publishing.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function list_unpublished()
+    {
+        //$this->authorize('unpublished', Comment::class);
+        
+        $comments = Comment::where('public', 0)->orderByDesc('updated_at')->paginate(10);
+        
+        return view('admin.comment.publish', compact('comments'));
+    }
+
+    /**
+     * Publish a single or all non-public comments.
+     *
+     * @param  \App\Comment  $comment
+     * @return \Illuminate\Http\Response
+     */
+    public function publish(Comment $comment)
+    {
+        //$this->authorize('publish', $comment);
+        
+        // Check for single comment or batch
+        if ($comment->comment_id) {
+            $comments = [Comment::find($comment->comment_id)];
+        } else {
+            $comments = Comment::where('public', 0)->orderBy('comment_id')->get();
+        }
+        
+        $count = 0;
+        // Set public flag on all given comments
+        foreach ($comments as $comment) {
+            $comment->public = 1;
+            $comment->save();
+            $count++;
+        }
+        
+        return Redirect::to('admin/comment/unpublished')
+            ->with('success', __('comments.published', ['count' => $count]));
+    }
+
+    /**
      * Show the form for editing the specified resource.
      *
      * @param  \App\Comment  $comment
