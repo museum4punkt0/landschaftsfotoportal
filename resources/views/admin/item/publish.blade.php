@@ -19,7 +19,7 @@
             <div class="card-header">@lang('items.unpublished')</div>
             <div class="card-body">
                 <a href="{{route('item.new')}}" class="btn btn-primary">@lang('items.new')</a>
-                <a href="{{route('item.publish')}}" class="btn btn-primary">@lang('items.publish_all')</a>
+                <a href="{{route('item.publish')}}" class="btn btn-primary">@lang('common.publish_all')</a>
                 <table class="table mt-4">
                 <thead>
                     <tr>
@@ -53,7 +53,7 @@
                         </td>
                         <td>
                             <a href="{{route('item.publish', $item->item_id)}}" class="btn btn-primary">
-                            @lang('items.publish')
+                            @lang('common.publish')
                             </a>
                         </td>
                         <td>
