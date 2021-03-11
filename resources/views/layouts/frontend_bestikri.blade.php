@@ -20,7 +20,7 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     
     <!-- Custom styles for this template -->
-    <link href="{{ asset('css/dashboard.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/bestikri.css') }}" rel="stylesheet">
     <style>
       .bd-placeholder-img {
         font-size: 1.125rem;
