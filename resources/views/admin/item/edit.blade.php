@@ -289,8 +289,6 @@
             @case('_image_copyright_')
             {{-- Data_type of form field is redirect --}}
             @case('_redirect_')
-            {{-- Data_type of form field is map --}}
-            @case('_map_')
                 <div class="form-group">
                     <span>
                         {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }}
@@ -375,6 +373,49 @@
                         </div>
                     </div>
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                </div>
+                @break
+            {{-- Data_type of form field is map --}}
+            @case('_map_')
+                <div class="form-group">
+                    <span>
+                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }}
+                        ({{ $cm->column->description }}, 
+                        @lang('columns.data_type'): 
+                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
+                    </span>
+                @if($cm->getConfigValue('map') == 'iframe')
+                    @if($details->firstWhere('column_fk', $cm->column->column_id))
+                        @if($cm->getConfigValue('map_iframe') == 'url')
+                            <iframe width="100%" height="670px" scrolling="no" marginheight="0" marginwidth="0" frameborder="0"
+                                src="{{ old('fields.'. $cm->column->column_id, 
+                                $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
+                            >
+                        @endif
+                        @if($cm->getConfigValue('map_iframe') == 'service')
+                            <iframe width="100%" height="670px" scrolling="no" marginheight="0" marginwidth="0" frameborder="0"
+                                src="{{ Config::get('media.mapservice_url') }}artid={{ old('fields.'. $cm->column->column_id, 
+                                $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
+                            >
+                        @endif
+                        <p>@lang('items.no_iframe')</p>
+                        </iframe>
+                    @else
+                        <span>detail column {{$cm->column->column_id}} for map not found</span>
+                    @endif
+                @endif
+                @if($cm->getConfigValue('map') == 'inline')
+                    <div id="map" class="map"></div>
+                    <script type="text/javascript">
+                        var lon = {{ $details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col'))->value_float }};
+                        var lat = {{ $details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col'))->value_float }};
+                        var zoom = {{ $cm->getConfigValue('map_zoom') }};
+                        // Init and display the map
+                        osm_map.display(lon, lat, zoom);
+                        
+                        //osm_map.updateSize();
+                    </script>
+                @endif
                 </div>
                 @break
             
