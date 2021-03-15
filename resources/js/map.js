@@ -5,7 +5,7 @@ import VectorSource from 'ol/source/Vector';
 import {Icon, Style} from 'ol/style';
 import Point from 'ol/geom/Point';
 import OSM from 'ol/source/OSM';
-import {fromLonLat} from 'ol/proj';
+import {fromLonLat, transform} from 'ol/proj';
 
 var osm_map = {
     map: false,
@@ -57,6 +57,19 @@ var osm_map = {
             })
         );
         this.vectorLayer.getSource().addFeature(marker);
+    },
+    
+    updatePosition: function (lon, lat, zoom) {
+        this.map.getView().setCenter(fromLonLat([lon, lat]));
+    },
+    
+    moveMarker: function (lon, lat) {
+        var coordinates = fromLonLat([lon, lat]);
+        this.vectorLayer.getSource().getFeatures()[0].getGeometry().setCoordinates(coordinates);
+    },
+    
+    transformCoordinate: function (coordinate) {
+        return transform(coordinate, 'EPSG:3857', 'EPSG:4326');
     },
 }
 

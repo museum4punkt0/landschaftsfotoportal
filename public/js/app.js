@@ -101239,6 +101239,16 @@ var osm_map = {
       })
     }));
     this.vectorLayer.getSource().addFeature(marker);
+  },
+  updatePosition: function updatePosition(lon, lat, zoom) {
+    this.map.getView().setCenter(Object(ol_proj__WEBPACK_IMPORTED_MODULE_7__["fromLonLat"])([lon, lat]));
+  },
+  moveMarker: function moveMarker(lon, lat) {
+    var coordinates = Object(ol_proj__WEBPACK_IMPORTED_MODULE_7__["fromLonLat"])([lon, lat]);
+    this.vectorLayer.getSource().getFeatures()[0].getGeometry().setCoordinates(coordinates);
+  },
+  transformCoordinate: function transformCoordinate(coordinate) {
+    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_7__["transform"])(coordinate, 'EPSG:3857', 'EPSG:4326');
   }
 };
 /* harmony default export */ __webpack_exports__["default"] = (osm_map);

@@ -68,4 +68,6 @@ return [
     'unpublished' => 'unveröffentlicht',
     
     'laravel_error' => 'System-Fehler!',
+    'geocoder_api_key_error' => 'API-Key für Geocoder ungültig!',
+    'get_latlon' => 'Koordinaten bestimmen',
 ];

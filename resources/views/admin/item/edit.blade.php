@@ -2,6 +2,8 @@
 
 @section('content')
 
+@include('includes.modal_alert')
+
 <div class="container">
 <h2>@lang('items.edit')</h2>
 
@@ -118,7 +120,7 @@
                         @lang('columns.data_type'): 
                         {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
                     </span>
-                    <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
+                    <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}" 
                         value="{{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_int) }}" />
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
@@ -133,7 +135,7 @@
                         @lang('columns.data_type'): 
                         {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
                     </span>
-                    <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
+                    <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}" 
                         value="{{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_float) }}" />
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
@@ -297,9 +299,14 @@
                         {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
                     </span>
                     @if($details->firstWhere('column_fk', $cm->column->column_id))
-                        <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
+                        <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif" 
                             value="{{ old('fields.'. $cm->column->column_id, 
                             $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}" />
+                        @if($cm->getConfigValue('data_subtype') == 'location_city')
+                            <button type="button" class="btn btn-primary btn-sm searchAddressBtn">
+                                @lang('common.get_latlon')
+                            </button>
+                        @endif
                     @else
                         <span>detail column {{$cm->column->column_id}} for map not found</span>
                     @endif
@@ -412,6 +419,7 @@
                         var zoom = {{ $cm->getConfigValue('map_zoom') }};
                         // Init and display the map
                         osm_map.display(lon, lat, zoom);
+                        osm_map.addMarker(lon, lat, '{{ asset("storage/images/dot.svg") }}');
                         
                         //osm_map.updateSize();
                     </script>
@@ -439,6 +447,146 @@
     {{ csrf_field() }}
     @method('PATCH')
 </form>
+
+<!-- Script using jQuery UI autocomplete widget -->
+<script type="text/javascript">
+    function getTownFromAddress(address) {
+        if(address.city) {
+            return address.city;
+        }
+        else {
+            if(address.town) {
+                return address.town;
+            }
+            else {
+                if(address.village) {
+                    return address.village;
+                }
+                else {
+                    return "?";
+                }
+            }
+        }
+    }
+    
+    // Autocomplete search for address form input
+    $('input.location_city').autocomplete( {
+        disabled: true,
+        minLength: 5,
+        source: function(request, response) {
+            // Fetch data from geocoder API
+            $.ajax({
+                url: '{{ Config::get("geo.geocoder_url") }}',
+                type: 'get',
+                dataType: 'json',
+                data: {
+                    format: 'json',
+                    'accept-language': 'de',
+                    addressdetails: '1',
+                    q: request.term,
+                    key: '{{ Config::get("geo.api_key") }}',
+                },
+                success: function(data) {
+                    var transformed = $.map(data, function (element) {
+                        //console.log(element);
+                        return {
+                            label: element.display_name + ' (' + element.class + ')',
+                            value: element.osm_id,
+                            address: element.address,
+                            latitude: element.lat,
+                            longitude: element.lon,
+                            osm_id: element.osm_id,
+                        };
+                    });
+                    //console.log(transformed);
+                    response(transformed);
+                },
+                error:function (xhr) {
+                    //console.log(xhr);
+                    // In case of wrong API key, the server responds with HTTP 403, but XHR fails
+                    // because of missing CORS headers
+                    if (xhr.status == 0) {
+                        error_message = '@lang("common.geocoder_api_key_error")';
+                    }
+                    // Render the geocoder error message
+                    $('#alertModalLabel').text('@lang("common.laravel_error")');
+                    $('#alertModalContent').html('<div class="alert alert-danger">' + error_message + '</div>');
+                    $('#alertModal').modal('show');
+                },
+            });
+        },
+        select: function (event, ui) {
+            //console.log(ui.item);
+            event.preventDefault();
+            $('input.location_city').autocomplete('disable');
+            
+            // Update address form input fields with results from geocoder
+            $('input.location_country').val(ui.item.address.country);
+            $('input.location_state').val(ui.item.address.state);
+            $('input.location_county').val(ui.item.address.county);
+            $('input.location_city').val(getTownFromAddress(ui.item.address));
+            $('input.location_lat').val(ui.item.latitude);
+            $('input.location_lon').val(ui.item.longitude);
+            
+            // Adjust map center to location of selected search result
+            osm_map.updatePosition($('input.location_lon').val(), $('input.location_lat').val());
+            osm_map.moveMarker($('input.location_lon').val(), $('input.location_lat').val());
+            
+            return false;
+        }
+    });
+    
+    // Send search request to geocoder API
+    $('button.searchAddressBtn').click(function(xhr) {
+        xhr.preventDefault();
+        $('input.location_city').autocomplete('enable');
+        $('input.location_city').autocomplete('search');
+    });
+    
+    // Click on map to update position of marker
+    osm_map.map.on('singleclick', function (evt) {
+        let coord = osm_map.transformCoordinate(evt.coordinate);
+        // Update lat/lon form fields
+        $('input.location_lon').val(coord[0]);
+        $('input.location_lat').val(coord[1]);
+        // Update position of marker
+        osm_map.moveMarker($('input.location_lon').val(), $('input.location_lat').val());
+        
+        // Fetch data from geocoder API
+        $.ajax({
+            url: '{{ Config::get("geo.reverse_geocoder_url") }}',
+            type: 'get',
+            dataType: 'json',
+            data: {
+                format: 'json',
+                'accept-language': 'de',
+                lat: coord[1],
+                lon: coord[0],
+                key: '{{ Config::get("geo.api_key") }}',
+            },
+            success: function(data) {
+                //console.log(data);
+                // Update address form input fields with results from geocoder
+                $('input.location_country').val(data.address.country);
+                $('input.location_state').val(data.address.state);
+                $('input.location_county').val(data.address.county);
+                $('input.location_city').val(getTownFromAddress(data.address));
+            },
+            error:function (xhr) {
+                //console.log(xhr);
+                // In case of wrong API key, the server responds with HTTP 403, but XHR fails
+                // because of missing CORS headers
+                if (xhr.status == 0) {
+                    error_message = '@lang("common.geocoder_api_key_error")';
+                }
+                // Render the geocoder error message
+                $('#alertModalLabel').text('@lang("common.laravel_error")');
+                $('#alertModalContent').html('<div class="alert alert-danger">' + error_message + '</div>');
+                $('#alertModal').modal('show');
+            },
+        });
+    });
+</script>
 
 @if(env('APP_DEBUG'))
     [Rendering time: {{ round(microtime(true) - LARAVEL_START, 3) }} seconds]
