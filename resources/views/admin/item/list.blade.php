@@ -25,8 +25,8 @@
                     <tr>
                         <th colspan="1">@lang('common.id')</th>
                         <th colspan="1"></th>
-                        <th colspan="1">@lang('items.item_type')</th>
                         <th colspan="1">@lang('common.name')</th>
+                        <th colspan="1">@lang('items.item_type')</th>
                         <th colspan="3">@lang('common.actions')</th>
                     </tr>
                 </thead>
@@ -45,16 +45,16 @@
                             </div>
                         </td>
                         <td>
-                            @foreach($item->item_type->values as $v)
-                                {{$v->value}}<br/>
-                            @endforeach
-                            Typ-ID {{$item->item_type_fk}}
-                        </td>
-                        <td>
                             <a href="{{route('item.show.public', $item->item_id)}}"
                                 title="@lang('items.show_frontend')">
                                 {{$item->title}}
                             </a>
+                        </td>
+                        <td>
+                            @foreach($item->item_type->values as $v)
+                                {{$v->value}}<br/>
+                            @endforeach
+                            Typ-ID {{$item->item_type_fk}}
                         </td>
                         <td>
                             <form action="{{route('item.show', $item->item_id)}}" method="GET">
