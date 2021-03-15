@@ -395,6 +395,7 @@
                         
                         {{-- Init and display the map --}}
                         osm_map.display(lon, lat, zoom);
+                        osm_map.addMarker(lon, lat, '{{ asset("storage/images/dot.svg") }}');
                         
                         {{-- Resize the map after un-collapsing the container --}}
                         $('#collapseCG{{ $cm->column_group_fk }}').on('shown.bs.collapse', function () {

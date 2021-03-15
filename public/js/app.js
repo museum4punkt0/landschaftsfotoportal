@@ -101204,25 +101204,13 @@ __webpack_require__.r(__webpack_exports__);
 
 var osm_map = {
   map: false,
+  vectorLayer: new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
+    source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
+      features: false
+    })
+  }),
   display: function display(lon, lat, zoom) {
     var position = Object(ol_proj__WEBPACK_IMPORTED_MODULE_7__["fromLonLat"])([lon, lat]);
-    var marker = new ol__WEBPACK_IMPORTED_MODULE_0__["Feature"]({
-      geometry: new ol_geom_Point__WEBPACK_IMPORTED_MODULE_5__["default"](position)
-    });
-    marker.setStyle(new ol_style__WEBPACK_IMPORTED_MODULE_4__["Style"]({
-      image: new ol_style__WEBPACK_IMPORTED_MODULE_4__["Icon"]({
-        color: '#ff0000',
-        crossOrigin: 'anonymous',
-        src: '../storage/images/dot.svg',
-        scale: 1.0
-      })
-    }));
-    var vectorSource = new ol_source_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
-      features: [marker]
-    });
-    var vectorLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
-      source: vectorSource
-    });
     var view = new ol__WEBPACK_IMPORTED_MODULE_0__["View"]({
       center: position,
       zoom: zoom
@@ -101231,12 +101219,26 @@ var osm_map = {
       target: 'map',
       layers: [new ol_layer_Tile__WEBPACK_IMPORTED_MODULE_1__["default"]({
         source: new ol_source_OSM__WEBPACK_IMPORTED_MODULE_6__["default"]()
-      }), vectorLayer],
+      }), this.vectorLayer],
       view: view
     });
   },
   updateSize: function updateSize() {
     this.map.updateSize();
+  },
+  addMarker: function addMarker(lon, lat, icon) {
+    var marker = new ol__WEBPACK_IMPORTED_MODULE_0__["Feature"]({
+      geometry: new ol_geom_Point__WEBPACK_IMPORTED_MODULE_5__["default"](Object(ol_proj__WEBPACK_IMPORTED_MODULE_7__["fromLonLat"])([lon, lat]))
+    });
+    marker.setStyle(new ol_style__WEBPACK_IMPORTED_MODULE_4__["Style"]({
+      image: new ol_style__WEBPACK_IMPORTED_MODULE_4__["Icon"]({
+        color: '#3490dc',
+        crossOrigin: 'anonymous',
+        src: icon,
+        scale: 1.0
+      })
+    }));
+    this.vectorLayer.getSource().addFeature(marker);
   }
 };
 /* harmony default export */ __webpack_exports__["default"] = (osm_map);

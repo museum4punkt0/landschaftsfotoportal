@@ -10,31 +10,15 @@ import {fromLonLat} from 'ol/proj';
 var osm_map = {
     map: false,
     
+    vectorLayer: new VectorLayer({
+        source: new VectorSource({
+            features: false,
+        })
+    }),
+    
     display: function (lon, lat, zoom) {
         
         var position = fromLonLat([lon, lat]);
-
-        var marker = new Feature({
-            geometry: new Point(position)
-        });
-        
-        marker.setStyle(
-            new Style({
-                image: new Icon({
-                    color: '#ff0000',
-                    crossOrigin: 'anonymous',
-                    src: '../storage/images/dot.svg',
-                    scale: 1.0,
-                }),
-            })
-        );
-        
-        var vectorSource = new VectorSource({
-            features: [marker],
-        });
-        var vectorLayer = new VectorLayer({
-            source: vectorSource,
-        });
 
         var view = new View({
             center: position,
@@ -47,7 +31,7 @@ var osm_map = {
                 new TileLayer({
                     source: new OSM()
                 }),
-                vectorLayer,
+                this.vectorLayer,
             ],
             view: view,
         });
@@ -55,6 +39,24 @@ var osm_map = {
     
     updateSize: function () {
         this.map.updateSize();
+    },
+    
+    addMarker: function (lon, lat, icon) {
+        var marker = new Feature({
+            geometry: new Point(fromLonLat([lon, lat]))
+        });
+        
+        marker.setStyle(
+            new Style({
+                image: new Icon({
+                    color: '#3490dc',
+                    crossOrigin: 'anonymous',
+                    src: icon,
+                    scale: 1.0,
+                }),
+            })
+        );
+        this.vectorLayer.getSource().addFeature(marker);
     },
 }
 
