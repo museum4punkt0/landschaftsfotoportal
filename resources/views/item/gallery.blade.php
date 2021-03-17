@@ -11,6 +11,7 @@
             </div>
             <div class="row">
             @foreach($items as $item)
+                @if($item->details->firstWhere('column_fk', 13))
                 <div class="col-lg-4 col-sm-6 mb-4">
                     <div class="portfolio-item">
                         <a class="portfolio-link d-flex justify-content-center" href="{{route('item.show.public', $item->item_id)}}#details">
@@ -77,6 +78,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
             @endforeach
             </div>
         </div>
