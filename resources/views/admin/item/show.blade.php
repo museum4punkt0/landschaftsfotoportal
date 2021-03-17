@@ -13,7 +13,7 @@
         </a>
         @unless($item->public)
             <a href="{{route('item.publish', $item->item_id)}}" class="btn btn-primary">
-            @lang('items.publish')
+            @lang('common.publish')
             </a>
         @endunless
     </div>
@@ -283,6 +283,17 @@
                     @else
                         <span>detail column {{$cm->column->column_id}} for map not found</span>
                     @endif
+                @endif
+                @if($cm->getConfigValue('map') == 'inline')
+                    <div id="map" class="map"></div>
+                    <script type="text/javascript">
+                        var lon = {{ $details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col'))->value_float }};
+                        var lat = {{ $details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col'))->value_float }};
+                        var zoom = {{ $cm->getConfigValue('map_zoom') }};
+                        // Init and display the map
+                        osm_map.display(lon, lat, zoom);
+                        osm_map.addMarker(lon, lat, '{{ asset("storage/images/dot.svg") }}');
+                    </script>
                 @endif
                 </div>
                 @break
