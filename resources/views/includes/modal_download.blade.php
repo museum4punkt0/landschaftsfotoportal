@@ -12,9 +12,17 @@
                 <p>Mit dem Herunterladen akzeptieren Sie die Lizenzbedingungen!</p>
             </div>
             <div class="modal-footer">
-                <a class="btn btn-primary" href="{{ route('item.download', $item->item_id) }}" onClick="$('#downloadModal').modal('hide')">@lang('common.download')</a>
+                <a class="btn btn-primary" href="#" onClick="$('#downloadModal').modal('hide')">@lang('common.download')</a>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('common.cancel')</button>
             </div>
         </div>
     </div>
 </div>
+<script type="text/javascript">
+    // Triggered when comment modal is shown
+    $('#downloadModal').on('shown.bs.modal', function(event) {
+        // Store the URL for the download request
+        var url = $(event.relatedTarget).data('href');
+        $('.modal-footer .btn').attr("href", url);
+    });
+</script>

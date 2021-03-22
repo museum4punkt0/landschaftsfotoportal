@@ -53,7 +53,7 @@
                     <!-- Icons for user interaction -->
                     <span class="fa-stack fa-2x">
                     @guest
-                        <a href="#" data-toggle="modal" data-target="#downloadModal" title="@lang('common.download')">
+                        <a href="#" data-toggle="modal" data-target="#downloadModal" data-href="{{ route('item.download', $item->item_id) }}" title="@lang('common.download')">
                     @else
                         <a href="{{ route('item.download', $item->item_id) }}" title="@lang('common.download')">
                     @endguest
