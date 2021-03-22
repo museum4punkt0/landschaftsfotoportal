@@ -94,7 +94,7 @@ class ItemController extends Controller
     public function own()
     {
         $items = Item::myOwn(Auth::user()->id)->with('details')->orderBy('created_at')->paginate(12);
-        #dd($items);
+        
         return view('item.own', compact('items'));
     }
 
@@ -116,13 +116,14 @@ class ItemController extends Controller
     }
 
     /**
-     * Display the image gallery containing latest items.
+     * Display the image gallery containing latest + random items.
      *
      * @return \Illuminate\Http\Response
      */
     public function gallery()
     {
-        $items = Item::with('details')->where('public', 1)->orderBy('created_at')->take(3)->get();
+        $items['latest'] = Item::with('details')->where('public', 1)->orderBy('created_at')->take(3)->get();
+        $items['random'] = Item::with('details')->where('public', 1)->inRandomOrder()->take(3)->get();
         
         return view('item.gallery', compact('items'));
     }
