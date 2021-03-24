@@ -94,7 +94,7 @@ class CommentController extends Controller
     {
         //$this->authorize('unpublished', Comment::class);
         
-        $comments = Comment::where('public', 0)->with('item')->orderByDesc('updated_at')->paginate(10);
+        $comments = Comment::where('public', '<', 1)->with('item')->orderByDesc('updated_at')->paginate(10);
         
         return view('admin.comment.publish', compact('comments'));
     }
@@ -113,7 +113,7 @@ class CommentController extends Controller
         if ($comment->comment_id) {
             $comments = [Comment::find($comment->comment_id)];
         } else {
-            $comments = Comment::where('public', 0)->orderBy('comment_id')->get();
+            $comments = Comment::where('public', '<', 1)->orderBy('comment_id')->get();
         }
         
         $count = 0;

@@ -49,16 +49,24 @@
                             {{$comment->message}}
                         </td>
                         <td>
-                            @if($comment->public)
-                                @lang('common.yes')
-                            @else
-                                @lang('common.no')
-                            @endif
+                            @switch($comment->public)
+                                @case(1)
+                                    @lang('comments.state_published')
+                                    @break
+                                @case(0)
+                                    @lang('comments.state_unpublished')
+                                    @break
+                                @case(-1)
+                                    @lang('comments.state_locked')
+                                    @break
+                            @endswitch
                         </td>
                         <td>
                             {{$comment->updated_at}}
                         </td>
                         <td>
+                        {{-- Show edit button if comment is not locked --}}
+                        @if($comment->public >= 0)
                             <!-- Icon and button for editing -->
                             <div style="font-size: 0.6rem;">
                                 <span class="fa-stack fa-2x">
@@ -68,6 +76,7 @@
                                     </a>
                                 </span>
                             </div>
+                        @endif
                         </td>
                         <td>
                             <!-- Icons and button for deleting -->

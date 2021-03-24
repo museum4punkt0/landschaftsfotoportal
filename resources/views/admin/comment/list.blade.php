@@ -39,11 +39,17 @@
                             {{$comment->message}}
                         </td>
                         <td>
-                            @if($comment->public)
-                                @lang('common.yes')
-                            @else
-                                @lang('common.no')
-                            @endif
+                            @switch($comment->public)
+                                @case(1)
+                                    @lang('comments.state_published')
+                                    @break
+                                @case(0)
+                                    @lang('comments.state_unpublished')
+                                    @break
+                                @case(-1)
+                                    @lang('comments.state_locked')
+                                    @break
+                            @endswitch
                         </td>
                         <td>
                             {{$comment->editor->name}} (@lang('users.group_'. $comment->editor->group->name)),<br/>
