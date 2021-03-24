@@ -27,8 +27,12 @@
                         </a>
                         <div class="portfolio-caption">
                             <div class="portfolio-caption-heading">
+                            @if(!empty($item->details->firstWhere('column_fk', 22)->value_string))
                                 {{ $item->details->firstWhere('column_fk', 22)->value_string }},
+                            @endif
+                            @if(!empty($item->details->firstWhere('column_fk', 20)->value_string))
                                 {{ $item->details->firstWhere('column_fk', 20)->value_string }},
+                            @endif
                                 {{ $item->details->firstWhere('column_fk', 19)->value_string }}
                             </div>
                             <div class="portfolio-caption-subheading text-muted">
