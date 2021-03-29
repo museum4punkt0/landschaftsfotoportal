@@ -43,7 +43,7 @@
             <div class="col-lg-2">
                 
                 <form action="{{ route('search.results') }}" method="POST">
-                @if(Config::get('ui.frontend_layout') == 'landschaftsfotoportal')
+                @if(Config::get('ui.frontend_layout') == 'bestikri')
                     <div class="form-group">
                         <span>@lang('search.taxon_name')</span>
                         <input type="text" name="taxon_name" class="form-control" value="{{$search_terms['taxon_name'] ?? ""}}" />
