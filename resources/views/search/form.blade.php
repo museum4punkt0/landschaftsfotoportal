@@ -89,6 +89,11 @@
                     <div class="form-group">
                         <button type="submit" class="btn btn-secondary">@lang('search.search')</button>
                     </div>
+                    <div class="form-group">
+                        <a href="{{ route('search.index') }}" class="btn btn-danger" role="button">
+                            @lang('search.reset')
+                        </a>
+                    </div>
                     {{ csrf_field() }}
                     @method('POST')
                 </form>

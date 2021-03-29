@@ -14,6 +14,7 @@ return [
     'header' => 'Suche',
     
     'search' => 'Suchen',
+    'reset' => 'Reset',
     'results' => 'Suchergebnisse',
     'taxon_name' => 'Wissenschaftlicher oder deutscher Name des Taxons',
     'full_text' => 'Volltext-Suche',
