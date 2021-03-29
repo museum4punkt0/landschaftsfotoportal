@@ -42,7 +42,7 @@
             <div class="collapse navbar-collapse" id="navbarResponsive">
                 <ul class="navbar-nav text-uppercase ml-auto">
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.gallery') }}#portfolio">Portal</a></li>
-                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#portfolio">@lang('search.header')</a></li>
+                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('search.index') }}">@lang('search.header')</a></li>
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.timeline') }}#timeline">Zeitstrahl</a></li>
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#">Karte</a></li>
                     @guest
