@@ -101,38 +101,53 @@ class SearchController extends Controller
         #dd($request->input());
         
         // Search within lists using dropdowns
+        $search_details = null;
+        $items_details = collect([]);
+        // Get only selected columns to search within
         $search_columns = array_filter($request->input('fields'), function($val) {
             return $val > 0;
         });
+        // Prepare the search query using selected columns
         foreach ($search_columns as $col => $val) {
-            $search[] = [['column_fk', $col], ['element_fk', intval($val)]];
+            $search_details[] = [['column_fk', $col], ['element_fk', intval($val)]];
         }
-        if (isset($search)) {
-            $details = Detail::where(function ($query) use ($search) {
-                    foreach ($search as $n => $s) {
-                        $query->orWhere($search[$n]);
+        if ($search_details) {
+            $details = Detail::where(function ($query) use ($search_details) {
+                    foreach ($search_details as $n => $s) {
+                        $query->orWhere($search_details[$n]);
                     }
                 })
                 ->with('item')
                 ->get();
             
-            $items = $details->groupBy('item_fk')
-                ->filter(function ($value, $key) use ($search) {
-                    return $value->count() >= count($search);
+            $items_details = $details->groupBy('item_fk')
+                ->filter(function ($value, $key) use ($search_details) {
+                    return $value->count() >= count($search_details);
                 })->map(function ($row) {
                     return $row->first()->item;
                 });
         }
         
         // Full text search in all details containing strings
-        $search = $request->input('full_text');
-        if ($search) {
-            $details = Detail::where('value_string', 'LIKE', "%{$search}%")
+        $items_full_text = collect([]);
+        $search_full_text = $request->input('full_text');
+        
+        if ($search_full_text) {
+            $details = Detail::where('value_string', 'LIKE', "%{$search_full_text}%")
                 ->with('item')
                 ->get();
-            $items = $details->map(function ($row) {
+            $items_full_text = $details->map(function ($row) {
                 return $row->item;
             });
+        }
+        
+        // Intersect all results on items
+        if ($search_details && $search_full_text) {
+            $items = $items_details->intersect($items_full_text);
+        }
+        // Concat all results on items
+        else {
+            $items = $items_details->concat($items_full_text);
         }
         
         // Taxon search: full name or native name
