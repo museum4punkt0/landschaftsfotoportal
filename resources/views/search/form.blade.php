@@ -107,6 +107,7 @@
                     <!-- Portfolio Grid, Gallery with search results -->
                     @include('includes.item_gallery', [
                         'items' => $items,
+                        'limit' => Config::get('ui.search_results'),
                         'heading' => __('search.results'),
                         'subheading' => 'Lorem ipsum dolor sit amet consectetur.'
                     ])

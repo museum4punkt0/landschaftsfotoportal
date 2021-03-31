@@ -7,6 +7,11 @@
         </div>
         <div class="row">
         @foreach($items as $item)
+            {{-- Limit the number of shown entries, used for search results --}}
+            @isset($limit)
+                @break($loop->iteration > $limit)
+            @endisset
+            
             @if($item->details->firstWhere('column_fk', 13))
             <div class="col-lg-4 col-sm-6 mb-4">
                 <div class="portfolio-item">
