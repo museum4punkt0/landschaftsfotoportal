@@ -2,7 +2,9 @@ import {Map, Feature, View} from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
-import {Icon, Style} from 'ol/style';
+import ClusterSource from 'ol/source/Cluster';
+import GeoJSON from 'ol/format/GeoJSON';
+import {Icon, Style, Circle as CircleStyle, Fill, Stroke, Text} from 'ol/style';
 import Point from 'ol/geom/Point';
 import OSM from 'ol/source/OSM';
 import {fromLonLat, transform} from 'ol/proj';
@@ -70,6 +72,44 @@ var osm_map = {
     
     transformCoordinate: function (coordinate) {
         return transform(coordinate, 'EPSG:3857', 'EPSG:4326');
+    },
+    
+    addGeoJsonLayer: function (url) {
+        var styleCache = {};
+        
+        var geoJsonLayer = new VectorLayer({
+            source: new ClusterSource({
+                distance: 30,
+                source: new VectorSource({
+                    projection : 'EPSG:3857',
+                    url: url,
+                    format: new GeoJSON(),
+                }),
+            }),
+            style: function (feature) {
+                var size = feature.get('features').length;
+                var style = styleCache[size];
+                if (!style) {
+                    style = new Style({
+                        image: new CircleStyle({
+                            radius: 12,
+                            fill: new Fill({color: 'rgba(52, 144, 220, 0.7)'}),
+                            stroke: new Stroke({
+                                color: '#000',
+                                width: 2,
+                            }),
+                        }),
+                        text: new Text({
+                            text: size.toString(),
+                            fill: new Fill({color: '#000'}),
+                        }),
+                    }),
+                    styleCache[size] = style;
+                }
+                return style;
+            },
+        });
+        this.map.addLayer(geoJsonLayer);
     },
 }
 

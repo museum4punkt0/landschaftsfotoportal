@@ -34,7 +34,9 @@ Route::get('item/show/own', 'ItemController@own')->name('item.show.own');
 Route::get('download/{item}', 'ItemController@download')->name('item.download');
 Route::get('gallery', 'ItemController@gallery')->name('item.gallery');
 Route::get('timeline', 'ItemController@timeline')->name('item.timeline');
+Route::get('map', 'ItemController@map')->name('item.map');
 
+Route::get('map/all', 'AjaxMapController@all')->name('map.all');
 Route::post('comment/{item}/store', 'AjaxCommentController@store')->name('comment.store');
 Route::post('comment/{comment}/update', 'AjaxCommentController@update')->name('ajax.comment.update');
 Route::post('comment/{comment}/destroy', 'AjaxCommentController@destroy')->name('ajax.comment.destroy');

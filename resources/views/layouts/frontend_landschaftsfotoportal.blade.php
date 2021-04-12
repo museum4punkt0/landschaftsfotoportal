@@ -44,7 +44,7 @@
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.gallery') }}#portfolio">Portal</a></li>
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('search.index') }}">@lang('search.header')</a></li>
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.timeline') }}#timeline">Zeitstrahl</a></li>
-                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="#">Karte</a></li>
+                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.map') }}">Karte</a></li>
                     @guest
                         <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('login') }}">@lang('Login') </a></li>
                     @else

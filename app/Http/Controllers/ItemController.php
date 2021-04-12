@@ -160,4 +160,14 @@ class ItemController extends Controller
         
         return view('item.timeline', compact('decades', 'details'));
     }
+
+    /**
+     * Display a map showing all items.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function map()
+    {
+        return view('item.map');
+    }
 }
