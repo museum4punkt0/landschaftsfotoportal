@@ -151,12 +151,16 @@ class SearchController extends Controller
         }
         
         // Taxon search: full name or native name
-        $search = $request->input('taxon_name');
-        $taxa = Taxon::where('full_name', 'LIKE', "%{$search}%")
-            ->orWhere('native_name', 'LIKE', "%{$search}%")
-            ->with('items')
-            ->orderBy('full_name')
-            ->get();
+        $taxa = collect([]);
+        $search_taxa = $request->input('taxon_name');
+        
+        if ($search_taxa) {
+            $taxa = Taxon::where('full_name', 'LIKE', "%{$search_taxa}%")
+                ->orWhere('native_name', 'LIKE', "%{$search_taxa}%")
+                ->with('items')
+                ->orderBy('full_name')
+                ->get();
+        }
         
         $search_terms = $request->input();
         return view('search.form', compact('menu_root', 'search_terms', 'taxa', 'items', 'lists', 'colmap', 'translations'));
