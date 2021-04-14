@@ -24,4 +24,17 @@ return [
     'reverse_geocoder_url' => 'http://open.mapquestapi.com/nominatim/v1/reverse.php?',
     'api_key' => 'FIR28iSHzTDis7Nj8GWEewkfT9gajo1j',
 
+    /*
+    |--------------------------------------------------------------------------
+    | Settings for the slippy map
+    |--------------------------------------------------------------------------
+    |
+    | Coordinates and zoom for map initialisation
+    |
+    */
+    
+    'map_lat' => 51.1,
+    'map_lon' => 14.5,
+    'map_zoom' => 10,
+
 ];

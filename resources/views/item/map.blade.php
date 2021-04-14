@@ -18,9 +18,9 @@
 
                     <div id="map" class="map"><div id="popup"></div></div>
                     <script type="text/javascript">
-                        var lon = 14.5;
-                        var lat = 51;
-                        var zoom = 10;
+                        var lon = {{ Config::get('geo.map_lon', 14.986) }};
+                        var lat = {{ Config::get('geo.map_lat', 51.15) }};
+                        var zoom = {{ Config::get('geo.map_zoom', 8) }};
                         
                         {{-- Init and display the map --}}
                         osm_map.display(lon, lat, zoom);
