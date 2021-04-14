@@ -102836,6 +102836,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var osm_map = {
   map: false,
+  popup: false,
   vectorLayer: new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
     source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
       features: false
@@ -102854,6 +102855,17 @@ var osm_map = {
       }), this.vectorLayer],
       view: view
     });
+    var element = document.getElementById('popup');
+
+    if (element) {
+      this.popup = new ol__WEBPACK_IMPORTED_MODULE_0__["Overlay"]({
+        element: element,
+        positioning: 'bottom-center',
+        stopEvent: false,
+        offset: [0, 15]
+      });
+      this.map.addOverlay(this.popup);
+    }
   },
   updateSize: function updateSize() {
     this.map.updateSize();

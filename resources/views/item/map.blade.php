@@ -16,7 +16,7 @@
                 <div class="card-body">
 @endif
 
-                    <div id="map" class="map"></div>
+                    <div id="map" class="map"><div id="popup"></div></div>
                     <script type="text/javascript">
                         var lon = 14.5;
                         var lat = 51;
@@ -27,6 +27,48 @@
                         osm_map.addGeoJsonLayer('{{ route("map.all") }}');
                         
                         osm_map.addMarker(14.986789,  51.153432, '{{ asset("storage/images/logos/mein-smng.png") }}');
+                        
+                        var element = document.getElementById('popup');
+                        
+                        // Display popup on click
+                        osm_map.map.on('click', function (evt) {
+                            var feature = osm_map.map.forEachFeatureAtPixel(evt.pixel, function (feature) {
+                                return feature;
+                            });
+                            if (feature) {
+                                // Show popups for single items only, not for clusters
+                                if (feature.get('features').length == 1) {
+                                    // Destroy old popups
+                                    $(element).popover('dispose');
+                                    var coordinates = feature.getGeometry().getCoordinates();
+                                    osm_map.popup.setPosition(coordinates);
+                                    var ft = feature.get('features')[0];
+                                    var content = '<a href="' + ft.get('details') + '">';
+                                    content += '<img width=100 src="' + ft.get('preview') + '"/></a>';
+                                    $(element).popover({
+                                        placement: 'bottom',
+                                        html: true,
+                                        title: ft.get('name'),
+                                        content: content,
+                                    });
+                                    $(element).popover('show');
+                                }
+                            } else {
+                                $(element).popover('dispose');
+                            }
+                        });
+                        
+                        // Change mouse cursor when over marker
+                        osm_map.map.on('pointermove', function (e) {
+                            if (e.dragging) {
+                                $(element).popover('dispose');
+                                return;
+                            }
+                            var pixel = osm_map.map.getEventPixel(e.originalEvent);
+                            var hit = osm_map.map.hasFeatureAtPixel(pixel);
+                            osm_map.map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+                        });
+
                     </script>
 
 {{-- Quick hack for LFP mock-up --}}

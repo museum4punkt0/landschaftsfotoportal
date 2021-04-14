@@ -1,4 +1,4 @@
-import {Map, Feature, View} from 'ol';
+import {Map, Feature, View, Overlay} from 'ol';
 import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
@@ -11,6 +11,8 @@ import {fromLonLat, transform} from 'ol/proj';
 
 var osm_map = {
     map: false,
+    
+    popup: false,
     
     vectorLayer: new VectorLayer({
         source: new VectorSource({
@@ -37,6 +39,17 @@ var osm_map = {
             ],
             view: view,
         });
+        
+        var element = document.getElementById('popup');
+        if (element) {
+            this.popup = new Overlay({
+                element: element,
+                positioning: 'bottom-center',
+                stopEvent: false,
+                offset: [0, 15],
+            });
+            this.map.addOverlay(this.popup);
+        }
     },
     
     updateSize: function () {

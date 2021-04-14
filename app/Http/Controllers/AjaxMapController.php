@@ -25,7 +25,10 @@ class AjaxMapController extends Controller
                 'type' => 'Feature',
                 'id' => $item->item_id,
                 'properties' => [
-                '   name' => $item->details->firstWhere('column_fk', 23)->value_string,
+                    'name' => $item->details->firstWhere('column_fk', 23)->value_string,
+                    'preview' => asset('storage/'. config('media.preview_dir')) . '/'
+                        . $item->details->firstWhere('column_fk', 13)->value_string . '.jpg',
+                    'details' => route('item.show.public', $item),
                 ],
                 'geometry' => [
                     'type' => 'Point',
