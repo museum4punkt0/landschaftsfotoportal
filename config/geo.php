@@ -26,10 +26,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Usage of browser's geolocation service
+    |--------------------------------------------------------------------------
+    |
+    | Try to use the built-in geolocation service if available and allowed by
+    | the user. If this fails for any reaon, the config options 'map_lat' and
+    | 'map_lon' will be used instead.
+    |
+    */
+    
+    'use_geolocation' => true,
+
+    /*
+    |--------------------------------------------------------------------------
     | Settings for the slippy map
     |--------------------------------------------------------------------------
     |
     | Coordinates and zoom for map initialisation
+    | Used only if config option 'use_geolocation' is not set or false
     |
     */
     
