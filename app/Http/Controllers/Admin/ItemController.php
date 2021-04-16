@@ -219,7 +219,8 @@ class ItemController extends Controller
                     case '_image_':
                         if ($file->isValid()) {
                             $path = config('media.full_dir');
-                            $name =  $column_id ."_". date('YmdHis') .".". $file->extension();
+                            $name = $item->item_id ."_". $column_id ."_". date('YmdHis') ."_";
+                            $name .= $file->getClientOriginalName();
                             // Store on local 'public' disc
                             $file->storeAs($path, $name, 'public');
                             $detail_data['value_string']  = $name;
@@ -501,7 +502,8 @@ class ItemController extends Controller
                     case '_image_':
                         if ($file->isValid()) {
                             $path = config('media.full_dir');
-                            $name = $column_id ."_". date('YmdHis') .".". $file->extension();
+                            $name = $item->item_id ."_". $column_id ."_". date('YmdHis') ."_";
+                            $name .= $file->getClientOriginalName();
                             // Store on local 'public' disc
                             $file->storeAs($path, $name, 'public');
                             $detail->value_string  = $name;
