@@ -40,7 +40,7 @@
                             <div class="portfolio-item">
                             <a class="portfolio-link d-flex justify-content-center" href="{{route('item.show.public', $comment->item->item_id)}}#details">
                                 <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                    $comment->item->details->firstWhere('column_fk', 13)->value_string .'.jpg') }}" height=100 alt="" title="{{ $comment->item->details->firstWhere('column_fk', 23)->value_string }}"/>
+                                    $comment->item->details->firstWhere('column_fk', 13)->value_string) }}" height=100 alt="" title="{{ $comment->item->details->firstWhere('column_fk', 23)->value_string }}"/>
                             </a>
                             </div>
                         </td>

@@ -34,7 +34,7 @@
                             <div class="row"><p class="text-muted">
                             @foreach($details[$dec->decade] as $detail)
                                 <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                    $detail->item->details->firstWhere('column_fk', 13)->value_string .'.jpg') }}" height=100 alt="" />
+                                    $detail->item->details->firstWhere('column_fk', 13)->value_string) }}" height=100 alt="" />
                             @endforeach
                             </p></div>
                         </div>

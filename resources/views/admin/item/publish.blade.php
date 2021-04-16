@@ -42,7 +42,7 @@
                             <a class="portfolio-link d-flex justify-content-center" href="{{route('item.show.public', $item->item_id)}}#details">
                             @if($item->details->firstWhere('column_fk', 13))
                                 <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                    $item->details->firstWhere('column_fk', 13)->value_string .'.jpg') }}" height=100 alt="" title="{{ $item->details->firstWhere('column_fk', 23)->value_string }}"/>
+                                    $item->details->firstWhere('column_fk', 13)->value_string) }}" height=100 alt="" title="{{ $item->details->firstWhere('column_fk', 23)->value_string }}"/>
                             @endif
                             </a>
                             </div>

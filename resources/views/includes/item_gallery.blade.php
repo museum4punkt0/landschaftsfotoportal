@@ -24,7 +24,7 @@
                             </div>
                         </div>
                         <img class="img-fluid" src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                $item->details->firstWhere('column_fk', 13)->value_string .'.jpg') }}" alt="" />
+                                $item->details->firstWhere('column_fk', 13)->value_string) }}" alt="" />
                     </a>
                     <div class="portfolio-caption">
                         <div class="portfolio-caption-heading">
