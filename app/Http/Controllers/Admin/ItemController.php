@@ -218,9 +218,10 @@ class ItemController extends Controller
                 switch ($data_type) {
                     case '_image_':
                         if ($file->isValid()) {
-                            $path = 'public/images/';
+                            $path = config('media.full_dir');
                             $name =  $column_id ."_". date('YmdHis') .".". $file->extension();
-                            $file->storeAs($path, $name);
+                            // Store on local 'public' disc
+                            $file->storeAs($path, $name, 'public');
                             $detail_data['value_string']  = $name;
                         }
                         break;
@@ -499,9 +500,10 @@ class ItemController extends Controller
                 switch ($data_type) {
                     case '_image_':
                         if ($file->isValid()) {
-                            $path = 'public/images/';
+                            $path = config('media.full_dir');
                             $name = $column_id ."_". date('YmdHis') .".". $file->extension();
-                            $file->storeAs($path, $name);
+                            // Store on local 'public' disc
+                            $file->storeAs($path, $name, 'public');
                             $detail->value_string  = $name;
                         }
                         break;
