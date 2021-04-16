@@ -366,7 +366,7 @@
                             <span class="form-text text-muted">@lang('column.image_hint')</span>
                         </div>
                         <div class="col">
-                        @if($cm->getConfigValue('image_show') == 'preview')
+                        @if($cm->getConfigValue('image_show') == 'preview' || $cm->getConfigValue('image_show') == 'filename')
                             @if(Storage::exists('public/'. Config::get('media.preview_dir') .
                                 $details->firstWhere('column_fk', $cm->column->column_id)->value_string))
                                 <img src="{{ asset('storage/'. Config::get('media.preview_dir') .

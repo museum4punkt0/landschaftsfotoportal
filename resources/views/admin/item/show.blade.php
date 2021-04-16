@@ -221,7 +221,7 @@
                     </h5>
                 </div>
                 <div class="card card-body">
-                @if($cm->getConfigValue('image_show') == 'preview')
+                @if($cm->getConfigValue('image_show') == 'preview' || $cm->getConfigValue('image_show') == 'filename')
                     @if($details->firstWhere('column_fk', $cm->column->column_id))
                         {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}
                         @if(Storage::exists('public/'. Config::get('media.preview_dir') .
