@@ -43,7 +43,7 @@ return [
     */
     'preview_dir' => 'images/preview/',
 
-    'preview_width' => 350,
+    'preview_width' => 375,
     'preview_height' => 250,
 
     /*

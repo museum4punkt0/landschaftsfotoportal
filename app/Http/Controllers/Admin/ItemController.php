@@ -545,22 +545,18 @@ class ItemController extends Controller
      * @return void
      */
     private function createThumnail($image_path, $filename) {
-        // Get original dimensions and ratio
+        // Get original dimensions of image
         list($width_orig, $height_orig) = getimagesize(
             Storage::disk('public')->path($image_path . $filename)
         );
-        $ratio_orig = $width_orig / $height_orig;
         
         // Calculate new dimensions
-        $width_thumb = config('media.preview_height');
+        $width_thumb = config('media.preview_width');
         $height_thumb = config('media.preview_height');
         
-        if ($width_thumb / $height_thumb > $ratio_orig) {
-            $width_thumb = $height_thumb * $ratio_orig;
-        }
-        else {
-            $height_thumb = $width_thumb / $ratio_orig;
-        }
+        $ratio = min($width_thumb/$width_orig, $height_thumb/$height_orig);
+        $width_thumb = $width_orig * $ratio;
+        $height_thumb = $height_orig * $ratio;
         
         // Load original image and scale it to new size
         $original = imagecreatefromjpeg(Storage::disk('public')->path($image_path . $filename));
