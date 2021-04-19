@@ -225,8 +225,8 @@ class ItemController extends Controller
                             // Store on local 'public' disc
                             $file->storeAs($path, $name, 'public');
                             $detail_data['value_string']  = $name;
-                            // Create thumbnail image
-                            $this->createThumnail($path, $name);
+                            // Create resized images
+                            $this->processImageResizing($path, $name);
                         }
                         break;
                 }
@@ -510,8 +510,8 @@ class ItemController extends Controller
                             // Store on local 'public' disc
                             $file->storeAs($path, $name, 'public');
                             $detail->value_string  = $name;
-                            // Create thumbnail image
-                            $this->createThumnail($path, $name);
+                            // Create resized images
+                            $this->processImageResizing($path, $name);
                         }
                         break;
                 }
@@ -538,31 +538,65 @@ class ItemController extends Controller
     }
 
     /**
-     * Create a resized version of a given image file.
+     * Handle resizing of a given image file.
      *
      * @param  string $image_path
      * @param  string $filename
      * @return void
      */
-    private function createThumnail($image_path, $filename) {
+    private function processImageResizing($image_path, $filename) {
         // Get original dimensions of image
         list($width_orig, $height_orig) = getimagesize(
             Storage::disk('public')->path($image_path . $filename)
         );
         
+        // Create small sized preview images if set in config
+        if (config('media.preview_dir')) {
+            $this->createResizedImage(
+                $image_path,
+                $filename,
+                $width_orig,
+                $height_orig,
+                config('media.preview_dir'),
+                config('media.preview_width'),
+                config('media.preview_height')
+            );
+        }
+        // Create medium sized preview images if set in config
+        if (config('media.medium_dir')) {
+            $this->createResizedImage(
+                $image_path,
+                $filename,
+                $width_orig,
+                $height_orig,
+                config('media.medium_dir'),
+                config('media.medium_width'),
+                config('media.medium_height')
+            );
+        }
+    }
+
+    /**
+     * Create a resized version of a given image file.
+     *
+     * @param  string $image_path
+     * @param  string $filename
+     * @param  string $dest_path
+     * @param  integer $width_thumb
+     * @param  integer $height_thumb
+     * @return void
+     */
+    private function createResizedImage($src_path, $filename, $width_orig, $height_orig, $dest_path, $width_thumb, $height_thumb) {
         // Calculate new dimensions
-        $width_thumb = config('media.preview_width');
-        $height_thumb = config('media.preview_height');
-        
         $ratio = min($width_thumb/$width_orig, $height_thumb/$height_orig);
         $width_thumb = $width_orig * $ratio;
         $height_thumb = $height_orig * $ratio;
         
         // Load original image and scale it to new size
-        $original = imagecreatefromjpeg(Storage::disk('public')->path($image_path . $filename));
+        $original = imagecreatefromjpeg(Storage::disk('public')->path($src_path . $filename));
         $scaled = imagescale($original, $width_thumb, $height_thumb, IMG_BICUBIC_FIXED);
         
         // Store thumbnail to disk
-        imagejpeg($scaled, Storage::disk('public')->path(config('media.preview_dir')) . $filename);
+        imagejpeg($scaled, Storage::disk('public')->path($dest_path) . $filename);
     }
 }

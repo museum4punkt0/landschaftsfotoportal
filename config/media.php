@@ -30,6 +30,9 @@ return [
     |--------------------------------------------------------------------------
     | Directory for storing image files in medium size
     |--------------------------------------------------------------------------
+    |
+    | Set to 'false' or empty string '' to prevent automatic image creating
+    |
     */
     'medium_dir' => 'images/medium/',
     
@@ -40,6 +43,9 @@ return [
     |--------------------------------------------------------------------------
     | Directory for storing image files in thumbnail size
     |--------------------------------------------------------------------------
+    |
+    | Set to 'false' or empty string '' to prevent automatic image creating
+    |
     */
     'preview_dir' => 'images/preview/',
 
