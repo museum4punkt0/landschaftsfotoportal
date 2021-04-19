@@ -32,6 +32,9 @@ return [
     |--------------------------------------------------------------------------
     */
     'medium_dir' => 'images/medium/',
+    
+    'medium_width' => 1200,
+    'medium_height' => 800,
 
     /*
     |--------------------------------------------------------------------------
@@ -40,7 +43,14 @@ return [
     */
     'preview_dir' => 'images/preview/',
 
-    'preview_width' => 112,
+    'preview_width' => 350,
+    'preview_height' => 250,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Parameters for zoomify image viewer
+    |--------------------------------------------------------------------------
+    */
     'zoomify_url' => 'https://webapp.senckenberg.de/zoomify/index_full.html?',
     'zoomify_zif_image_path' => 'bilder/aq-media/bestikri/images_tiled/2/',
     'zoomify_jpg_image_path' => 'bilder/aq-media/bestikri/images/2/',

@@ -13,6 +13,7 @@ use App\Value;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Redirect;
 
 class ItemController extends Controller
@@ -224,6 +225,8 @@ class ItemController extends Controller
                             // Store on local 'public' disc
                             $file->storeAs($path, $name, 'public');
                             $detail_data['value_string']  = $name;
+                            // Create thumbnail image
+                            $this->createThumnail($path, $name);
                         }
                         break;
                 }
@@ -507,6 +510,8 @@ class ItemController extends Controller
                             // Store on local 'public' disc
                             $file->storeAs($path, $name, 'public');
                             $detail->value_string  = $name;
+                            // Create thumbnail image
+                            $this->createThumnail($path, $name);
                         }
                         break;
                 }
@@ -530,5 +535,38 @@ class ItemController extends Controller
         
         return Redirect::to('admin/item')
             ->with('success', __('items.deleted'));
+    }
+
+    /**
+     * Create a resized version of a given image file.
+     *
+     * @param  string $image_path
+     * @param  string $filename
+     * @return void
+     */
+    private function createThumnail($image_path, $filename) {
+        // Get original dimensions and ratio
+        list($width_orig, $height_orig) = getimagesize(
+            Storage::disk('public')->path($image_path . $filename)
+        );
+        $ratio_orig = $width_orig / $height_orig;
+        
+        // Calculate new dimensions
+        $width_thumb = config('media.preview_height');
+        $height_thumb = config('media.preview_height');
+        
+        if ($width_thumb / $height_thumb > $ratio_orig) {
+            $width_thumb = $height_thumb * $ratio_orig;
+        }
+        else {
+            $height_thumb = $width_thumb / $ratio_orig;
+        }
+        
+        // Load original image and scale it to new size
+        $original = imagecreatefromjpeg(Storage::disk('public')->path($image_path . $filename));
+        $scaled = imagescale($original, $width_thumb, $height_thumb, IMG_BICUBIC_FIXED);
+        
+        // Store thumbnail to disk
+        imagejpeg($scaled, Storage::disk('public')->path(config('media.preview_dir')) . $filename);
     }
 }
