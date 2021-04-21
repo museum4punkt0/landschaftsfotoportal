@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Item;
 use App\Taxon;
+use App\Cart;
+use App\Comment;
 use App\Detail;
 use App\Column;
 use App\ColumnMapping;
@@ -531,6 +533,16 @@ class ItemController extends Controller
      */
     public function destroy(Item $item)
     {
+        // Delete this item from all carts
+        Cart::where('item_fk', $item->item_id)->delete();
+        
+        // Delete all comments owned by this item
+        Comment::where('item_fk', $item->item_id)->delete();
+        
+        // Delete all details owned by this item
+        Detail::where('item_fk', $item->item_id)->delete();
+        
+        // Delete the item itself
         $item->delete();
         
         return Redirect::to('admin/item')
