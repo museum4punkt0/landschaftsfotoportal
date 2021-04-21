@@ -25,7 +25,15 @@ class SearchController extends Controller
         $menu_root = Item::whereNull('parent_fk')->where('public', 1)->orderBy('item_id')->get();
         
         // BEGIN TODO to be refactored
-        $item_type = 39;
+        // Get the item_type for '_image_' items
+        // TODO: this should be more flexible; allow configuration of multiple/different item_types
+        $it_list = Selectlist::where('name', '_item_type_')->first();
+        $item_type = Element::where('list_fk', $it_list->list_id)
+            ->whereHas('values', function (Builder $query) {
+                $query->where('value', '_image_');
+            })
+            ->first()->element_id;
+        
         $colmap = ColumnMapping::where('item_type_fk', $item_type)->orderBy('column_order')->get();
         
         // Load all list elements of lists used by this item_type's columns
@@ -70,7 +78,15 @@ class SearchController extends Controller
         $menu_root = Item::whereNull('parent_fk')->orderBy('item_id')->get();
         
         // BEGINN TODO to be refactored
-        $item_type = 39;
+        // Get the item_type for '_image_' items
+        // TODO: this should be more flexible; allow configuration of multiple/different item_types
+        $it_list = Selectlist::where('name', '_item_type_')->first();
+        $item_type = Element::where('list_fk', $it_list->list_id)
+            ->whereHas('values', function (Builder $query) {
+                $query->where('value', '_image_');
+            })
+            ->first()->element_id;
+        
         $colmap = ColumnMapping::where('item_type_fk', $item_type)->orderBy('column_order')->get();
         
         // Load all list elements of lists used by this item_type's columns

@@ -93,9 +93,18 @@ class ItemController extends Controller
      */
     public function own()
     {
+        // Get the item_type for '_image_' items
+        // TODO: this should be more flexible; allow configuration of multiple/different item_types
+        $it_list = Selectlist::where('name', '_item_type_')->first();
+        $item_type = Element::where('list_fk', $it_list->list_id)
+            ->whereHas('values', function (Builder $query) {
+                $query->where('value', '_image_');
+            })
+            ->first()->element_id;
+        
         $items = Item::myOwn(Auth::user()->id)->with('details')->orderBy('created_at')->paginate(12);
         
-        return view('item.own', compact('items'));
+        return view('item.own', compact('items', 'item_type'));
     }
 
     /**
