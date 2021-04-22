@@ -152,32 +152,59 @@
                     </div>
                     <!-- Radio buttons to switch the type of date -->
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="date_type" id="datePointRadio-{{ $cm->column->column_id }}" data-column="{{ $cm->column->column_id }}" value="point" checked>
+                        <input class="form-check-input" type="radio" name="date_type" id="datePointRadio-{{ $cm->column->column_id }}" data-column="{{ $cm->column->column_id }}" value="point"
+                        @if($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from()->toDateString() == $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to()->toDateString())
+                            checked
+                        @endif
+                        >
                         <label class="form-check-label" for="datePointRadio-{{ $cm->column->column_id }}">@lang('common.date_point')</label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="date_type" id="datePeriodRadio-{{ $cm->column->column_id }}" data-column="{{ $cm->column->column_id }}" value="period">
+                        <input class="form-check-input" type="radio" name="date_type" id="datePeriodRadio-{{ $cm->column->column_id }}" data-column="{{ $cm->column->column_id }}" value="period"
+                        @if($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from()->toDateString() != $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to()->toDateString())
+                            checked
+                        @endif
+                        >
                         <label class="form-check-label" for="datePeriodRadio-{{ $cm->column->column_id }}">@lang('common.date_period')</label>
                     </div>
                     <!-- Form field for the date (point in time) -->
-                    <div class="collapse show date-point" data-column="{{ $cm->column->column_id }}">
+                    @if($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from()->toDateString() == $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to()->toDateString())
+                        <div class="collapse show date-point" data-column="{{ $cm->column->column_id }}">
+                    @else
+                        <div class="collapse date-point" data-column="{{ $cm->column->column_id }}">
+                    @endif
                         <input type="date" name="fields[{{ $cm->column->column_id }}]" data-column="{{ $cm->column->column_id }}" class="form-control" 
                             value="{{ old('fields.'. $cm->column->column_id, 
-                            $details->firstWhere('column_fk', $cm->column->column_id)->value_date) }}" />
+                            $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from()->toDateString()) }}" />
                         <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                     </div>
                     <!-- Form fields for the date (period of time) -->
-                    <div class="collapse date-period" data-column="{{ $cm->column->column_id }}">
-                        @include('includes.form_date_range')
+                    @if($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from()->toDateString() != $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to()->toDateString())
+                        <div class="collapse show date-period" data-column="{{ $cm->column->column_id }}">
+                    @else
+                        <div class="collapse date-period" data-column="{{ $cm->column->column_id }}">
+                    @endif
+                        @include('includes.form_date_range', [
+                            'start_date' => [
+                                $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from()->year,
+                                $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from()->month,
+                                $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from()->day,
+                            ],
+                            'end_date' => [
+                                $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to()->year,
+                                $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to()->month,
+                                $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to()->day,
+                            ],
+                        ])
                         <input class="btn btn-primary" type="button" value="@lang('common.save')" onClick="checkDateRange({{ $cm->column->column_id }});">
                     </div>
                     <!-- Hidden form fields for time range passed to laravel controller -->
-                    <input type="text" name="fields[{{ $cm->column->column_id }}][start]" data-column="{{ $cm->column->column_id }}" class="form-control date-period-start" 
+                    <input type="hidden" name="fields[{{ $cm->column->column_id }}][start]" data-column="{{ $cm->column->column_id }}" class="form-control date-period-start" 
                         value="{{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_date) }}" />
-                    <input type="text" name="fields[{{ $cm->column->column_id }}][end]" data-column="{{ $cm->column->column_id }}" class="form-control date-period-end" 
+                        $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from()->toDateString()) }}" />
+                    <input type="hidden" name="fields[{{ $cm->column->column_id }}][end]" data-column="{{ $cm->column->column_id }}" class="form-control date-period-end" 
                         value="{{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_date) }}" />
+                        $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to()->toDateString()) }}" />
                 </div>
                 <script type="text/javascript">
                     // Triggered when radio changed

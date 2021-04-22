@@ -156,6 +156,25 @@
                 </div>
                 @break
             
+            {{-- Data_type of form field is date range --}}
+            @case('_date_range_')
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        {{ $cm->column->translation->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        ({{ $cm->column->description }})
+                    </h5>
+                </div>
+                <div class="card card-body">
+                    {{ old('fields.'. $cm->column->column_id, 
+                        $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from()->toDateString()) }}
+                    @if($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from()->toDateString() != $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to()->toDateString())
+                        - {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to()->toDateString() }}
+                    @endif
+                        
+                </div>
+                @break
+            
             {{-- Data_type of form field is string --}}
             @case('_string_')
             {{-- Data_type of form field is (menu) title --}}

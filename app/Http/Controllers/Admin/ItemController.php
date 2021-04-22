@@ -6,6 +6,7 @@ use App\Item;
 use App\Taxon;
 use App\Cart;
 use App\Comment;
+use App\DateRange;
 use App\Detail;
 use App\Column;
 use App\ColumnMapping;
@@ -192,6 +193,9 @@ class ItemController extends Controller
                     break;
                 case '_date_':
                     $detail_data['value_date'] = $value;
+                    break;
+                case '_date_range_':
+                    $detail->value_daterange = new DateRange($value['start'], $value['end']);
                     break;
                 case '_string_':
                 case '_title_':
@@ -480,6 +484,9 @@ class ItemController extends Controller
                     break;
                 case '_date_':
                     $detail->value_date = $value;
+                    break;
+                case '_date_range_':
+                    $detail->value_daterange = new DateRange($value['start'], $value['end']);
                     break;
                 case '_string_':
                 case '_title_':
