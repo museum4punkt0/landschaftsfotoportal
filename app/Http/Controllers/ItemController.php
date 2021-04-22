@@ -115,7 +115,7 @@ class ItemController extends Controller
      */
     public function download(Item $item)
     {
-        $filename = $item->details->firstWhere('column_fk', 13)->value_string . '.jpg';
+        $filename = $item->details->firstWhere('column_fk', 13)->value_string;
         $pathToFile = 'public/'. config('media.full_dir') . $filename;
         
         if (Storage::missing($pathToFile))
