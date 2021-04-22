@@ -132,6 +132,24 @@ class ListSeeder extends Seeder
             Attribute::where('name', 'name_en')->value('attribute_id'),
             ['value' => 'date value']
         );
+        // Data type: date range
+        $element = Element::create([
+            'list_fk' => $data_type_list->list_id,
+            'parent_fk' => null,
+            'value_summary' => '',
+        ]);
+        $element->attributes()->attach(
+            Attribute::where('name', 'code')->value('attribute_id'),
+            ['value' => '_date_range_']
+        );
+        $element->attributes()->attach(
+            Attribute::where('name', 'name_de')->value('attribute_id'),
+            ['value' => 'Zeitspanne']
+        );
+        $element->attributes()->attach(
+            Attribute::where('name', 'name_en')->value('attribute_id'),
+            ['value' => 'date range']
+        );
         // Data type: url
         $element = Element::create([
             'list_fk' => $data_type_list->list_id,
