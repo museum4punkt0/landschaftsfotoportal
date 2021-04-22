@@ -3,6 +3,8 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Casts\DateRangeCast;
+#use Belamov\PostgresRange\Casts\DateRangeCast;
 
 class Detail extends Model
 {
@@ -27,7 +29,12 @@ class Detail extends Model
         'value_int',
         'value_float',
         'value_date',
+        'value_daterange',
         'value_string',
+    ];
+    
+    protected $casts = [
+        'value_daterange' => DateRangeCast::class,
     ];
     
     /**
