@@ -195,7 +195,7 @@ class ItemController extends Controller
                     $detail_data['value_date'] = $value;
                     break;
                 case '_date_range_':
-                    $detail->value_daterange = new DateRange($value['start'], $value['end']);
+                    $detail_data['value_daterange'] = new DateRange($value['start'], $value['end']);
                     break;
                 case '_string_':
                 case '_title_':
