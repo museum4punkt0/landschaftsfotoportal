@@ -126,6 +126,7 @@
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 @break
+            
             {{-- Data_type of form field is float --}}
             @case('_float_')
                 <div class="form-group">
@@ -141,6 +142,96 @@
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 @break
+            
+            {{-- Data_type of form field is string --}}
+            @case('_string_')
+            {{-- Data_type of form field is (menu) title --}}
+            @case('_title_')
+            {{-- Data_type of form field is image title --}}
+            @case('_image_title_')
+            {{-- Data_type of form field is image copyright --}}
+            @case('_image_copyright_')
+            {{-- Data_type of form field is redirect --}}
+            @case('_redirect_')
+                <div class="form-group">
+                    <span>
+                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }}
+                        ({{ $cm->column->description }}, 
+                        @lang('columns.data_type'): 
+                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
+                    </span>
+                    @if($details->firstWhere('column_fk', $cm->column->column_id))
+                        <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif" 
+                            value="{{ old('fields.'. $cm->column->column_id, 
+                            $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}" />
+                        @if($cm->getConfigValue('data_subtype') == 'location_city')
+                            <button type="button" class="btn btn-primary btn-sm searchAddressBtn">
+                                @lang('common.get_latlon')
+                            </button>
+                        @endif
+                    @else
+                        <span>detail column {{$cm->column->column_id}} for map not found</span>
+                    @endif
+                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                </div>
+                @break
+            
+            {{-- Data_type of form field is html --}}
+            @case('_html_')
+                <div class="form-group">
+                    <span>
+                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
+                        ({{ $cm->column->description }}, 
+                        @lang('columns.data_type'): 
+                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
+                    </span>
+                    <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control summernote" 
+                        rows=5>{!! old('fields.'. $cm->column->column_id, 
+                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string) !!}</textarea>
+                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                </div>
+                <script type="text/javascript">
+                    $(document).ready(function() {
+                        $('.summernote').summernote({
+                            tabsize: 4,
+                            height: 200
+                        });
+                    });
+                </script>
+                @break
+            
+            {{-- Data_type of form field is URL --}}
+            @case('_url_')
+                <div class="form-group">
+                    <span>
+                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
+                        ({{ $cm->column->description }}, 
+                        @lang('columns.data_type'): 
+                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
+                    </span>
+                    <input type="url" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
+                        value="{{ old('fields.'. $cm->column->column_id, 
+                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}" />
+                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                </div>
+                @break
+            
+            {{-- Data_type of form field is date --}}
+            @case('_date_')
+                <div class="form-group">
+                    <span>
+                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
+                        ({{ $cm->column->description }}, 
+                        @lang('columns.data_type'): 
+                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
+                    </span>
+                    <input type="date" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
+                        value="{{ old('fields.'. $cm->column->column_id, 
+                        $details->firstWhere('column_fk', $cm->column->column_id)->value_date) }}" />
+                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                </div>
+                @break
+            
             {{-- Data_type of form field is date range --}}
             @case('_date_range_')
                 <div class="form-group">
@@ -293,91 +384,7 @@
                     }
                 </script>
                 @break
-            {{-- Data_type of form field is date --}}
-            @case('_date_')
-                <div class="form-group">
-                    <span>
-                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
-                        ({{ $cm->column->description }}, 
-                        @lang('columns.data_type'): 
-                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
-                    </span>
-                    <input type="date" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
-                        value="{{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_date) }}" />
-                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
-                </div>
-                @break
-            {{-- Data_type of form field is string --}}
-            @case('_string_')
-            {{-- Data_type of form field is (menu) title --}}
-            @case('_title_')
-            {{-- Data_type of form field is image title --}}
-            @case('_image_title_')
-            {{-- Data_type of form field is image copyright --}}
-            @case('_image_copyright_')
-            {{-- Data_type of form field is redirect --}}
-            @case('_redirect_')
-                <div class="form-group">
-                    <span>
-                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }}
-                        ({{ $cm->column->description }}, 
-                        @lang('columns.data_type'): 
-                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
-                    </span>
-                    @if($details->firstWhere('column_fk', $cm->column->column_id))
-                        <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif" 
-                            value="{{ old('fields.'. $cm->column->column_id, 
-                            $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}" />
-                        @if($cm->getConfigValue('data_subtype') == 'location_city')
-                            <button type="button" class="btn btn-primary btn-sm searchAddressBtn">
-                                @lang('common.get_latlon')
-                            </button>
-                        @endif
-                    @else
-                        <span>detail column {{$cm->column->column_id}} for map not found</span>
-                    @endif
-                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
-                </div>
-                @break
-            {{-- Data_type of form field is html --}}
-            @case('_html_')
-                <div class="form-group">
-                    <span>
-                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
-                        ({{ $cm->column->description }}, 
-                        @lang('columns.data_type'): 
-                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
-                    </span>
-                    <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control summernote" 
-                        rows=5>{!! old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string) !!}</textarea>
-                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
-                </div>
-                <script type="text/javascript">
-                    $(document).ready(function() {
-                        $('.summernote').summernote({
-                            tabsize: 4,
-                            height: 200
-                        });
-                    });
-                </script>
-                @break
-            {{-- Data_type of form field is URL --}}
-            @case('_url_')
-                <div class="form-group">
-                    <span>
-                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
-                        ({{ $cm->column->description }}, 
-                        @lang('columns.data_type'): 
-                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
-                    </span>
-                    <input type="url" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
-                        value="{{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}" />
-                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
-                </div>
-                @break
+            
             {{-- Data_type of form field is image --}}
             @case('_image_')
                 <div class="form-group">
@@ -409,6 +416,7 @@
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 @break
+            
             {{-- Data_type of form field is map --}}
             @case('_map_')
                 <div class="form-group">

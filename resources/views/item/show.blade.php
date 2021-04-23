@@ -176,15 +176,6 @@
                 </div>
                 @break
             
-            {{-- Data_type of form field is date --}}
-            @case('_date_')
-                @include('includes.column_title')
-                <div class="col font-weight-bold">
-                    {{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_date) }}
-                </div>
-                @break
-            
             {{-- Data_type of form field is string --}}
             @case('_string_')
             {{-- Data_type of form field is image title --}}
@@ -217,6 +208,15 @@
                 <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}
+                </div>
+                @break
+            
+            {{-- Data_type of form field is date --}}
+            @case('_date_')
+                @include('includes.column_title')
+                <div class="col font-weight-bold">
+                    {{ old('fields.'. $cm->column->column_id, 
+                        $details->firstWhere('column_fk', $cm->column->column_id)->value_date) }}
                 </div>
                 @break
             
