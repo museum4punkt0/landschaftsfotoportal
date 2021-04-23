@@ -220,6 +220,19 @@
                 </div>
                 @break
             
+            {{-- Data_type of form field is date range --}}
+            @case('_date_range_')
+                @include('includes.column_title')
+                <div class="col font-weight-bold">
+                    {{ old('fields.'. $cm->column->column_id, 
+                        $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from()->toDateString()) }}
+                    @if($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from()->toDateString() != $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to()->toDateString())
+                        - {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to()->toDateString() }}
+                    @endif
+                        
+                </div>
+                @break
+            
             {{-- Data_type of form field is image --}}
             @case('_image_')
                 @include('includes.column_title')
