@@ -42,10 +42,9 @@
         </select>
         <span class="text-danger">{{ $errors->first('data_type') }}</span>
     </div>
-    <div class="form-group">
+    <div class="form-group collapse @if(old('data_type') == 1 || !old('data_type'))show @endif" id="list_group">
         <span>@lang('lists.list')</span>
         <select name="list" class="form-control" size=1 >
-            <option value="">@lang('common.ignore')</option>
             @foreach($lists as $list)
                 <option value="{{$list->list_id}}"
                     @if(old('list') == $list->list_id) selected @endif>
@@ -81,6 +80,16 @@
             input_element.style.visibility = "hidden";
         }
     }
+    
+    // Triggered when select for 'data_type' changed
+    $('.form-control[name=data_type]').change(function(event) {
+        if ($(this).val() == 1) {
+            $('#list_group').collapse('show');
+        }
+        else {
+            $('#list_group').collapse('hide');
+        }
+    });
 </script>
 
 @endsection

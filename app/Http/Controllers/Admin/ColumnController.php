@@ -84,7 +84,7 @@ class ColumnController extends Controller
         $value = Value::where('value', '_list_')->first();
         
         $request->validate([
-            'list' => 'required_if:data_type,'.$value->element_fk,
+            'list' => 'required_if:data_type,'.$value->element_fk.'|integer',
             'data_type' => 'required|integer',
             'translation' => 'required|integer',
             'description' => 'required|string',
@@ -183,7 +183,7 @@ class ColumnController extends Controller
         $value = Value::where('value', '_list_')->first();
         
         $request->validate([
-            'list' => 'required_if:data_type,'.$value->element_fk,
+            'list' => 'required_if:data_type,'.$value->element_fk.'|integer',
             'data_type' => 'required|integer',
             'translation' => 'required|integer',
             'description' => 'required|string',
