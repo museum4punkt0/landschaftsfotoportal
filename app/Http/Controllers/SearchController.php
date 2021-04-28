@@ -28,11 +28,16 @@ class SearchController extends Controller
         // Get the item_type for '_image_' items
         // TODO: this should be more flexible; allow configuration of multiple/different item_types
         $it_list = Selectlist::where('name', '_item_type_')->first();
-        $item_type = Element::where('list_fk', $it_list->list_id)
+        $it_element = Element::where('list_fk', $it_list->list_id)
             ->whereHas('values', function (Builder $query) {
                 $query->where('value', '_image_');
-            })
-            ->first()->element_id;
+            })->first();
+        if ($it_element) {
+            $item_type = $it_element->element_id;
+        }
+        else {
+            $item_type = 0;
+        }
         
         $colmap = ColumnMapping::where('item_type_fk', $item_type)->orderBy('column_order')->get();
         
@@ -81,11 +86,16 @@ class SearchController extends Controller
         // Get the item_type for '_image_' items
         // TODO: this should be more flexible; allow configuration of multiple/different item_types
         $it_list = Selectlist::where('name', '_item_type_')->first();
-        $item_type = Element::where('list_fk', $it_list->list_id)
+        $it_element = Element::where('list_fk', $it_list->list_id)
             ->whereHas('values', function (Builder $query) {
                 $query->where('value', '_image_');
-            })
-            ->first()->element_id;
+            })->first();
+        if ($it_element) {
+            $item_type = $it_element->element_id;
+        }
+        else {
+            $item_type = 0;
+        }
         
         $colmap = ColumnMapping::where('item_type_fk', $item_type)->orderBy('column_order')->get();
         
@@ -119,29 +129,33 @@ class SearchController extends Controller
         // Search within lists using dropdowns
         $search_details = null;
         $items_details = collect([]);
-        // Get only selected columns to search within
-        $search_columns = array_filter($request->input('fields'), function($val) {
-            return $val > 0;
-        });
-        // Prepare the search query using selected columns
-        foreach ($search_columns as $col => $val) {
-            $search_details[] = [['column_fk', $col], ['element_fk', intval($val)]];
-        }
-        if ($search_details) {
-            $details = Detail::where(function ($query) use ($search_details) {
-                    foreach ($search_details as $n => $s) {
-                        $query->orWhere($search_details[$n]);
-                    }
-                })
-                ->with('item')
-                ->get();
-            
-            $items_details = $details->groupBy('item_fk')
-                ->filter(function ($value, $key) use ($search_details) {
-                    return $value->count() >= count($search_details);
-                })->map(function ($row) {
-                    return $row->first()->item;
-                });
+        
+        // Make sure there is at least one dropdown available
+        if ($request->input('fields')) {
+            // Get only selected columns to search within
+            $search_columns = array_filter($request->input('fields'), function($val) {
+                return $val > 0;
+            });
+            // Prepare the search query using selected columns
+            foreach ($search_columns as $col => $val) {
+                $search_details[] = [['column_fk', $col], ['element_fk', intval($val)]];
+            }
+            if ($search_details) {
+                $details = Detail::where(function ($query) use ($search_details) {
+                        foreach ($search_details as $n => $s) {
+                            $query->orWhere($search_details[$n]);
+                        }
+                    })
+                    ->with('item')
+                    ->get();
+                
+                $items_details = $details->groupBy('item_fk')
+                    ->filter(function ($value, $key) use ($search_details) {
+                        return $value->count() >= count($search_details);
+                    })->map(function ($row) {
+                        return $row->first()->item;
+                    });
+            }
         }
         
         // Full text search in all details containing strings
