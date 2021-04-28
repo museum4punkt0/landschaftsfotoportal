@@ -63,7 +63,7 @@ class ColumnMappingController extends Controller
         
         // Check for existing item_type, otherwise redirect back with warning message
         if ($item_types->isEmpty()) {
-            return Redirect::to('admin/colmap')
+            return redirect()->route('list.internal')
                 ->with('warning', __('colmaps.no_item_type'));
         }
         
@@ -148,7 +148,7 @@ class ColumnMappingController extends Controller
         
         // Check for existing item_type, otherwise redirect back with warning message
         if ($item_types->isEmpty()) {
-            return Redirect::to('admin/colmap')
+            return redirect()->route('list.internal')
                 ->with('warning', __('colmaps.no_item_type'));
         }
         
