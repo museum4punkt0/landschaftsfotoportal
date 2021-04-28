@@ -366,7 +366,6 @@
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
                     </span>
                     <input type="file" class="form-control-file" name="fields[{{ $cm->column->column_id }}]" />
-                    <span class="form-text text-muted">@lang('column.image_hint')</span>
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 @break

@@ -396,21 +396,22 @@
                     </span>
                     <div class="form-row">
                         <div class="col">
-                            <input type="file" class="form-control-file" name="fields[{{ $cm->column->column_id }}]" />
-                            <span class="form-text text-muted">@lang('column.image_hint')</span>
-                        </div>
-                        <div class="col">
                         @if($cm->getConfigValue('image_show') == 'preview' || $cm->getConfigValue('image_show') == 'filename')
                             @if(Storage::exists('public/'. Config::get('media.preview_dir') .
                                 $details->firstWhere('column_fk', $cm->column->column_id)->value_string))
+                                {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}
+                                <br/>
                                 <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
                                     $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
-                                    width=100
                                 />
                             @else
                                 @lang('columns.image_not_available')
                             @endif
                         @endif
+                        </div>
+                        <div class="col">
+                            <input type="file" class="form-control-file" name="fields[{{ $cm->column->column_id }}]" />
+                            <span class="form-text text-muted">@lang('columns.image_hint')</span>
                         </div>
                     </div>
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
