@@ -102,7 +102,8 @@ class ItemController extends Controller
             })
             ->first()->element_id;
         
-        $items = Item::myOwn(Auth::user()->id)->with('details')->orderBy('created_at')->paginate(12);
+        $items = Item::myOwn(Auth::user()->id)->with('details')
+            ->where('item_type_fk', $item_type)->latest()->paginate(12);
         
         return view('item.own', compact('items', 'item_type'));
     }
@@ -131,8 +132,19 @@ class ItemController extends Controller
      */
     public function gallery()
     {
-        $items['latest'] = Item::with('details')->where('public', 1)->orderBy('created_at')->take(3)->get();
-        $items['random'] = Item::with('details')->where('public', 1)->inRandomOrder()->take(3)->get();
+        // Get the item_type for '_image_' items
+        // TODO: this should be more flexible; allow configuration of multiple/different item_types
+        $it_list = Selectlist::where('name', '_item_type_')->first();
+        $item_type = Element::where('list_fk', $it_list->list_id)
+            ->whereHas('values', function (Builder $query) {
+                $query->where('value', '_image_');
+            })
+            ->first()->element_id;
+        
+        $items['latest'] = Item::with('details')
+            ->where('public', 1)->where('item_type_fk', $item_type)->latest()->take(3)->get();
+        $items['random'] = Item::with('details')
+            ->where('public', 1)->where('item_type_fk', $item_type)->inRandomOrder()->take(3)->get();
         
         return view('item.gallery', compact('items'));
     }
