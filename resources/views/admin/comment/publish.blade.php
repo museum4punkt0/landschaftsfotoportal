@@ -26,8 +26,9 @@
                         <th colspan="1"></th>
                         <th colspan="1">@lang('comments.message')</th>
                         <th colspan="1">@lang('common.published')</th>
+                        <th colspan="1">@lang('common.created')</th>
                         <th colspan="1">@lang('common.updated')</th>
-                        <th colspan="2">@lang('common.actions')</th>
+                        <th colspan="1">@lang('common.actions')</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -61,6 +62,10 @@
                             @endswitch
                         </td>
                         <td>
+                            {{$comment->creator->name}} (@lang('users.group_'. $comment->editor->group->name)),<br/>
+                            {{$comment->created_at}}
+                        </td>
+                        <td>
                             {{$comment->editor->name}} (@lang('users.group_'. $comment->editor->group->name)),<br/>
                             {{$comment->updated_at}}
                         </td>
@@ -68,15 +73,10 @@
                             <a href="{{route('comment.publish', $comment->comment_id)}}" class="btn btn-primary">
                             @lang('common.publish')
                             </a>
-                        </td>
-                        <td>
                             <form action="{{route('comment.edit', $comment)}}" method="GET">
                                 {{ csrf_field() }}
                                 <button class="btn btn-primary" type="submit">@lang('common.edit')</button>
                             </form>
-                        </td>
-                        <td>
-                            <form action="{{route('comment.destroy', $comment)}}" method="POST">
                                 {{ csrf_field() }}
                                 @method('DELETE')
                                 <button class="btn btn-danger" type="submit">@lang('common.delete')</button>
