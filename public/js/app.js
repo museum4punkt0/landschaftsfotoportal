@@ -102870,13 +102870,13 @@ var osm_map = {
   updateSize: function updateSize() {
     this.map.updateSize();
   },
-  addMarker: function addMarker(lon, lat, icon) {
+  addMarker: function addMarker(lon, lat, icon, color) {
     var marker = new ol__WEBPACK_IMPORTED_MODULE_0__["Feature"]({
       geometry: new ol_geom_Point__WEBPACK_IMPORTED_MODULE_7__["default"](Object(ol_proj__WEBPACK_IMPORTED_MODULE_9__["fromLonLat"])([lon, lat]))
     });
     marker.setStyle(new ol_style__WEBPACK_IMPORTED_MODULE_6__["Style"]({
       image: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Icon"]({
-        color: '#3490dc',
+        color: color,
         crossOrigin: 'anonymous',
         src: icon,
         scale: 1.0

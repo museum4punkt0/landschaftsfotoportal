@@ -56,7 +56,7 @@ var osm_map = {
         this.map.updateSize();
     },
     
-    addMarker: function (lon, lat, icon) {
+    addMarker: function (lon, lat, icon, color) {
         var marker = new Feature({
             geometry: new Point(fromLonLat([lon, lat]))
         });
@@ -64,7 +64,7 @@ var osm_map = {
         marker.setStyle(
             new Style({
                 image: new Icon({
-                    color: '#3490dc',
+                    color: color,
                     crossOrigin: 'anonymous',
                     src: icon,
                     scale: 1.0,
