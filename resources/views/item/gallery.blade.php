@@ -14,6 +14,12 @@
         'heading' => 'Zufällige Bilder',
         'subheading' => 'Lorem ipsum dolor sit amet consectetur.'
     ])
+    <!-- Portfolio Grid, Gallery with incomplete items-->
+    @include('includes.item_gallery', [
+        'items' => $items['incomplete'],
+        'heading' => 'Bilder mit fehlenden Ortsangaben',
+        'subheading' => 'Lorem ipsum dolor sit amet consectetur.'
+    ])
     
     @include('includes.modal_login_request')
     @include('includes.modal_download')

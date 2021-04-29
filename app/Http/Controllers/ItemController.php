@@ -145,6 +145,17 @@ class ItemController extends Controller
             ->where('public', 1)->where('item_type_fk', $item_type)->latest()->take(3)->get();
         $items['random'] = Item::with('details')
             ->where('public', 1)->where('item_type_fk', $item_type)->inRandomOrder()->take(3)->get();
+        $items['incomplete'] = Item::with('details')
+            ->where('public', 1)
+            ->where('item_type_fk', $item_type)
+            ->whereHas('details', function (Builder $query) {
+                // Details with missing location/city value
+                $query->where('column_fk', 22)
+                    ->where('value_string', '');
+            })
+            ->inRandomOrder()
+            ->take(3)
+            ->get();
         
         return view('item.gallery', compact('items'));
     }
