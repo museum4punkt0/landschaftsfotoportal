@@ -255,8 +255,8 @@
                         @include('includes.form_date_range', [
                             'start_date' => [
                                 old('start_year', date('Y')),
-                                old('start_month', date('n')),
-                                old('start_day', date('j')),
+                                old('start_month', 1),
+                                old('start_day', 1),
                             ],
                             'end_date' => [
                                 old('end_year', date('Y')),
