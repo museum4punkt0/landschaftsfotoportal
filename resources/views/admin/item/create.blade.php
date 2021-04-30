@@ -132,8 +132,14 @@
                         {{ $cm->column->data_type->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
                     </span>
-                    <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif" 
-                        value="{{old('fields.'. $cm->column->column_id)}}" />
+                    @if($cm->getConfigValue('textarea'))
+                        <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}" rows="$cm->getConfigValue('textarea')">{{
+                            old('fields.'. $cm->column->column_id)
+                        }}</textarea>
+                    @else
+                        <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif" 
+                            value="{{old('fields.'. $cm->column->column_id)}}" />
+                    @endif
                     @if($cm->getConfigValue('data_subtype') == 'location_city')
                         <button type="button" class="btn btn-primary btn-sm searchAddressBtn">
                             @lang('common.get_latlon')

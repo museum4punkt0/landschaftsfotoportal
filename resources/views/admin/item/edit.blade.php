@@ -161,9 +161,16 @@
                         {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
                     </span>
                     @if($details->firstWhere('column_fk', $cm->column->column_id))
-                        <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif" 
-                            value="{{ old('fields.'. $cm->column->column_id, 
-                            $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}" />
+                        @if($cm->getConfigValue('textarea'))
+                            <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}" rows="{{$cm->getConfigValue('textarea')}}">{{
+                                old('fields.'. $cm->column->column_id, 
+                                    $details->firstWhere('column_fk', $cm->column->column_id)->value_string)
+                            }}</textarea>
+                        @else
+                            <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif" 
+                                value="{{ old('fields.'. $cm->column->column_id, 
+                                $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}" />
+                        @endif
                         @if($cm->getConfigValue('data_subtype') == 'location_city')
                             <button type="button" class="btn btn-primary btn-sm searchAddressBtn">
                                 @lang('common.get_latlon')
