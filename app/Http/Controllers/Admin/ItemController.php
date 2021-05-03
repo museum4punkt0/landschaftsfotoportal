@@ -184,6 +184,7 @@ class ItemController extends Controller
                 case '_list_':
                     $detail_data['element_fk'] = intval($value);
                     break;
+                case '_boolean_':
                 case '_integer_':
                 case '_image_ppi_':
                     $detail_data['value_int'] = intval($value);
@@ -475,6 +476,7 @@ class ItemController extends Controller
                 case '_list_':
                     $detail->element_fk = intval($value);
                     break;
+                case '_boolean_':
                 case '_integer_':
                 case '_image_ppi_':
                     $detail->value_int = intval($value);

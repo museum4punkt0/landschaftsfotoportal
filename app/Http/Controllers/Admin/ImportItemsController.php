@@ -232,6 +232,7 @@ class ImportItemsController extends Controller
                             // TODO: don't import and add warning if value doesn't exist in list
                             $detail_data['element_fk'] = $value ? $value->element_fk : null;
                             break;
+                        case '_boolean_':
                         case '_integer_':
                         case '_image_ppi_':
                             $detail_data['value_int'] = intval($cell);

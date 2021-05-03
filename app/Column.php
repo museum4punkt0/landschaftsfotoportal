@@ -90,6 +90,8 @@ class Column extends Model
     public function getValidationRule()
     {
         switch ($this->getDataType()) {
+            case '_boolean_':
+                return 'boolean';
             case '_list_':
             case '_integer_':
                 return 'integer';

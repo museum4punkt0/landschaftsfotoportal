@@ -156,6 +156,15 @@
                 </div>
                 @break
             
+            {{-- Data_type of form field is boolean --}}
+            @case('_boolean_')
+                @include('includes.column_title')
+                <div class="col font-weight-bold">
+                    {{ old('fields.'. $cm->column->column_id, 
+                        $details->firstWhere('column_fk', $cm->column->column_id)->value_int ? __('common.yes') : __('common.no')) }}
+                </div>
+                @break
+            
             {{-- Data_type of form field is integer --}}
             @case('_integer_')
             {{-- Data_type of form field is image pixel per inch --}}

@@ -107,6 +107,29 @@
                 </div>
                 @break
             
+            {{-- Data_type of form field is boolean --}}
+            @case('_boolean_')
+                <div class="form-group">
+                    <span>
+                        {{ $cm->column->translation->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        ({{ $cm->column->description }}, 
+                        @lang('columns.data_type'): 
+                        {{ $cm->column->data_type->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
+                    </span>
+                    <div class="form-check">
+                        <input type="hidden" name="fields[{{ $cm->column->column_id }}]" value=0 />
+                        <input type="checkbox" name="fields[{{ $cm->column->column_id }}]" class="form-check-input" 
+                            value=1 
+                            @if(old('fields.'. $cm->column->column_id)) checked @endif />
+                        {{ $cm->column->translation->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    </div>
+                </div>
+                @break
+            
             {{-- Data_type of form field is integer --}}
             @case('_integer_')
             {{-- Data_type of form field is image pixel per inch --}}

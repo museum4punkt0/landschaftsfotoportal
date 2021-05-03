@@ -60,6 +60,24 @@ class ListSeeder extends Seeder
             Attribute::where('name', 'name_en')->value('attribute_id'),
             ['value' => 'list value']
         );
+        // Data type: boolean
+        $element = Element::create([
+            'list_fk' => $data_type_list->list_id,
+            'parent_fk' => null,
+            'value_summary' => '',
+        ]);
+        $element->attributes()->attach(
+            Attribute::where('name', 'code')->value('attribute_id'),
+            ['value' => '_boolean_']
+        );
+        $element->attributes()->attach(
+            Attribute::where('name', 'name_de')->value('attribute_id'),
+            ['value' => 'Checkbox']
+        );
+        $element->attributes()->attach(
+            Attribute::where('name', 'name_en')->value('attribute_id'),
+            ['value' => 'checkbox']
+        );
         // Data type: integer
         $element = Element::create([
             'list_fk' => $data_type_list->list_id,
