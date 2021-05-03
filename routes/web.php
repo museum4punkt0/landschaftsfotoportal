@@ -66,6 +66,7 @@ Route::post('admin/colmap/map/store', 'Admin\ColumnMappingController@map_store')
 Route::get('admin/colmap/sort/{item_type?}', 'Admin\ColumnMappingController@sort')->name('colmap.sort');
 Route::post('admin/colmap/sort/store', 'Admin\ColumnMappingController@sort_store')->name('colmap.sort.store');
 Route::resource('admin/colmap', 'Admin\ColumnMappingController');
+Route::get('admin/column/autocomplete', 'Admin\ColumnController@autocomplete')->name('column.autocomplete');
 Route::resource('admin/column', 'Admin\ColumnController');
 Route::resource('admin/detail', 'Admin\DetailController');
 

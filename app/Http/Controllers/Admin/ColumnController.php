@@ -212,4 +212,30 @@ class ColumnController extends Controller
         return Redirect::to('admin/column')
             ->with('success', __('columns.deleted'));
     }
+
+    /**
+     * Get resource for AJAX autocompletion search field.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function autocomplete(Request $request)
+    {
+        $results = Column::select('column_id', 'description')
+            ->where('description', 'ILIKE', "%{$request->search}%")
+            ->orderBy('description')
+            ->limit(config('ui.autocomplete_results', 5))
+            ->get();
+        
+        $response = array();
+        foreach($results as $result){
+            $response[] = array(
+                "value" => $result->column_id,
+                "label" => $result->description,
+                "edit_url" => route('column.edit', $result->column_id),
+            );
+        }
+        
+        return response()->json($response);
+    }
 }
