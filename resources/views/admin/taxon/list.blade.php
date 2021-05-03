@@ -18,44 +18,12 @@
                         <a href="{{route('taxon.create')}}" class="btn btn-primary">@lang('taxon.new')</a>
                     </div>
                     
-                    <div class="col align-self-end">
-                        <!-- For defining autocomplete search -->
-                        <input type="text" id='auto_search' class="form-control autocomplete" placeholder="@lang('search.search')" />
-                    </div>
+                    @include('includes.form_autocomplete_search', [
+                        'search_url' => route('taxon.autocomplete'),
+                        'div_class' => 'col align-self-end',
+                        'input_placeholder' => __('search.search'),
+                    ])
                 </div>
-                
-                <!-- Script using jQuery UI autocomplete widget -->
-                <script type="text/javascript">
-                    // CSRF Token
-                    var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
-                    
-                    $(document).ready(function() {
-                        $('#auto_search').autocomplete( {
-                            minLength: 3,
-                            source: function(request, response) {
-                                // Fetch data
-                                $.ajax({
-                                    url:"{{route('taxon.autocomplete')}}",
-                                    type: 'get',
-                                    dataType: 'json',
-                                    data: {
-                                        _token: CSRF_TOKEN,
-                                        search: request.term
-                                    },
-                                    success: function(data) {
-                                        response(data);
-                                    }
-                                });
-                            },
-                            select: function (event, ui) {
-                                // Set selection
-                                $('#auto_search').val(ui.item.label); // display the selected text
-                                location.href = ui.item.edit_url;
-                                return false;
-                            }
-                        });
-                    });
-                </script>
                 
                 <table class="table mt-4">
                 <thead>

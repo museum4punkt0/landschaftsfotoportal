@@ -17,44 +17,13 @@
                     <div class="col align-self-start">
                         <a href="{{route('column.create')}}" class="btn btn-primary">@lang('columns.new')</a>
                     </div>
-                    <div class="col align-self-end">
-                        <!-- For defining autocomplete search -->
-                        <input type="text" id='auto_search' class="form-control autocomplete" placeholder="@lang('search.search')" />
-                    </div>
-                </div>
-                
-                <!-- Script using jQuery UI autocomplete widget -->
-                <script type="text/javascript">
-                    // CSRF Token
-                    var CSRF_TOKEN = $('meta[name="csrf-token"]').attr('content');
                     
-                    $(document).ready(function() {
-                        $('#auto_search').autocomplete( {
-                            minLength: 3,
-                            source: function(request, response) {
-                                // Fetch data
-                                $.ajax({
-                                    url:"{{route('column.autocomplete')}}",
-                                    type: 'get',
-                                    dataType: 'json',
-                                    data: {
-                                        _token: CSRF_TOKEN,
-                                        search: request.term
-                                    },
-                                    success: function(data) {
-                                        response(data);
-                                    }
-                                });
-                            },
-                            select: function (event, ui) {
-                                // Set selection
-                                $('#auto_search').val(ui.item.label); // display the selected text
-                                location.href = ui.item.edit_url;
-                                return false;
-                            }
-                        });
-                    });
-                </script>
+                    @include('includes.form_autocomplete_search', [
+                        'search_url' => route('column.autocomplete'),
+                        'div_class' => 'col align-self-end',
+                        'input_placeholder' => __('search.search'),
+                    ])
+                </div>
                 
                 <table class="table mt-4">
                 <thead>
