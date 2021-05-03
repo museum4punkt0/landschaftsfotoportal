@@ -31,6 +31,7 @@
                     
                     $(document).ready(function() {
                         $('#auto_search').autocomplete( {
+                            minLength: 3,
                             source: function(request, response) {
                                 // Fetch data
                                 $.ajax({
@@ -49,7 +50,7 @@
                             select: function (event, ui) {
                                 // Set selection
                                 $('#auto_search').val(ui.item.label); // display the selected text
-                                location.href = "{{route('taxon.index')}}/" + ui.item.value + "/edit";
+                                location.href = ui.item.edit_url;
                                 return false;
                             }
                         });

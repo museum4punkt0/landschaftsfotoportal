@@ -188,8 +188,8 @@ class TaxonController extends Controller
     public function autocomplete(Request $request)
     {
         $results = Taxon::select('taxon_id', 'full_name', 'native_name')
-            ->where('full_name', 'LIKE', "%{$request->search}%")
-            ->orWhere('native_name', 'LIKE', "%{$request->search}%")
+            ->where('full_name', 'ILIKE', "%{$request->search}%")
+            ->orWhere('native_name', 'ILIKE', "%{$request->search}%")
             ->orderBy('full_name')
             ->limit(config('ui.autocomplete_results', 5))
             ->get();
@@ -199,6 +199,7 @@ class TaxonController extends Controller
             $response[] = array(
                 "value" => $result->taxon_id,
                 "label" => $result->full_name ." (". $result->native_name .")",
+                "edit_url" => route('taxon.edit', $result->column_id),
             );
         }
         
