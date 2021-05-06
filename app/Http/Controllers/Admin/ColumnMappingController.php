@@ -362,4 +362,32 @@ class ColumnMappingController extends Controller
         return Redirect::to('admin/colmap')
             ->with('success', __('colmaps.deleted'));
     }
+
+    /**
+     * Get resource for AJAX autocompletion search field.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function autocomplete(Request $request)
+    {
+        $term = $request->search;
+        $results = ColumnMapping::with('column')
+            ->whereHas('column', function ($query) use ($term) {
+                $query->where('description', 'ILIKE', "%{$term}%");
+            })
+            ->limit(config('ui.autocomplete_results', 5))
+            ->get();
+        
+        $response = array();
+        foreach($results as $result){
+            $response[] = array(
+                "value" => $result->colmap_id,
+                "label" => $result->column->description,
+                "edit_url" => route('colmap.edit', $result->colmap_id),
+            );
+        }
+        
+        return response()->json($response);
+    }
 }

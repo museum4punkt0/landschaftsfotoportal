@@ -18,11 +18,22 @@
         @if (true || Auth::check())
             <div class="card-header">@lang('colmaps.header')</div>
             <div class="card-body">
-                <a href="{{route('colmap.create')}}" class="btn btn-primary">@lang('colmaps.new')</a>
-                <a href="{{route('colmap.map')}}" class="btn btn-primary">@lang('common.batch')</a>
-                @if(count($colmaps))
-                    <a href="{{route('colmap.sort')}}" class="btn btn-primary">@lang('common.sort')</a>
-                @endif
+                <div class="row">
+                    <div class="col align-self-start">
+                        <a href="{{route('colmap.create')}}" class="btn btn-primary">@lang('colmaps.new')</a>
+                        <a href="{{route('colmap.map')}}" class="btn btn-primary">@lang('common.batch')</a>
+                        @if(count($colmaps))
+                            <a href="{{route('colmap.sort')}}" class="btn btn-primary">@lang('common.sort')</a>
+                        @endif
+                    </div>
+                    
+                    @include('includes.form_autocomplete_search', [
+                        'search_url' => route('colmap.autocomplete'),
+                        'div_class' => 'col align-self-end',
+                        'input_placeholder' => __('search.search'),
+                    ])
+                </div>
+                
                 <table class="table mt-4">
                 <thead>
                     <tr>
