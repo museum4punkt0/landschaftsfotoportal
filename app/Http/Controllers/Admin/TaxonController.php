@@ -199,7 +199,7 @@ class TaxonController extends Controller
             $response[] = array(
                 "value" => $result->taxon_id,
                 "label" => $result->full_name ." (". $result->native_name .")",
-                "edit_url" => route('taxon.edit', $result->column_id),
+                "edit_url" => route('taxon.edit', $result->taxon_id),
             );
         }
         
