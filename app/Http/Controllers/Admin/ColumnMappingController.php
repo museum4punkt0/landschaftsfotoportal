@@ -327,17 +327,17 @@ class ColumnMappingController extends Controller
     public function update(Request $request, ColumnMapping $colmap)
     {
         $request->validate([
-            'column' => 'required|integer',
+            //'column' => 'required|integer',
             'column_group' => 'required|integer',
-            'item_type' => 'required|integer',
+            //'item_type' => 'required|integer',
             'taxon' => 'nullable|integer',
             'column_order' => 'required|integer',
             'config' => 'nullable|string',
         ]);
         
-        $colmap->column_fk = $request->input('column');
+        //$colmap->column_fk = $request->input('column');
         $colmap->column_group_fk = $request->input('column_group');
-        $colmap->item_type_fk = $request->input('item_type');
+        //$colmap->item_type_fk = $request->input('item_type');
         $colmap->taxon_fk = $request->input('taxon');
         $colmap->column_order = $request->input('column_order');
         $colmap->config = $request->input('config');

@@ -11,7 +11,7 @@
     
     <div class="form-group">
         <span>@lang('colmaps.item_type')</span>
-        <select name="item_type" class="form-control" size=1 >
+        <select name="item_type" class="form-control" size=1 disabled>
             @foreach($item_types as $type)
                 <option value="{{$type->element_id}}"
                     @if(old('item_type', $colmap->item_type_fk) == $type->element_id) selected @endif >
@@ -57,7 +57,7 @@
     </div>
     <div class="form-group">
         <span>@lang('columns.list')</span>
-        <select name="column" class="form-control" size=1 >
+        <select name="column" class="form-control" size=1 disabled>
             @foreach($columns as $column)
                 <option value="{{$column->column_id}}"
                     @if(old('column', $colmap->column_fk) == $column->column_id) selected @endif >
