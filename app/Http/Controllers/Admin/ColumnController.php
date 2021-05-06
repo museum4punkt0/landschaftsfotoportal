@@ -207,6 +207,12 @@ class ColumnController extends Controller
      */
     public function destroy(Column $column)
     {
+        // Check for column mappings owning this column
+        if ($column->column_mapping->count()) {
+            return Redirect::to('admin/column')
+                ->with('warning', __('columns.still_owned_by'));
+        }
+        
         $column->delete();
         
         return Redirect::to('admin/column')

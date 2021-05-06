@@ -24,4 +24,5 @@ return [
     'translated_name' => 'Name in verschiedenen Sprachen',
     'image_hint' => 'Beim Hochladen einer Bilddatei wird die bisherige überschrieben!',
     'image_not_available' => 'Keine Bilddatei vorhanden',
+    'still_owned_by' => 'Anzeigefeld kann nicht gelöscht werden, da es (in Feld-Zuordnungen) verwendet wird!',
 ];
