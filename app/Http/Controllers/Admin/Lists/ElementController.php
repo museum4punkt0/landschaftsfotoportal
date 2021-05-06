@@ -169,4 +169,36 @@ class ElementController extends Controller
         return Redirect::to('admin/lists/list/'.$element->list_fk)
             ->with('success', $success_status_msg);
     }
+
+    /**
+     * Get resource for AJAX autocompletion search field.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $list_id  ID of the list to search within
+     * @return \Illuminate\Http\Response
+     */
+    public function autocomplete(Request $request, $list_id)
+    {
+        $term = $request->search;
+        $results = Element::with('values')
+            ->where('list_fk', $list_id)
+            ->whereHas('values', function ($query) use ($term) {
+                $query->where('value', 'ILIKE', "%{$term}%");
+            })
+            ->limit(config('ui.autocomplete_results', 5))
+            ->get();
+        
+        $response = array();
+        foreach ($results as $result){
+            foreach ($result->values as $value) {
+                $response[] = array(
+                    "value" => $value->value_id,
+                    "label" => $value->value,
+                    "edit_url" => route('value.edit', $value->value_id),
+                );
+            }
+        }
+        
+        return response()->json($response);
+    }
 }

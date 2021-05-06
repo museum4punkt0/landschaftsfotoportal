@@ -83,6 +83,7 @@ Route::get('admin/taxon/autocomplete', 'Admin\TaxonController@autocomplete')->na
 Route::resource('admin/taxon', 'Admin\TaxonController');
 Route::resource('admin/user', 'Admin\UserController');
 
+Route::get('admin/lists/list/{id}/element/autocomplete', 'Admin\Lists\ElementController@autocomplete')->name('element.autocomplete');
 Route::resource('admin/lists/list.element', 'Admin\Lists\ElementController')->shallow();
 Route::resource('admin/lists/element.value', 'Admin\Lists\ValueController')->shallow();
 

@@ -17,8 +17,18 @@
                     <div class="alert alert-warning">@lang('lists.internal_warning')</div>
                 @endif
 
-                <a href="{{route('list.element.create', $list->list_id)}}" class="btn btn-primary">@lang('elements.new')</a>
-                <a href="{{route('list.export', $list->list_id)}}" class="btn btn-primary">@lang('common.export')</a>
+                <div class="row">
+                    <div class="col align-self-start">
+                        <a href="{{route('list.element.create', $list->list_id)}}" class="btn btn-primary">@lang('elements.new')</a>
+                        <a href="{{route('list.export', $list->list_id)}}" class="btn btn-primary">@lang('common.export')</a>
+                    </div>
+                    
+                    @include('includes.form_autocomplete_search', [
+                        'search_url' => route('element.autocomplete', $list->list_id),
+                        'div_class' => 'col align-self-end',
+                        'input_placeholder' => __('search.search'),
+                    ])
+                </div>
                 <table class="table mt-4">
                 <thead>
                     <tr>
