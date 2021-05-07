@@ -163,7 +163,7 @@ class SearchController extends Controller
         $search_full_text = $request->input('full_text');
         
         if ($search_full_text) {
-            $details = Detail::where('value_string', 'LIKE', "%{$search_full_text}%")
+            $details = Detail::where('value_string', 'ILIKE', "%{$search_full_text}%")
                 ->with('item')
                 ->get();
             $items_full_text = $details->map(function ($row) {
@@ -185,8 +185,8 @@ class SearchController extends Controller
         $search_taxa = $request->input('taxon_name');
         
         if ($search_taxa) {
-            $taxa = Taxon::where('full_name', 'LIKE', "%{$search_taxa}%")
-                ->orWhere('native_name', 'LIKE', "%{$search_taxa}%")
+            $taxa = Taxon::where('full_name', 'ILIKE', "%{$search_taxa}%")
+                ->orWhere('native_name', 'ILIKE', "%{$search_taxa}%")
                 ->with('items')
                 ->orderBy('full_name')
                 ->get();
