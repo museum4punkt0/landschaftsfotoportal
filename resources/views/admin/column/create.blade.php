@@ -42,7 +42,7 @@
         </select>
         <span class="text-danger">{{ $errors->first('data_type') }}</span>
     </div>
-    <div class="form-group collapse @if(old('data_type') == 1 || !old('data_type'))show @endif" id="list_group">
+    <div class="form-group collapse @if(old('data_type') == $data_type_ids['_list_'] || old('data_type') == $data_type_ids['_multi_list_'] || !old('data_type'))show @endif" id="list_group">
         <span>@lang('lists.list')</span>
         <select name="list" class="form-control" size=1 >
             @foreach($lists as $list)
@@ -83,7 +83,7 @@
     
     // Triggered when select for 'data_type' changed
     $('.form-control[name=data_type]').change(function(event) {
-        if ($(this).val() == 1) {
+        if ($(this).val() == {{ $data_type_ids['_list_'] }} || $(this).val() == {{ $data_type_ids['_multi_list_'] }}) {
             $('#list_group').collapse('show');
         }
         else {

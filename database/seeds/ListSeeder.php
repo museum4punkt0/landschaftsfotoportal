@@ -58,7 +58,25 @@ class ListSeeder extends Seeder
         );
         $element->attributes()->attach(
             Attribute::where('name', 'name_en')->value('attribute_id'),
-            ['value' => 'list value']
+            ['value' => 'dropdown list']
+        );
+        // Data type: multi selection list
+        $element = Element::create([
+            'list_fk' => $data_type_list->list_id,
+            'parent_fk' => null,
+            'value_summary' => '',
+        ]);
+        $element->attributes()->attach(
+            Attribute::where('name', 'code')->value('attribute_id'),
+            ['value' => '_multi_list_']
+        );
+        $element->attributes()->attach(
+            Attribute::where('name', 'name_de')->value('attribute_id'),
+            ['value' => 'Auswahlliste mit Mehrfachauswahl']
+        );
+        $element->attributes()->attach(
+            Attribute::where('name', 'name_en')->value('attribute_id'),
+            ['value' => 'dropdown list with multiple selection']
         );
         // Data type: boolean
         $element = Element::create([

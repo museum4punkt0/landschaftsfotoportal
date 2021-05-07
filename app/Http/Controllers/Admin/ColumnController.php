@@ -9,6 +9,7 @@ use App\Attribute;
 use App\Value;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Redirect;
 
 class ColumnController extends Controller
@@ -59,6 +60,10 @@ class ColumnController extends Controller
         })
         ->orderBy('value')->get();
         
+        // Get IDs for data_types
+        $data_type_ids['_list_'] = Value::where('value', '_list_')->first()->element_fk;
+        $data_type_ids['_multi_list_'] = Value::where('value', '_multi_list_')->first()->element_fk;
+        
         // Get with localized names of columns
         $translations = Value::whereHas('element', function ($query) {
             $query->where('list_fk', Selectlist::where('name', '_translation_')->first()->list_id);
@@ -68,7 +73,7 @@ class ColumnController extends Controller
         })
         ->orderBy('value')->get();
         
-        return view('admin.column.create', compact('lists', 'data_types', 'translations', 'attribute'));
+        return view('admin.column.create', compact('lists', 'data_types', 'data_type_ids', 'translations', 'attribute'));
     }
 
     /**
@@ -79,12 +84,17 @@ class ColumnController extends Controller
      */
     public function store(Request $request)
     {
-        // Get the element_id of data_type '_list' for validating the user's input
-        // TODO: check for list '_data_type' and maybe attribute
-        $value = Value::where('value', '_list_')->first();
-        
         $request->validate([
-            'list' => 'required_if:data_type,'.$value->element_fk.'|integer',
+            'list' => [
+                Rule::requiredIf(function () use ($request) {
+                    if ($request->input('data_type') == Value::where('value', '_list_')->first()->element_fk)
+                        return true;
+                    if ($request->input('data_type') == Value::where('value', '_multi_list_')->first()->element_fk)
+                        return true;
+                    return false;
+                }),
+                'integer',
+            ],
             'data_type' => 'required|integer',
             'translation' => 'required|integer',
             'description' => 'required|string',
@@ -93,7 +103,7 @@ class ColumnController extends Controller
         ]);
         
         $data = [
-            'list_fk' => ($request->input('data_type') == $value->element_fk) ? $request->input('list') : null,
+            'list_fk' => $this->getListIdFromFormRequest($request),
             'data_type_fk' => $request->input('data_type'),
             'translation_fk' => $request->input('translation'),
             'description' => $request->input('description'),
@@ -157,6 +167,10 @@ class ColumnController extends Controller
         })
         ->orderBy('value')->get();
         
+        // Get IDs for data_types
+        $data_type_ids['_list_'] = Value::where('value', '_list_')->first()->element_fk;
+        $data_type_ids['_multi_list_'] = Value::where('value', '_multi_list_')->first()->element_fk;
+        
         // Get with localized names of columns
         $translations = Value::whereHas('element', function ($query) {
             $query->where('list_fk', Selectlist::where('name', '_translation_')->first()->list_id);
@@ -166,7 +180,7 @@ class ColumnController extends Controller
         })
         ->orderBy('value')->get();
         
-        return view('admin.column.edit', compact('column', 'lists', 'data_types', 'translations'));
+        return view('admin.column.edit', compact('column', 'lists', 'data_types', 'data_type_ids', 'translations'));
     }
 
     /**
@@ -178,18 +192,23 @@ class ColumnController extends Controller
      */
     public function update(Request $request, Column $column)
     {
-        // Get the element_id of data_type '_list' for validating the user's input
-        // TODO: check for list '_data_type' and maybe attribute
-        $value = Value::where('value', '_list_')->first();
-        
         $request->validate([
-            'list' => 'required_if:data_type,'.$value->element_fk.'|integer',
+            'list' => [
+                Rule::requiredIf(function () use ($request) {
+                    if ($request->input('data_type') == Value::where('value', '_list_')->first()->element_fk)
+                        return true;
+                    if ($request->input('data_type') == Value::where('value', '_multi_list_')->first()->element_fk)
+                        return true;
+                    return false;
+                }),
+                'integer',
+            ],
             'data_type' => 'required|integer',
             'translation' => 'required|integer',
             'description' => 'required|string',
         ]);
         
-        $column->list_fk = ($request->input('data_type') == $value->element_fk) ? $request->input('list') : null;
+        $column->list_fk = $this->getListIdFromFormRequest($request);
         $column->data_type_fk = $request->input('data_type');
         $column->translation_fk = $request->input('translation');
         $column->description = $request->input('description');
@@ -243,5 +262,22 @@ class ColumnController extends Controller
         }
         
         return response()->json($response);
+    }
+
+    /**
+     * Get the ID of the selected list if appropriate data type was chosen, null otherwise.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    private function getListIdFromFormRequest(Request $request) {
+        // Get the element_id of data_type '_list' for validating the user's input
+        // TODO: check for list '_data_type' and maybe attribute
+        
+        if ($request->input('data_type') == Value::where('value', '_list_')->first()->element_fk)
+            return $request->input('list');
+        if ($request->input('data_type') == Value::where('value', '_multi_list_')->first()->element_fk)
+            return $request->input('list');
+        return null;
     }
 }
