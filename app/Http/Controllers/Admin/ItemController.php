@@ -176,6 +176,8 @@ class ItemController extends Controller
         foreach ($request->input('fields') as $column_id => $value) {
             $data_type = Column::find($column_id)->getDataType();
             
+            $detail_elements = null;
+            
             $detail_data = [
                 'item_fk' => $item->item_id,
                 'column_fk' => $column_id,
@@ -183,6 +185,9 @@ class ItemController extends Controller
             switch ($data_type) {
                 case '_list_':
                     $detail_data['element_fk'] = intval($value);
+                    break;
+                case '_multi_list_':
+                    $detail_elements = array_values($value);
                     break;
                 case '_boolean_':
                 case '_integer_':
@@ -209,7 +214,12 @@ class ItemController extends Controller
                     $detail_data['value_string'] = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', "", $value);
                     break;
             }
-            Detail::create($detail_data);
+            $detail = Detail::create($detail_data);
+            
+            // Save chosen elements for drop-down lists with multiple selections
+            if ($detail_elements) {
+                $detail->elements()->attach($detail_elements);
+            }
         }
         
         // Save uploaded files and their details
@@ -475,6 +485,9 @@ class ItemController extends Controller
             switch ($data_type) {
                 case '_list_':
                     $detail->element_fk = intval($value);
+                    break;
+                case '_multi_list_':
+                    $detail->elements()->sync(array_values($value));
                     break;
                 case '_boolean_':
                 case '_integer_':

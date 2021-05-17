@@ -60,4 +60,13 @@ class Detail extends Model
     {
         return $this->belongsTo('App\Element', 'element_fk', 'element_id');
     }
+    
+    /**
+     * The elements that belong to the detail.
+     */
+    public function elements()
+    {
+        return $this->belongsToMany('App\Element', 'element_mapping', 'detail_fk', 'element_fk')
+            ->withTimestamps();
+    }
 }

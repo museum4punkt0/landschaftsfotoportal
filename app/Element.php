@@ -52,6 +52,15 @@ class Element extends Model
     }
     
     /**
+     * The details that belong to the element.
+     */
+    public function details()
+    {
+        return $this->belongsToMany('App\Detail', 'element_mapping', 'element_fk', 'detail_fk')
+            ->withTimestamps();
+    }
+    
+    /**
      * Get the children of the element.
      */
     public function childrenElements()

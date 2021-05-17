@@ -156,6 +156,19 @@
                 </div>
                 @break
             
+            {{-- Data_type of form field is list with multiple elements --}}
+            @case('_multi_list_')
+                @include('includes.column_title')
+                <div class="col font-weight-bold">
+                    <ul class="list-unstyled">
+                    @foreach($details->firstWhere('column_fk', $cm->column->column_id)->elements()->get() as $element)
+                        <li>{{ $element->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}</li>
+                    @endforeach
+                    </ul>
+                </div>
+                @break
+            
             {{-- Data_type of form field is boolean --}}
             @case('_boolean_')
                 @include('includes.column_title')

@@ -109,6 +109,25 @@
                 </div>
                 @break
             
+            {{-- Data_type of form field is list with multiple elements --}}
+            @case('_multi_list_')
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        {{ $cm->column->translation->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        ({{ $cm->column->description }})
+                    </h5>
+                </div>
+                <div class="card card-body">
+                    <ul class="list-unstyled">
+                    @foreach($details->firstWhere('column_fk', $cm->column->column_id)->elements()->get() as $element)
+                        <li>{{ $element->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}</li>
+                    @endforeach
+                    </ul>
+                </div>
+                @break
+            
             {{-- Data_type of form field is boolean --}}
             @case('_boolean_')
                 <div class="card-header">

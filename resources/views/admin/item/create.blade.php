@@ -107,6 +107,37 @@
                 </div>
                 @break
             
+            {{-- Data_type of form field is list with multiple elements --}}
+            @case('_multi_list_')
+                <div class="form-group">
+                    <span>
+                        {{ $cm->column->translation->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        ({{ $cm->column->description }}, 
+                        @lang('columns.data_type'): 
+                        {{ $cm->column->data_type->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
+                    </span>
+                    <select name="fields[{{ $cm->column->column_id }}][]" class="form-control" size=5 multiple>
+                        @foreach($lists[$cm->column->list_fk] as $element)
+                            <option value="{{$element->element_id}}"
+                                @if(collect(old('fields.'. $cm->column->column_id))->contains($element->element_id))
+                                    selected
+                                @endif
+                            >
+                                @for ($i = 0; $i < $element->depth; $i++)
+                                    |___
+                                @endfor
+                                @foreach($element->values as $v)
+                                    {{$v->value}}, 
+                                @endforeach
+                            </option>
+                        @endforeach
+                    </select>
+                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                </div>
+                @break
+            
             {{-- Data_type of form field is boolean --}}
             @case('_boolean_')
                 <div class="form-group">

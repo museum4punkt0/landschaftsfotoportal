@@ -109,6 +109,47 @@
                 </div>
                 @break
             
+            {{-- Data_type of form field is list with multiple elements --}}
+            @case('_multi_list_')
+                <div class="form-group">
+                    <span>
+                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
+                        ({{ $cm->column->description }}, 
+                        @lang('columns.data_type'): 
+                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
+                    </span>
+                    <select name="fields[{{ $cm->column->column_id }}][]" class="form-control" size=5 multiple>
+                        @foreach($lists[$cm->column->list_fk] as $element)
+                            <option value="{{$element->element_id}}"
+                                @if(collect(old('fields.'. $cm->column->column_id, $details->firstWhere('column_fk', $cm->column->column_id)->elements()->pluck('element_id')->toArray()))->contains($element->element_id))
+                                    selected
+                                @endif
+                            {{--
+                            @if(old('fields.'. $cm->column->column_id))
+                                @if(collect(old('fields.'. $cm->column->column_id))->contains($element->element_id))
+                                    selected
+                                @endif
+                            @else
+                                @if($details->firstWhere('column_fk', $cm->column->column_id)->elements()->get()->contains($element->element_id) == 
+                                     $element->element_id)
+                                    selected
+                                @endif
+                            @endif
+                            --}}
+                            >
+                                @for ($i = 0; $i < $element->depth; $i++)
+                                    |___
+                                @endfor
+                                @foreach($element->values as $v)
+                                    {{$v->value}}, 
+                                @endforeach
+                            </option>
+                        @endforeach
+                    </select>
+                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                </div>
+                @break
+            
             {{-- Data_type of form field is boolean --}}
             @case('_boolean_')
                 <div class="form-group">

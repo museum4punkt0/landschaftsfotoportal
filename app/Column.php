@@ -92,7 +92,9 @@ class Column extends Model
         switch ($this->getDataType()) {
             case '_boolean_':
                 return 'boolean';
+            case '_date_range_':
             case '_multi_list_':
+                return 'array';
             case '_list_':
             case '_integer_':
                 return 'integer';
