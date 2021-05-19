@@ -149,15 +149,18 @@ class ItemController extends Controller
         // Validation rules for all fields associated with columns
         foreach ($request->input('fields') as $column_id => $value) {
             $required = $colmap->firstWhere('column_fk', $column_id)->getRequiredRule();
-            $validation_rules['fields.'.$column_id] = $required . Column::find($column_id)->getValidationRule();
-        }
-        // Validate uploaded files
-        if ($request->file('fields')) {
-            foreach ($request->file('fields') as $column_id => $value) {
-                $validation_rules['fields.'.$column_id] = 'required|'. Column::find($column_id)->getValidationRule();
+            $rule = Column::find($column_id)->getValidationRule();
+            $validation_rules['fields.'.$column_id] = $required . $rule[0];
+            
+            // Special treatment for arrays
+            if (sizeof($rule) > 1) {
+                foreach ($rule[1] as $key => $value) {
+                    $validation_rules['fields.'.$column_id.'.'.$key] = $required . $value;
+                }
             }
         }
         
+        #dd($validation_rules);
         $request->validate($validation_rules);
         
         // Save new item to database
@@ -213,6 +216,9 @@ class ItemController extends Controller
                 case '_html_':
                     $detail_data['value_string'] = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', "", $value);
                     break;
+                case '_image_':
+                    $detail_data['value_string'] = null;
+                    break;
             }
             $detail = Detail::create($detail_data);
             
@@ -227,10 +233,7 @@ class ItemController extends Controller
             foreach ($request->file('fields') as $column_id => $value) {
                 $data_type = Column::find($column_id)->getDataType();
                 
-                $detail_data = [
-                    'item_fk' => $item->item_id,
-                    'column_fk' => $column_id,
-                ];
+                $detail_data = null;
                 
                 $file = $request->file('fields.'.$column_id);
                 switch ($data_type) {
@@ -247,7 +250,9 @@ class ItemController extends Controller
                         }
                         break;
                 }
-                Detail::create($detail_data);
+                Detail::where('item_fk', $item->item_id)
+                    ->where('column_fk', $column_id)
+                    ->update($detail_data);
             }
         }
         
@@ -456,12 +461,14 @@ class ItemController extends Controller
         // Validation rules for all fields associated with columns
         foreach ($request->input('fields') as $column_id => $value) {
             $required = $colmap->firstWhere('column_fk', $column_id)->getRequiredRule();
-            $validation_rules['fields.'.$column_id] = $required . Column::find($column_id)->getValidationRule();
-        }
-        // Validate uploaded files
-        if ($request->file('fields')) {
-            foreach ($request->file('fields') as $column_id => $value) {
-                $validation_rules['fields.'.$column_id] = Column::find($column_id)->getValidationRule();
+            $rule = Column::find($column_id)->getValidationRule();
+            $validation_rules['fields.'.$column_id] = $required . $rule[0];
+            
+            // Special treatment for arrays
+            if (sizeof($rule) > 1) {
+                foreach ($rule[1] as $key => $value) {
+                    $validation_rules['fields.'.$column_id.'.'.$key] = $required . $value;
+                }
             }
         }
         

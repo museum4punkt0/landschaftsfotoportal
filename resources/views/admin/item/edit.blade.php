@@ -479,7 +479,8 @@
                         @endif
                         </div>
                         <div class="col">
-                            <input type="file" class="form-control-file" name="fields[{{ $cm->column->column_id }}]" />
+                            <input type="hidden" name="fields[{{ $cm->column->column_id }}][dummy]" value=0 />
+                            <input type="file" class="form-control-file" name="fields[{{ $cm->column->column_id }}][file]" />
                             <span class="form-text text-muted">@lang('columns.image_hint')</span>
                         </div>
                     </div>

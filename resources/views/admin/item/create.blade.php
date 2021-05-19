@@ -425,7 +425,8 @@
                         {{ $cm->column->data_type->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }})
                     </span>
-                    <input type="file" class="form-control-file" name="fields[{{ $cm->column->column_id }}]" />
+                    <input type="hidden" name="fields[{{ $cm->column->column_id }}][dummy]" value="0" />
+                    <input type="file" class="form-control-file" name="fields[{{ $cm->column->column_id }}][file]" />
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 @break
