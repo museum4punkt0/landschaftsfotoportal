@@ -137,6 +137,7 @@ class ItemController extends Controller
                         $query->where('taxon_id', $taxon_id);
                     });
             })
+            ->with('column')
             ->get();
         
         // Validation rules for fields associated with this item
@@ -255,6 +256,10 @@ class ItemController extends Controller
                     ->update($detail_data);
             }
         }
+        
+        // Check for missing details from form input and add them
+        // especially useful for drop-down lists with multiple selection if no option was selected
+        $this->addMissingDetails($item, $colmap);
         
         return Redirect::to('admin/item')
             ->with('success', __('items.created'));
@@ -380,7 +385,6 @@ class ItemController extends Controller
         $items = $items->diff($item->descendantsAndSelf()->get());
         
         $taxa = Taxon::tree()->depthFirst()->get();
-        $details = Detail::where('item_fk', $item->item_id)->get();
         
         // Only columns associated with this item's taxon or its descendants
         $taxon_id = $item->taxon_fk;
@@ -391,7 +395,15 @@ class ItemController extends Controller
                         $query->where('taxon_id', $taxon_id);
                     });
             })
+            ->with('column')
             ->orderBy('column_order')->get();
+        
+        // Check for missing details and add them
+        // Should be not necessary but allows editing items with somehow incomplete data
+        $this->addMissingDetails($item, $colmap);
+        
+        // Load all details for this item
+        $details = Detail::where('item_fk', $item->item_id)->get();
         
         $lists = null;
         // Load all list elements of lists used by this item's columns
@@ -576,6 +588,26 @@ class ItemController extends Controller
         
         return Redirect::to('admin/item')
             ->with('success', __('items.deleted'));
+    }
+
+    /**
+     * Check for missing details and add them to database.
+     *
+     * @param  \App\Item  $item
+     * @param  \Illuminate\Database\Eloquent\Collection  $colmap
+     * @return void
+     */
+    public function addMissingDetails(Item $item, $colmap)
+    {
+        // Check all columns for existing details
+        foreach ($colmap as $cm) {
+            Detail::firstOrCreate([
+                'item_fk' => $item->item_id,
+                'column_fk' => $cm->column->column_id,
+            ]);
+        }
+        
+        // TODO: logging for debug purpose
     }
 
     /**
