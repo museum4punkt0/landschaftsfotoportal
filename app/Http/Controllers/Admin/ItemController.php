@@ -236,16 +236,21 @@ class ItemController extends Controller
                 
                 $detail_data = null;
                 
-                $file = $request->file('fields.'.$column_id);
+                $file = $request->file('fields.'.$column_id.'.file');
                 switch ($data_type) {
                     case '_image_':
                         if ($file->isValid()) {
                             $path = config('media.full_dir');
                             $name = $item->item_id ."_". $column_id ."_". date('YmdHis') ."_";
                             $name .= $file->getClientOriginalName();
+                            
                             // Store on local 'public' disc
                             $file->storeAs($path, $name, 'public');
                             $detail_data['value_string']  = $name;
+                            
+                            // Store image dimensions in database
+                            $this->storeImageDimensions($path, $name, $item->item_id, $column_id);
+                            
                             // Create resized images
                             $this->processImageResizing($path, $name);
                         }
@@ -543,16 +548,21 @@ class ItemController extends Controller
                 
                 $data_type = Column::find($column_id)->getDataType();
                 
-                $file = $request->file('fields.'.$column_id);
+                $file = $request->file('fields.'.$column_id.'.file');
                 switch ($data_type) {
                     case '_image_':
                         if ($file->isValid()) {
                             $path = config('media.full_dir');
                             $name = $item->item_id ."_". $column_id ."_". date('YmdHis') ."_";
                             $name .= $file->getClientOriginalName();
+                            
                             // Store on local 'public' disc
                             $file->storeAs($path, $name, 'public');
                             $detail->value_string  = $name;
+                            
+                            // Store image dimensions in database
+                            $this->storeImageDimensions($path, $name, $item->item_id, $column_id);
+                            
                             // Create resized images
                             $this->processImageResizing($path, $name);
                         }
@@ -597,7 +607,7 @@ class ItemController extends Controller
      * @param  \Illuminate\Database\Eloquent\Collection  $colmap
      * @return void
      */
-    public function addMissingDetails(Item $item, $colmap)
+    private function addMissingDetails(Item $item, $colmap)
     {
         // Check all columns for existing details
         foreach ($colmap as $cm) {
@@ -610,6 +620,42 @@ class ItemController extends Controller
         // TODO: logging for debug purpose
     }
 
+    /**
+     * Store width and height of a given image file.
+     *
+     * @param  string $image_path
+     * @param  string $filename
+     * @param  integer $item_id
+     * @param  integer $fcolumn_id
+     * @return void
+     */
+    private function storeImageDimensions($image_path, $filename, $item_id, $column_id)
+    {
+        // Get original dimensions of image
+        list($width_orig, $height_orig) = getimagesize(
+            Storage::disk('public')->path($image_path . $filename)
+        );
+        
+        // Get the colmap holding the config for columns containing image dimensions
+        $cm = Column::find($column_id)->column_mapping()->first();
+        
+        // Find the column holding the image width
+        $width_column = $cm->getConfigValue('image_width_col');
+        if ($width_column) {
+            Detail::where('item_fk', $item_id)
+            ->where('column_fk', $width_column)
+            ->update(['value_int' => $width_orig]);
+        }
+        
+        // Find the column holding the image height
+        $height_column = $cm->getConfigValue('image_height_col');
+        if ($height_column) {
+            Detail::where('item_fk', $item_id)
+            ->where('column_fk', $height_column)
+            ->update(['value_int' => $height_orig]);
+        }
+    }
+    
     /**
      * Handle resizing of a given image file.
      *
