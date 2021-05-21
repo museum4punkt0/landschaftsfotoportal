@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Column;
 use App\ColumnMapping;
+use App\DateRange;
 use App\Detail;
 use App\Element;
 use App\Item;
@@ -215,6 +216,8 @@ class ImportItemsController extends Controller
             foreach ($line as $colnr => $cell) {
                 // Check for column's attribute chosen by user
                 if ($selected_attr[$colnr] > 0) {
+                    $detail_elements = null;
+                    
                     $detail_data = [
                         'item_fk' => $item->item_id,
                         'column_fk' => $selected_attr[$colnr],
@@ -232,6 +235,21 @@ class ImportItemsController extends Controller
                             // TODO: don't import and add warning if value doesn't exist in list
                             $detail_data['element_fk'] = $value ? $value->element_fk : null;
                             break;
+                        case '_multi_list_':
+                            foreach (explode(',', $cell) as $element) {
+                                // Get element's ID for given value, independent of language
+                                $attr = $selected_attr[$colnr];
+                                $value = Value::whereHas('element', function ($query) use ($attr) {
+                                    $query->where('list_fk', Column::find($attr)->list_fk);
+                                })
+                                ->where('value', $element)
+                                ->first();
+                                // TODO: don't import and add warning if value doesn't exist in list
+                                if ($value) {
+                                    $detail_elements[] = $value->element_fk;
+                                }
+                            }
+                            break;
                         case '_boolean_':
                         case '_integer_':
                         case '_image_ppi_':
@@ -242,6 +260,14 @@ class ImportItemsController extends Controller
                             break;
                         case '_date_':
                             $detail_data['value_date'] = $cell ? $cell : null;
+                            break;
+                        case '_date_range_':
+                            $dates = explode(',', $cell);
+                            // Convert a single date into a date range
+                            if (count($dates) == 1) {
+                                $dates[1] = $dates[0];
+                            }
+                            $detail_data['value_daterange'] = new DateRange($dates[0], $dates[1]);
                             break;
                         case '_string_':
                         case '_title_':
@@ -254,7 +280,12 @@ class ImportItemsController extends Controller
                             $detail_data['value_string'] = $cell;
                             break;
                     }
-                    Detail::create($detail_data);
+                    $detail = Detail::create($detail_data);
+                    
+                    // Save chosen elements for drop-down lists with multiple selections
+                    if ($detail_elements) {
+                        $detail->elements()->attach($detail_elements);
+                    }
                 }
                 
                 // Set parent fkey of item if individually choosen per item
