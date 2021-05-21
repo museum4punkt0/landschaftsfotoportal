@@ -151,8 +151,16 @@
                 {{-- dd($lists->firstWhere('list_id', $cm->column->list_fk)->elements) --}}
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
+                @if($details->firstWhere('column_fk', $cm->column->column_id))
+                    @if($details->firstWhere('column_fk', $cm->column->column_id)->element)
                     {{ $details->firstWhere('column_fk', $cm->column->column_id)->element->attributes->
                         firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}
+                    @else
+                        <span>valid element for column {{$cm->column->column_id}} not found</span>
+                    @endif
+                @else
+                    <span>detail column {{$cm->column->column_id}} for list not found</span>
+                @endif
                 </div>
                 @break
             
@@ -174,7 +182,7 @@
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_int ? __('common.yes') : __('common.no')) }}
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int ? __('common.yes') : __('common.no')) }}
                 </div>
                 @break
             
@@ -185,7 +193,7 @@
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_int) }}
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int) }}
                 </div>
                 @break
             
@@ -194,7 +202,7 @@
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_float) }}
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_float) }}
                 </div>
                 @break
             
@@ -206,12 +214,8 @@
             @case('_image_copyright_')
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
-                @if($details->firstWhere('column_fk', $cm->column->column_id))
                     {{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}
-                @else
-                    <span>detail column {{$cm->column->column_id}} for string not found</span>
-                @endif
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string) }}
                 </div>
                 @break
             
@@ -220,7 +224,7 @@
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
                     {!! old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string) !!}
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string) !!}
                 </div>
                 @break
             
@@ -229,7 +233,7 @@
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string) }}
                 </div>
                 @break
             
@@ -238,7 +242,7 @@
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
                     {{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_date) }}
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_date) }}
                 </div>
                 @break
             
@@ -424,8 +428,8 @@
                 @if($cm->getConfigValue('map') == 'inline')
                     <div id="map" class="map"></div>
                     <script type="text/javascript">
-                        var lon = {{ $details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col'))->value_float }};
-                        var lat = {{ $details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col'))->value_float }};
+                        var lon = {{ optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col')))->value_float ?? 0 }};
+                        var lat = {{ optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col')))->value_float ?? 0 }};
                         var zoom = {{ $cm->getConfigValue('map_zoom') }};
                         
                         {{-- Init and display the map --}}
