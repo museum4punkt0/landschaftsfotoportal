@@ -13,17 +13,20 @@ class DateRange
 
     public function __construct($from = null, $to = null, $fromBound = "[", $toBound = "]")
     {
+        $from = ($from === '') ? $from = null : $from;
+        $to = ($to === '') ? $to = null : $to;
+        
         $this->from = is_string($from) ? $this->parseFrom($from) : $from;
         $this->to = is_string($to) ? $this->parseTo($to) : $to;
 
         // when exclusive bound is set,
         // let's canonicalize it to inclusive bounds
         if ($fromBound === '(') {
-            $this->from = $this->from->addDay();
+            $this->from = optional($this->from)->addDay();
         }
 
         if ($toBound === ')') {
-            $this->to = $this->to->subDay();
+            $this->to = optional($this->to)->subDay();
         }
     }
 

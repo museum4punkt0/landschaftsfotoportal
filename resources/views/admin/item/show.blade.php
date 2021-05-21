@@ -256,8 +256,8 @@
                 </div>
                 <div class="card card-body">
                     {{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from()->toDateString()) }}
-                    @if($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from()->toDateString() != $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to()->toDateString())
+                        optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from())->toDateString()) }}
+                    @if($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from() != $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to())
                         - {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to()->toDateString() }}
                     @endif
                         
