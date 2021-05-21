@@ -181,8 +181,7 @@
             @case('_boolean_')
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
-                    {{ old('fields.'. $cm->column->column_id, 
-                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int ? __('common.yes') : __('common.no')) }}
+                    {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int ? __('common.yes') : __('common.no') }}
                 </div>
                 @break
             
@@ -192,8 +191,7 @@
             @case('_image_ppi_')
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
-                    {{ old('fields.'. $cm->column->column_id, 
-                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int) }}
+                    {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int }}
                 </div>
                 @break
             
@@ -201,8 +199,7 @@
             @case('_float_')
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
-                    {{ old('fields.'. $cm->column->column_id, 
-                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_float) }}
+                    {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_float }}
                 </div>
                 @break
             
@@ -214,8 +211,7 @@
             @case('_image_copyright_')
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
-                    {{ old('fields.'. $cm->column->column_id, 
-                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string) }}
+                    {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string }}
                 </div>
                 @break
             
@@ -223,8 +219,7 @@
             @case('_html_')
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
-                    {!! old('fields.'. $cm->column->column_id, 
-                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string) !!}
+                    {!! optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string !!}
                 </div>
                 @break
             
@@ -232,8 +227,7 @@
             @case('_url_')
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
-                    {{ old('fields.'. $cm->column->column_id, 
-                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string) }}
+                    {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string }}
                 </div>
                 @break
             
@@ -241,8 +235,7 @@
             @case('_date_')
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
-                    {{ old('fields.'. $cm->column->column_id, 
-                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_date) }}
+                    {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_date }}
                 </div>
                 @break
             
@@ -250,8 +243,7 @@
             @case('_date_range_')
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
-                    {{ old('fields.'. $cm->column->column_id, 
-                        optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from())->toDateString()) }}
+                    {{ optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from())->toDateString() }}
                     @if($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from() != $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to())
                         - {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to()->toDateString() }}
                     @endif
@@ -409,14 +401,13 @@
                     @if($details->firstWhere('column_fk', $cm->column->column_id))
                         @if($cm->getConfigValue('map_iframe') == 'url')
                             <iframe width="100%" height="670px" scrolling="no" marginheight="0" marginwidth="0" frameborder="0"
-                                src="{{ old('fields.'. $cm->column->column_id, 
-                                $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
+                                src="{{ $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}"
                             >
                         @endif
                         @if($cm->getConfigValue('map_iframe') == 'service')
                             <iframe width="100%" height="670px" scrolling="no" marginheight="0" marginwidth="0" frameborder="0"
-                                src="{{ Config::get('media.mapservice_url') }}artid={{ old('fields.'. $cm->column->column_id, 
-                                $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
+                                src="{{ Config::get('media.mapservice_url') }}artid={{ 
+                                $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}"
                             >
                         @endif
                         <p>@lang('items.no_iframe')</p>
