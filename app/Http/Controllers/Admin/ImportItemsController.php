@@ -14,6 +14,7 @@ use App\Taxon;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
 use Validator;
 use Redirect;
@@ -165,6 +166,8 @@ class ImportItemsController extends Controller
             return str_getcsv($d, ";");
         }, file($csv_file));
         
+        Log::channel('import')->info(__('import.read_csv', ['file' => $csv_file]));
+        
         $selected_attr = $request->input('fields.*');
         $warning_status_msg = null;
         #$messageBag = new MessageBag;
@@ -211,6 +214,9 @@ class ImportItemsController extends Controller
                 'updated_by' => $request->user()->id,
             ];
             $item = Item::create($item_data);
+            Log::channel('import')->info(__('import.item_imported', ['id' => $item->item_id]), [
+                'line' => $number,
+            ]);
             
             // Process each column (= table cell)
             foreach ($line as $colnr => $cell) {
@@ -234,6 +240,13 @@ class ImportItemsController extends Controller
                             ->first();
                             // TODO: don't import and add warning if value doesn't exist in list
                             $detail_data['element_fk'] = $value ? $value->element_fk : null;
+                            if (!$value) {
+                                Log::channel('import')->warning(__('import.element_mismatch', ['element' => $element]), [
+                                    'list' => Column::find($attr)->list_fk,
+                                    'item' => $item->item_id,
+                                    'line' => $number,
+                                ]);
+                            }
                             break;
                         case '_multi_list_':
                             foreach (explode(',', $cell) as $element) {
@@ -250,6 +263,13 @@ class ImportItemsController extends Controller
                                 // TODO: don't import and add warning if value doesn't exist in list
                                 if ($value) {
                                     $detail_elements[] = $value->element_fk;
+                                }
+                                else {
+                                    Log::channel('import')->warning(__('import.element_mismatch', ['element' => $element]), [
+                                        'list' => Column::find($attr)->list_fk,
+                                        'item' => $item->item_id,
+                                        'line' => $number,
+                                    ]);
                                 }
                             }
                             break;
@@ -317,6 +337,7 @@ class ImportItemsController extends Controller
                 }
             }
         }
+        Log::channel('import')->info(__('import.done'));
         
         return Redirect::to('admin/item')
             ->with('success', __('import.done'));
