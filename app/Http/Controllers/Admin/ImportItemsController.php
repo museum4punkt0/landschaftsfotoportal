@@ -237,6 +237,9 @@ class ImportItemsController extends Controller
                             break;
                         case '_multi_list_':
                             foreach (explode(',', $cell) as $element) {
+                                // Strip whitespaces from beginning and end
+                                $element = trim($element);
+                                
                                 // Get element's ID for given value, independent of language
                                 $attr = $selected_attr[$colnr];
                                 $value = Value::whereHas('element', function ($query) use ($attr) {
