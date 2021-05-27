@@ -11,6 +11,7 @@ use App\Item;
 use App\Selectlist;
 use App\Value;
 use App\Taxon;
+use App\Utils\Image;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -292,13 +293,19 @@ class ImportItemsController extends Controller
                             }
                             $detail_data['value_daterange'] = new DateRange($dates[0], $dates[1]);
                             break;
+                        case '_image_':
+                            // Store image dimensions in database
+                            Image::storeImageDimensions(config('media.full_dir'), $cell,
+                                $item->item_id, $selected_attr[$colnr]);
+                            // Create resized images
+                            Image::processImageResizing(config('media.full_dir'), $cell);
+                            // No break, but fall through
                         case '_string_':
                         case '_title_':
                         case '_image_title_':
                         case '_image_copyright_':
                         case '_html_':
                         case '_url_':
-                        case '_image_':
                         case '_map_':
                             $detail_data['value_string'] = $cell;
                             break;
