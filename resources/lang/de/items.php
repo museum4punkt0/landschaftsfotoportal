@@ -29,6 +29,11 @@ return [
     'add_titles' => 'Titel übernehmen',
     'titles_added' => 'Für :count Datensätze wurde ein Titel übernommen.',
     'published' => ':count Datensätze wurden veröffentlicht.',
+
+    'no_column_for_image_width' => 'Keine Anzeigespalte für Bildbreite konfiguriert!',
+    'no_column_for_image_height' => 'Keine Anzeigespalte für Bildhöhe konfiguriert!',
+    'file_not_found' => 'Datei ":file" nicht vorhanden!',
+    'resized_image_created' => 'Bild wurde in geänderter Größe gespeichert: ',
     'file_ext_fixed' => 'Für :count Bild-Datensätze wurde die Endung des Dateinamens korrigiert.',
     'no_home_page' => 'Es wurde keine Seite als Homepage konfiguriert.',
 ];
