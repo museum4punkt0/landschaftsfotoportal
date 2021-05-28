@@ -277,10 +277,10 @@ class ImportItemsController extends Controller
                         case '_boolean_':
                         case '_integer_':
                         case '_image_ppi_':
-                            $detail_data['value_int'] = intval($cell);
+                            $detail_data['value_int'] = $cell == '' ? null : intval($cell);
                             break;
                         case '_float_':
-                            $detail_data['value_float'] = floatval(strtr($cell, ',', '.'));
+                            $detail_data['value_float'] = $cell == '' ? null : floatval(strtr($cell, ',', '.'));
                             break;
                         case '_date_':
                             $detail_data['value_date'] = $cell ? $cell : null;

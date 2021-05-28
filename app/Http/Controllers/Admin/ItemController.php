@@ -189,7 +189,7 @@ class ItemController extends Controller
             ];
             switch ($data_type) {
                 case '_list_':
-                    $detail_data['element_fk'] = intval($value);
+                    $detail_data['element_fk'] = $value == '' ? null : intval($value);
                     break;
                 case '_multi_list_':
                     $detail_elements = array_values($value);
@@ -197,10 +197,10 @@ class ItemController extends Controller
                 case '_boolean_':
                 case '_integer_':
                 case '_image_ppi_':
-                    $detail_data['value_int'] = intval($value);
+                    $detail_data['value_int'] = $value == '' ? null : intval($value);
                     break;
                 case '_float_':
-                    $detail_data['value_float'] = floatval($value);
+                    $detail_data['value_float'] = $value == '' ? null : floatval($value);
                     break;
                 case '_date_':
                     $detail_data['value_date'] = $value;
@@ -509,7 +509,7 @@ class ItemController extends Controller
             
             switch ($data_type) {
                 case '_list_':
-                    $detail->element_fk = intval($value);
+                    $detail->element_fk = $value == '' ? null : intval($value);
                     break;
                 case '_multi_list_':
                     $detail->elements()->sync(array_values($value));
@@ -517,10 +517,10 @@ class ItemController extends Controller
                 case '_boolean_':
                 case '_integer_':
                 case '_image_ppi_':
-                    $detail->value_int = intval($value);
+                    $detail->value_int = $value == '' ? null : intval($value);
                     break;
                 case '_float_':
-                    $detail->value_float = floatval($value);
+                    $detail->value_float = $value == '' ? null : floatval($value);
                     break;
                 case '_date_':
                     $detail->value_date = $value;
