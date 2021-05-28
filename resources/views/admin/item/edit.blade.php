@@ -88,6 +88,7 @@
                         {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
                     </span>
                     <select name="fields[{{ $cm->column->column_id }}]" class="form-control" size=1 >
+                        <option value="">@lang('common.choose')</option>
                         @foreach($lists[$cm->column->list_fk] as $element)
                             <option value="{{$element->element_id}}"
                                 @if(old('fields.'. $cm->column->column_id, 

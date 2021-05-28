@@ -29,6 +29,8 @@ return [
     'publish_all' => 'alle veröffentlichen',
     'export' => 'exportieren',
     'batch' => 'Stapelverarbeitung',
+    'choose' => '- bitte auswählen -',
+    'not_chosen' => 'keine Angabe',
     'ignore' => 'ignorieren',
     'internal' => 'intern',
     'next' => 'weiter',
