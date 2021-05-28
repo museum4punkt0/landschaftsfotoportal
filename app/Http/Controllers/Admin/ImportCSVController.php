@@ -47,6 +47,8 @@ class ImportCSVController extends Controller
             
             // Save CSV file path to session
             $request->session()->put('csv_file', $csv_file);
+            // Save original CSV file name to session
+            $request->session()->put('file_name', $files->getClientOriginalName());
             // Save CSV separators to session
             $request->session()->put('column_separator', $request->input('column_separator'));
             
@@ -63,6 +65,8 @@ class ImportCSVController extends Controller
     {
         // Get CSV file path from session
         $csv_file = $request->session()->get('csv_file');
+        // Get original CSV file name from session
+        $file_name = $request->session()->get('file_name');
         $separator = $request->session()->get('column_separator');
         
         // Parse CSV file and read file into array $data
@@ -75,7 +79,7 @@ class ImportCSVController extends Controller
         $list = Selectlist::find($request->list);
         $attributes = Attribute::all();
         
-        return view('admin.import.csvcontent', compact('csv_data', 'attributes', 'list'));
+        return view('admin.import.csvcontent', compact('file_name', 'csv_data', 'attributes', 'list'));
     }
     
     public function process(Request $request)
