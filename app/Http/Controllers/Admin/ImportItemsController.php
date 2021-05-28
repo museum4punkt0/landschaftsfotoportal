@@ -70,6 +70,9 @@ class ImportItemsController extends Controller
             $request->session()->put('csv_file', $csv_file);
             // Save original CSV file name to session
             $request->session()->put('file_name', $files->getClientOriginalName());
+            // Save CSV separators to session
+            $request->session()->put('column_separator', $request->input('column_separator'));
+            $request->session()->put('element_separator', $request->input('element_separator'));
             
             return redirect()->route('import.items.preview', ['item_type' => $request->input('item_type')]);
         }
@@ -88,14 +91,15 @@ class ImportItemsController extends Controller
      */
     public function preview(Request $request)
     {
-        // Get CSV file path from session and read file into array $data
+        // Get CSV file path from session and
         $csv_file = $request->session()->get('csv_file');
         // Get original CSV file name from session
         $file_name = $request->session()->get('file_name');
+        $separator = $request->session()->get('column_separator');
         
-        // Parse CSV file
-        $data = array_map(function ($d) {
-            return str_getcsv($d, ";");
+        // Parse CSV file read file into array $data
+        $data = array_map(function ($d) use ($separator) {
+            return str_getcsv($d, $separator);
         }, file($csv_file));
         $csv_data = array_slice($data, 0, 5);
         
@@ -163,8 +167,10 @@ class ImportItemsController extends Controller
                 
         // Get CSV file path from session and read file into array $data
         $csv_file = $request->session()->get('csv_file');
-        $data = array_map(function ($d) {
-            return str_getcsv($d, ";");
+        $separator = $request->session()->get('column_separator');
+        
+        $data = array_map(function ($d) use ($separator) {
+            return str_getcsv($d, $separator);
         }, file($csv_file));
         
         Log::channel('import')->info(__('import.read_csv', ['file' => $csv_file]));
@@ -250,7 +256,7 @@ class ImportItemsController extends Controller
                             }
                             break;
                         case '_multi_list_':
-                            foreach (explode(',', $cell) as $element) {
+                            foreach (explode($request->session()->get('element_separator'), $cell) as $element) {
                                 // Strip whitespaces from beginning and end
                                 $element = trim($element);
                                 

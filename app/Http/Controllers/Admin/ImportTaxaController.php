@@ -53,6 +53,8 @@ class ImportTaxaController extends Controller
             
             // Save CSV file path to session
             $request->session()->put('csv_file', $csv_file);
+            // Save CSV separators to session
+            $request->session()->put('column_separator', $request->input('column_separator'));
             
             return Redirect::to('admin/import/taxa/preview');
         }
@@ -71,12 +73,13 @@ class ImportTaxaController extends Controller
      */
     public function preview(Request $request)
     {
-        // Get CSV file path from session and read file into array $data
+        // Get CSV file path from session
         $csv_file = $request->session()->get('csv_file');
+        $separator = $request->session()->get('column_separator');
         
-        // Parse CSV file
-        $data = array_map(function ($d) {
-            return str_getcsv($d, ";");
+        // Parse CSV file and read file into array $data
+        $data = array_map(function ($d) use ($separator) {
+            return str_getcsv($d, $separator);
         }, file($csv_file));
         $csv_data = array_slice($data, 0, 10);
         
@@ -157,8 +160,10 @@ class ImportTaxaController extends Controller
         
         // Get CSV file path from session and read file into array $data
         $csv_file = $request->session()->get('csv_file');
-        $data = array_map(function ($d) {
-            return str_getcsv($d, ";");
+        $separator = $request->session()->get('column_separator');
+        
+        $data = array_map(function ($d) use ($separator) {
+            return str_getcsv($d, $separator);
         }, file($csv_file));
         
         $selected_attr = $request->input('fields.*');
