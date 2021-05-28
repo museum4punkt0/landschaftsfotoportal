@@ -42,7 +42,7 @@ class ItemController extends Controller
      */
     public function index()
     {
-        $items = Item::orderBy('item_id')->paginate(10);
+        $items = Item::orderBy('item_id', 'desc')->paginate(10);
         
         return view('admin.item.list', compact('items'));
     }
@@ -344,7 +344,7 @@ class ItemController extends Controller
     {
         $this->authorize('unpublished', Item::class);
         
-        $items = Item::where('public', 0)->orderByDesc('updated_at')->paginate(10);
+        $items = Item::where('public', 0)->latest('updated_at')->paginate(10);
         
         return view('admin.item.publish', compact('items'));
     }

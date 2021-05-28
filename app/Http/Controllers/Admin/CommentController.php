@@ -28,7 +28,7 @@ class CommentController extends Controller
      */
     public function index($item_id)
     {
-        $comments = Comment::where('item_fk', $item_id)->orderBy('comment_id')->paginate(10);
+        $comments = Comment::where('item_fk', $item_id)->orderBy('comment_id', 'desc')->paginate(10);
         $item = Item::find($item_id);
         
         return view('admin.comment.list', compact('comments', 'item'));
@@ -94,7 +94,7 @@ class CommentController extends Controller
     {
         //$this->authorize('unpublished', Comment::class);
         
-        $comments = Comment::where('public', '<', 1)->with('item')->orderByDesc('updated_at')->paginate(10);
+        $comments = Comment::where('public', '<', 1)->with('item')->latest('updated_at')->paginate(10);
         
         return view('admin.comment.publish', compact('comments'));
     }

@@ -27,7 +27,7 @@ class CommentController extends Controller
      */
     public function index()
     {
-        $comments = Comment::myOwn(Auth::user()->id)->with('item')->orderBy('created_at')->paginate(10);
+        $comments = Comment::myOwn(Auth::user()->id)->with('item')->latest()->paginate(10);
         
         return view('comment', compact('comments'));
     }
