@@ -109,7 +109,7 @@
                     {{ $details->firstWhere('column_fk', $cm->column->column_id)->element->attributes->
                         firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}
                     @else
-                        <span>valid element for column {{$cm->column->column_id}} not found</span>
+                        @lang('common.not_chosen')
                     @endif
                 @else
                     <span>detail column {{$cm->column->column_id}} for list not found</span>
