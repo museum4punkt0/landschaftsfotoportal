@@ -81,12 +81,8 @@
             @case('_list_')
                 {{-- dd($lists->firstWhere('list_id', $cm->column->list_fk)->elements) --}}
                 <div class="form-group">
-                    <span>
-                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
-                        ({{ $cm->column->description }}, 
-                        @lang('columns.data_type'): 
-                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
-                    </span>
+                    @include('includes.column_label')
+                    
                     <select name="fields[{{ $cm->column->column_id }}]" class="form-control" size=1 >
                         <option value="">@lang('common.choose')</option>
                         @foreach($lists[$cm->column->list_fk] as $element)
@@ -113,12 +109,8 @@
             {{-- Data_type of form field is list with multiple elements --}}
             @case('_multi_list_')
                 <div class="form-group">
-                    <span>
-                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
-                        ({{ $cm->column->description }}, 
-                        @lang('columns.data_type'): 
-                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
-                    </span>
+                    @include('includes.column_label')
+                    
                     <select name="fields[{{ $cm->column->column_id }}][]" class="form-control" size=5 multiple>
                         @foreach($lists[$cm->column->list_fk] as $element)
                             <option value="{{$element->element_id}}"
@@ -154,12 +146,8 @@
             {{-- Data_type of form field is boolean --}}
             @case('_boolean_')
                 <div class="form-group">
-                    <span>
-                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
-                        ({{ $cm->column->description }}, 
-                        @lang('columns.data_type'): 
-                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
-                    </span>
+                    @include('includes.column_label')
+                    
                     <div class="form-check">
                         <input type="hidden" name="fields[{{ $cm->column->column_id }}]" value=0 />
                         <input type="checkbox" name="fields[{{ $cm->column->column_id }}]" class="form-check-input" 
@@ -177,12 +165,8 @@
             {{-- Data_type of form field is image pixel per inch --}}
             @case('_image_ppi_')
                 <div class="form-group">
-                    <span>
-                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
-                        ({{ $cm->column->description }}, 
-                        @lang('columns.data_type'): 
-                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
-                    </span>
+                    @include('includes.column_label')
+                    
                     <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}" 
                         value="{{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_int) }}" />
@@ -193,12 +177,8 @@
             {{-- Data_type of form field is float --}}
             @case('_float_')
                 <div class="form-group">
-                    <span>
-                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
-                        ({{ $cm->column->description }}, 
-                        @lang('columns.data_type'): 
-                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
-                    </span>
+                    @include('includes.column_label')
+                    
                     <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}" 
                         value="{{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_float) }}" />
@@ -217,12 +197,8 @@
             {{-- Data_type of form field is redirect --}}
             @case('_redirect_')
                 <div class="form-group">
-                    <span>
-                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }}
-                        ({{ $cm->column->description }}, 
-                        @lang('columns.data_type'): 
-                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
-                    </span>
+                    @include('includes.column_label')
+                    
                     @if($details->firstWhere('column_fk', $cm->column->column_id))
                         @if($cm->getConfigValue('textarea'))
                             <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}" rows="{{$cm->getConfigValue('textarea')}}">{{
@@ -249,12 +225,8 @@
             {{-- Data_type of form field is html --}}
             @case('_html_')
                 <div class="form-group">
-                    <span>
-                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
-                        ({{ $cm->column->description }}, 
-                        @lang('columns.data_type'): 
-                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
-                    </span>
+                    @include('includes.column_label')
+                    
                     <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control summernote" 
                         rows=5>{!! old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_string) !!}</textarea>
@@ -273,12 +245,8 @@
             {{-- Data_type of form field is URL --}}
             @case('_url_')
                 <div class="form-group">
-                    <span>
-                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
-                        ({{ $cm->column->description }}, 
-                        @lang('columns.data_type'): 
-                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
-                    </span>
+                    @include('includes.column_label')
+                    
                     <input type="url" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
                         value="{{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}" />
@@ -289,12 +257,8 @@
             {{-- Data_type of form field is date --}}
             @case('_date_')
                 <div class="form-group">
-                    <span>
-                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
-                        ({{ $cm->column->description }}, 
-                        @lang('columns.data_type'): 
-                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
-                    </span>
+                    @include('includes.column_label')
+                    
                     <input type="date" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
                         value="{{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_date) }}" />
@@ -305,12 +269,8 @@
             {{-- Data_type of form field is date range --}}
             @case('_date_range_')
                 <div class="form-group">
-                    <div>
-                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
-                        ({{ $cm->column->description }}, 
-                        @lang('columns.data_type'): 
-                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
-                    </div>
+                    @include('includes.column_label')
+                    
                     <!-- Radio buttons to switch the type of date -->
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="date_type" id="datePointRadio-{{ $cm->column->column_id }}" data-column="{{ $cm->column->column_id }}" value="point"
@@ -458,12 +418,8 @@
             {{-- Data_type of form field is image --}}
             @case('_image_')
                 <div class="form-group">
-                    <span>
-                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
-                        ({{ $cm->column->description }}, 
-                        @lang('columns.data_type'): 
-                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
-                    </span>
+                    @include('includes.column_label')
+                    
                     <div class="form-row">
                         <div class="col">
                         @if($cm->getConfigValue('image_show') == 'preview' || $cm->getConfigValue('image_show') == 'filename')
@@ -492,12 +448,8 @@
             {{-- Data_type of form field is map --}}
             @case('_map_')
                 <div class="form-group">
-                    <span>
-                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }}
-                        ({{ $cm->column->description }}, 
-                        @lang('columns.data_type'): 
-                        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
-                    </span>
+                    @include('includes.column_label')
+                    
                 @if($cm->getConfigValue('map') == 'iframe')
                     @if($details->firstWhere('column_fk', $cm->column->column_id))
                         @if($cm->getConfigValue('map_iframe') == 'url')
