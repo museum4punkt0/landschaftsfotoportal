@@ -68,7 +68,7 @@
     <header class="masthead">
         <div class="container">
             <div class="masthead-subheading">Willkommen!</div>
-            <div class="masthead-heading text-uppercase">Landschaftsfotoportal</div>
+            <div class="masthead-heading text-uppercase">Landschafts&shy;fotoportal</div>
             <a class="btn btn-primary btn-xl text-uppercase js-scroll-trigger" href="#services">Wissen Sie mehr?</a>
         </div>
     </header>
