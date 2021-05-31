@@ -40,9 +40,9 @@
     <div class="container">
         <div class="row">
             <!-- Search form -->
-            <div class="col-lg-2">
+            <div class="col-lg-2" id="searchForm">
                 
-                <form action="{{ route('search.results') }}" method="POST">
+                <form action="{{ route('search.results') }}#searchResults" method="POST">
                 @if(Config::get('ui.frontend_layout') == 'bestikri')
                     <div class="form-group">
                         <span>@lang('search.taxon_name')</span>
@@ -100,7 +100,7 @@
             
             </div>
             <!-- Search results -->
-            <div class="col-lg-10">
+            <div class="col-lg-10" id="searchResults">
                 
                 <!-- Search results for details -->
                 @isset($items)
