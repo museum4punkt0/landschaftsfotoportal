@@ -37,6 +37,8 @@ return [
     'icon_cart_remove' => 'fa-trash',
     'icon_comment' => 'fa-comment',
     'icon_download' => 'fa-download',
+    'icon_published' => 'fa-eye',
+    'icon_unpublished' => 'fa-eye-slash',
     'icon_items_own' => 'fa-images',
     'icon_email_address' => 'fa-at',
     'icon_edit' => 'fa-pencil-alt',
