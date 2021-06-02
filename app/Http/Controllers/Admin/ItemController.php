@@ -105,14 +105,14 @@ class ItemController extends Controller
         }
         
         // Get current UI language
-        $lang = 'name_'. app()->getLocale();
+        $lang = app()->getLocale();
         
         // Get data types of columns with localized names
         $data_types = Value::whereHas('element', function ($query) {
             $query->where('list_fk', Selectlist::where('name', '_data_type_')->first()->list_id);
         })
         ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', $lang);
+            $query->where('name', 'name_'. $lang);
         })
         ->with(['attribute'])
         ->get();
@@ -122,17 +122,26 @@ class ItemController extends Controller
             $query->where('list_fk', Selectlist::where('name', '_translation_')->first()->list_id);
         })
         ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', $lang);
+            $query->where('name', 'name_'. $lang);
         })
         ->with(['attribute'])
         ->get();
                 
+        // Get localized placeholders for columns
+        $placeholders = Value::whereHas('element', function ($query) {
+            $query->where('list_fk', Selectlist::where('name', '_translation_')->first()->list_id);
+        })
+        ->whereHas('attribute', function ($query) use ($lang) {
+            $query->where('name', 'placeholder_'. $lang);
+        })
+        ->get();
+        
         // Save item_type ID to session
         $request->session()->put('item_type', $request->item_type);
         // Save taxon ID to session
         $request->session()->put('taxon', $request->taxon);
         
-        return view('admin.item.create', compact('items', 'taxa', 'colmap', 'lists', 'data_types', 'translations'));
+        return view('admin.item.create', compact('items', 'taxa', 'colmap', 'lists', 'data_types', 'translations', 'placeholders'));
     }
 
     /**
@@ -441,14 +450,14 @@ class ItemController extends Controller
         }
         
         // Get current UI language
-        $lang = 'name_'. app()->getLocale();
+        $lang = app()->getLocale();
         
         // Get data types of columns with localized names
         $data_types = Value::whereHas('element', function ($query) {
             $query->where('list_fk', Selectlist::where('name', '_data_type_')->first()->list_id);
         })
         ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', $lang);
+            $query->where('name', 'name_'. $lang);
         })
         ->with(['attribute'])
         ->get();
@@ -458,12 +467,21 @@ class ItemController extends Controller
             $query->where('list_fk', Selectlist::where('name', '_translation_')->first()->list_id);
         })
         ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', $lang);
+            $query->where('name', 'name_'. $lang);
         })
         ->with(['attribute'])
         ->get();
         
-        return view('admin.item.edit', compact('item', 'items', 'taxa', 'details', 'colmap', 'lists', 'data_types', 'translations'));
+        // Get localized placeholders for columns
+        $placeholders = Value::whereHas('element', function ($query) {
+            $query->where('list_fk', Selectlist::where('name', '_translation_')->first()->list_id);
+        })
+        ->whereHas('attribute', function ($query) use ($lang) {
+            $query->where('name', 'placeholder_'. $lang);
+        })
+        ->get();
+        
+        return view('admin.item.edit', compact('item', 'items', 'taxa', 'details', 'colmap', 'lists', 'data_types', 'translations', 'placeholders'));
     }
 
     /**

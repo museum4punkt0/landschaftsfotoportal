@@ -168,6 +168,7 @@
                     @include('includes.column_label')
                     
                     <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}" 
+                        placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
                         value="{{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_int) }}" />
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
@@ -180,6 +181,7 @@
                     @include('includes.column_label')
                     
                     <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}" 
+                        placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
                         value="{{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_float) }}" />
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
@@ -201,12 +203,15 @@
                     
                     @if($details->firstWhere('column_fk', $cm->column->column_id))
                         @if($cm->getConfigValue('textarea'))
-                            <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}" rows="{{$cm->getConfigValue('textarea')}}">{{
+                            <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}" 
+                                placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
+                                rows="{{$cm->getConfigValue('textarea')}}">{{
                                 old('fields.'. $cm->column->column_id, 
                                     $details->firstWhere('column_fk', $cm->column->column_id)->value_string)
                             }}</textarea>
                         @else
                             <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif" 
+                                placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
                                 value="{{ old('fields.'. $cm->column->column_id, 
                                 $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}" />
                         @endif
@@ -228,6 +233,7 @@
                     @include('includes.column_label')
                     
                     <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control summernote" 
+                        placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
                         rows=5>{!! old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_string) !!}</textarea>
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
@@ -248,6 +254,7 @@
                     @include('includes.column_label')
                     
                     <input type="url" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
+                        placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
                         value="{{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}" />
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>

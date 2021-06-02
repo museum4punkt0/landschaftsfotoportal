@@ -164,11 +164,14 @@
                     @include('includes.column_label')
                     
                     @if($cm->getConfigValue('textarea'))
-                        <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}" rows="$cm->getConfigValue('textarea')">{{
+                        <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}" 
+                            placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
+                            rows="$cm->getConfigValue('textarea')">{{
                             old('fields.'. $cm->column->column_id)
                         }}</textarea>
                     @else
                         <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif" 
+                            placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
                             value="{{old('fields.'. $cm->column->column_id)}}" />
                     @endif
                     @if($cm->getConfigValue('data_subtype') == 'location_city')
@@ -186,6 +189,7 @@
                     @include('includes.column_label')
                     
                     <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control summernote" 
+                        placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
                         rows=5>{!! old('fields.'. $cm->column->column_id) !!}</textarea>
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
@@ -205,6 +209,7 @@
                     @include('includes.column_label')
                     
                     <input type="url" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
+                        placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
                         value="{{old('fields.'. $cm->column->column_id, 'https://')}}" />
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
