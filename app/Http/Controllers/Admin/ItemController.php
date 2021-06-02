@@ -12,8 +12,8 @@ use App\Column;
 use App\ColumnMapping;
 use App\Selectlist;
 use App\Element;
-use App\Value;
 use App\Http\Controllers\Controller;
+use App\Utils\Localization;
 use App\Utils\Image;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -108,42 +108,14 @@ class ItemController extends Controller
         $lang = app()->getLocale();
         
         // Get data types of columns with localized names
-        $data_types = Value::whereHas('element', function ($query) {
-            $query->where('list_fk', Selectlist::where('name', '_data_type_')->first()->list_id);
-        })
-        ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', 'name_'. $lang);
-        })
-        ->with(['attribute'])
-        ->get();
+        $data_types = Localization::getDataTypes($lang);
         
         // Get localized names of columns
-        $translations = Value::whereHas('element', function ($query) {
-            $query->where('list_fk', Selectlist::where('name', '_translation_')->first()->list_id);
-        })
-        ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', 'name_'. $lang);
-        })
-        ->with(['attribute'])
-        ->get();
-                
+        $translations = Localization::getTranslations($lang, 'name');
         // Get localized placeholders for columns
-        $placeholders = Value::whereHas('element', function ($query) {
-            $query->where('list_fk', Selectlist::where('name', '_translation_')->first()->list_id);
-        })
-        ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', 'placeholder_'. $lang);
-        })
-        ->get();
-        
+        $placeholders = Localization::getTranslations($lang, 'placeholder');
         // Get localized description/help for columns
-        $descriptions = Value::whereHas('element', function ($query) {
-            $query->where('list_fk', Selectlist::where('name', '_translation_')->first()->list_id);
-        })
-        ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', 'description_'. $lang);
-        })
-        ->get();
+        $descriptions = Localization::getTranslations($lang, 'description');
         
         // Save item_type ID to session
         $request->session()->put('item_type', $request->item_type);
@@ -462,42 +434,14 @@ class ItemController extends Controller
         $lang = app()->getLocale();
         
         // Get data types of columns with localized names
-        $data_types = Value::whereHas('element', function ($query) {
-            $query->where('list_fk', Selectlist::where('name', '_data_type_')->first()->list_id);
-        })
-        ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', 'name_'. $lang);
-        })
-        ->with(['attribute'])
-        ->get();
+        $data_types = Localization::getDataTypes($lang);
         
         // Get localized names of columns
-        $translations = Value::whereHas('element', function ($query) {
-            $query->where('list_fk', Selectlist::where('name', '_translation_')->first()->list_id);
-        })
-        ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', 'name_'. $lang);
-        })
-        ->with(['attribute'])
-        ->get();
-        
+        $translations = Localization::getTranslations($lang, 'name');
         // Get localized placeholders for columns
-        $placeholders = Value::whereHas('element', function ($query) {
-            $query->where('list_fk', Selectlist::where('name', '_translation_')->first()->list_id);
-        })
-        ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', 'placeholder_'. $lang);
-        })
-        ->get();
-        
+        $placeholders = Localization::getTranslations($lang, 'placeholder');
         // Get localized description/help for columns
-        $descriptions = Value::whereHas('element', function ($query) {
-            $query->where('list_fk', Selectlist::where('name', '_translation_')->first()->list_id);
-        })
-        ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', 'description_'. $lang);
-        })
-        ->get();
+        $descriptions = Localization::getTranslations($lang, 'description');
         
         return view('admin.item.edit', compact('item', 'items', 'taxa', 'details', 'colmap', 'lists', 'data_types', 'translations', 'placeholders', 'descriptions'));
     }
