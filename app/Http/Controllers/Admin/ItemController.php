@@ -311,8 +311,11 @@ class ItemController extends Controller
             }
         }
         
-        $l10n_list = Selectlist::where('name', '_translation_')->first();
-        $translations = Element::where('list_fk', $l10n_list->list_id)->get();
+        // Get current UI language
+        $lang = app()->getLocale();
+        
+        // Get localized names of columns
+        $translations = Localization::getTranslations($lang, 'name');
         
         return view('admin.item.show', compact('item', 'details', 'colmap', 'lists', 'translations'));
     }

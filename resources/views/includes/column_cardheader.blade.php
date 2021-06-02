@@ -1,3 +1,5 @@
+{{-- Included in resources/views/admin/item/show.blade.php --}}
+
                 <div class="card-header">
                     <h5 class="mb-0">
                         @if($cm->public != 1)
@@ -5,8 +7,7 @@
                                 title=" @lang('common.unpublished') "></i>
                         @endif
                         
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }}
                         ({{ $cm->column->description }})
                     </h5>
                 </div>

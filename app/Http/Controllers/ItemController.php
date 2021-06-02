@@ -7,6 +7,7 @@ use App\Detail;
 use App\ColumnMapping;
 use App\Selectlist;
 use App\Element;
+use App\Utils\Localization;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -79,10 +80,12 @@ class ItemController extends Controller
             }
         }
         
-        // Translations for titles of columns and column groups
-        $l10n_list = Selectlist::where('name', '_translation_')->first();
-        $translations = Element::where('list_fk', $l10n_list->list_id)->get();
-                
+        // Get current UI language
+        $lang = app()->getLocale();
+        
+        // Get localized names of columns
+        $translations = Localization::getTranslations($lang, 'name');
+        
         return view('item.show', compact('item', 'items', 'details', 'menu_root', 'path', 'colmap', 'lists', 'translations'));
     }
 
