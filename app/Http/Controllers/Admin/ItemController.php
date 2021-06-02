@@ -136,12 +136,21 @@ class ItemController extends Controller
         })
         ->get();
         
+        // Get localized description/help for columns
+        $descriptions = Value::whereHas('element', function ($query) {
+            $query->where('list_fk', Selectlist::where('name', '_translation_')->first()->list_id);
+        })
+        ->whereHas('attribute', function ($query) use ($lang) {
+            $query->where('name', 'description_'. $lang);
+        })
+        ->get();
+        
         // Save item_type ID to session
         $request->session()->put('item_type', $request->item_type);
         // Save taxon ID to session
         $request->session()->put('taxon', $request->taxon);
         
-        return view('admin.item.create', compact('items', 'taxa', 'colmap', 'lists', 'data_types', 'translations', 'placeholders'));
+        return view('admin.item.create', compact('items', 'taxa', 'colmap', 'lists', 'data_types', 'translations', 'placeholders', 'descriptions'));
     }
 
     /**
@@ -481,7 +490,16 @@ class ItemController extends Controller
         })
         ->get();
         
-        return view('admin.item.edit', compact('item', 'items', 'taxa', 'details', 'colmap', 'lists', 'data_types', 'translations', 'placeholders'));
+        // Get localized description/help for columns
+        $descriptions = Value::whereHas('element', function ($query) {
+            $query->where('list_fk', Selectlist::where('name', '_translation_')->first()->list_id);
+        })
+        ->whereHas('attribute', function ($query) use ($lang) {
+            $query->where('name', 'description_'. $lang);
+        })
+        ->get();
+        
+        return view('admin.item.edit', compact('item', 'items', 'taxa', 'details', 'colmap', 'lists', 'data_types', 'translations', 'placeholders', 'descriptions'));
     }
 
     /**
