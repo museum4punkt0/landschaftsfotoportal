@@ -591,6 +591,8 @@
             $('input.location_state').val(ui.item.address.state);
             $('input.location_county').val(ui.item.address.county);
             $('input.location_city').val(getTownFromAddress(ui.item.address));
+            $('input.location_street').val(ui.item.address.road);
+            $('input.location_postcode').val(ui.item.address.postcode);
             $('input.location_lat').val(ui.item.latitude);
             $('input.location_lon').val(ui.item.longitude);
             
@@ -637,6 +639,8 @@
                 $('input.location_state').val(data.address.state);
                 $('input.location_county').val(data.address.county);
                 $('input.location_city').val(getTownFromAddress(data.address));
+                $('input.location_street').val(data.address.road);
+                $('input.location_postcode').val(data.address.postcode);
             },
             error:function (xhr) {
                 //console.log(xhr);
