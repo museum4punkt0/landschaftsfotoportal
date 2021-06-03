@@ -194,7 +194,12 @@
                 @case('_image_ppi_')
                     @include('includes.column_title')
                     <div class="col font-weight-bold">
-                        {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int }}
+                        {{-- TODO: move scaling to controller or model --}}
+                        @if($cm->getConfigValue('scale_factor'))
+                            {{ round(optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int * $cm->getConfigValue('scale_factor'), $cm->getConfigValue('precision')) }}
+                        @else
+                            {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int }}
+                        @endif
                     </div>
                     @break
                 
