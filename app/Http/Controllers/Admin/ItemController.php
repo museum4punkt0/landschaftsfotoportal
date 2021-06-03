@@ -258,6 +258,7 @@ class ItemController extends Controller
                             
                             // Store image dimensions in database
                             Image::storeImageDimensions($path, $name, $item->item_id, $column_id);
+                            Image::storeImageSize($path, $name, $item->item_id, $column_id);
                             
                             // Create resized images
                             Image::processImageResizing($path, $name);
@@ -563,6 +564,7 @@ class ItemController extends Controller
                             
                             // Store image dimensions in database
                             Image::storeImageDimensions($path, $name, $item->item_id, $column_id);
+                            Image::storeImageSize($path, $name, $item->item_id, $column_id);
                             
                             // Create resized images
                             Image::processImageResizing($path, $name);

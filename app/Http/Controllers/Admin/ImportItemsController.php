@@ -303,6 +303,8 @@ class ImportItemsController extends Controller
                             // Store image dimensions in database
                             Image::storeImageDimensions(config('media.full_dir'), $cell,
                                 $item->item_id, $selected_attr[$colnr]);
+                            Image::storeImageSize(config('media.full_dir'), $cell,
+                                $item->item_id, $selected_attr[$colnr]);
                             // Create resized images
                             Image::processImageResizing(config('media.full_dir'), $cell);
                             // No break, but fall through

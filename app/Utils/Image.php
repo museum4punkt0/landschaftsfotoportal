@@ -25,6 +25,38 @@ class Image
     }
 
     /**
+     * Store size (bytes) of a given image file.
+     *
+     * @param  string $image_path
+     * @param  string $filename
+     * @param  integer $item_id
+     * @param  integer $fcolumn_id
+     * @return void
+     */
+    public static function storeImageSize($image_path, $filename, $item_id, $column_id)
+    {
+        if (Image::checkFileExists($image_path . $filename)) {
+        
+            // Get size (bytes) of image
+            $size = Storage::disk('public')->size($image_path . $filename);
+            
+            // Get the colmap holding the config for columns containing image dimensions
+            $cm = Column::find($column_id)->column_mapping()->first();
+            
+            // Find the column holding the image height
+            $size_column = $cm->getConfigValue('image_size_col');
+            if ($size_column) {
+                Detail::where('item_fk', $item_id)
+                ->where('column_fk', $size_column)
+                ->update(['value_int' => $size]);
+            }
+            else {
+                Log::warning(__('items.no_column_for_image_size'), ['colmap' => $cm->colmap_id]);
+            }
+        }
+    }
+
+    /**
      * Store width and height of a given image file.
      *
      * @param  string $image_path
