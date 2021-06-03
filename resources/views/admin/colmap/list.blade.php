@@ -57,13 +57,17 @@
                         </td>
                         <td>
                             @foreach($colmap->column->translation->values as $v)
-                                {{substr($v->attribute->name, -2)}}: {{$v->value}}<br/>
+                                <b>{{substr($v->attribute->name, 0, -3)}}:</b> {{$v->value}}<br/>
                             @endforeach
                             ID {{$colmap->column_fk}}<br/>
                         </td>
                         <td>
                             @foreach($colmap->column_group->values as $v)
-                                {{substr($v->attribute->name, -2)}}: {{$v->value}}<br/>
+                                @if($v->attribute->name == 'config')
+                                    <b>{{$v->attribute->name, 0}}:</b> {{$v->value}}<br/>
+                                @else
+                                    <b>{{substr($v->attribute->name, 0, -3)}}:</b> {{$v->value}}<br/>
+                                @endif
                             @endforeach
                             ID {{$colmap->column_group_fk}}<br/>
                         </td>

@@ -52,7 +52,7 @@
                         </td>
                         <td>
                             @foreach($column->translation->values as $v)
-                                {{substr($v->attribute->name, -2)}}: {{$v->value}}<br/>
+                                <b>{{substr($v->attribute->name, 0, -3)}}:</b> {{$v->value}}<br/>
                             @endforeach
                             ID {{$column->translation_fk}}<br/>
                         </td>
