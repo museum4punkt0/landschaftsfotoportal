@@ -93,7 +93,10 @@ class ElementController extends Controller
      */
     public function show(Element $element)
     {
-        //
+        $data['element'] = $element;
+        $data['list'] = $element->list;
+        
+        return view('admin.lists.element.show', $data);
     }
 
     /**

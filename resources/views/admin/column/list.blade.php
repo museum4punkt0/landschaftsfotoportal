@@ -54,18 +54,18 @@
                             @foreach($column->translation->values as $v)
                                 <b>{{substr($v->attribute->name, 0, -3)}}:</b> {{$v->value}}<br/>
                             @endforeach
-                            ID {{$column->translation_fk}}<br/>
+                            <a href="{{route('element.show', $column->translation_fk)}}">ID {{$column->translation_fk}}</a>
                         </td>
                         <td>
                             @foreach($column->data_type->values as $v)
                                 {{$v->value}}<br/>
                             @endforeach
-                            ID {{$column->data_type_fk}}
+                            <a href="{{route('element.show', $column->data_type_fk)}}">ID {{$column->data_type_fk}}</a>
                         </td>
                         <td>
                             @if($column->list_fk)
                                 {{$column->list->name}} ({{$column->list->description}})<br/>
-                                ID {{$column->list_fk}}
+                                <a href="{{route('list.show', $column->list_fk)}}">ID {{$column->list_fk}}</a>
                             @endif
                         </td>
                         <td>

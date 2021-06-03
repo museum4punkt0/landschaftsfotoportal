@@ -59,7 +59,7 @@
                             @foreach($colmap->column->translation->values as $v)
                                 <b>{{substr($v->attribute->name, 0, -3)}}:</b> {{$v->value}}<br/>
                             @endforeach
-                            ID {{$colmap->column_fk}}<br/>
+                            <a href="{{route('column.edit', $colmap->column_fk)}}">ID {{$colmap->column_fk}}</a>
                         </td>
                         <td>
                             @foreach($colmap->column_group->values as $v)
@@ -69,12 +69,12 @@
                                     <b>{{substr($v->attribute->name, 0, -3)}}:</b> {{$v->value}}<br/>
                                 @endif
                             @endforeach
-                            ID {{$colmap->column_group_fk}}<br/>
+                            <a href="{{route('element.show', $colmap->column_group_fk)}}">ID {{$colmap->column_group_fk}}</a>
                         </td>
                         <td>
                             @if($colmap->taxon_fk)
                                 {{$colmap->taxon->taxon_name}}<br/>
-                                ID {{$colmap->taxon_fk}}
+                                <a href="{{route('taxon.edit', $colmap->taxon_fk)}}">ID {{$colmap->taxon_fk}}</a>
                             @else
                                 @lang('common.all')
                             @endif
@@ -83,7 +83,7 @@
                             @foreach($colmap->item_type->values as $v)
                                 {{$v->value}}<br/>
                             @endforeach
-                            ID {{$colmap->item_type_fk}}
+                            <a href="{{route('element.show', $colmap->item_type_fk)}}">ID {{$colmap->item_type_fk}}</a>
                         </td>
                         <td>
                             <form action="{{route('colmap.destroy', $colmap)}}" method="POST">
