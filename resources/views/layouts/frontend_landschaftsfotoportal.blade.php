@@ -145,8 +145,5 @@
             </div>
         </div>
     </footer>
-    
-    <!-- Third party plugin JS-->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
 </body>
 </html>
