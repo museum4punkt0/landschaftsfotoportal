@@ -90,6 +90,7 @@
                     @include('includes.column_label')
                     
                     <select
+                        id="fieldsInput-{{ $cm->column->column_id }}"
                         name="fields[{{ $cm->column->column_id }}]"
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
@@ -125,6 +126,7 @@
                     @include('includes.column_label')
                     
                     <select
+                        id="fieldsInput-{{ $cm->column->column_id }}"
                         name="fields[{{ $cm->column->column_id }}][]"
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
@@ -173,6 +175,7 @@
                         <input type="hidden" name="fields[{{ $cm->column->column_id }}]" value=0 />
                         <input
                             type="checkbox"
+                            id="fieldsInput-{{ $cm->column->column_id }}"
                             name="fields[{{ $cm->column->column_id }}]"
                             aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                             class="form-check-input @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
@@ -196,6 +199,7 @@
                     
                     <input
                         type="text"
+                        id="fieldsInput-{{ $cm->column->column_id }}"
                         name="fields[{{ $cm->column->column_id }}]"
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control {{ $cm->getConfigValue('data_subtype') }} @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
@@ -216,6 +220,7 @@
                     
                     <input
                         type="text"
+                        id="fieldsInput-{{ $cm->column->column_id }}"
                         name="fields[{{ $cm->column->column_id }}]"
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control {{ $cm->getConfigValue('data_subtype') }} @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
@@ -245,6 +250,7 @@
                     @if($details->firstWhere('column_fk', $cm->column->column_id))
                         @if($cm->getConfigValue('textarea'))
                             <textarea
+                                id="fieldsInput-{{ $cm->column->column_id }}"
                                 name="fields[{{ $cm->column->column_id }}]"
                                 aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                                 class="form-control {{ $cm->getConfigValue('data_subtype') }} @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
@@ -257,6 +263,7 @@
                         @else
                             <input
                                 type="text"
+                                id="fieldsInput-{{ $cm->column->column_id }}"
                                 name="fields[{{ $cm->column->column_id }}]"
                                 aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                                 class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
@@ -285,6 +292,7 @@
                     @include('includes.column_label')
                     
                     <textarea
+                        id="fieldsInput-{{ $cm->column->column_id }}"
                         name="fields[{{ $cm->column->column_id }}]"
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control summernote @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
@@ -315,6 +323,7 @@
                     
                     <input
                         type="url"
+                        id="fieldsInput-{{ $cm->column->column_id }}"
                         name="fields[{{ $cm->column->column_id }}]"
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
@@ -335,6 +344,7 @@
                     
                     <input
                         type="date"
+                        id="fieldsInput-{{ $cm->column->column_id }}"
                         name="fields[{{ $cm->column->column_id }}]"
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
@@ -351,7 +361,7 @@
             @case('_date_range_')
                 <div class="form-group">
                     @include('includes.column_label')
-                    
+                    <br/>
                     <!-- Radio buttons to switch the type of date -->
                     <div class="form-check form-check-inline">
                         <input
@@ -389,6 +399,7 @@
                     @endif
                         <input
                             type="date"
+                            id="fieldsInput-{{ $cm->column->column_id }}"
                             name="fields[{{ $cm->column->column_id }}]"
                             aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                             class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
@@ -554,6 +565,7 @@
                             <input type="hidden" name="fields[{{ $cm->column->column_id }}][dummy]" value=0 />
                             <input
                                 type="file"
+                                id="fieldsInput-{{ $cm->column->column_id }}"
                                 name="fields[{{ $cm->column->column_id }}][file]"
                                 aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                                 class="form-control-file @if($errors->has('fields.'.$cm->column->column_id.'.file')) is-invalid @endif"
