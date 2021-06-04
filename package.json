@@ -16,6 +16,7 @@
         "cross-env": "^7.0.3",
         "jquery": "^3.5.1",
         "jquery-ui": "^1.12.1",
+        "jquery.easing": "^1.4.1",
         "laravel-mix": "^5.0.9",
         "lodash": "^4.17.20",
         "ol": "^6.5.0",

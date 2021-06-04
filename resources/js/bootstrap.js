@@ -41,6 +41,11 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 // });
 
 /**
+ * jQuery-easing
+ */
+require('jquery.easing');
+
+/**
  * jQuery-UI
  */
 
