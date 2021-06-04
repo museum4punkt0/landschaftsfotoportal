@@ -87,7 +87,12 @@
                 <div class="form-group">
                     @include('includes.column_label')
                     
-                    <select name="fields[{{ $cm->column->column_id }}]" class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif" size=1 >
+                    <select
+                        name="fields[{{ $cm->column->column_id }}]"
+                        aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
+                        class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                        size=1
+                    >
                         <option value="">@lang('common.choose')</option>
                         @foreach($lists[$cm->column->list_fk] as $element)
                             <option value="{{$element->element_id}}"
@@ -104,6 +109,8 @@
                             </option>
                         @endforeach
                     </select>
+                    
+                    @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 @break
@@ -113,7 +120,13 @@
                 <div class="form-group">
                     @include('includes.column_label')
                     
-                    <select name="fields[{{ $cm->column->column_id }}][]" class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif" size=5 multiple>
+                    <select
+                        name="fields[{{ $cm->column->column_id }}][]"
+                        aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
+                        class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                        size=5
+                        multiple
+                    >
                         @foreach($lists[$cm->column->list_fk] as $element)
                             <option value="{{$element->element_id}}"
                                 @if(collect(old('fields.'. $cm->column->column_id))->contains($element->element_id))
@@ -129,6 +142,8 @@
                             </option>
                         @endforeach
                     </select>
+                    
+                    @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 @break
@@ -140,11 +155,18 @@
                     
                     <div class="form-check @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif">
                         <input type="hidden" name="fields[{{ $cm->column->column_id }}]" value=0 />
-                        <input type="checkbox" name="fields[{{ $cm->column->column_id }}]" class="form-check-input" 
+                        <input
+                            type="checkbox"
+                            name="fields[{{ $cm->column->column_id }}]"
+                            aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
+                            class="form-check-input"
                             value=1 
-                            @if(old('fields.'. $cm->column->column_id)) checked @endif />
+                            @if(old('fields.'. $cm->column->column_id)) checked @endif
+                        />
                         {{ $cm->column->translation->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
+                        
+                        @include('includes.form_input_help')
                         <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                     </div>
                 </div>
@@ -170,21 +192,32 @@
                     @include('includes.column_label')
                     
                     @if($cm->getConfigValue('textarea'))
-                        <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }} @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif" 
-                            placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
-                            rows="$cm->getConfigValue('textarea')">{{
+                        <textarea
+                            name="fields[{{ $cm->column->column_id }}]"
+                            aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
+                            class="form-control {{ $cm->getConfigValue('data_subtype') }} @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                            placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
+                            rows="$cm->getConfigValue('textarea')"
+                        >{{
                             old('fields.'. $cm->column->column_id)
                         }}</textarea>
                     @else
-                        <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif" 
-                            placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
-                            value="{{old('fields.'. $cm->column->column_id)}}" />
+                        <input
+                            type="text"
+                            name="fields[{{ $cm->column->column_id }}]"
+                            aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
+                            class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                            placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
+                            value="{{old('fields.'. $cm->column->column_id)}}"
+                        />
                     @endif
                     @if($cm->getConfigValue('data_subtype') == 'location_city')
                         <button type="button" class="btn btn-primary btn-sm searchAddressBtn">
                             @lang('common.get_latlon')
                         </button>
                     @endif
+                    
+                    @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 @break
@@ -194,9 +227,17 @@
                 <div class="form-group">
                     @include('includes.column_label')
                     
-                    <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control summernote @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif" 
-                        placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
-                        rows=5>{!! old('fields.'. $cm->column->column_id) !!}</textarea>
+                    <textarea
+                        name="fields[{{ $cm->column->column_id }}]"
+                        aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
+                        class="form-control summernote @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                        placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
+                        rows=5
+                    >{!!
+                        old('fields.'. $cm->column->column_id)
+                    !!}</textarea>
+                    
+                    @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 <script type="text/javascript">
@@ -214,9 +255,16 @@
                 <div class="form-group">
                     @include('includes.column_label')
                     
-                    <input type="url" name="fields[{{ $cm->column->column_id }}]" class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif" 
-                        placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
-                        value="{{old('fields.'. $cm->column->column_id, 'https://')}}" />
+                    <input
+                        type="url"
+                        name="fields[{{ $cm->column->column_id }}]"
+                        aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
+                        class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                        placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
+                        value="{{old('fields.'. $cm->column->column_id, 'https://')}}"
+                    />
+                    
+                    @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 @break
@@ -226,8 +274,15 @@
                 <div class="form-group">
                     @include('includes.column_label')
                     
-                    <input type="date" name="fields[{{ $cm->column->column_id }}]" class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif" 
-                        value="{{old('fields.'. $cm->column->column_id)}}" />
+                    <input
+                        type="date"
+                        name="fields[{{ $cm->column->column_id }}]"
+                        aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
+                        class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                        value="{{old('fields.'. $cm->column->column_id)}}"
+                    />
+                    
+                    @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 @break
@@ -239,18 +294,30 @@
                     
                     <!-- Radio buttons to switch the type of date -->
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="date_type" id="datePointRadio-{{ $cm->column->column_id }}" data-column="{{ $cm->column->column_id }}" value="point"
-                        @if(old('date_type') == 'point')
-                            checked
-                        @endif
+                        <input
+                            type="radio"
+                            id="datePointRadio-{{ $cm->column->column_id }}"
+                            name="date_type"
+                            class="form-check-input"
+                            data-column="{{ $cm->column->column_id }}"
+                            value="point"
+                            @if(old('date_type') == 'point')
+                                checked
+                            @endif
                         >
                         <label class="form-check-label" for="datePointRadio-{{ $cm->column->column_id }}">@lang('common.date_point')</label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="date_type" id="datePeriodRadio-{{ $cm->column->column_id }}" data-column="{{ $cm->column->column_id }}" value="period"
-                        @if(old('date_type') == 'period')
-                            checked
-                        @endif
+                        <input
+                            type="radio"
+                            id="datePeriodRadio-{{ $cm->column->column_id }}"
+                            name="date_type"
+                            class="form-check-input"
+                            data-column="{{ $cm->column->column_id }}"
+                            value="period"
+                            @if(old('date_type') == 'period')
+                                checked
+                            @endif
                         >
                         <label class="form-check-label" for="datePeriodRadio-{{ $cm->column->column_id }}">@lang('common.date_period')</label>
                     </div>
@@ -260,8 +327,15 @@
                     @else
                         <div class="collapse date-point" data-column="{{ $cm->column->column_id }}">
                     @endif
-                        <input type="date" name="fields[{{ $cm->column->column_id }}]" data-column="{{ $cm->column->column_id }}" class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif" 
-                            value="{{ old('fields.'. $cm->column->column_id .'.start') }}" />
+                        <input
+                            type="date"
+                            name="fields[{{ $cm->column->column_id }}]"
+                            aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
+                            class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                            data-column="{{ $cm->column->column_id }}"
+                            value="{{ old('fields.'. $cm->column->column_id .'.start') }}"
+                        />
+                        @include('includes.form_input_help')
                         <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                     </div>
                     <!-- Form fields for the date (period of time) -->
@@ -285,10 +359,20 @@
                         <input class="btn btn-primary" type="button" value="@lang('common.save')" onClick="checkDateRange({{ $cm->column->column_id }});">
                     </div>
                     <!-- Hidden form fields for time range passed to laravel controller -->
-                    <input type="hidden" name="fields[{{ $cm->column->column_id }}][start]" data-column="{{ $cm->column->column_id }}" class="form-control date-period-start" 
-                        value="{{ old('fields.'. $cm->column->column_id .'.start') }}" />
-                    <input type="hidden" name="fields[{{ $cm->column->column_id }}][end]" data-column="{{ $cm->column->column_id }}" class="form-control date-period-end" 
-                        value="{{ old('fields.'. $cm->column->column_id .'.end') }}" />
+                    <input
+                        type="hidden"
+                        name="fields[{{ $cm->column->column_id }}][start]"
+                        class="form-control date-period-start"
+                        data-column="{{ $cm->column->column_id }}"
+                        value="{{ old('fields.'. $cm->column->column_id .'.start') }}"
+                    />
+                    <input
+                        type="hidden"
+                        name="fields[{{ $cm->column->column_id }}][end]"
+                        data-column="{{ $cm->column->column_id }}"
+                        class="form-control date-period-end"
+                        value="{{ old('fields.'. $cm->column->column_id .'.end') }}"
+                    />
                 </div>
                 <script type="text/javascript">
                     // Triggered when radio changed
@@ -384,7 +468,14 @@
                     @include('includes.column_label')
                     
                     <input type="hidden" name="fields[{{ $cm->column->column_id }}][dummy]" value="0" />
-                    <input type="file" class="form-control-file @if($errors->has('fields.'.$cm->column->column_id.'.file')) is-invalid @endif" name="fields[{{ $cm->column->column_id }}][file]" />
+                    <input
+                        type="file"
+                        name="fields[{{ $cm->column->column_id }}][file]"
+                        aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
+                        class="form-control-file @if($errors->has('fields.'.$cm->column->column_id.'.file')) is-invalid @endif"
+                    />
+                    
+                    @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 @break
