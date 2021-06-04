@@ -70,6 +70,7 @@ return [
     'unpublished' => 'unveröffentlicht',
     
     'laravel_error' => 'System-Fehler!',
+    'form_validation_error' => 'Dieses Formular enthält Fehler. Bitte korrigieren Sie die gekennzeichneten Felder!',
     'geocoder_api_key_error' => 'API-Key für Geocoder ungültig!',
     'get_latlon' => 'Koordinaten bestimmen',
 ];

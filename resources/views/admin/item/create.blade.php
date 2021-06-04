@@ -3,6 +3,12 @@
 @section('content')
 
 <div class="container">
+@if ($errors->any())
+    <div class="alert alert-danger">
+        @lang('common.form_validation_error')
+    </div>
+@endif
+
 <h2>@lang('items.new')</h2>
 
 @if(count($colmap)==0)
@@ -81,7 +87,7 @@
                 <div class="form-group">
                     @include('includes.column_label')
                     
-                    <select name="fields[{{ $cm->column->column_id }}]" class="form-control" size=1 >
+                    <select name="fields[{{ $cm->column->column_id }}]" class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif" size=1 >
                         <option value="">@lang('common.choose')</option>
                         @foreach($lists[$cm->column->list_fk] as $element)
                             <option value="{{$element->element_id}}"
@@ -107,7 +113,7 @@
                 <div class="form-group">
                     @include('includes.column_label')
                     
-                    <select name="fields[{{ $cm->column->column_id }}][]" class="form-control" size=5 multiple>
+                    <select name="fields[{{ $cm->column->column_id }}][]" class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif" size=5 multiple>
                         @foreach($lists[$cm->column->list_fk] as $element)
                             <option value="{{$element->element_id}}"
                                 @if(collect(old('fields.'. $cm->column->column_id))->contains($element->element_id))
@@ -132,7 +138,7 @@
                 <div class="form-group">
                     @include('includes.column_label')
                     
-                    <div class="form-check">
+                    <div class="form-check @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif">
                         <input type="hidden" name="fields[{{ $cm->column->column_id }}]" value=0 />
                         <input type="checkbox" name="fields[{{ $cm->column->column_id }}]" class="form-check-input" 
                             value=1 
@@ -164,13 +170,13 @@
                     @include('includes.column_label')
                     
                     @if($cm->getConfigValue('textarea'))
-                        <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}" 
+                        <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }} @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif" 
                             placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
                             rows="$cm->getConfigValue('textarea')">{{
                             old('fields.'. $cm->column->column_id)
                         }}</textarea>
                     @else
-                        <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif" 
+                        <input type="text" name="fields[{{ $cm->column->column_id }}]" class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif" 
                             placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
                             value="{{old('fields.'. $cm->column->column_id)}}" />
                     @endif
@@ -188,7 +194,7 @@
                 <div class="form-group">
                     @include('includes.column_label')
                     
-                    <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control summernote" 
+                    <textarea name="fields[{{ $cm->column->column_id }}]" class="form-control summernote @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif" 
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
                         rows=5>{!! old('fields.'. $cm->column->column_id) !!}</textarea>
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
@@ -208,7 +214,7 @@
                 <div class="form-group">
                     @include('includes.column_label')
                     
-                    <input type="url" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
+                    <input type="url" name="fields[{{ $cm->column->column_id }}]" class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif" 
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
                         value="{{old('fields.'. $cm->column->column_id, 'https://')}}" />
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
@@ -220,7 +226,7 @@
                 <div class="form-group">
                     @include('includes.column_label')
                     
-                    <input type="date" name="fields[{{ $cm->column->column_id }}]" class="form-control" 
+                    <input type="date" name="fields[{{ $cm->column->column_id }}]" class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif" 
                         value="{{old('fields.'. $cm->column->column_id)}}" />
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
@@ -254,7 +260,7 @@
                     @else
                         <div class="collapse date-point" data-column="{{ $cm->column->column_id }}">
                     @endif
-                        <input type="date" name="fields[{{ $cm->column->column_id }}]" data-column="{{ $cm->column->column_id }}" class="form-control" 
+                        <input type="date" name="fields[{{ $cm->column->column_id }}]" data-column="{{ $cm->column->column_id }}" class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif" 
                             value="{{ old('fields.'. $cm->column->column_id .'.start') }}" />
                         <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                     </div>
@@ -378,7 +384,7 @@
                     @include('includes.column_label')
                     
                     <input type="hidden" name="fields[{{ $cm->column->column_id }}][dummy]" value="0" />
-                    <input type="file" class="form-control-file" name="fields[{{ $cm->column->column_id }}][file]" />
+                    <input type="file" class="form-control-file @if($errors->has('fields.'.$cm->column->column_id.'.file')) is-invalid @endif" name="fields[{{ $cm->column->column_id }}][file]" />
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 @break
@@ -587,7 +593,7 @@
         
     @endforeach
     
-    @if ($errors->any())
+    @if(0 && $errors->any())
         <div class="alert alert-danger">
             <ul>
                 @foreach ($errors->all() as $error)
