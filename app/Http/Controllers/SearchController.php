@@ -34,8 +34,7 @@ class SearchController extends Controller
             })->first();
         if ($it_element) {
             $item_type = $it_element->element_id;
-        }
-        else {
+        } else {
             $item_type = 0;
         }
         
@@ -92,8 +91,7 @@ class SearchController extends Controller
             })->first();
         if ($it_element) {
             $item_type = $it_element->element_id;
-        }
-        else {
+        } else {
             $item_type = 0;
         }
         
@@ -133,7 +131,7 @@ class SearchController extends Controller
         // Make sure there is at least one dropdown available
         if ($request->input('fields')) {
             // Get only selected columns to search within
-            $search_columns = array_filter($request->input('fields'), function($val) {
+            $search_columns = array_filter($request->input('fields'), function ($val) {
                 return $val > 0;
             });
             // Prepare the search query using selected columns
@@ -142,12 +140,12 @@ class SearchController extends Controller
             }
             if ($search_details) {
                 $details = Detail::where(function ($query) use ($search_details) {
-                        foreach ($search_details as $n => $s) {
-                            $query->orWhere($search_details[$n]);
-                        }
-                    })
-                    ->with('item')
-                    ->get();
+                    foreach ($search_details as $n => $s) {
+                        $query->orWhere($search_details[$n]);
+                    }
+                })
+                ->with('item')
+                ->get();
                 
                 $items_details = $details->groupBy('item_fk')
                     ->filter(function ($value, $key) use ($search_details) {

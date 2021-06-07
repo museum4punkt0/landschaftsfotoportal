@@ -192,7 +192,7 @@ class ElementController extends Controller
             ->get();
         
         $response = array();
-        foreach ($results as $result){
+        foreach ($results as $result) {
             foreach ($result->values as $value) {
                 $response[] = array(
                     "value" => $value->value_id,

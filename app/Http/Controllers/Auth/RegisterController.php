@@ -68,8 +68,7 @@ class RegisterController extends Controller
         // Check for any existing users, else grant super admin power to the very first user
         if (User::first()) {
             $group = Group::where('name', 'registered')->value('group_id');
-        }
-        else {
+        } else {
             $group = Group::where('name', 'super-admin')->value('group_id');
         }
         

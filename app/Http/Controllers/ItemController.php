@@ -122,8 +122,9 @@ class ItemController extends Controller
         $filename = $item->details->firstWhere('column_fk', 13)->value_string;
         $pathToFile = 'public/'. config('media.full_dir') . $filename;
         
-        if (Storage::missing($pathToFile))
+        if (Storage::missing($pathToFile)) {
             abort(404);
+        }
         
         return Storage::download($pathToFile);
     }

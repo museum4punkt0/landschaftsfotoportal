@@ -87,10 +87,12 @@ class ColumnController extends Controller
         $request->validate([
             'list' => [
                 Rule::requiredIf(function () use ($request) {
-                    if ($request->input('data_type') == Value::where('value', '_list_')->first()->element_fk)
+                    if ($request->input('data_type') == Value::where('value', '_list_')->first()->element_fk) {
                         return true;
-                    if ($request->input('data_type') == Value::where('value', '_multi_list_')->first()->element_fk)
+                    }
+                    if ($request->input('data_type') == Value::where('value', '_multi_list_')->first()->element_fk) {
                         return true;
+                    }
                     return false;
                 }),
                 'integer',
@@ -195,10 +197,12 @@ class ColumnController extends Controller
         $request->validate([
             'list' => [
                 Rule::requiredIf(function () use ($request) {
-                    if ($request->input('data_type') == Value::where('value', '_list_')->first()->element_fk)
+                    if ($request->input('data_type') == Value::where('value', '_list_')->first()->element_fk) {
                         return true;
-                    if ($request->input('data_type') == Value::where('value', '_multi_list_')->first()->element_fk)
+                    }
+                    if ($request->input('data_type') == Value::where('value', '_multi_list_')->first()->element_fk) {
                         return true;
+                    }
                     return false;
                 }),
                 'integer',
@@ -253,7 +257,7 @@ class ColumnController extends Controller
             ->get();
         
         $response = array();
-        foreach($results as $result){
+        foreach ($results as $result) {
             $response[] = array(
                 "value" => $result->column_id,
                 "label" => $result->description,
@@ -270,14 +274,17 @@ class ColumnController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    private function getListIdFromFormRequest(Request $request) {
+    private function getListIdFromFormRequest(Request $request)
+    {
         // Get the element_id of data_type '_list' for validating the user's input
         // TODO: check for list '_data_type' and maybe attribute
         
-        if ($request->input('data_type') == Value::where('value', '_list_')->first()->element_fk)
+        if ($request->input('data_type') == Value::where('value', '_list_')->first()->element_fk) {
             return $request->input('list');
-        if ($request->input('data_type') == Value::where('value', '_multi_list_')->first()->element_fk)
+        }
+        if ($request->input('data_type') == Value::where('value', '_multi_list_')->first()->element_fk) {
             return $request->input('list');
+        }
         return null;
     }
 }

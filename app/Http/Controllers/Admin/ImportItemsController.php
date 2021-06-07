@@ -270,8 +270,7 @@ class ImportItemsController extends Controller
                                 // TODO: don't import and add warning if value doesn't exist in list
                                 if ($value) {
                                     $detail_elements[] = $value->element_fk;
-                                }
-                                else {
+                                } else {
                                     Log::channel('import')->warning(__('import.element_mismatch', ['element' => $element]), [
                                         'list' => Column::find($attr)->list_fk,
                                         'item' => $item->item_id,
@@ -301,13 +300,21 @@ class ImportItemsController extends Controller
                             break;
                         case '_image_':
                             // Store image dimensions in database
-                            Image::storeImageDimensions(config('media.full_dir'), $cell,
-                                $item->item_id, $selected_attr[$colnr]);
-                            Image::storeImageSize(config('media.full_dir'), $cell,
-                                $item->item_id, $selected_attr[$colnr]);
+                            Image::storeImageDimensions(
+                                config('media.full_dir'),
+                                $cell,
+                                $item->item_id,
+                                $selected_attr[$colnr]
+                            );
+                            Image::storeImageSize(
+                                config('media.full_dir'),
+                                $cell,
+                                $item->item_id,
+                                $selected_attr[$colnr]
+                            );
                             // Create resized images
                             Image::processImageResizing(config('media.full_dir'), $cell);
-                            // No break, but fall through
+                            // no break, but fall through
                         case '_string_':
                         case '_title_':
                         case '_image_title_':

@@ -195,7 +195,7 @@ class TaxonController extends Controller
             ->get();
         
         $response = array();
-        foreach($results as $result){
+        foreach ($results as $result) {
             $response[] = array(
                 "value" => $result->taxon_id,
                 "label" => $result->full_name ." (". $result->native_name .")",
@@ -205,5 +205,4 @@ class TaxonController extends Controller
         
         return response()->json($response);
     }
-
 }

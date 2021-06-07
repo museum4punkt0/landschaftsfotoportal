@@ -9,7 +9,7 @@ class Localization
 {
     /**
      * Get localized values for columns, to be used in blade views.
-     * 
+     *
      * The type depends on localized attributes defined in database table 'attributes'.
      *
      * @param  string $lang
@@ -32,7 +32,7 @@ class Localization
     
     /**
      * Get data types of columns with localized names, to be used in blade views.
-     * 
+     *
      * @param  string $lang
      * @return Illuminate\Database\Eloquent\Collection
      */

@@ -384,7 +384,7 @@ class ColumnMappingController extends Controller
             ->get();
         
         $response = array();
-        foreach($results as $result){
+        foreach ($results as $result) {
             $response[] = array(
                 "value" => $result->colmap_id,
                 "label" => $result->column->description,

@@ -49,8 +49,7 @@ class Image
                 Detail::where('item_fk', $item_id)
                 ->where('column_fk', $size_column)
                 ->update(['value_int' => $size]);
-            }
-            else {
+            } else {
                 Log::warning(__('items.no_column_for_image_size'), ['colmap' => $cm->colmap_id]);
             }
         }
@@ -83,8 +82,7 @@ class Image
                 Detail::where('item_fk', $item_id)
                 ->where('column_fk', $width_column)
                 ->update(['value_int' => $width_orig]);
-            }
-            else {
+            } else {
                 Log::warning(__('items.no_column_for_image_width'), ['colmap' => $cm->colmap_id]);
             }
             
@@ -94,8 +92,7 @@ class Image
                 Detail::where('item_fk', $item_id)
                 ->where('column_fk', $height_column)
                 ->update(['value_int' => $height_orig]);
-            }
-            else {
+            } else {
                 Log::warning(__('items.no_column_for_image_height'), ['colmap' => $cm->colmap_id]);
             }
         }
