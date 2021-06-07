@@ -17,11 +17,11 @@ return [
     |--------------------------------------------------------------------------
     |
     | The corresponding layout file should be located at:
-    | ressources/views/layouts/frontend_{FRONTEND_TEMPLATE_NAME}.blade.php
+    | ressources/views/layouts/frontend_{FRONTEND_LAYOUT_NAME}.blade.php
     |
     */
     
-    'frontend_layout' => 'landschaftsfotoportal',
+    'frontend_layout' => env('APP_LAYOUT', 'landschaftsfotoportal'),
 
     /*
     |--------------------------------------------------------------------------
