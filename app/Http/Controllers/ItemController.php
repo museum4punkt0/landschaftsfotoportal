@@ -171,27 +171,44 @@ class ItemController extends Controller
      */
     public function timeline()
     {
-        // Get number of items per decade
-        $decades = Detail::select("value_int AS decade", DB::raw("COUNT(*) AS images_count"))
-                        ->whereHas('item', function (Builder $query) {
-                            $query->where('public', 1);
-                        })
-                        ->where('column_fk', 18) // TODO: introduce a data type for decades?
-                        ->groupBy('value_int')
-                        ->orderBy('value_int', 'desc')
-                        ->get();
+        // TODO: remove hard-coded daterange column
+        $daterange_column = 27;
         
-        // Get some random items per decade, to be shown as examples
-        foreach ($decades as $decade) {
-            $details[$decade->decade] = Detail::with('item')
-                        ->whereHas('item', function (Builder $query) {
-                            $query->where('public', 1);
-                        })
-                        ->where('column_fk', 18) // TODO: introduce a data type for decades?
-                        ->where('value_int', $decade->decade)
-                        ->inRandomOrder()
-                        ->take(3)
-                        ->get();
+        // Get bounds for daterange
+        $bounds = Detail::selectRaw("
+                EXTRACT(DECADE FROM MIN(LOWER(value_daterange)))*10 AS lower,
+                EXTRACT(DECADE FROM MAX(UPPER(value_daterange)))*10 AS upper
+            ")
+            ->whereHas('item', function (Builder $query) {
+                $query->where('public', 1);
+            })
+            ->where('column_fk', $daterange_column) 
+            ->first();
+        
+        // For each decade...
+        for ($decade = $bounds->lower; $decade <= $bounds->upper; $decade += 10) {
+            $daterange = '['. date('Y-m-d', mktime(0, 0, 0, 1, 1, $decade)) .','.
+                date('Y-m-d', mktime(0, 0, 0, 1, 1, $decade + 10)) .')';
+            
+            // Get number of items per decade
+            $decades[$decade] = Detail::
+                whereHas('item', function (Builder $query) {
+                    $query->where('public', 1);
+                })
+                ->where('column_fk', $daterange_column)
+                ->whereRaw("value_daterange && '$daterange'")
+                ->count();
+            
+            // Get some random items per decade, to be shown as examples
+            $details[$decade] = Detail::with('item')
+                ->whereHas('item', function (Builder $query) {
+                    $query->where('public', 1);
+                })
+                ->where('column_fk', $daterange_column)
+                ->whereRaw("value_daterange && '$daterange'")
+                ->inRandomOrder()
+                ->take(5)
+                ->get();
         }
         
         return view('item.timeline', compact('decades', 'details'));
