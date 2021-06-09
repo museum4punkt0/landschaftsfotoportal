@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Column;
 use App\ColumnMapping;
 use App\Detail;
 use App\Element;
@@ -52,6 +53,42 @@ class SearchController extends Controller
             }
         }
         
+        // Load all date ranges used by this item_type's columns
+        $dateranges = null;
+        foreach ($colmap as $cm) {
+            if ($cm->column->getDataType() == '_date_range_') {
+                // Get bounds for daterange
+                // TODO: Refactor, copied from Item::timeline()
+                $bounds = Detail::selectRaw("
+                        EXTRACT(DECADE FROM MIN(LOWER(value_daterange)))*10 AS lower,
+                        EXTRACT(DECADE FROM MAX(UPPER(value_daterange)))*10 AS upper
+                    ")
+                    ->whereHas('item', function (Builder $query) {
+                        $query->where('public', 1);
+                    })
+                    ->where('column_fk', $cm->column_fk) 
+                    ->first();
+                
+                // For each decade...
+                // TODO: Refactor, copied from Item::timeline()
+                for ($decade = $bounds->lower; $decade <= $bounds->upper; $decade += 10) {
+                    $daterange = '['. date('Y-m-d', mktime(0, 0, 0, 1, 1, $decade)) .','.
+                        date('Y-m-d', mktime(0, 0, 0, 1, 1, $decade + 10)) .')';
+                    
+                    // Get number of items per decade
+                    $decades[$decade] = Detail::
+                        whereHas('item', function (Builder $query) {
+                            $query->where('public', 1);
+                        })
+                        ->where('column_fk', $cm->column_fk)
+                        ->whereRaw("value_daterange && '$daterange'")
+                        ->count();
+                }
+                $dateranges[$cm->column_fk] = $decades;
+            }
+        }
+        #dd($dateranges);
+        
         // Get current UI language
         $lang = 'name_'. app()->getLocale();
         
@@ -78,7 +115,16 @@ class SearchController extends Controller
             });
             // Prepare the search query using selected columns
             foreach ($search_columns as $col => $val) {
-                $search_details[] = [['column_fk', $col], ['element_fk', intval($val)]];
+                switch (Column::find($col)->getDataType()) {
+                    case '_list_':
+                        $search_details[] = [['column_fk', $col], ['element_fk', intval($val)]];
+                    break;
+                    case '_date_range_':
+                        $daterange = '['. date('Y-m-d', mktime(0, 0, 0, 1, 1, intval($val))) .','.
+                            date('Y-m-d', mktime(0, 0, 0, 1, 1, intval($val) + 10)) .')';
+                        $search_details[] = [['column_fk', $col], ['value_daterange', '&&', $daterange]];
+                    break;
+                }
             }
             if ($search_details) {
                 $details = Detail::where(function ($query) use ($search_details) {
@@ -133,6 +179,7 @@ class SearchController extends Controller
         }
         
         $search_terms = $request->input();
-        return view('search.form', compact('menu_root', 'search_terms', 'taxa', 'items', 'lists', 'colmap', 'translations'));
+        return view('search.form', compact('menu_root', 'search_terms', 'lists', 'dateranges',
+            'colmap', 'translations', 'taxa', 'items'));
     }
 }

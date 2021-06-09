@@ -17,6 +17,7 @@
                     <li>
                 @endif
                 
+                    <a href="{{ route('search.index', ['fields[27]' => $decade]) }}">
                     <div class="timeline-image">
                         <h4>
                         @if($decade)
@@ -26,6 +27,7 @@
                         @endif
                         </h4>
                     </div>
+                    </a>
                     <div class="timeline-panel">
                         <div class="timeline-heading">
                             <h4 class="subheading">{{ $count }} Fotos</h4>

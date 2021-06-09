@@ -58,8 +58,9 @@
                         <span class="text-danger">{{ $errors->first('full_text') }}</span>
                     </div>
                     
-                    <!-- Dropdown menus for select lists -->
                     @foreach($colmap as $cm)
+                        
+                        <!-- Dropdown menus for select lists -->
                         @if($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value == '_list_')
                             <div class="form-group">
                                 <span>
@@ -86,6 +87,32 @@
                                 <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                             </div>
                         @endif
+                        
+                        <!-- Dropdown menus for date ranges -->
+                        @if($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value == '_date_range_')
+                            <div class="form-group">
+                                <span>
+                                    {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
+                                </span>
+                                <select name="fields[{{ $cm->column->column_id }}]" class="form-control" size=1 >
+                                    <option value=0>- @lang('common.all') -</option>
+                                    @foreach($dateranges[$cm->column_fk] as $range => $count)
+                                        @if($count)
+                                            <option value="{{$range}}"
+                                                @if(($search_terms['fields'][$cm->column->column_id] ?? "") == 
+                                                    $range)
+                                                        selected
+                                                @endif
+                                            >
+                                                {{$range}}er
+                                            </option>
+                                        @endif
+                                    @endforeach
+                                </select>
+                                <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                            </div>
+                        @endif
+                    
                     @endforeach
                     
                     <div class="form-group">
