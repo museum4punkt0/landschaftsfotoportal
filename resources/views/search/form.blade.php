@@ -42,7 +42,7 @@
             <!-- Search form -->
             <div class="col-lg-2" id="searchForm">
                 
-                <form action="{{ route('search.results') }}#searchResults" method="POST">
+                <form action="{{ route('search.results') }}#searchResults" method="GET">
                 @if(Config::get('ui.frontend_layout') == 'bestikri')
                     <div class="form-group">
                         <span>@lang('search.taxon_name')</span>
@@ -94,8 +94,6 @@
                             @lang('search.reset')
                         </a>
                     </div>
-                    {{ csrf_field() }}
-                    @method('POST')
                 </form>
             
             </div>
