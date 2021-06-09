@@ -42,14 +42,16 @@
             <!-- Search form -->
             <div class="col-lg-2" id="searchForm">
                 
-                <form action="{{ route('search.results') }}#searchResults" method="GET">
+                <form action="{{ route('search.index') }}#searchResults" method="GET">
                 @if(Config::get('ui.frontend_layout') == 'bestikri')
+                    <!-- Input for taxon search -->
                     <div class="form-group">
                         <span>@lang('search.taxon_name')</span>
                         <input type="text" name="taxon_name" class="form-control" value="{{$search_terms['taxon_name'] ?? ""}}" />
                         <span class="text-danger">{{ $errors->first('taxon_name') }}</span>
                     </div>
                 @endif
+                    <!-- Input for full text search -->
                     <div class="form-group">
                         <span>@lang('search.full_text')</span>
                         <input type="text" name="full_text" class="form-control" value="{{$search_terms['full_text'] ?? ""}}" />

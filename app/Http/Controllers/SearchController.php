@@ -15,73 +15,16 @@ use Illuminate\Http\Request;
 class SearchController extends Controller
 {
     /**
-     * Display the specified resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
-    {
-        // First level items for the sidebar menu
-        $menu_root = Item::whereNull('parent_fk')->where('public', 1)->orderBy('item_id')->get();
-        
-        // BEGIN TODO to be refactored
-        // Get the item_type for '_image_' items
-        // TODO: this should be more flexible; allow configuration of multiple/different item_types
-        $it_list = Selectlist::where('name', '_item_type_')->first();
-        $it_element = Element::where('list_fk', $it_list->list_id)
-            ->whereHas('values', function (Builder $query) {
-                $query->where('value', '_image_');
-            })->first();
-        if ($it_element) {
-            $item_type = $it_element->element_id;
-        } else {
-            $item_type = 0;
-        }
-        
-        $colmap = ColumnMapping::where('item_type_fk', $item_type)->orderBy('column_order')->get();
-        
-        // Load all list elements of lists used by this item_type's columns
-        $lists = null;
-        foreach ($colmap as $cm) {
-            $list_id = $cm->column->list_fk;
-            if ($list_id) {
-                $constraint = function (Builder $query) use ($list_id) {
-                    $query->where('parent_fk', null)->where('list_fk', $list_id);
-                };
-                $lists[$list_id] = Element::treeOf($constraint)->depthFirst()->get();
-            }
-        }
-        
-        // Get current UI language
-        $lang = 'name_'. app()->getLocale();
-        
-        // Get localized names of columns
-        $translations = Value::whereHas('element', function ($query) {
-            $query->where('list_fk', Selectlist::where('name', '_translation_')->first()->list_id);
-        })
-        ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', $lang);
-        })
-        ->with(['attribute'])
-        ->get();
-        // END TODO to be refactored
-        
-        $search_terms = [];
-        return view('search.form', compact('menu_root', 'search_terms', 'lists', 'colmap', 'translations'));
-    }
-
-    /**
-     * Show search results.
+     * Show search form and results.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function results(Request $request)
+    public function index(Request $request)
     {
         // First level items for the sidebar menu
-        $menu_root = Item::whereNull('parent_fk')->orderBy('item_id')->get();
+        $menu_root = Item::whereNull('parent_fk')->where('public', 1)->orderBy('item_id')->get();
         
-        // BEGINN TODO to be refactored
         // Get the item_type for '_image_' items
         // TODO: this should be more flexible; allow configuration of multiple/different item_types
         $it_list = Selectlist::where('name', '_item_type_')->first();
@@ -121,7 +64,6 @@ class SearchController extends Controller
         })
         ->with(['attribute'])
         ->get();
-        // END TODO to be refactored
         #dd($request->input());
         
         // Search within lists using dropdowns

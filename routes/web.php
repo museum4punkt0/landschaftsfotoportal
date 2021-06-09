@@ -24,7 +24,6 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/frontend', 'HomeController@frontend')->name('frontend');
 Route::get('/locale/{locale}', 'HomeController@locale')->name('locale');
 Route::get('/search', 'SearchController@index')->name('search.index');
-Route::get('/search/results', 'SearchController@results')->name('search.results');
 
 Route::get('/email/change', 'Auth\ChangeEmailController@change')->name('email.change');
 Route::post('/email/store', 'Auth\ChangeEmailController@store')->name('email.store');
