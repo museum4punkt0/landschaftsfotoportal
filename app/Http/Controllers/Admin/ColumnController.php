@@ -7,6 +7,7 @@ use App\Selectlist;
 use App\Element;
 use App\Attribute;
 use App\Value;
+use App\Utils\Localization;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -46,32 +47,20 @@ class ColumnController extends Controller
         $lists = Selectlist::where('internal', false)->orderBy('name')->get();
         
         // Get current UI language
-        $lang = 'name_'. app()->getLocale();
+        $lang = app()->getLocale();
         
         // Get name attribute for current language
-        $attribute = Attribute::where('name', $lang)->first();
+        $attribute = Attribute::where('name', 'name_'. $lang)->first();
+        
+        // Get localized names of columns
+        $translations = Localization::getTranslations($lang, 'name');
         
         // Get data types of columns with localized names
-        $data_types = Value::whereHas('element', function ($query) {
-            $query->where('list_fk', Selectlist::where('name', '_data_type_')->first()->list_id);
-        })
-        ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', $lang);
-        })
-        ->orderBy('value')->get();
+        $data_types = Localization::getDataTypes($lang);
         
         // Get IDs for data_types
         $data_type_ids['_list_'] = Value::where('value', '_list_')->first()->element_fk;
         $data_type_ids['_multi_list_'] = Value::where('value', '_multi_list_')->first()->element_fk;
-        
-        // Get with localized names of columns
-        $translations = Value::whereHas('element', function ($query) {
-            $query->where('list_fk', Selectlist::where('name', '_translation_')->first()->list_id);
-        })
-        ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', $lang);
-        })
-        ->orderBy('value')->get();
         
         return view('admin.column.create', compact('lists', 'data_types', 'data_type_ids', 'translations', 'attribute'));
     }
@@ -158,29 +147,17 @@ class ColumnController extends Controller
         $lists = Selectlist::where('internal', false)->orderBy('name')->get();
         
         // Get current UI language
-        $lang = 'name_'. app()->getLocale();
+        $lang = app()->getLocale();
+        
+        // Get localized names of columns
+        $translations = Localization::getTranslations($lang, 'name');
         
         // Get data types of columns with localized names
-        $data_types = Value::whereHas('element', function ($query) {
-            $query->where('list_fk', Selectlist::where('name', '_data_type_')->first()->list_id);
-        })
-        ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', $lang);
-        })
-        ->orderBy('value')->get();
+        $data_types = Localization::getDataTypes($lang);
         
         // Get IDs for data_types
         $data_type_ids['_list_'] = Value::where('value', '_list_')->first()->element_fk;
         $data_type_ids['_multi_list_'] = Value::where('value', '_multi_list_')->first()->element_fk;
-        
-        // Get with localized names of columns
-        $translations = Value::whereHas('element', function ($query) {
-            $query->where('list_fk', Selectlist::where('name', '_translation_')->first()->list_id);
-        })
-        ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', $lang);
-        })
-        ->orderBy('value')->get();
         
         return view('admin.column.edit', compact('column', 'lists', 'data_types', 'data_type_ids', 'translations'));
     }

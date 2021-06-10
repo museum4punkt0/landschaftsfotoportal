@@ -10,6 +10,7 @@ use App\Selectlist;
 use App\Value;
 use App\Item;
 use App\Taxon;
+use App\Utils\Localization;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
@@ -90,18 +91,10 @@ class SearchController extends Controller
         #dd($dateranges);
         
         // Get current UI language
-        $lang = 'name_'. app()->getLocale();
+        $lang = app()->getLocale();
         
         // Get localized names of columns
-        $translations = Value::whereHas('element', function ($query) {
-            $query->where('list_fk', Selectlist::where('name', '_translation_')->first()->list_id);
-        })
-        ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', $lang);
-        })
-        ->with(['attribute'])
-        ->get();
-        #dd($request->input());
+        $translations = Localization::getTranslations($lang, 'name');
         
         // Search within lists using dropdowns
         $search_details = null;
