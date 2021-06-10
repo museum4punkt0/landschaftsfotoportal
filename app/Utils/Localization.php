@@ -25,6 +25,7 @@ class Localization
             $query->where('name', $type .'_'. $lang);
         })
         ->with(['attribute'])
+        ->orderBy('value')
         ->get();
         
         return $translations;
@@ -45,6 +46,7 @@ class Localization
             $query->where('name', 'name_'. $lang);
         })
         ->with(['attribute'])
+        ->orderBy('value')
         ->get();
         
         return $data_types;
@@ -65,6 +67,7 @@ class Localization
             $query->where('name', 'name_'. $lang);
         })
         ->with(['attribute'])
+        ->orderBy('value')
         ->get();
         
         return $data_types;
