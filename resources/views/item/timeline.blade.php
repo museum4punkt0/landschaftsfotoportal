@@ -21,7 +21,7 @@
                     <div class="timeline-image">
                         <h4>
                         @if($decade)
-                            {{ $decade }}er
+                            {{ $decade }}@lang('common.decade_suffix')
                         @else
                             Unbekannt
                         @endif

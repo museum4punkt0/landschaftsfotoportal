@@ -104,7 +104,7 @@
                                                         selected
                                                 @endif
                                             >
-                                                {{$range}}er
+                                                {{$range}}@lang('common.decade_suffix')
                                             </option>
                                         @endif
                                     @endforeach

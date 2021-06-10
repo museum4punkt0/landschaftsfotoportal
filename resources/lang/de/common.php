@@ -47,6 +47,7 @@ return [
     'day' => 'Tag',
     'month' => 'Monat',
     'year' => 'Jahr',
+    'decade_suffix' => 'er',
     'january' => 'Januar',
     'february' => 'Februar',
     'march' => 'März',
