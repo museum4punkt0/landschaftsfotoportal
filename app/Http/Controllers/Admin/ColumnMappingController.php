@@ -10,6 +10,7 @@ use App\Taxon;
 use App\Selectlist;
 use App\Value;
 use App\Element;
+use App\Utils\Localization;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -49,14 +50,8 @@ class ColumnMappingController extends Controller
         #$columns = Column::doesntHave('column_mapping')->orderBy('description')->get();
         $columns = Column::with(['translation.values'])->orderBy('description')->get();
         
-        $lang = 'name_'. app()->getLocale();
-        $column_groups = Value::whereHas('element', function ($query) {
-            $query->where('list_fk', Selectlist::where('name', '_column_group_')->first()->list_id);
-        })
-        ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', $lang);
-        })
-        ->orderBy('value')->get();
+        $lang = app()->getLocale();
+        $column_groups = Localization::getColumnGroups($lang);
         
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
@@ -134,14 +129,8 @@ class ColumnMappingController extends Controller
      */
     public function map(Request  $request)
     {
-        $lang = 'name_'. app()->getLocale();
-        $column_groups = Value::whereHas('element', function ($query) {
-            $query->where('list_fk', Selectlist::where('name', '_column_group_')->first()->list_id);
-        })
-        ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', $lang);
-        })
-        ->orderBy('value')->get();
+        $lang = app()->getLocale();
+        $column_groups = Localization::getColumnGroups($lang);;
         
         $item_type = $request->item_type;
         
@@ -299,14 +288,8 @@ class ColumnMappingController extends Controller
         $columns = Column::with(['translation.values'])->orderBy('description')->get();
         #$columns = Column::doesntHave('column_mapping')->orderBy('description')->get();
         
-        $lang = 'name_'. app()->getLocale();
-        $column_groups = Value::whereHas('element', function ($query) {
-            $query->where('list_fk', Selectlist::where('name', '_column_group_')->first()->list_id);
-        })
-        ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', $lang);
-        })
-        ->orderBy('value')->get();
+        $lang = app()->getLocale();
+        $column_groups = Localization::getColumnGroups($lang);;
         
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();

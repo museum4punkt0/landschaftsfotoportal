@@ -49,4 +49,24 @@ class Localization
         
         return $data_types;
     }
+    
+    /**
+     * Get column groups with localized names, to be used in blade views.
+     *
+     * @param  string $lang
+     * @return Illuminate\Database\Eloquent\Collection
+     */
+    public static function getColumnGroups($lang)
+    {
+        $data_types = Value::whereHas('element', function ($query) {
+            $query->where('list_fk', Selectlist::where('name', '_column_group_')->first()->list_id);
+        })
+        ->whereHas('attribute', function ($query) use ($lang) {
+            $query->where('name', 'name_'. $lang);
+        })
+        ->with(['attribute'])
+        ->get();
+        
+        return $data_types;
+    }
 }
