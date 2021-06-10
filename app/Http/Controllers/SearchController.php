@@ -132,6 +132,9 @@ class SearchController extends Controller
                         $query->orWhere($search_details[$n]);
                     }
                 })
+                ->whereHas('item', function (Builder $query) {
+                    $query->where('public', 1);
+                })
                 ->with('item')
                 ->get();
                 
@@ -150,6 +153,9 @@ class SearchController extends Controller
         
         if ($search_full_text) {
             $details = Detail::where('value_string', 'ILIKE', "%{$search_full_text}%")
+                ->whereHas('item', function (Builder $query) {
+                    $query->where('public', 1);
+                })
                 ->with('item')
                 ->get();
             $items_full_text = $details->map(function ($row) {
