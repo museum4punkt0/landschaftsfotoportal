@@ -82,15 +82,7 @@ class ItemController extends Controller
         $taxa = Taxon::tree()->depthFirst()->get();
         
         // Only columns associated with this item's taxon or its descendants
-        $taxon_id = $request->taxon;
-        $colmap = ColumnMapping::where('item_type_fk', $request->item_type)
-            ->where(function (Builder $query) use ($taxon_id) {
-                return $query->whereNull('taxon_fk')
-                    ->orWhereHas('taxon.descendants', function (Builder $query) use ($taxon_id) {
-                        $query->where('taxon_id', $taxon_id);
-                    });
-            })
-            ->orderBy('column_order')->get();
+        $colmap = ColumnMapping::forItem($request->item_type, $request->taxon);
         
         $lists = null;
         // Load all list elements of lists used by this item's columns
@@ -137,16 +129,7 @@ class ItemController extends Controller
         $item_type = $request->session()->get('item_type');
         
         // Only columns associated with this item's taxon or its descendants
-        $taxon_id = $request->taxon;
-        $colmap = ColumnMapping::where('item_type_fk', $item_type)
-            ->where(function (Builder $query) use ($taxon_id) {
-                return $query->whereNull('taxon_fk')
-                    ->orWhereHas('taxon.descendants', function (Builder $query) use ($taxon_id) {
-                        $query->where('taxon_id', $taxon_id);
-                    });
-            })
-            ->with('column')
-            ->get();
+        $colmap = ColumnMapping::forItem($item_type, $request->taxon);
         
         // Validation rules for fields associated with this item
         $validation_rules['title'] = 'nullable|string';
@@ -290,15 +273,7 @@ class ItemController extends Controller
         $details = Detail::where('item_fk', $item->item_id)->get();
         
         // Only columns associated with this item's taxon or its descendants
-        $taxon_id = $item->taxon_fk;
-        $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)
-            ->where(function (Builder $query) use ($taxon_id) {
-                return $query->whereNull('taxon_fk')
-                    ->orWhereHas('taxon.descendants', function (Builder $query) use ($taxon_id) {
-                        $query->where('taxon_id', $taxon_id);
-                    });
-            })
-            ->orderBy('column_order')->get();
+        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk);
         
         $lists = null;
         // Load all list elements of lists used by this item's columns
@@ -404,16 +379,7 @@ class ItemController extends Controller
         $taxa = Taxon::tree()->depthFirst()->get();
         
         // Only columns associated with this item's taxon or its descendants
-        $taxon_id = $item->taxon_fk;
-        $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)
-            ->where(function (Builder $query) use ($taxon_id) {
-                return $query->whereNull('taxon_fk')
-                    ->orWhereHas('taxon.descendants', function (Builder $query) use ($taxon_id) {
-                        $query->where('taxon_id', $taxon_id);
-                    });
-            })
-            ->with('column')
-            ->orderBy('column_order')->get();
+        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk);
         
         // Check for missing details and add them
         // Should be not necessary but allows editing items with somehow incomplete data
@@ -460,15 +426,7 @@ class ItemController extends Controller
     public function update(Request $request, Item $item)
     {
         // Only columns associated with this item's taxon or its descendants
-        $taxon_id = $item->taxon_fk;
-        $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)
-            ->where(function (Builder $query) use ($taxon_id) {
-                return $query->whereNull('taxon_fk')
-                    ->orWhereHas('taxon.descendants', function (Builder $query) use ($taxon_id) {
-                        $query->where('taxon_id', $taxon_id);
-                    });
-            })
-            ->get();
+        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk);
         
         // Validation rules for fields associated with this item
         $validation_rules['title'] = 'nullable|string';

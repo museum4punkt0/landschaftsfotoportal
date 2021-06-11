@@ -58,15 +58,7 @@ class ItemController extends Controller
         $details = Detail::where('item_fk', $item->item_id)->get();
         
         // Only columns associated with this item's taxon or its descendants
-        $taxon_id = $item->taxon_fk;
-        $colmap = ColumnMapping::where('item_type_fk', $item->item_type_fk)
-            ->where(function (Builder $query) use ($taxon_id) {
-                return $query->whereNull('taxon_fk')
-                    ->orWhereHas('taxon.descendants', function (Builder $query) use ($taxon_id) {
-                        $query->where('taxon_id', $taxon_id);
-                    });
-            })
-            ->orderBy('column_order')->get();
+        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk);
         
         $lists = null;
         // Load all list elements of lists used by this item's columns
