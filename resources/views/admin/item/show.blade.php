@@ -49,10 +49,21 @@
         </div>
     </div>
     
-    @if($item->taxon)
+    @if($item->parent_fk)
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">@lang('lists.parent')</h5>
+            </div>
+            <div class="card card-body">
+                {{ $item->parent->title}}, Item ID 
+                <a href="{{ route('item.show', $item->parent_fk) }}">{{ $item->parent_fk }}</a>
+            </div>
+        </div>
+    @endif
+    @if($item->taxon)
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">@lang('taxon.parent')</h5>
             </div>
             <div class="card card-body">
                 {{ $item->taxon->parent->taxon_name }}
