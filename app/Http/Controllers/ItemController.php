@@ -60,17 +60,8 @@ class ItemController extends Controller
         // Only columns associated with this item's taxon or its descendants
         $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk);
         
-        $lists = null;
         // Load all list elements of lists used by this item's columns
-        foreach ($colmap as $cm) {
-            $list_id = $cm->column->list_fk;
-            if ($list_id) {
-                $constraint = function (Builder $query) use ($list_id) {
-                    $query->where('parent_fk', null)->where('list_fk', $list_id);
-                };
-                $lists[$list_id] = Element::treeOf($constraint)->depthFirst()->get();
-            }
-        }
+        $lists = Element::getTrees($colmap);
         
         // Get current UI language
         $lang = app()->getLocale();

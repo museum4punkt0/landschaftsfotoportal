@@ -43,16 +43,7 @@ class SearchController extends Controller
         $colmap = ColumnMapping::where('item_type_fk', $item_type)->orderBy('column_order')->get();
         
         // Load all list elements of lists used by this item_type's columns
-        $lists = null;
-        foreach ($colmap as $cm) {
-            $list_id = $cm->column->list_fk;
-            if ($list_id) {
-                $constraint = function (Builder $query) use ($list_id) {
-                    $query->where('parent_fk', null)->where('list_fk', $list_id);
-                };
-                $lists[$list_id] = Element::treeOf($constraint)->depthFirst()->get();
-            }
-        }
+        $lists = Element::getTrees($colmap);
         
         // Load all date ranges used by this item_type's columns
         $dateranges = null;
