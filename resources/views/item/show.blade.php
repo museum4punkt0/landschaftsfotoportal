@@ -112,8 +112,6 @@
     @endif
     
     @foreach($cg as $cm)
-        {{-- Show only public columns --}}
-        @if($cm->public == 1)
             
             @if($cg->first()->column_group->getConfigValue('hide_heading'))
                 <div class="container-fluid">
@@ -124,6 +122,7 @@
                     <div class="container-fluid collapse" id="collapseCG{{ $cm->column_group_fk }}">
                 @endif
             @endif
+            
             <div class="row my-2">
             @switch($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value)
                 
@@ -447,7 +446,6 @@
             @endswitch
             </div>
             </div>
-        @endif
     @endforeach
     
 @endforeach

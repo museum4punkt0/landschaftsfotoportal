@@ -58,7 +58,7 @@ class ItemController extends Controller
         $details = Detail::where('item_fk', $item->item_id)->get();
         
         // Only columns associated with this item's taxon or its descendants
-        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk);
+        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk)->where('public', 1);
         
         // Load all list elements of lists used by this item's columns
         $lists = Element::getTrees($colmap);
