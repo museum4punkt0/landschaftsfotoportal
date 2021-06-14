@@ -105,7 +105,9 @@ class ItemController extends Controller
         // Save taxon ID to session
         $request->session()->put('taxon', $request->taxon);
         
-        return view('admin.item.create', compact('items', 'taxa', 'colmap', 'lists', 'data_types', 'translations', 'placeholders', 'descriptions'));
+        $options = ['edit.meta' => true, 'route' => 'item.store'];
+        
+        return view('admin.item.create', compact('items', 'taxa', 'colmap', 'lists', 'data_types', 'translations', 'placeholders', 'descriptions', 'options'));
     }
 
     /**
@@ -386,7 +388,9 @@ class ItemController extends Controller
         // Get localized description/help for columns
         $descriptions = Localization::getTranslations($lang, 'description');
         
-        return view('admin.item.edit', compact('item', 'items', 'taxa', 'details', 'colmap', 'lists', 'data_types', 'translations', 'placeholders', 'descriptions'));
+        $options = ['edit.meta' => true, 'route' => 'item.update'];
+        
+        return view('admin.item.edit', compact('item', 'items', 'taxa', 'details', 'colmap', 'lists', 'data_types', 'translations', 'placeholders', 'descriptions', 'options'));
     }
 
     /**

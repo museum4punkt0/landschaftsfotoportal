@@ -13,8 +13,9 @@
 
 <h2>@lang('items.edit')</h2>
 
-<form action="{{ route('item.update', $item->item_id) }}" method="POST" enctype="multipart/form-data">
+<form action="{{ route($options['route'], $item->item_id) }}" method="POST" enctype="multipart/form-data">
     
+    @if($options['edit.meta'])
     <div class="form-group">
         <span>@lang('items.menu_title')</span>
         <input type="text" name="title" class="form-control" value="{{old('title', $item->title)}}" />
@@ -79,8 +80,12 @@
             //window.location.reload(true);
         }
     </script>
+    @endif
     
     @foreach($colmap as $cm)
+        {{-- Don't show columns which have auto generated content, e.g. image size/dimensions --}}
+        @unless($cm->getConfigValue('editable') === false)
+        
         @switch($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value)
             
             {{-- Data_type of form field is list --}}
@@ -620,6 +625,8 @@
                 @break
             
         @endswitch
+        
+        @endunless
         
     @endforeach
     

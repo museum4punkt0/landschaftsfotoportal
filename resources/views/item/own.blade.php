@@ -9,6 +9,9 @@
                 <h2 class="section-heading text-uppercase">@lang('items.my_own')</h2>
                 <h3 class="section-subheading text-muted">Lorem ipsum dolor sit amet consectetur.</h3>
             </div>
+            <div class="container my-5">
+                <a href="{{route('item.create.own', ['item_type'=>$item_type])}}" class="btn btn-primary">@lang('items.new')</a>
+            </div>
             <div class="row">
             @foreach($items as $item)
                 <div class="col-lg-4 col-sm-6 mb-4">
@@ -39,6 +42,12 @@
                             </div>
                             <!-- Icons for user interaction -->
                             <div class="my-2" style="font-size: 0.6rem;">
+                                <span class="fa-stack fa-2x">
+                                    <a href="{{ route('item.edit.own', $item->item_id) }}" title="@lang('common.edit')">
+                                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                        <i class="fas {{ Config::get('ui.icon_edit') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
                                 <span class="fa-stack fa-2x">
                                     <a href="{{ route('item.download', $item->item_id) }}" title="@lang('common.download')">
                                         <i class="fas fa-circle fa-stack-2x text-primary"></i>

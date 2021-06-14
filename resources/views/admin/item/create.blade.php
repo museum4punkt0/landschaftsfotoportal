@@ -20,8 +20,9 @@
     </div>
 @else
 
-<form action="{{ route('item.store') }}" method="POST" enctype="multipart/form-data">
+<form action="{{ route($options['route']) }}" method="POST" enctype="multipart/form-data">
     
+    @if($options['edit.meta'])
     <div class="form-group">
         <span>@lang('items.menu_title')</span>
         <input type="text" name="title" class="form-control" value="{{old('title')}}" />
@@ -76,8 +77,12 @@
         </select>
         <span class="text-danger">{{ $errors->first('taxon') }}</span>
     </div>
+    @endif
     
     @foreach($colmap as $cm)
+        
+        {{-- Don't show columns which have auto generated content, e.g. image size/dimensions --}}
+        @unless($cm->getConfigValue('editable') === false)
         
         @switch($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value)
             
@@ -690,6 +695,8 @@
                 @break
             
         @endswitch
+        
+        @endunless
         
     @endforeach
     
