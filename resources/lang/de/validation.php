@@ -136,6 +136,9 @@ return [
         'fileUpload' => [
             'required' => 'Es wurde keine Datei ausgewählt.',
         ],
+        'fields.*' => [
+            'required' => 'Dieses Feld muss ausgefüllt werden.',
+        ],
     ],
 
     /*

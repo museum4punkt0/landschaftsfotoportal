@@ -52,11 +52,36 @@ class Element extends Model
     }
     
     /**
+     * The details that belong to the element.
+     */
+    public function details()
+    {
+        return $this->belongsToMany('App\Detail', 'element_mapping', 'element_fk', 'detail_fk')
+            ->withTimestamps();
+    }
+    
+    /**
      * Get the children of the element.
      */
     public function childrenElements()
     {
         return $this->hasMany('App\Element', 'parent_fk', 'element_id')->with('childrenElements');
+    }
+    
+    /**
+     * Scope a query to only include elements for a given list.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  mixed  $list_id
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOfList($query, $list_id)
+    {
+        return $query->treeOf(function ($query) use ($list_id) {
+                $query->where('parent_fk', null)->where('list_fk', $list_id);
+            })
+            ->depthFirst()
+            ->get();
     }
     
     
@@ -102,5 +127,23 @@ class Element extends Model
         else {
             return null;
         }
+    }
+    
+    /**
+     * Get trees with all elements for given column mappings.
+     *
+     * @param  Illuminate\Database\Eloquent\Collection  $colmaps
+     * @param  mixed  $list_id
+     * @return array
+     */
+    public static function getTrees($colmaps)
+    {
+        foreach ($colmaps as $cm) {
+            $list_id = $cm->column->list_fk;
+            if ($list_id) {
+                $lists[$list_id] = Element::ofList($list_id);
+            }
+        }
+        return $lists;
     }
 }

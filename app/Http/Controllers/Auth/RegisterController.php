@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
+use App\Group;
 use App\User;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use Illuminate\Support\Facades\Hash;
@@ -64,10 +65,18 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+        // Check for any existing users, else grant super admin power to the very first user
+        if (User::first()) {
+            $group = Group::where('name', 'registered')->value('group_id');
+        } else {
+            $group = Group::where('name', 'super-admin')->value('group_id');
+        }
+        
         return User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'group_fk' => $group,
         ]);
     }
 }

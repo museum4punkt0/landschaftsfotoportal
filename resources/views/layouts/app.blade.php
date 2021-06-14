@@ -18,6 +18,14 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    
+    <!-- Custom styles for this template -->
+    <style>
+      .map {
+        height: 500px;
+        width: 100%;
+      }
+    </style>
 </head>
 <body>
     <div id="app">

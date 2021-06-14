@@ -7,13 +7,29 @@
         {{ session('success') }}
     </div>
 @endif
+@if (session('warning'))
+    <div class="alert alert-warning">
+        {{ session('warning') }}
+    </div>
+@endif
 
 <div class="container">
     <div class="card">
         @if (true || Auth::check())
             <div class="card-header">@lang('columns.header')</div>
             <div class="card-body">
-                <a href="{{route('column.create')}}" class="btn btn-primary">@lang('columns.new')</a>
+                <div class="row">
+                    <div class="col align-self-start">
+                        <a href="{{route('column.create')}}" class="btn btn-primary">@lang('columns.new')</a>
+                    </div>
+                    
+                    @include('includes.form_autocomplete_search', [
+                        'search_url' => route('column.autocomplete'),
+                        'div_class' => 'col align-self-end',
+                        'input_placeholder' => __('search.search'),
+                    ])
+                </div>
+                
                 <table class="table mt-4">
                 <thead>
                     <tr>
@@ -36,20 +52,20 @@
                         </td>
                         <td>
                             @foreach($column->translation->values as $v)
-                                {{substr($v->attribute->name, -2)}}: {{$v->value}}<br/>
+                                <b>{{substr($v->attribute->name, 0, -3)}}:</b> {{$v->value}}<br/>
                             @endforeach
-                            ID {{$column->translation_fk}}<br/>
+                            <a href="{{route('element.show', $column->translation_fk)}}">ID {{$column->translation_fk}}</a>
                         </td>
                         <td>
                             @foreach($column->data_type->values as $v)
                                 {{$v->value}}<br/>
                             @endforeach
-                            ID {{$column->data_type_fk}}
+                            <a href="{{route('element.show', $column->data_type_fk)}}">ID {{$column->data_type_fk}}</a>
                         </td>
                         <td>
                             @if($column->list_fk)
                                 {{$column->list->name}} ({{$column->list->description}})<br/>
-                                ID {{$column->list_fk}}
+                                <a href="{{route('list.show', $column->list_fk)}}">ID {{$column->list_fk}}</a>
                             @endif
                         </td>
                         <td>

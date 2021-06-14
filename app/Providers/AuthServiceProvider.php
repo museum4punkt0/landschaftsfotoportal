@@ -32,6 +32,10 @@ class AuthServiceProvider extends ServiceProvider
             }
         });
         
+        Gate::define('show-admin', function ($user) {
+            return $user->hasAccess(['show-admin']);
+        });
+        
         Gate::define('show-dashboard', function ($user) {
             return $user->hasAccess(['show-dashboard']);
         });

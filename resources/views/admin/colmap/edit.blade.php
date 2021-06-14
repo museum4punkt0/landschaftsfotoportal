@@ -11,7 +11,7 @@
     
     <div class="form-group">
         <span>@lang('colmaps.item_type')</span>
-        <select name="item_type" class="form-control" size=1 >
+        <select name="item_type" class="form-control" size=1 disabled>
             @foreach($item_types as $type)
                 <option value="{{$type->element_id}}"
                     @if(old('item_type', $colmap->item_type_fk) == $type->element_id) selected @endif >
@@ -57,7 +57,7 @@
     </div>
     <div class="form-group">
         <span>@lang('columns.list')</span>
-        <select name="column" class="form-control" size=1 >
+        <select name="column" class="form-control" size=1 disabled>
             @foreach($columns as $column)
                 <option value="{{$column->column_id}}"
                     @if(old('column', $colmap->column_fk) == $column->column_id) selected @endif >
@@ -79,6 +79,20 @@
             value="{{ old('column_order', $colmap->column_order) }}"
         />
         <span class="text-danger">{{ $errors->first('column_order') }}</span>
+    </div>
+    <div class="form-group">
+        <span>@lang('common.published')</span>
+        <select name="public" class="form-control" size=1 >
+            <option value="1"
+                @if(old('public', $colmap->public) == 1) selected @endif>
+                @lang('common.yes')
+            </option>
+            <option value="0"
+                @if(old('public', $colmap->public) == 0) selected @endif>
+                @lang('common.no')
+            </option>
+        </select>
+        <span class="text-danger">{{ $errors->first('public') }}</span>
     </div>
     <div class="form-group">
         <span>@lang('colmaps.config')</span>

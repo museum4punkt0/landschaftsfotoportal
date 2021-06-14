@@ -13,7 +13,7 @@
         </a>
         @unless($item->public)
             <a href="{{route('item.publish', $item->item_id)}}" class="btn btn-primary">
-            @lang('items.publish')
+            @lang('common.publish')
             </a>
         @endunless
     </div>
@@ -49,10 +49,21 @@
         </div>
     </div>
     
-    @if($item->taxon)
+    @if($item->parent_fk)
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">@lang('lists.parent')</h5>
+            </div>
+            <div class="card card-body">
+                {{ $item->parent->title}}, Item ID 
+                <a href="{{ route('item.show', $item->parent_fk) }}">{{ $item->parent_fk }}</a>
+            </div>
+        </div>
+    @endif
+    @if($item->taxon)
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">@lang('taxon.parent')</h5>
             </div>
             <div class="card card-body">
                 {{ $item->taxon->parent->taxon_name }}
@@ -67,13 +78,8 @@
             
             {{-- Data_type of form field is taxon --}}
             @case('_taxon_')
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                        ({{ $cm->column->description }})
-                    </h5>
-                </div>
+                @include('includes.column_cardheader')
+                
                 <div class="card card-body">
                     @if($cm->getConfigValue('taxon_show') == 'full_name')
                         {{ $item->taxon->full_name }}
@@ -95,20 +101,42 @@
             
             {{-- Data_type of form field is list --}}
             @case('_list_')
-                {{-- dd($lists->firstWhere('list_id', $cm->column->list_fk)->elements) --}}
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                        ({{ $cm->column->description }})
-                    </h5>
-                </div>
+                @include('includes.column_cardheader')
+                
                 <div class="card card-body">
-                @foreach($lists[$cm->column->list_fk] as $element)
-                    @foreach($element->values as $v)
-                        {{$v->value}}, 
+                @if($details->firstWhere('column_fk', $cm->column->column_id))
+                    @if($details->firstWhere('column_fk', $cm->column->column_id)->element)
+                    {{ $details->firstWhere('column_fk', $cm->column->column_id)->element->attributes->
+                        firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}
+                    @else
+                        @lang('common.not_chosen')
+                    @endif
+                @else
+                    <span>detail column {{$cm->column->column_id}} for list not found</span>
+                @endif
+                </div>
+                @break
+            
+            {{-- Data_type of form field is list with multiple elements --}}
+            @case('_multi_list_')
+                @include('includes.column_cardheader')
+                
+                <div class="card card-body">
+                    <ul class="list-unstyled">
+                    @foreach($details->firstWhere('column_fk', $cm->column->column_id)->elements()->get() as $element)
+                        <li>{{ $element->attributes->
+                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}</li>
                     @endforeach
-                @endforeach
+                    </ul>
+                </div>
+                @break
+            
+            {{-- Data_type of form field is boolean --}}
+            @case('_boolean_')
+                @include('includes.column_cardheader')
+                
+                <div class="card card-body">
+                    {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int ? __('common.yes') : __('common.no') }}
                 </div>
                 @break
             
@@ -116,46 +144,19 @@
             @case('_integer_')
             {{-- Data_type of form field is image pixel per inch --}}
             @case('_image_ppi_')
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                        ({{ $cm->column->description }})
-                    </h5>
-                </div>
+                @include('includes.column_cardheader')
+                
                 <div class="card card-body">
-                    {{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_int) }}
+                    {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int }}
                 </div>
                 @break
             
             {{-- Data_type of form field is float --}}
             @case('_float_')
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                        ({{ $cm->column->description }})
-                    </h5>
-                </div>
+                @include('includes.column_cardheader')
+                
                 <div class="card card-body">
-                    {{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_float) }}
-                </div>
-                @break
-            
-            {{-- Data_type of form field is date --}}
-            @case('_date_')
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                        ({{ $cm->column->description }})
-                    </h5>
-                </div>
-                <div class="card card-body">
-                    {{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_date) }}
+                    {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_float }}
                 </div>
                 @break
             
@@ -167,64 +168,59 @@
             @case('_image_title_')
             {{-- Data_type of form field is image copyright --}}
             @case('_image_copyright_')
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                        ({{ $cm->column->description }})
-                    </h5>
-                </div>
+                @include('includes.column_cardheader')
+                
                 <div class="card card-body">
-                @if($details->firstWhere('column_fk', $cm->column->column_id))
-                    {{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}
-                @else
-                    <span>detail column {{$cm->column->column_id}} for string not found</span>
-                @endif
+                    {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string }}
                 </div>
                 @break
             
             {{-- Data_type of form field is html --}}
             @case('_html_')
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                        ({{ $cm->column->description }})
-                    </h5>
-                </div>
+                @include('includes.column_cardheader')
+                
                 <div class="card card-body">
-                    {!! old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string) !!}
+                    {!! optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string !!}
                 </div>
                 @break
             
             {{-- Data_type of form field is URL --}}
             @case('_url_')
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                        ({{ $cm->column->description }})
-                    </h5>
-                </div>
+                @include('includes.column_cardheader')
+                
                 <div class="card card-body">
-                    {{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}
+                    {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string }}
+                </div>
+                @break
+            
+            {{-- Data_type of form field is date --}}
+            @case('_date_')
+                @include('includes.column_cardheader')
+                
+                <div class="card card-body">
+                    {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_date }}
+                </div>
+                @break
+            
+            {{-- Data_type of form field is date range --}}
+            @case('_date_range_')
+                @include('includes.column_cardheader')
+                
+                <div class="card card-body">
+                    {{ optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from())->toDateString() }}
+                    @if($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from() != $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to())
+                        - {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to()->toDateString() }}
+                    @endif
+                        
                 </div>
                 @break
             
             {{-- Data_type of form field is image --}}
             @case('_image_')
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                        ({{ $cm->column->description }})
-                    </h5>
-                </div>
+                @include('includes.column_cardheader')
+                
                 <div class="card card-body">
-                @if($cm->getConfigValue('image_show') == 'preview')
+                @if($cm->getConfigValue('image_show') == 'preview' || $cm->getConfigValue('image_show') == 'filename')
                     @if($details->firstWhere('column_fk', $cm->column->column_id))
                         {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}
                         @if(Storage::exists('public/'. Config::get('media.preview_dir') .
@@ -259,26 +255,20 @@
             
             {{-- Data_type of form field is map --}}
             @case('_map_')
-                <div class="card-header">
-                    <h5 class="mb-0">
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                        ({{ $cm->column->description }})
-                    </h5>
-                </div>
+                @include('includes.column_cardheader')
+                
                 <div class="card card-body">
                 @if($cm->getConfigValue('map') == 'iframe')
                     @if($details->firstWhere('column_fk', $cm->column->column_id))
                         @if($cm->getConfigValue('map_iframe') == 'url')
                             <iframe width="100%" height="670px" scrolling="no" marginheight="0" marginwidth="0" frameborder="0"
-                                src="{{ old('fields.'. $cm->column->column_id, 
-                                $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
+                                src="{{ $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}"
                             >
                         @endif
                         @if($cm->getConfigValue('map_iframe') == 'service')
                             <iframe width="100%" height="670px" scrolling="no" marginheight="0" marginwidth="0" frameborder="0"
-                                src="{{ Config::get('media.mapservice_url') }}artid={{ old('fields.'. $cm->column->column_id, 
-                                $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
+                                src="{{ Config::get('media.mapservice_url') }}artid={{ 
+                                $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}"
                             >
                         @endif
                         <p>@lang('items.no_iframe')</p>
@@ -286,6 +276,17 @@
                     @else
                         <span>detail column {{$cm->column->column_id}} for map not found</span>
                     @endif
+                @endif
+                @if($cm->getConfigValue('map') == 'inline')
+                    <div id="map" class="map"></div>
+                    <script type="text/javascript">
+                        var lon = {{ optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col')))->value_float ?? 0 }};
+                        var lat = {{ optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col')))->value_float ?? 0 }};
+                        var zoom = {{ $cm->getConfigValue('map_zoom') }};
+                        // Init and display the map
+                        osm_map.display(lon, lat, zoom);
+                        osm_map.addMarker(lon, lat, '{{ asset("storage/images/dot.svg") }}');
+                    </script>
                 @endif
                 </div>
                 @break

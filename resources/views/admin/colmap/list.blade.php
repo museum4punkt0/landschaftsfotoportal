@@ -18,11 +18,22 @@
         @if (true || Auth::check())
             <div class="card-header">@lang('colmaps.header')</div>
             <div class="card-body">
-                <a href="{{route('colmap.create')}}" class="btn btn-primary">@lang('colmaps.new')</a>
-                <a href="{{route('colmap.map')}}" class="btn btn-primary">@lang('common.batch')</a>
-                @if(count($colmaps))
-                    <a href="{{route('colmap.sort')}}" class="btn btn-primary">@lang('common.sort')</a>
-                @endif
+                <div class="row">
+                    <div class="col align-self-start">
+                        <a href="{{route('colmap.create')}}" class="btn btn-primary">@lang('colmaps.new')</a>
+                        <a href="{{route('colmap.map')}}" class="btn btn-primary">@lang('common.batch')</a>
+                        @if(count($colmaps))
+                            <a href="{{route('colmap.sort')}}" class="btn btn-primary">@lang('common.sort')</a>
+                        @endif
+                    </div>
+                    
+                    @include('includes.form_autocomplete_search', [
+                        'search_url' => route('colmap.autocomplete'),
+                        'div_class' => 'col align-self-end',
+                        'input_placeholder' => __('search.search'),
+                    ])
+                </div>
+                
                 <table class="table mt-4">
                 <thead>
                     <tr>
@@ -46,20 +57,24 @@
                         </td>
                         <td>
                             @foreach($colmap->column->translation->values as $v)
-                                {{substr($v->attribute->name, -2)}}: {{$v->value}}<br/>
+                                <b>{{substr($v->attribute->name, 0, -3)}}:</b> {{$v->value}}<br/>
                             @endforeach
-                            ID {{$colmap->column_fk}}<br/>
+                            <a href="{{route('column.edit', $colmap->column_fk)}}">ID {{$colmap->column_fk}}</a>
                         </td>
                         <td>
                             @foreach($colmap->column_group->values as $v)
-                                {{substr($v->attribute->name, -2)}}: {{$v->value}}<br/>
+                                @if($v->attribute->name == 'config')
+                                    <b>{{$v->attribute->name, 0}}:</b> {{$v->value}}<br/>
+                                @else
+                                    <b>{{substr($v->attribute->name, 0, -3)}}:</b> {{$v->value}}<br/>
+                                @endif
                             @endforeach
-                            ID {{$colmap->column_group_fk}}<br/>
+                            <a href="{{route('element.show', $colmap->column_group_fk)}}">ID {{$colmap->column_group_fk}}</a>
                         </td>
                         <td>
                             @if($colmap->taxon_fk)
                                 {{$colmap->taxon->taxon_name}}<br/>
-                                ID {{$colmap->taxon_fk}}
+                                <a href="{{route('taxon.edit', $colmap->taxon_fk)}}">ID {{$colmap->taxon_fk}}</a>
                             @else
                                 @lang('common.all')
                             @endif
@@ -68,7 +83,7 @@
                             @foreach($colmap->item_type->values as $v)
                                 {{$v->value}}<br/>
                             @endforeach
-                            ID {{$colmap->item_type_fk}}
+                            <a href="{{route('element.show', $colmap->item_type_fk)}}">ID {{$colmap->item_type_fk}}</a>
                         </td>
                         <td>
                             <form action="{{route('colmap.destroy', $colmap)}}" method="POST">

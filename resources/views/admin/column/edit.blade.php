@@ -38,10 +38,9 @@
         </select>
         <span class="text-danger">{{ $errors->first('data_type') }}</span>
     </div>
-    <div class="form-group">
+    <div class="form-group collapse @if(old('data_type') == $data_type_ids['_list_'] || old('data_type') == $data_type_ids['_multi_list_'] || !old('data_type') && ($column->data_type_fk == $data_type_ids['_list_'] || $column->data_type_fk == $data_type_ids['_multi_list_']))show @endif" id="list_group">
         <span>@lang('lists.list')</span>
         <select name="list" class="form-control" size=1 >
-            <option value="">@lang('common.ignore')</option>
             @foreach($lists as $list)
                 <option value="{{$list->list_id}}"
                     @if(old('list', $column->list_fk) == $list->list_id) selected @endif>
@@ -60,5 +59,17 @@
 </form>
 
 </div>
+
+<script type="text/javascript">
+    // Triggered when select for 'data_type' changed
+    $('.form-control[name=data_type]').change(function(event) {
+        if ($(this).val() == {{ $data_type_ids['_list_'] }} || $(this).val() == {{ $data_type_ids['_multi_list_'] }}) {
+            $('#list_group').collapse('show');
+        }
+        else {
+            $('#list_group').collapse('hide');
+        }
+    });
+</script>
 
 @endsection

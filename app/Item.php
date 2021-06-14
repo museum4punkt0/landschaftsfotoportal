@@ -87,6 +87,26 @@ class Item extends Model
         return $this->hasMany('App\Comment', 'item_fk', 'item_id');
     }
     
+    /**
+     * Get the carts of the item.
+     */
+    public function carts()
+    {
+        return $this->hasMany('App\Cart', 'item_fk', 'item_id');
+    }
+    
+    /**
+     * Scope a query to only include items of a given user.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  mixed  $owner
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeMyOwn($query, $owner)
+    {
+        return $query->where('created_by', $owner);
+    }
+    
     
     use \Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
     

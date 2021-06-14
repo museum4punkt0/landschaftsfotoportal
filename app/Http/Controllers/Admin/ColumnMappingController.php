@@ -10,6 +10,7 @@ use App\Taxon;
 use App\Selectlist;
 use App\Value;
 use App\Element;
+use App\Utils\Localization;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -49,21 +50,15 @@ class ColumnMappingController extends Controller
         #$columns = Column::doesntHave('column_mapping')->orderBy('description')->get();
         $columns = Column::with(['translation.values'])->orderBy('description')->get();
         
-        $lang = 'name_'. app()->getLocale();
-        $column_groups = Value::whereHas('element', function ($query) {
-            $query->where('list_fk', Selectlist::where('name', '_column_group_')->first()->list_id);
-        })
-        ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', $lang);
-        })
-        ->orderBy('value')->get();
+        $lang = app()->getLocale();
+        $column_groups = Localization::getColumnGroups($lang);
         
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
         // Check for existing item_type, otherwise redirect back with warning message
         if ($item_types->isEmpty()) {
-            return Redirect::to('admin/colmap')
+            return redirect()->route('list.internal')
                 ->with('warning', __('colmaps.no_item_type'));
         }
         
@@ -85,6 +80,7 @@ class ColumnMappingController extends Controller
             'column_group' => 'required|integer',
             'item_type' => 'required|integer',
             'taxon' => 'nullable|integer',
+            'public' => 'required|integer',
             'config' => 'nullable|string',
         ]);
         
@@ -93,6 +89,7 @@ class ColumnMappingController extends Controller
             'column_group_fk' => $request->input('column_group'),
             'item_type_fk' => $request->input('item_type'),
             'taxon_fk' => $request->input('taxon'),
+            'public' => $request->input('public'),
             'config' => $request->input('config'),
         ];
         ColumnMapping::create($data);
@@ -132,14 +129,8 @@ class ColumnMappingController extends Controller
      */
     public function map(Request  $request)
     {
-        $lang = 'name_'. app()->getLocale();
-        $column_groups = Value::whereHas('element', function ($query) {
-            $query->where('list_fk', Selectlist::where('name', '_column_group_')->first()->list_id);
-        })
-        ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', $lang);
-        })
-        ->orderBy('value')->get();
+        $lang = app()->getLocale();
+        $column_groups = Localization::getColumnGroups($lang);;
         
         $item_type = $request->item_type;
         
@@ -148,7 +139,7 @@ class ColumnMappingController extends Controller
         
         // Check for existing item_type, otherwise redirect back with warning message
         if ($item_types->isEmpty()) {
-            return Redirect::to('admin/colmap')
+            return redirect()->route('list.internal')
                 ->with('warning', __('colmaps.no_item_type'));
         }
         
@@ -297,14 +288,8 @@ class ColumnMappingController extends Controller
         $columns = Column::with(['translation.values'])->orderBy('description')->get();
         #$columns = Column::doesntHave('column_mapping')->orderBy('description')->get();
         
-        $lang = 'name_'. app()->getLocale();
-        $column_groups = Value::whereHas('element', function ($query) {
-            $query->where('list_fk', Selectlist::where('name', '_column_group_')->first()->list_id);
-        })
-        ->whereHas('attribute', function ($query) use ($lang) {
-            $query->where('name', $lang);
-        })
-        ->orderBy('value')->get();
+        $lang = app()->getLocale();
+        $column_groups = Localization::getColumnGroups($lang);;
         
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
@@ -327,19 +312,21 @@ class ColumnMappingController extends Controller
     public function update(Request $request, ColumnMapping $colmap)
     {
         $request->validate([
-            'column' => 'required|integer',
+            //'column' => 'required|integer',
             'column_group' => 'required|integer',
-            'item_type' => 'required|integer',
+            //'item_type' => 'required|integer',
             'taxon' => 'nullable|integer',
             'column_order' => 'required|integer',
+            'public' => 'required|integer',
             'config' => 'nullable|string',
         ]);
         
-        $colmap->column_fk = $request->input('column');
+        //$colmap->column_fk = $request->input('column');
         $colmap->column_group_fk = $request->input('column_group');
-        $colmap->item_type_fk = $request->input('item_type');
+        //$colmap->item_type_fk = $request->input('item_type');
         $colmap->taxon_fk = $request->input('taxon');
         $colmap->column_order = $request->input('column_order');
+        $colmap->public = $request->input('public');
         $colmap->config = $request->input('config');
         $colmap->save();
         
@@ -361,5 +348,33 @@ class ColumnMappingController extends Controller
         
         return Redirect::to('admin/colmap')
             ->with('success', __('colmaps.deleted'));
+    }
+
+    /**
+     * Get resource for AJAX autocompletion search field.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function autocomplete(Request $request)
+    {
+        $term = $request->search;
+        $results = ColumnMapping::with('column')
+            ->whereHas('column', function ($query) use ($term) {
+                $query->where('description', 'ILIKE', "%{$term}%");
+            })
+            ->limit(config('ui.autocomplete_results', 5))
+            ->get();
+        
+        $response = array();
+        foreach ($results as $result) {
+            $response[] = array(
+                "value" => $result->colmap_id,
+                "label" => $result->column->description,
+                "edit_url" => route('colmap.edit', $result->colmap_id),
+            );
+        }
+        
+        return response()->json($response);
     }
 }

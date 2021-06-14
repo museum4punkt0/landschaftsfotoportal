@@ -24,6 +24,7 @@ return [
     'email' => 'Email',
     'verified' => 'verifiziert',
     'dashboard' => 'Dashboard',
+    'profile' => 'Mein Bereich',
     
     'group_registered' => 'registriert',
     'group_author' => 'Autor',
@@ -31,4 +32,8 @@ return [
     'group_publisher' => 'Publisher',
     'group_admin' => 'Admin',
     'group_super-admin' => 'Super-Admin',
+    
+    'change_email' => 'Emailadresse ändern',
+    'current_email' => 'Aktuelle Emailadresse',
+    'new_email' => 'Neue Emailadresse',
 ];

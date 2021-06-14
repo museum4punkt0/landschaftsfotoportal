@@ -3,6 +3,9 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use App\Casts\DateRangeCast;
+
+#use Belamov\PostgresRange\Casts\DateRangeCast;
 
 class Detail extends Model
 {
@@ -27,7 +30,12 @@ class Detail extends Model
         'value_int',
         'value_float',
         'value_date',
+        'value_daterange',
         'value_string',
+    ];
+    
+    protected $casts = [
+        'value_daterange' => DateRangeCast::class,
     ];
     
     /**
@@ -52,5 +60,14 @@ class Detail extends Model
     public function element()
     {
         return $this->belongsTo('App\Element', 'element_fk', 'element_id');
+    }
+    
+    /**
+     * The elements that belong to the detail.
+     */
+    public function elements()
+    {
+        return $this->belongsToMany('App\Element', 'element_mapping', 'detail_fk', 'element_fk')
+            ->withTimestamps();
     }
 }

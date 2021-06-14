@@ -90,11 +90,17 @@ class Column extends Model
     public function getValidationRule()
     {
         switch ($this->getDataType()) {
+            case '_boolean_':
+                return ['boolean'];
+            case '_date_range_':
+                return ['array', ['*' => 'date']];
+            case '_multi_list_':
+                return ['array', ['*' => 'integer']];
             case '_list_':
             case '_integer_':
-                return 'integer';
+                return ['integer'];
             case '_float_':
-                return 'numeric';
+                return ['numeric'];
             case '_string_':
             case '_title_':
             case '_image_title_':
@@ -102,15 +108,15 @@ class Column extends Model
             case '_redirect_':
             case '_map_':
             case '_html_':
-                return 'string';
+                return ['string'];
             case '_date_':
-                return 'date';
+                return ['date'];
             case '_url_':
-                return 'url';
+                return ['url'];
             case '_image_':
-                return 'image|mimes:jpeg,png|max:8192';
+                return ['', ['file' => 'image|mimes:jpeg|max:8192', 'dummy' => 'integer']];
             default:
-                return '';
+                return [''];
         }
     }
 }

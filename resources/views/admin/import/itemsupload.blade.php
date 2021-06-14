@@ -59,6 +59,25 @@
                         <small class="form-text text-muted">@lang('import.file_hint')</small>
                     </div>
                     <div class="form-group">
+                        <label for="column_separator">@lang('import.column_separator')</label>
+                        <select name="column_separator" id="column_separator" class="form-control" size=1 >
+                            <option value=";" selected>;</option>
+                            <option value=",">,</option>
+                            <option value="|">|</option>
+                            <option value="_">_</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="element_separator">@lang('import.element_separator')</label>
+                        <select name="element_separator" id="element_separator" class="form-control" size=1 >
+                            <option value=";">;</option>
+                            <option value="," selected>,</option>
+                            <option value="|">|</option>
+                            <option value="_">_</option>
+                            <option value=" "> </option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <button type="submit" class="btn btn-primary">@lang('common.upload')</button>
                     </div>
                 </form>

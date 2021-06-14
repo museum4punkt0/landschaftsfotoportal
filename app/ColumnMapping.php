@@ -36,6 +36,7 @@ class ColumnMapping extends Model
         'taxon_fk',
         'column_order',
         'config',
+        'public',
     ];
     
     /**
@@ -68,6 +69,28 @@ class ColumnMapping extends Model
     public function taxon()
     {
         return $this->belongsTo('App\Taxon', 'taxon_fk', 'taxon_id');
+    }
+    
+    /**
+     * Scope a query to only include column mappings for a given item and taxon.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  mixed  $item_type_id
+     * @param  mixed  $taxon_id
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeForItem($query, $item_type_id, $taxon_id)
+    {
+        return $query->where('item_type_fk', $item_type_id)
+            ->where(function ($query) use ($taxon_id) {
+                return $query->whereNull('taxon_fk')
+                    ->orWhereHas('taxon.descendants', function ($query) use ($taxon_id) {
+                        $query->where('taxon_id', $taxon_id);
+                    });
+            })
+            ->with('column')
+            ->orderBy('column_order')
+            ->get();
     }
     
     
