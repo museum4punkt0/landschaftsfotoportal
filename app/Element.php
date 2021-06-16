@@ -138,6 +138,7 @@ class Element extends Model
      */
     public static function getTrees($colmaps)
     {
+        $lists = null;
         foreach ($colmaps as $cm) {
             $list_id = $cm->column->list_fk;
             if ($list_id) {
