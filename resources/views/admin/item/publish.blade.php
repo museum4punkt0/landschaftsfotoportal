@@ -20,6 +20,8 @@
             <div class="card-body">
                 <a href="{{route('item.new')}}" class="btn btn-primary">@lang('items.new')</a>
                 <a href="{{route('item.publish')}}" class="btn btn-primary">@lang('common.publish_all')</a>
+                
+                <div class="table-responsive">
                 <table class="table mt-4">
                 <thead>
                     <tr>
@@ -89,6 +91,7 @@
                 @endforeach
                 </tbody>
                 </table>
+                </div>
             </div>
         @else
             <div class="card-body">

@@ -19,6 +19,7 @@
             <div class="card-header">@lang('users.header')</div>
             <div class="card-body">
                 
+                <div class="table-responsive">
                 <table class="table mt-4">
                 <thead>
                     <tr>
@@ -67,6 +68,7 @@
                 @endforeach
                 </tbody>
                 </table>
+                </div>
             </div>
         @else
             <div class="card-body">

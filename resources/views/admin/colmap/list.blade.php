@@ -34,6 +34,7 @@
                     ])
                 </div>
                 
+                <div class="table-responsive">
                 <table class="table mt-4">
                 <thead>
                     <tr>
@@ -96,6 +97,7 @@
                 @endforeach
                 </tbody>
                 </table>
+                </div>
             </div>
         @else
             <div class="card-body">

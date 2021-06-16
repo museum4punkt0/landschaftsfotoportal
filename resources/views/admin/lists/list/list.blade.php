@@ -23,6 +23,8 @@
                 @endif
                 
                 <a href="{{route('list.create')}}" class="btn btn-primary">@lang('lists.new')</a>
+                
+                <div class="table-responsive">
                 <table class="table mt-4">
                 <thead>
                     <tr>
@@ -70,6 +72,7 @@
                 @endforeach
                 </tbody>
                 </table>
+                </div>
             </div>
         @else
             <div class="card-body">
