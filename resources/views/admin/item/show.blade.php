@@ -122,12 +122,14 @@
                 @include('includes.column_cardheader')
                 
                 <div class="card card-body">
+                @if($details->firstWhere('column_fk', $cm->column->column_id))
                     <ul class="list-unstyled">
                     @foreach($details->firstWhere('column_fk', $cm->column->column_id)->elements()->get() as $element)
                         <li>{{ $element->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}</li>
                     @endforeach
                     </ul>
+                @endif
                 </div>
                 @break
             
@@ -207,11 +209,12 @@
                 @include('includes.column_cardheader')
                 
                 <div class="card card-body">
+                @if($details->firstWhere('column_fk', $cm->column->column_id))
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from())->toDateString() }}
                     @if($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from() != $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to())
                         - {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to()->toDateString() }}
                     @endif
-                        
+                @endif
                 </div>
                 @break
             

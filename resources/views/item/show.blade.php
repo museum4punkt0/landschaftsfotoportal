@@ -41,11 +41,13 @@
             <div class="text-center">
                 <h2 class="section-heading text-uppercase">Bilddetails</h2>
                 <h3 class="section-subheading text-muted">Lorem ipsum dolor sit amet consectetur.</h3>
+                @if($details->firstWhere('column_fk', 13))
                 <a href="{{ asset('storage/'. Config::get('media.full_dir') .
                     $item->details->firstWhere('column_fk', 13)->value_string) }}">
                 <img class="img-fluid" src="{{ asset('storage/'. Config::get('media.medium_dir') .
                     $item->details->firstWhere('column_fk', 13)->value_string) }}" alt="" />
                 </a>
+                @endif
             </div>
             <div class="card">
                 <div class="card-body">
@@ -170,12 +172,14 @@
             @case('_multi_list_')
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
+                @if($details->firstWhere('column_fk', $cm->column->column_id))
                     <ul class="list-unstyled">
                     @foreach($details->firstWhere('column_fk', $cm->column->column_id)->elements()->get() as $element)
                         <li>{{ $element->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}</li>
                     @endforeach
                     </ul>
+                @endif
                 </div>
                 @break
             
@@ -250,11 +254,12 @@
             @case('_date_range_')
                 @include('includes.column_title')
                 <div class="col font-weight-bold">
+                @if($details->firstWhere('column_fk', $cm->column->column_id))
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from())->toDateString() }}
                     @if($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from() != $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to())
                         - {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to()->toDateString() }}
                     @endif
-                        
+                @endif
                 </div>
                 @break
             
@@ -395,7 +400,7 @@
                     @endif
                     
                     @if($cm->getConfigValue('image_show') == 'filename')
-                        {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}
+                        {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string }}
                     @endif
                 </div>
                 @break
