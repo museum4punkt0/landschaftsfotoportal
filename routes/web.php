@@ -65,6 +65,7 @@ Route::post('/admin/import/items/save', 'Admin\ImportItemsController@save')->nam
 Route::get('/admin/import/items/preview', 'Admin\ImportItemsController@preview')->name('import.items.preview');
 Route::post('/admin/import/items/process', 'Admin\ImportItemsController@process')->name('import.items.process');
 Route::get('/admin/import/items/fix_ext', 'Admin\ImportItemsController@fix_ext')->name('import.items.fix_ext');
+Route::get('admin/import/items/line', 'Admin\AjaxImportController@importLine')->name('ajax.import.line');
 
 Route::get('admin/colmap/map/{item_type?}', 'Admin\ColumnMappingController@map')->name('colmap.map');
 Route::post('admin/colmap/map/store', 'Admin\ColumnMappingController@map_store')->name('colmap.map.store');

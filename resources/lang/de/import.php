@@ -44,6 +44,8 @@ return [
     'unique_taxa' => 'nur einzigartige (keine doppelten) Taxa importieren',
     'into_this_list' => 'Die CSV-Datei wird anschließend in die Liste ":name" (:description) importiert werden.',
     
+    'items_count_import' => ':count Datensätze werden insgesamt importiert.',
+    
     'read_csv' => 'CSV-Datei :file wird eingelesen.',
     'item_imported' => 'Datensatz wurde mit ID :id importiert.',
     'element_mismatch' => 'Auswahlliste enthält kein Element namens ":element"!',
