@@ -100,7 +100,10 @@ class ImportItemsController extends Controller
         $csv_data = array_slice($data, 0, 5);
         
         // Load column mapping for selected item_type from database
-        $colmaps = ColumnMapping::where('item_type_fk', $request->item_type)->get();
+        $colmaps = ColumnMapping::where('item_type_fk', $request->item_type)
+            ->with('column')
+            ->orderBy('column_order')
+            ->get();
         
         // Check for defined columns for this item_type, otherwise redirect back with error message
         if ($colmaps->isEmpty()) {
