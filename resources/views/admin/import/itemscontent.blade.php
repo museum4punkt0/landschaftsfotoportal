@@ -50,7 +50,7 @@
                                         @unless($colmap->column->data_type->attributes
                                             ->firstWhere('name', 'code')->pivot->value == '_taxon_')
                                             <option value="{{ $colmap->column_fk }}"
-                                                @if(old('fields.'.$loop->parent->index) == $colmap->column_fk)
+                                                @if(old('fields.'.$loop->parent->index, $selected_attr[$loop->parent->index]) == $colmap->column_fk)
                                                     selected
                                                 @endif
                                             >

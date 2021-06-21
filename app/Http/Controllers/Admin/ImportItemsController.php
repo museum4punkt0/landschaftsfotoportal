@@ -11,6 +11,7 @@ use App\Selectlist;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
 use Validator;
@@ -87,6 +88,9 @@ class ImportItemsController extends Controller
      */
     public function preview(Request $request)
     {
+        // Get selected attributes from cookie
+        $selected_attr = json_decode($request->cookie('import_'. $request->item_type), true);
+        
         // Get CSV file path from session and
         $csv_file = $request->session()->get('csv_file');
         // Get original CSV file name from session
@@ -117,7 +121,7 @@ class ImportItemsController extends Controller
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
-        return view('admin.import.itemscontent', compact('file_name', 'csv_data', 'colmaps', 'items', 'item_types'));
+        return view('admin.import.itemscontent', compact('file_name', 'csv_data', 'colmaps', 'items', 'item_types', 'selected_attr'));
     }
     
     /**
@@ -181,6 +185,10 @@ class ImportItemsController extends Controller
         Log::channel('import')->info(__('import.read_csv', ['file' => $csv_file]));
         
         $selected_attr = $request->input('fields.*');
+        // Save to cookie for future usage after session has expired
+        $cookie_content = json_encode($selected_attr, JSON_FORCE_OBJECT);
+        Cookie::queue(Cookie::forever('import_'. $request->input('item_type'), $cookie_content));
+        
         $warning_status_msg = null;
         
         // Save selected attributes to session
