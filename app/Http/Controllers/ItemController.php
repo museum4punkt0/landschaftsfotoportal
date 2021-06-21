@@ -28,7 +28,7 @@ class ItemController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('verified')->except(['show', 'download', 'gallery', 'timeline']);
+        $this->middleware('verified')->except(['show', 'download', 'gallery', 'map', 'timeline']);
     }
 
     /**
