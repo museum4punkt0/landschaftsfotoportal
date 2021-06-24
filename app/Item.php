@@ -2,6 +2,9 @@
 
 namespace App;
 
+use App\ColumnMapping;
+use App\Detail;
+use App\Location;
 use Illuminate\Database\Eloquent\Model;
 
 class Item extends Model
@@ -229,5 +232,32 @@ class Item extends Model
             }
         }
         return $detail;
+    }
+    
+    /**
+     * Update map latitude and longitude from given location.
+     *
+     * @param  \App\Location  $location
+     * @return void
+     */
+    public function updateLatLon($location)
+    {
+        if ($location) {
+            // Get the config containing column IDs for latitude and longitute
+            $cm = ColumnMapping::where('config', 'ILIKE', '%map_lat_col%')->first();
+            $config = $cm->config_array;
+            // Check for existing config keys
+            if (isset($config['map_lat_col']) && isset($config['map_lon_col'])) {
+                // Update latitude and longitude
+                Detail::updateOrCreate(
+                    ['item_fk' => $this->item_id, 'column_fk' => $config['map_lat_col']],
+                    ['value_float' => $location->lat]
+                );
+                Detail::updateOrCreate(
+                    ['item_fk' => $this->item_id, 'column_fk' => $config['map_lon_col']],
+                    ['value_float' => $location->lon]
+                );
+            }
+        }
     }
 }

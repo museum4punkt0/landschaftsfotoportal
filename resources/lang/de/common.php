@@ -60,6 +60,12 @@ return [
     'october' => 'Oktober',
     'november' => 'November',
     'december' => 'Dezember',
+    'country' => 'Land',
+    'state' => 'Bundesland',
+    'county' => 'Landkreis',
+    'city' => 'Stadt/Ort',
+    'street' => 'Straße',
+    'locality' => 'Örtlichkeit',
     
     'actions' => 'Aktionen',
     'language' => 'Sprache',

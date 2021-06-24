@@ -6,6 +6,7 @@ use App\Column;
 use App\DateRange;
 use App\Detail;
 use App\Item;
+use App\Location;
 use App\Taxon;
 use App\Value;
 use App\Utils\Image;
@@ -42,7 +43,9 @@ class AjaxImportController extends Controller
         
         $total_items = intval($request->session()->get('total_items')); // total number of lines w/o header
         $selected_attr = $request->session()->get('selected_attr');
+        $geocoder_attr = $request->session()->get('geocoder_attr');
         
+        $geocoder_results = null;
         $warning_status_msg = null;
         #dd($request);
         
@@ -237,6 +240,16 @@ class AjaxImportController extends Controller
                     }
                 }
             }
+            // Use geocoder for address data from current line
+            if ($request->session()->has('geocoder_enable')) {
+                $location = $this->getLocationFromLine($line);
+                $geocoder_results[$item->item_id] = $location->getGeocodingResults('forward');
+                
+                if (!$request->session()->has('geocoder_interactive')) {
+                    // Update item with lat and lon from location
+                    $item->updateLatLon($location);
+                }
+            }
         }
         // Reset last line number increment
         $number--;
@@ -251,8 +264,29 @@ class AjaxImportController extends Controller
             'lastItem' => $request->session()->has('header') ? $number-1 : $number,
             'totalItems' => $total_items,
             'statusMessage' => $warning_status_msg,
+            'geocoder_results' => $geocoder_results,
         ];
         
         return response()->json($response_data);
+    }
+
+    /**
+     * Collect location data from CSV line and pass to geocoder.
+     *
+     * @param  array  $line
+     * @return \App\Location
+     */
+    private function getLocationFromLine($line)
+    {
+        $geocoder_attr = session('geocoder_attr');
+        
+        // Prepare data for geocoder query
+        $location = new Location();
+        $location->country = $line[$geocoder_attr['country']];
+        $location->city = $line[$geocoder_attr['city']];
+        $location->street = $line[$geocoder_attr['street']];
+        $location->locality = $line[$geocoder_attr['locality']];
+        
+        return $location;
     }
 }

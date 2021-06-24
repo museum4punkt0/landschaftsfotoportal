@@ -129,6 +129,75 @@
                     <span class="text-danger">{{ $errors->first('parent_item_type') }}</span>
                 </div>
                 
+                <!-- Form fields for geocoding -->
+                <div class="form-group">
+                    <input type="checkbox" name="geocoder_enable" class="checkbox" value=1 @if(old('geocoder_enable')) checked @endif />
+                    <span>@lang('import.geocoder_use')</span>
+                </div>
+                
+                <fieldset id="geocoderFieldset" class="collapse @if(old('geocoder'))show @endif">
+                    <legend>@lang('import.geocoder_use')</legend>
+                    
+                    <div class="form-group">
+                        <input type="checkbox" name="geocoder_interactive" class="checkbox" value=1 @if(old('geocoder_interactive')) checked @endif />
+                        <span>@lang('import.geocoder_interactive')</span>
+                    </div>
+                
+                    <div class="form-text">@lang('import.geocoder_hint')</div>
+                    
+                    <div class="form-group">
+                        <span>@lang('common.country')</span>
+                        <select name="geocoder[country]" class="form-control" size=1 >
+                            @foreach($csv_data[0] as $csv_header)
+                                <option value="{{$loop->index}}"
+                                    @if(old('geocoder.country', $geocoder_attr['country']??null) == $loop->index) selected @endif>
+                                        {{ $csv_header }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <span class="text-danger">{{ $errors->first('geocoder.country') }}</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <span>@lang('common.city')</span>
+                        <select name="geocoder[city]" class="form-control" size=1 >
+                            @foreach($csv_data[0] as $csv_header)
+                                <option value="{{$loop->index}}"
+                                    @if(old('geocoder.city', $geocoder_attr['city']??null) == $loop->index) selected @endif>
+                                        {{ $csv_header }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <span class="text-danger">{{ $errors->first('geocoder.city') }}</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <span>@lang('common.street')</span>
+                        <select name="geocoder[street]" class="form-control" size=1 >
+                            @foreach($csv_data[0] as $csv_header)
+                                <option value="{{$loop->index}}"
+                                    @if(old('geocoder.city', $geocoder_attr['street']??null) == $loop->index) selected @endif>
+                                        {{ $csv_header }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <span class="text-danger">{{ $errors->first('geocoder.street') }}</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <span>@lang('common.locality')</span>
+                        <select name="geocoder[locality]" class="form-control" size=1 >
+                            @foreach($csv_data[0] as $csv_header)
+                                <option value="{{$loop->index}}"
+                                    @if(old('geocoder.city', $geocoder_attr['locality']??null) == $loop->index) selected @endif>
+                                        {{ $csv_header }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <span class="text-danger">{{ $errors->first('geocoder.locality') }}</span>
+                    </div>
+                </fieldset>
+                
                 <div class="form-group">
                     <button type="submit" class="btn btn-primary">
                         @lang('import.import')
@@ -138,5 +207,17 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    // Triggered when checkbox for geocoder changed
+    $('.checkbox[name=geocoder_enable]').change(function(event) {
+        if ($(this).prop('checked')) {
+            $('#geocoderFieldset').collapse('show');
+        }
+        else {
+            $('#geocoderFieldset').collapse('hide');
+        }
+    });
+</script>
 
 @endsection
