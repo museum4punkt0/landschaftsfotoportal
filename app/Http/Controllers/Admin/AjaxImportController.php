@@ -243,7 +243,11 @@ class AjaxImportController extends Controller
             // Use geocoder for address data from current line
             if ($request->session()->has('geocoder_enable')) {
                 $location = $this->getLocationFromLine($line);
-                $geocoder_results[$item->item_id] = $location->getGeocodingResults('forward');
+                $geocoder_results[] = [
+                    'item' => $item->item_id,
+                    'original' => $location,
+                    'results' => $location->getGeocodingResults('forward'),
+                ];
                 
                 if (!$request->session()->has('geocoder_interactive')) {
                     // Update item with lat and lon from location
@@ -264,7 +268,37 @@ class AjaxImportController extends Controller
             'lastItem' => $request->session()->has('header') ? $number-1 : $number,
             'totalItems' => $total_items,
             'statusMessage' => $warning_status_msg,
-            'geocoder_results' => $geocoder_results,
+            'geocoderResults' => $geocoder_results,
+            'geocoderInteractive' => $request->session()->has('geocoder_interactive'),
+        ];
+        
+        return response()->json($response_data);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function importLatLon(Request $request)
+    {
+        // Get HTTP parameters from request
+        $item = intval($request->item);
+        $lat = floatval($request->lat);
+        $lon = floatval($request->lon);
+        
+        $warning_status_msg = null;
+        #dd($request);
+        
+        $location = new Location();
+        $location->lat = $lat;
+        $location->lon = $lon;
+        
+        Item::find($item)->updateLatLon($location);
+        
+        $response_data = [
+            'statusMessage' => $warning_status_msg,
         ];
         
         return response()->json($response_data);
