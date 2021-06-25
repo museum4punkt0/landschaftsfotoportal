@@ -127,7 +127,7 @@ class AjaxImportController extends Controller
                             // TODO: don't import and add warning if value doesn't exist in list
                             $detail_data['element_fk'] = $value ? $value->element_fk : null;
                             if (!$value) {
-                                Log::channel('import')->warning(__('import.element_mismatch', ['element' => $element]), [
+                                Log::channel('import')->warning(__('import.element_mismatch', ['element' => $cell]), [
                                     'list' => Column::find($attr)->list_fk,
                                     'item' => $item->item_id,
                                     'line' => $number,
