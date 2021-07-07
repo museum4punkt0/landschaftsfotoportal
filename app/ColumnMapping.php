@@ -40,6 +40,17 @@ class ColumnMapping extends Model
     ];
     
     /**
+     * Accessor to get the JSON config as array.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    public function getConfigArrayAttribute($value)
+    {
+        return json_decode($this->config, true);
+    }
+    
+    /**
      * Get the column that owns the column mapping.
      */
     public function column()

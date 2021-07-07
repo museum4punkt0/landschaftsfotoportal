@@ -7,6 +7,7 @@ use App\ColumnMapping;
 use App\Detail;
 use App\Element;
 use App\Item;
+use App\Location;
 use App\Selectlist;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
@@ -90,6 +91,7 @@ class ImportItemsController extends Controller
     {
         // Get selected attributes from cookie
         $selected_attr = json_decode($request->cookie('import_'. $request->item_type), true);
+        $geocoder_attr = json_decode($request->cookie('import_geocoder_'. $request->item_type), true);
         
         // Get CSV file path from session and
         $csv_file = $request->session()->get('csv_file');
@@ -121,7 +123,7 @@ class ImportItemsController extends Controller
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
-        return view('admin.import.itemscontent', compact('file_name', 'csv_data', 'colmaps', 'items', 'item_types', 'selected_attr'));
+        return view('admin.import.itemscontent', compact('file_name', 'csv_data', 'colmaps', 'items', 'item_types', 'selected_attr', 'geocoder_attr'));
     }
     
     /**
@@ -189,16 +191,25 @@ class ImportItemsController extends Controller
         $cookie_content = json_encode($selected_attr, JSON_FORCE_OBJECT);
         Cookie::queue(Cookie::forever('import_'. $request->input('item_type'), $cookie_content));
         
+        $geocoder_attr = $request->input('geocoder');
+        // Save to cookie for future usage after session has expired
+        $cookie_content = json_encode($geocoder_attr, JSON_FORCE_OBJECT);
+        Cookie::queue(Cookie::forever('import_geocoder_'. $request->input('item_type'), $cookie_content));
+        
         $warning_status_msg = null;
         
         // Save selected attributes to session
         $request->session()->put('selected_attr', $selected_attr);
+        $request->session()->put('geocoder_attr', $geocoder_attr);
         
         // Save total number of items in CSV to session
         $request->session()->put('total_items', $total_items);
         
-        // Save request input data to session
-        session($request->except(['_token', 'fields']));
+        // Reset input from all checkboxes because it wont be updated for un-checked ones
+        $request->session()->forget(['header', 'geocoder_enable', 'geocoder_interactive']);
+        
+        // Save all request input data to session
+        session($request->except(['_token', 'fields', 'geocoder']));
         
         // Get original CSV file name from session
         $file_name = $request->session()->get('file_name');

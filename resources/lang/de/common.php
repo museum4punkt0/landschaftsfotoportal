@@ -60,6 +60,12 @@ return [
     'october' => 'Oktober',
     'november' => 'November',
     'december' => 'Dezember',
+    'country' => 'Land',
+    'state' => 'Bundesland',
+    'county' => 'Landkreis',
+    'city' => 'Stadt/Ort',
+    'street' => 'Straße',
+    'locality' => 'Örtlichkeit',
     
     'actions' => 'Aktionen',
     'language' => 'Sprache',
@@ -72,6 +78,7 @@ return [
     
     'laravel_error' => 'System-Fehler!',
     'form_validation_error' => 'Dieses Formular enthält Fehler. Bitte korrigieren Sie die gekennzeichneten Felder!',
+    'geocoder_no_result' => 'Der Geocoder konnte den Ort ":location" nicht finden!',
     'geocoder_api_key_error' => 'API-Key für Geocoder ungültig!',
     'get_latlon' => 'Koordinaten bestimmen',
 ];

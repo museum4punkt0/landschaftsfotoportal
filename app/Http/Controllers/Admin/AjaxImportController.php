@@ -6,6 +6,7 @@ use App\Column;
 use App\DateRange;
 use App\Detail;
 use App\Item;
+use App\Location;
 use App\Taxon;
 use App\Value;
 use App\Utils\Image;
@@ -42,7 +43,9 @@ class AjaxImportController extends Controller
         
         $total_items = intval($request->session()->get('total_items')); // total number of lines w/o header
         $selected_attr = $request->session()->get('selected_attr');
+        $geocoder_attr = $request->session()->get('geocoder_attr');
         
+        $geocoder_results = null;
         $warning_status_msg = null;
         #dd($request);
         
@@ -132,6 +135,8 @@ class AjaxImportController extends Controller
                                     'item' => $item->item_id,
                                     'line' => $number,
                                 ]);
+                                $warning_status_msg .= " ". __('import.csv_line', ['line' => $number]) .
+                                    __('import.element_mismatch', ['element' => $cell]) ."\n";
                             }
                             break;
                         case '_multi_list_':
@@ -155,6 +160,8 @@ class AjaxImportController extends Controller
                                         'item' => $item->item_id,
                                         'line' => $number,
                                     ]);
+                                    $warning_status_msg .= " ". __('import.csv_line', ['line' => $number]) .
+                                        __('import.element_mismatch', ['element' => $element]) ."\n";
                                 }
                             }
                             break;
@@ -237,6 +244,30 @@ class AjaxImportController extends Controller
                     }
                 }
             }
+            // Use geocoder for address data from current line
+            if ($request->session()->has('geocoder_enable')) {
+                $location = $this->getLocationFromLine($line);
+                $geocoder_results[] = [
+                    'item' => $item->item_id,
+                    'original' => $location,
+                    'results' => $location->getGeocodingResults('forward'),
+                ];
+                
+                // Log missing geocoder result
+                if (!$geocoder_results[array_key_last($geocoder_results)]['results']) {
+                    Log::channel('import')->warning(__('common.geocoder_no_result', ['location' => $location->toString()]), [
+                        'item' => $item->item_id,
+                        'line' => $number,
+                    ]);
+                    $warning_status_msg .= " ". __('import.csv_line', ['line' => $number]) .
+                        __('common.geocoder_no_result', ['location' => $location->toString()]) ."\n";
+                }
+                
+                if (!$request->session()->has('geocoder_interactive')) {
+                    // Update item with lat and lon from location
+                    $item->updateLatLon($location);
+                }
+            }
         }
         // Reset last line number increment
         $number--;
@@ -251,8 +282,59 @@ class AjaxImportController extends Controller
             'lastItem' => $request->session()->has('header') ? $number-1 : $number,
             'totalItems' => $total_items,
             'statusMessage' => $warning_status_msg,
+            'geocoderResults' => $geocoder_results,
+            'geocoderInteractive' => $request->session()->has('geocoder_interactive'),
         ];
         
         return response()->json($response_data);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function importLatLon(Request $request)
+    {
+        // Get HTTP parameters from request
+        $item = intval($request->item);
+        $lat = floatval($request->lat);
+        $lon = floatval($request->lon);
+        
+        $warning_status_msg = null;
+        #dd($request);
+        
+        $location = new Location();
+        $location->lat = $lat;
+        $location->lon = $lon;
+        
+        Item::find($item)->updateLatLon($location);
+        
+        $response_data = [
+            'statusMessage' => $warning_status_msg,
+        ];
+        
+        return response()->json($response_data);
+    }
+
+    /**
+     * Collect location data from CSV line and pass to geocoder.
+     *
+     * @param  array  $line
+     * @return \App\Location
+     */
+    private function getLocationFromLine($line)
+    {
+        $geocoder_attr = session('geocoder_attr');
+        
+        // Prepare data for geocoder query
+        $location = new Location();
+        $location->country = $line[$geocoder_attr['country']];
+        $location->city = $line[$geocoder_attr['city']];
+        $location->street = $line[$geocoder_attr['street']];
+        $location->locality = $line[$geocoder_attr['locality']];
+        
+        return $location;
     }
 }

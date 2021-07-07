@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Utils\Geocoder;
+use Illuminate\Support\Facades\Log;
 
 class Location
 {
@@ -17,9 +18,35 @@ class Location
     public $locality;
     public $lat;
     public $lon;
+    private $geocoder_results = ['forward' => null, 'reverse' => null];
 
     public function __construct()
     {
+    }
+
+    /**
+     * Get some location info as comma separated string.
+     *
+     * @return string
+     */
+    public function toString() {
+        return $this->country . ", " . $this->city . ", " . $this->street;
+    }
+
+    /**
+     * Do geocoding for this location and return results.
+     *
+     * @param  string $direction
+     * @return array
+     */
+    public function getGeocodingResults($direction) {
+        if ($direction == 'forward') {
+            return $this->geocoder_results['forward'] ?? $this->forwardGeocode();
+        }
+        if ($direction == 'reverse') {
+            return $this->geocoder_results['reverse'] ?? $this->reverseGeocode();
+        }
+        return false;
     }
 
     /**
@@ -28,14 +55,19 @@ class Location
      * @param  integer $result_index
      * @return array
      */
-    public function forwardGeocode($result_index = 0)
+    private function forwardGeocode($result_index = 0)
     {
         $response = Geocoder::forward($this);
         
         if ($response) {
             $this->lat = floatval($response[$result_index]['lat']);
             $this->lon = floatval($response[$result_index]['lon']);
+            $this->geocoder_results['forward'] = $response;
         }
+        else {
+            Log::info(__('common.geocoder_no_result', ['location' => $this->toString()]));
+        }
+        
         return $response;
     }
 
@@ -44,7 +76,7 @@ class Location
      *
      * @return JSON
      */
-    public function reverseGeocode()
+    private function reverseGeocode()
     {
         $response = Geocoder::reverse($this);
         
@@ -57,6 +89,7 @@ class Location
             $this->city = $this->getCity($response['address']);
             $this->suburb = $response['address']['suburb'];
             $this->street = $this->getStreet($response['address']);
+            $this->geocoder_results['reverse'] = $response;
         }
         
         return $response;
