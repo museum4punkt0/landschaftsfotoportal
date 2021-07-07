@@ -249,6 +249,14 @@ class AjaxImportController extends Controller
                     'results' => $location->getGeocodingResults('forward'),
                 ];
                 
+                // Log missing geocoder result
+                if (!$geocoder_results[array_key_last($geocoder_results)]['results']) {
+                    Log::channel('import')->warning(__('common.geocoder_no_result', ['location' => $location->toString()]), [
+                        'item' => $item->item_id,
+                        'line' => $number,
+                    ]);
+                }
+                
                 if (!$request->session()->has('geocoder_interactive')) {
                     // Update item with lat and lon from location
                     $item->updateLatLon($location);

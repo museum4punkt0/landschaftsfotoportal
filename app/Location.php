@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Utils\Geocoder;
+use Illuminate\Support\Facades\Log;
 
 class Location
 {
@@ -21,6 +22,15 @@ class Location
 
     public function __construct()
     {
+    }
+
+    /**
+     * Get some location info as comma separated string.
+     *
+     * @return string
+     */
+    public function toString() {
+        return $this->country . ", " . $this->city . ", " . $this->street;
     }
 
     /**
@@ -54,6 +64,10 @@ class Location
             $this->lon = floatval($response[$result_index]['lon']);
             $this->geocoder_results['forward'] = $response;
         }
+        else {
+            Log::info(__('common.geocoder_no_result', ['location' => $this->toString()]));
+        }
+        
         return $response;
     }
 
