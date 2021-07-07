@@ -39,6 +39,7 @@ class Image
         
             // Get size (bytes) of image
             $size = Storage::disk('public')->size($image_path . $filename);
+            Log::debug(__('items.image_size'), ['size' => $size]);
             
             // Get the colmap holding the config for columns containing image dimensions
             $cm = Column::find($column_id)->column_mapping()->first();
@@ -46,9 +47,10 @@ class Image
             // Find the column holding the image height
             $size_column = $cm->getConfigValue('image_size_col');
             if ($size_column) {
-                Detail::where('item_fk', $item_id)
-                ->where('column_fk', $size_column)
-                ->update(['value_int' => $size]);
+                Detail::updateOrCreate(
+                    ['item_fk' => $item_id, 'column_fk' => $size_column],
+                    ['value_int' => $size]
+                );
             } else {
                 Log::warning(__('items.no_column_for_image_size'), ['colmap' => $cm->colmap_id]);
             }
@@ -72,6 +74,7 @@ class Image
             list($width_orig, $height_orig) = getimagesize(
                 Storage::disk('public')->path($image_path . $filename)
             );
+            Log::debug(__('items.image_dimensions'), ['width' => $width_orig, 'height' => $height_orig]);
             
             // Get the colmap holding the config for columns containing image dimensions
             $cm = Column::find($column_id)->column_mapping()->first();
@@ -79,9 +82,10 @@ class Image
             // Find the column holding the image width
             $width_column = $cm->getConfigValue('image_width_col');
             if ($width_column) {
-                Detail::where('item_fk', $item_id)
-                ->where('column_fk', $width_column)
-                ->update(['value_int' => $width_orig]);
+                Detail::updateOrCreate(
+                    ['item_fk' => $item_id , 'column_fk' => $width_column],
+                    ['value_int' => $width_orig]
+                );
             } else {
                 Log::warning(__('items.no_column_for_image_width'), ['colmap' => $cm->colmap_id]);
             }
@@ -89,9 +93,10 @@ class Image
             // Find the column holding the image height
             $height_column = $cm->getConfigValue('image_height_col');
             if ($height_column) {
-                Detail::where('item_fk', $item_id)
-                ->where('column_fk', $height_column)
-                ->update(['value_int' => $height_orig]);
+                Detail::updateOrCreate(
+                    ['item_fk' => $item_id, 'column_fk' => $height_column],
+                    ['value_int' => $height_orig]
+                );
             } else {
                 Log::warning(__('items.no_column_for_image_height'), ['colmap' => $cm->colmap_id]);
             }

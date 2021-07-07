@@ -30,6 +30,8 @@ return [
     'titles_added' => 'Für :count Datensätze wurde ein Titel übernommen.',
     'published' => ':count Datensätze wurden veröffentlicht.',
 
+    'image_dimensions' => 'Bildgröße',
+    'image_size' => 'Dateigröße',
     'no_column_for_image_width' => 'Keine Anzeigespalte für Bildbreite konfiguriert!',
     'no_column_for_image_height' => 'Keine Anzeigespalte für Bildhöhe konfiguriert!',
     'no_column_for_image_size' => 'Keine Anzeigespalte für Bildgröße konfiguriert!',
