@@ -135,6 +135,8 @@ class AjaxImportController extends Controller
                                     'item' => $item->item_id,
                                     'line' => $number,
                                 ]);
+                                $warning_status_msg .= " ". __('import.csv_line', ['line' => $number]) .
+                                    __('import.element_mismatch', ['element' => $cell]) ."\n";
                             }
                             break;
                         case '_multi_list_':
@@ -158,6 +160,8 @@ class AjaxImportController extends Controller
                                         'item' => $item->item_id,
                                         'line' => $number,
                                     ]);
+                                    $warning_status_msg .= " ". __('import.csv_line', ['line' => $number]) .
+                                        __('import.element_mismatch', ['element' => $element]) ."\n";
                                 }
                             }
                             break;
@@ -255,6 +259,8 @@ class AjaxImportController extends Controller
                         'item' => $item->item_id,
                         'line' => $number,
                     ]);
+                    $warning_status_msg .= " ". __('import.csv_line', ['line' => $number]) .
+                        __('common.geocoder_no_result', ['location' => $location->toString()]) ."\n";
                 }
                 
                 if (!$request->session()->has('geocoder_interactive')) {

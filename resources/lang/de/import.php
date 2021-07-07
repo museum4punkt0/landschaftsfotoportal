@@ -50,6 +50,7 @@ return [
     'items_count_import' => ':count Datensätze werden insgesamt importiert.',
     
     'read_csv' => 'CSV-Datei :file wird eingelesen.',
+    'csv_line' => 'CSV-Zeile :line: ',
     'select_location' => 'Wählen Sie den Eintrag, welcher am besten den Originaldaten entspricht.',
     'item_imported' => 'Datensatz wurde mit ID :id importiert.',
     'element_mismatch' => 'Auswahlliste enthält kein Element namens ":element"!',
