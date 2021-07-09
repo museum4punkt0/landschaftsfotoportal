@@ -42,6 +42,11 @@
         let lastLine = 0;
         let lastItem = 0;
         let totalItems = $('#importProgress').attr('aria-valuemax');
+        let modalShown = false;
+        
+        $('#alertModal').on('hidden.bs.modal', function (e) {
+            modalShown = false;
+        });
         
         // Start import
         run();
@@ -49,9 +54,10 @@
         function run() {
             if (geocoderInteractive) {
                 if (geocoderResults) {
+                    console.log(lastResult + '/' + geocoderResults.length + ' geocoder results total');
                     // Geocoder results are bundled for some items
                     if (lastResult < geocoderResults.length) {
-                        //alert(geocoderResults[lastResult].results.length);
+                        console.log(geocoderResults[lastResult].results.length + ' geocoder results for item');
                         // More than one result from geocoder -> ask the user
                         if (geocoderResults[lastResult].results.length > 1) {
                             showGeocoderModal(geocoderResults[lastResult]);
@@ -75,6 +81,7 @@
                     }
                     // No more items
                     else {
+                        console.log('reset results');
                         lastResult = 0;
                         geocoderResults = null;
                     }
@@ -117,6 +124,14 @@
             }
             modalContent += '</div></form>';
             
+            // Wait for modal transition being finished
+            if (modalShown) {
+                console.log('modal is still shown or in transition');
+                // TODO: remove this Q&D hack
+                alert('just click me...');
+            }
+            
+            modalShown = true;
             // Set and show modal
             $('#alertModalLabel').text('@lang("import.header") ID ' + result.item);
             $('#alertModalContent').html(modalContent);
@@ -147,7 +162,7 @@
                     console.log(data);
                     // Write status message (if any) to textarea
                     if (data.statusMessage) {
-                        $('#importLog').append(data.statusMessage + '\n');
+                        $('#importLog').append(data.statusMessage);
                     }
                     // Start next loop cycle
                     run();
@@ -182,7 +197,7 @@
                     updateProgressBar(lastItem, lastItem +'/'+ totalItems);
                     // Write status message (if any) to textarea
                     if (data.statusMessage) {
-                        $('#importLog').append(data.statusMessage + '\n');
+                        $('#importLog').append(data.statusMessage);
                     }
                     // Start next loop cycle
                     run();
