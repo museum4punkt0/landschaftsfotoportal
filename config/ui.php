@@ -69,6 +69,19 @@ return [
     
     /*
     |--------------------------------------------------------------------------
+    | Number of items to be imported per batch
+    |--------------------------------------------------------------------------
+    |
+    | How many rows of a CSV file are imported in a single AJAX request.
+    | Lower numbers provide better feedback to the user, higher numbers might
+    | be a little faster. (default should be approx. 10)
+    |
+    */
+    
+    'import_batch_size' => 10,
+    
+    /*
+    |--------------------------------------------------------------------------
     | Boundaries for date ranges / time spans
     |--------------------------------------------------------------------------
     |

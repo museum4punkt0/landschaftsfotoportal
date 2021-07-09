@@ -17,6 +17,7 @@
             
             <form action="{{ route('item.index') }}" method="GET" class="form-horizontal">
                 {{ csrf_field() }}
+                <input type="hidden" id="batchSize" name="batch_size" value="{{ Config::get('ui.import_batch_size') }}">
                 
                 <div class="form-group">
                     <label for="importLog">Log</label>
@@ -42,6 +43,7 @@
         let lastLine = 0;
         let lastItem = 0;
         let totalItems = $('#importProgress').attr('aria-valuemax');
+        let batchSize = $('#batchSize').val();
         let modalShown = false;
         
         $('#alertModal').on('hidden.bs.modal', function (e) {
@@ -89,7 +91,7 @@
             }
             // Import next lines from CSV
             if (lastItem < totalItems) {
-                importLines(lastLine + 1, 2);
+                importLines(lastLine + 1, batchSize);
             }
             // Import finished
             else {
