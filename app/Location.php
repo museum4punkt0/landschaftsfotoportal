@@ -30,7 +30,8 @@ class Location
      * @return string
      */
     public function toString() {
-        return $this->country . ", " . $this->city . ", " . $this->street;
+        return $this->country . ", " . $this->state . ", " . $this->county . ", " . $this->postcode
+            . ", " . $this->city . ", " . $this->street . ", " . $this->locality;
     }
 
     /**

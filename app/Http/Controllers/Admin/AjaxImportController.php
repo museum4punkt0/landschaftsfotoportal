@@ -331,6 +331,9 @@ class AjaxImportController extends Controller
         // Prepare data for geocoder query
         $location = new Location();
         $location->country = $line[$geocoder_attr['country']];
+        $location->state = $line[$geocoder_attr['state']];
+        $location->county = $line[$geocoder_attr['county']];
+        $location->postcode = $line[$geocoder_attr['postcode']];
         $location->city = $line[$geocoder_attr['city']];
         $location->street = $line[$geocoder_attr['street']];
         $location->locality = $line[$geocoder_attr['locality']];

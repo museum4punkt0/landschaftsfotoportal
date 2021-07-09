@@ -103,7 +103,8 @@
         function showGeocoderModal(result) {
             // Prepare html result data
             let modalContent = '<div class="alert alert-info">@lang("import.select_location")</div>\n';
-            modalContent += '<p><strong>Original: ' + result.original.country + ', ' + result.original.city; 
+            modalContent += '<p><strong>Original: ' + result.original.country + ', ' + result.original.state; 
+            modalContent += ', ' + result.original.county + ', ' + result.original.postcode + ', ' + result.original.city; 
             modalContent += ', ' + result.original.street + '</strong></p>\n';
             modalContent += '<form><div class="form-check">\n'
             

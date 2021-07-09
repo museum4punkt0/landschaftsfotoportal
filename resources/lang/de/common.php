@@ -63,6 +63,7 @@ return [
     'country' => 'Land',
     'state' => 'Bundesland',
     'county' => 'Landkreis',
+    'postcode' => 'PLZ',
     'city' => 'Stadt/Ort',
     'street' => 'Straße',
     'locality' => 'Örtlichkeit',
