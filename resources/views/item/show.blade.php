@@ -91,6 +91,12 @@
                             <i class="fas {{ Config::get('ui.icon_comment') }} fa-stack-1x fa-inverse"></i>
                         </a>
                     </span>
+                    <span class="fa-stack fa-2x">
+                        <a href="{{ route('item.show.public', $item->item_id) }}" title="@lang('common.permalink')">
+                            <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                            <i class="fas {{ Config::get('ui.icon_permalink') }} fa-stack-1x fa-inverse"></i>
+                        </a>
+                    </span>
                 </div>
 @endif
 

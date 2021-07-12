@@ -71,6 +71,7 @@ return [
     'language' => 'Sprache',
     'ordering' => 'Reihenfolge',
     'meta_data' => 'Metadaten',
+    'permalink' => 'Permalink',
     'created' => 'erstellt',
     'updated' => 'bearbeitet',
     'published' => 'veröffentlicht',
