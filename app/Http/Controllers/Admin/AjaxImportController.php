@@ -8,6 +8,7 @@ use App\Detail;
 use App\Item;
 use App\Location;
 use App\Taxon;
+use App\Selectlist;
 use App\Value;
 use App\Utils\Image;
 use Illuminate\Database\Eloquent\Builder;
@@ -135,8 +136,9 @@ class AjaxImportController extends Controller
                                     'item' => $item->item_id,
                                     'line' => $number,
                                 ]);
+                                $list = Selectlist::find(Column::find($attr)->list_fk)->name;
                                 $warning_status_msg .= " ". __('import.csv_line', ['line' => $number]) .
-                                    __('import.element_mismatch', ['element' => $cell]) ."\n";
+                                    __('import.element_mismatch', ['element' => $cell, 'list' => $list]) ."\n";
                             }
                             break;
                         case '_multi_list_':
@@ -160,8 +162,9 @@ class AjaxImportController extends Controller
                                         'item' => $item->item_id,
                                         'line' => $number,
                                     ]);
+                                    $list = Selectlist::find(Column::find($attr)->list_fk)->name;
                                     $warning_status_msg .= " ". __('import.csv_line', ['line' => $number]) .
-                                        __('import.element_mismatch', ['element' => $element]) ."\n";
+                                        __('import.element_mismatch', ['element' => $element, 'list' => $list]) ."\n";
                                 }
                             }
                             break;
