@@ -178,11 +178,22 @@ class AjaxImportController extends Controller
                             break;
                         case '_date_range_':
                             $dates = explode(',', $cell);
-                            // Convert a single date into a date range
+                            // No date range given
                             if (count($dates) == 1) {
-                                $dates[1] = $dates[0];
+                                // No date at all
+                                if (trim($dates[0]) == '') {
+                                    $detail_data['value_daterange'] = null;
+                                }
+                                // Convert a single date into a date range
+                                else {
+                                    $dates[1] = $dates[0];
+                                    $detail_data['value_daterange'] = new DateRange($dates[0], $dates[1]);
+                                }
                             }
-                            $detail_data['value_daterange'] = new DateRange($dates[0], $dates[1]);
+                            // Seems to be a date range, at least it has two comma separated fields
+                            else {
+                                $detail_data['value_daterange'] = new DateRange($dates[0], $dates[1]);
+                            }
                             break;
                         case '_image_':
                             // Store image dimensions in database

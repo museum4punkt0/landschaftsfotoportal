@@ -349,6 +349,7 @@ class ItemController extends Controller
                 EXTRACT(DECADE FROM MIN(LOWER(value_daterange)))*10 AS lower,
                 EXTRACT(DECADE FROM MAX(UPPER(value_daterange)))*10 AS upper
             ")
+            ->whereNotNull('value_daterange')
             ->whereHas('item', function (Builder $query) {
                 $query->where('public', 1);
             })
@@ -380,6 +381,27 @@ class ItemController extends Controller
                 ->take(5)
                 ->get();
         }
+        
+        // For items without any date (value_daterange = null)
+        // Get number of items per decade
+        $decades[0] = Detail::
+            whereHas('item', function (Builder $query) {
+                $query->where('public', 1);
+            })
+            ->where('column_fk', $daterange_column)
+            ->where('value_daterange', null)
+            ->count();
+        
+        // Get some random items per decade, to be shown as examples
+        $details[0] = Detail::with('item')
+            ->whereHas('item', function (Builder $query) {
+                $query->where('public', 1);
+            })
+            ->where('column_fk', $daterange_column)
+            ->where('value_daterange', null)
+            ->inRandomOrder()
+            ->take(5)
+            ->get();
         
         return view('item.timeline', compact('decades', 'details'));
     }
