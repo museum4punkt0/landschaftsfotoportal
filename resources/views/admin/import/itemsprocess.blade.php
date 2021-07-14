@@ -147,7 +147,7 @@
             let modalContent = '<div class="alert alert-info">@lang("import.select_location")</div>\n';
             modalContent += '<p><strong>Original: ' + result.original.country + ', ' + result.original.state; 
             modalContent += ', ' + result.original.county + ', ' + result.original.postcode + ', ' + result.original.city; 
-            modalContent += ', ' + result.original.street + '</strong></p>\n';
+            modalContent += ', ' + result.original.street + ', (' + result.original.locality + ')</strong></p>\n';
             modalContent += '<form><div class="form-check">\n'
             modalContent += '<input type="checkbox" id="cache" name="cache" class="form-check-input" data-item="' + result.item + '" value=1 checked />\n';
             modalContent += '<label class="form-check-label" for="cache">@lang("import.geocoder_cache_selected")</label><br/>\n';
@@ -160,6 +160,8 @@
                 modalContent += '<label class="form-check-label" for="itemLocation-'+i+'">' + r[i].display_name + ')</label>\n';
                 modalContent += '<small class="form-text text-muted">(' + r[i].class + ', ' + r[i].lat + '/' + r[i].lon + ')</small><br/>\n';
             }
+            modalContent += '<input type="radio" id="itemLocation-999" name="locations" class="form-check-input" data-item="' + result.item + '" data-lat="0" data-lon="0" value="-1" />\n';
+            modalContent += '<label class="form-check-label" for="itemLocation-999">@lang("common.none_of_these")</label>\n';
             modalContent += '</div></form>';
             
             // Wait for modal transition being finished
@@ -189,7 +191,13 @@
                 }
                 
                 // Send selected location result to server
-                importLatLon(item, lat, lon);
+                if (event.currentTarget.value == -1) {
+                    // None of the results matches given location
+                    importLatLon(item, null, null);
+                }
+                else {
+                    importLatLon(item, lat, lon);
+                }
             });
         }
         

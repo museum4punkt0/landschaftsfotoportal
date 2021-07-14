@@ -13,6 +13,7 @@ return [
 
     'all' => 'alle',
     'none' => 'keine',
+    'none_of_these' => 'keines davon',
     'unknown' => 'unbekannt',
     'yes' => 'ja',
     'no' => 'nein',
