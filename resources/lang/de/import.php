@@ -45,6 +45,7 @@ return [
     'unique_taxa' => 'nur einzigartige (keine doppelten) Taxa importieren',
     'geocoder_use' => 'Geocoder-Dienst benutzen',
     'geocoder_interactive' => 'Interaktiver Geocoder: bei mehrdeutigen Ergebnissen nachfragen',
+    'geocoder_cache_selected' => 'Auswahl für diesen Ort merken',
     'into_this_list' => 'Die CSV-Datei wird anschließend in die Liste ":name" (:description) importiert werden.',
     
     'items_count_import' => ':count Datensätze werden insgesamt importiert.',

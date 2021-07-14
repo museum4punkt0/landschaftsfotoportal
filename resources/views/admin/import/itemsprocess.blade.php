@@ -39,6 +39,7 @@
     $(document).ready(function () {
         let geocoderInteractive = false;
         let geocoderResults = null;
+        let geocoderCache = new Map;
         let lastResult = 0;
         let lastLine = 0;
         let lastItem = 0;
@@ -62,7 +63,23 @@
                         console.log(geocoderResults[lastResult].results.length + ' geocoder results for item');
                         // More than one result from geocoder -> ask the user
                         if (geocoderResults[lastResult].results.length > 1) {
-                            showGeocoderModal(geocoderResults[lastResult]);
+                            console.log(geocoderResults[lastResult]);
+                            // Check cache for previous selections
+                            let cacheKey = geocoderResults[lastResult].original.country +
+                                geocoderResults[lastResult].original.postcode +
+                                geocoderResults[lastResult].original.city +
+                                geocoderResults[lastResult].original.street;
+                            let selectedResult = checkCache(cacheKey);
+                            // No cached result -> ask the user
+                            if (selectedResult === false) {
+                                showGeocoderModal(geocoderResults[lastResult]);
+                            }
+                            else {
+                                importLatLon(geocoderResults[lastResult].item,
+                                    geocoderResults[lastResult].results[selectedResult].lat,
+                                    geocoderResults[lastResult].results[selectedResult].lon
+                                );
+                            }
                         }
                         else {
                             // Exactly one result from geocoder -> just take that one
@@ -103,6 +120,22 @@
             }
         }
         
+        function checkCache(key) {
+            if (geocoderCache.has(key)) {
+                //alert('cache hit: ' + key + ' => ' + geocoderCache.get(key));
+                console.log('cache hit: ' + key + ' => ' + geocoderCache.get(key));
+                return geocoderCache.get(key);
+            }
+            return false;
+        }
+        
+        function fillCache(key, value) {
+            //alert('fill cache: ' + value);
+            console.log('fill cache: ' + value);
+            geocoderCache.set(key, value);
+            //console.log(geocoderCache);
+        }
+        
         function updateProgressBar(current, text) {
             $('#importProgress').attr('aria-valuenow', parseInt(current));
             $('#importProgress').css('width', parseFloat(current/totalItems*100).toString() + '%');
@@ -116,6 +149,9 @@
             modalContent += ', ' + result.original.county + ', ' + result.original.postcode + ', ' + result.original.city; 
             modalContent += ', ' + result.original.street + '</strong></p>\n';
             modalContent += '<form><div class="form-check">\n'
+            modalContent += '<input type="checkbox" id="cache" name="cache" class="form-check-input" data-item="' + result.item + '" value=1 checked />\n';
+            modalContent += '<label class="form-check-label" for="cache">@lang("import.geocoder_cache_selected")</label><br/>\n';
+            modalContent += '<hr>';
             
             let r = result.results;
             for (let i=0; i < r.length; i++) {
@@ -130,7 +166,7 @@
             if (modalShown) {
                 console.log('modal is still shown or in transition');
                 // TODO: remove this Q&D hack
-                alert('just click me...');
+                alert('Sorry, just click me to continue...');
             }
             
             modalShown = true;
@@ -145,6 +181,13 @@
                 let lat = $(this).data('lat');
                 let lon = $(this).data('lon');
                 $('#alertModal').modal('hide');
+                
+                // Save selection to cache
+                if ($('#cache').prop('checked')) {
+                    let cacheKey = result.original.country + result.original.postcode + result.original.city + result.original.street;
+                    fillCache(cacheKey, event.currentTarget.value);
+                }
+                
                 // Send selected location result to server
                 importLatLon(item, lat, lon);
             });
