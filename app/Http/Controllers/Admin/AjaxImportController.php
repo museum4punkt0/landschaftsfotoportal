@@ -8,6 +8,7 @@ use App\Detail;
 use App\Item;
 use App\Location;
 use App\Taxon;
+use App\Selectlist;
 use App\Value;
 use App\Utils\Image;
 use Illuminate\Database\Eloquent\Builder;
@@ -135,8 +136,9 @@ class AjaxImportController extends Controller
                                     'item' => $item->item_id,
                                     'line' => $number,
                                 ]);
+                                $list = Selectlist::find(Column::find($attr)->list_fk)->name;
                                 $warning_status_msg .= " ". __('import.csv_line', ['line' => $number]) .
-                                    __('import.element_mismatch', ['element' => $cell]) ."\n";
+                                    __('import.element_mismatch', ['element' => $cell, 'list' => $list]) ."\n";
                             }
                             break;
                         case '_multi_list_':
@@ -160,8 +162,9 @@ class AjaxImportController extends Controller
                                         'item' => $item->item_id,
                                         'line' => $number,
                                     ]);
+                                    $list = Selectlist::find(Column::find($attr)->list_fk)->name;
                                     $warning_status_msg .= " ". __('import.csv_line', ['line' => $number]) .
-                                        __('import.element_mismatch', ['element' => $element]) ."\n";
+                                        __('import.element_mismatch', ['element' => $element, 'list' => $list]) ."\n";
                                 }
                             }
                             break;
@@ -342,6 +345,9 @@ class AjaxImportController extends Controller
         // Prepare data for geocoder query
         $location = new Location();
         $location->country = $line[$geocoder_attr['country']];
+        $location->state = $line[$geocoder_attr['state']];
+        $location->county = $line[$geocoder_attr['county']];
+        $location->postcode = $line[$geocoder_attr['postcode']];
         $location->city = $line[$geocoder_attr['city']];
         $location->street = $line[$geocoder_attr['street']];
         $location->locality = $line[$geocoder_attr['locality']];

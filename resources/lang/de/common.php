@@ -13,6 +13,7 @@ return [
 
     'all' => 'alle',
     'none' => 'keine',
+    'none_of_these' => 'keines davon',
     'unknown' => 'unbekannt',
     'yes' => 'ja',
     'no' => 'nein',
@@ -63,6 +64,7 @@ return [
     'country' => 'Land',
     'state' => 'Bundesland',
     'county' => 'Landkreis',
+    'postcode' => 'PLZ',
     'city' => 'Stadt/Ort',
     'street' => 'Straße',
     'locality' => 'Örtlichkeit',

@@ -45,6 +45,7 @@ return [
     'unique_taxa' => 'nur einzigartige (keine doppelten) Taxa importieren',
     'geocoder_use' => 'Geocoder-Dienst benutzen',
     'geocoder_interactive' => 'Interaktiver Geocoder: bei mehrdeutigen Ergebnissen nachfragen',
+    'geocoder_cache_selected' => 'Auswahl für diesen Ort merken',
     'into_this_list' => 'Die CSV-Datei wird anschließend in die Liste ":name" (:description) importiert werden.',
     
     'items_count_import' => ':count Datensätze werden insgesamt importiert.',
@@ -53,7 +54,7 @@ return [
     'csv_line' => 'CSV-Zeile :line: ',
     'select_location' => 'Wählen Sie den Eintrag, welcher am besten den Originaldaten entspricht.',
     'item_imported' => 'Datensatz wurde mit ID :id importiert.',
-    'element_mismatch' => 'Auswahlliste enthält kein Element namens ":element"!',
+    'element_mismatch' => 'Auswahlliste ":list" enthält kein Element namens ":element"!',
     'taxon_exists' => 'Der Datensatz für ":full_name" wurde nicht importiert, da das Taxon bereits existiert!',
     'taxon_not_found' => 'Der Datensatz für ":full_name" konnte nicht importiert werden, da das Taxon nicht existiert!',
     'done' => 'Import wurde abgeschlossen.',

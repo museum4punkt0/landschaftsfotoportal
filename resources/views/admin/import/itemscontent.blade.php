@@ -50,7 +50,7 @@
                                         @unless($colmap->column->data_type->attributes
                                             ->firstWhere('name', 'code')->pivot->value == '_taxon_')
                                             <option value="{{ $colmap->column_fk }}"
-                                                @if(old('fields.'.$loop->parent->index, $selected_attr[$loop->parent->index]) == $colmap->column_fk)
+                                                @if(old('fields.'.$loop->parent->index, Arr::get($selected_attr, $loop->parent->index, 0)) == $colmap->column_fk)
                                                     selected
                                                 @endif
                                             >
@@ -156,6 +156,45 @@
                             @endforeach
                         </select>
                         <span class="text-danger">{{ $errors->first('geocoder.country') }}</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <span>@lang('common.state')</span>
+                        <select name="geocoder[state]" class="form-control" size=1 >
+                            @foreach($csv_data[0] as $csv_header)
+                                <option value="{{$loop->index}}"
+                                    @if(old('geocoder.state', $geocoder_attr['state']??null) == $loop->index) selected @endif>
+                                        {{ $csv_header }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <span class="text-danger">{{ $errors->first('geocoder.state') }}</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <span>@lang('common.county')</span>
+                        <select name="geocoder[county]" class="form-control" size=1 >
+                            @foreach($csv_data[0] as $csv_header)
+                                <option value="{{$loop->index}}"
+                                    @if(old('geocoder.county', $geocoder_attr['county']??null) == $loop->index) selected @endif>
+                                        {{ $csv_header }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <span class="text-danger">{{ $errors->first('geocoder.county') }}</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <span>@lang('common.postcode')</span>
+                        <select name="geocoder[postcode]" class="form-control" size=1 >
+                            @foreach($csv_data[0] as $csv_header)
+                                <option value="{{$loop->index}}"
+                                    @if(old('geocoder.postcode', $geocoder_attr['postcode']??null) == $loop->index) selected @endif>
+                                        {{ $csv_header }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <span class="text-danger">{{ $errors->first('geocoder.postcode') }}</span>
                     </div>
                     
                     <div class="form-group">
