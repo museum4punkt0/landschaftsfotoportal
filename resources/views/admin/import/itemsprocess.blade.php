@@ -25,6 +25,17 @@
                 </div>
                 
                 <div class="form-group">
+                    <label for="firstLine">@lang('import.skip_lines')</label>
+                    <input type="number" id="firstLine" name="first_line" class="form-control"
+                        min="0" max="{{ $total_items - 1 }}" step="1" value="0">
+                </div>
+                
+                <div class="form-group">
+                    <button type="button" id="startButton" class="btn btn-primary">
+                        @lang('import.import')
+                    </button>
+                </div>
+                <div class="form-group">
                     <button type="submit" id="finishedButton" class="btn btn-primary" disabled>
                         @lang('common.next')
                     </button>
@@ -43,16 +54,22 @@
         let lastResult = 0;
         let lastLine = 0;
         let lastItem = 0;
-        let totalItems = $('#importProgress').attr('aria-valuemax');
-        let batchSize = $('#batchSize').val();
+        let totalItems = parseInt($('#importProgress').attr('aria-valuemax'));
+        let batchSize = parseInt($('#batchSize').val());
         let modalShown = false;
         
         $('#alertModal').on('hidden.bs.modal', function (e) {
             modalShown = false;
         });
         
-        // Start import
-        run();
+        $('#startButton').click(function (xhr) {
+            lastLine = parseInt($('#firstLine').val());
+            if (lastLine < totalItems) {
+                $('#startButton').attr('disabled', true);
+                // Start import
+                run();
+            }
+        });
         
         function run() {
             if (geocoderInteractive) {
@@ -112,6 +129,13 @@
             }
             // Import finished
             else {
+                // Wait for modal transition being finished
+                if (modalShown) {
+                    console.log('modal is still shown or in transition');
+                    // TODO: remove this Q&D hack
+                    alert('Sorry, just click me to continue...');
+                }
+                
                 $('#alertModalLabel').text('@lang("import.header")');
                 $('#alertModalContent').html('<div class="alert alert-success">@lang("import.done")</div>');
                 $('#alertModal').modal('show');

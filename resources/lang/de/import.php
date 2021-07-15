@@ -49,6 +49,7 @@ return [
     'into_this_list' => 'Die CSV-Datei wird anschließend in die Liste ":name" (:description) importiert werden.',
     
     'items_count_import' => ':count Datensätze werden insgesamt importiert.',
+    'skip_lines' => 'Anzahl der zu überspingenden Datensätze (0: keine, beginne am Anfang)',
     
     'read_csv' => 'CSV-Datei :file wird eingelesen.',
     'csv_line' => 'CSV-Zeile :line: ',
