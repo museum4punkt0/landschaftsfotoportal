@@ -215,7 +215,7 @@
                         <select name="geocoder[street]" class="form-control" size=1 >
                             @foreach($csv_data[0] as $csv_header)
                                 <option value="{{$loop->index}}"
-                                    @if(old('geocoder.city', $geocoder_attr['street']??null) == $loop->index) selected @endif>
+                                    @if(old('geocoder.street', $geocoder_attr['street']??null) == $loop->index) selected @endif>
                                         {{ $csv_header }}
                                 </option>
                             @endforeach
@@ -228,12 +228,25 @@
                         <select name="geocoder[locality]" class="form-control" size=1 >
                             @foreach($csv_data[0] as $csv_header)
                                 <option value="{{$loop->index}}"
-                                    @if(old('geocoder.city', $geocoder_attr['locality']??null) == $loop->index) selected @endif>
+                                    @if(old('geocoder.locality', $geocoder_attr['locality']??null) == $loop->index) selected @endif>
                                         {{ $csv_header }}
                                 </option>
                             @endforeach
                         </select>
                         <span class="text-danger">{{ $errors->first('geocoder.locality') }}</span>
+                    </div>
+                    
+                    <div class="form-group">
+                        <span>@lang('common.description')</span>
+                        <select name="geocoder[note]" class="form-control" size=1 >
+                            @foreach($csv_data[0] as $csv_header)
+                                <option value="{{$loop->index}}"
+                                    @if(old('geocoder.note', $geocoder_attr['note']??null) == $loop->index) selected @endif>
+                                        {{ $csv_header }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <span class="text-danger">{{ $errors->first('geocoder.note') }}</span>
                     </div>
                 </fieldset>
                 

@@ -351,6 +351,7 @@ class AjaxImportController extends Controller
         $location->city = $line[$geocoder_attr['city']];
         $location->street = $line[$geocoder_attr['street']];
         $location->locality = $line[$geocoder_attr['locality']];
+        $location->note = $line[$geocoder_attr['note']];
         
         return $location;
     }

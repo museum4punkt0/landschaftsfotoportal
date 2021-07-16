@@ -18,6 +18,7 @@ class Location
     public $locality;
     public $lat;
     public $lon;
+    public $note;
     private $geocoder_results = ['forward' => null, 'reverse' => null];
 
     public function __construct()

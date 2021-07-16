@@ -170,8 +170,9 @@
             // Prepare html result data
             let modalContent = '<div class="alert alert-info">@lang("import.select_location")</div>\n';
             modalContent += '<p><strong>Original: ' + result.original.country + ', ' + result.original.state; 
-            modalContent += ', ' + result.original.county + ', ' + result.original.postcode + ', ' + result.original.city; 
-            modalContent += ', ' + result.original.street + ', (' + result.original.locality + ')</strong></p>\n';
+            modalContent += ', ' + result.original.county + ', ' + result.original.postcode; 
+            modalContent += ', ' + result.original.city + ', ' + result.original.street;
+            modalContent += ', (' + result.original.locality + ', ' + result.original.note + ')</strong></p>\n';
             modalContent += '<form><div class="form-check">\n'
             modalContent += '<input type="checkbox" id="cache" name="cache" class="form-check-input" data-item="' + result.item + '" value=1 checked />\n';
             modalContent += '<label class="form-check-label" for="cache">@lang("import.geocoder_cache_selected")</label><br/>\n';
