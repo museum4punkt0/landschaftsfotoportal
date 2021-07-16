@@ -17,9 +17,15 @@ class Geocoder
      */
     public static function forward(Location $location)
     {
-        // Check presence of certain geo fields in current line
-        if ($location->country && $location->city) {
-            $search = "country=". $location->country ."&city=". urlencode($location->city);
+        // Check presence of certain geo fields in current line for a structured query
+        if ($location->city) {
+            $search = "city=". urlencode($location->city);
+            if ($location->country) 
+                $search .= "&country=". urlencode($location->country);
+            if ($location->state) 
+                $search .= "&state=". urlencode($location->state);
+            if ($location->postcode) 
+                $search .= "&postalcode=". urlencode($location->postcode);
             if ($location->street) 
                 $search .= "&street=". urlencode($location->street);
         }
@@ -29,9 +35,10 @@ class Geocoder
         // Send search request to geocoder
         $results = json_decode(Geocoder::request(config('geo.geocoder_url'), $search), true);
         
-        // 2nd try with different search parameters
+        // 2nd try with different search parameters as a simple query
         if (!count($results)) {
             $search = "q=". urlencode($location->city .",". $location->street);
+            Log::debug('Geocoder 2nd try: '. $search);
             $results = json_decode(Geocoder::request(config('geo.geocoder_url'), $search), true);
         }
         
