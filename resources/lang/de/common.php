@@ -1,7 +1,6 @@
 <?php
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Common Language Lines
@@ -36,7 +35,7 @@ return [
     'internal' => 'intern',
     'next' => 'weiter',
     'update_success' => 'Erfolgreich aktualisiert',
-
+    
     'root' => 'Wurzelelement',
     'id' => 'ID',
     'name' => 'Name',
@@ -72,6 +71,9 @@ return [
     'actions' => 'Aktionen',
     'language' => 'Sprache',
     'ordering' => 'Reihenfolge',
+    'filter' => 'filtern',
+    'showall' => 'zeige alle',
+    'reset' => 'zurücksetzen',
     'meta_data' => 'Metadaten',
     'permalink' => 'Permalink',
     'created' => 'erstellt',
