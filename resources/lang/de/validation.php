@@ -138,6 +138,7 @@ return [
         ],
         'fields.*' => [
             'required' => 'Dieses Feld muss ausgefüllt werden.',
+            'min'      => 'In diesem Feld muss mindestens ein Element ausgewählt werden.',
         ],
     ],
 

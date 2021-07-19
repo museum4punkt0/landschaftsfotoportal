@@ -95,7 +95,7 @@ class Column extends Model
             case '_date_range_':
                 return ['array', ['*' => 'date']];
             case '_multi_list_':
-                return ['array', ['*' => 'integer']];
+                return ['array|min:2', ['*' => 'integer']];
             case '_list_':
             case '_integer_':
                 return ['integer'];

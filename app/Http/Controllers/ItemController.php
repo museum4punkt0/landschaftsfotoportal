@@ -133,7 +133,9 @@ class ItemController extends Controller
                     $detail_data['element_fk'] = $value == '' ? null : intval($value);
                     break;
                 case '_multi_list_':
-                    $detail_elements = array_values($value);
+                    $detail_elements = array_values(array_filter($value, function ($v, $k) {
+                        return $k !== 'dummy';
+                    }, ARRAY_FILTER_USE_BOTH));
                     break;
                 case '_boolean_':
                 case '_integer_':
@@ -511,7 +513,9 @@ class ItemController extends Controller
                     $detail->element_fk = $value == '' ? null : intval($value);
                     break;
                 case '_multi_list_':
-                    $detail->elements()->sync(array_values($value));
+                    $detail->elements()->sync(array_values(array_filter($value, function ($v, $k) {
+                        return $k !== 'dummy';
+                    }, ARRAY_FILTER_USE_BOTH)));
                     break;
                 case '_boolean_':
                 case '_integer_':

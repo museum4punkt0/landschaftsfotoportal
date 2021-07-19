@@ -126,6 +126,7 @@
                 <div class="form-group">
                     @include('includes.column_label')
                     
+                    <input type="hidden" name="fields[{{ $cm->column->column_id }}][dummy]" value="0" />
                     <select
                         id="fieldsInput-{{ $cm->column->column_id }}"
                         name="fields[{{ $cm->column->column_id }}][]"
