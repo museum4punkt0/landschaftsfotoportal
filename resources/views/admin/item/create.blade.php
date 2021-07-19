@@ -490,7 +490,7 @@
                     />
                     
                     @include('includes.form_input_help')
-                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id .'.file') }}</span>
                 </div>
                 @break
             

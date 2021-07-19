@@ -579,7 +579,7 @@
                             <span class="form-text text-muted">@lang('columns.image_hint')</span>
                         </div>
                     </div>
-                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id .'.file') }}</span>
                 </div>
                 @break
             
