@@ -92,10 +92,16 @@
                                 showGeocoderModal(geocoderResults[lastResult]);
                             }
                             else {
-                                importLatLon(geocoderResults[lastResult].item,
-                                    geocoderResults[lastResult].results[selectedResult].lat,
-                                    geocoderResults[lastResult].results[selectedResult].lon
-                                );
+                                // Cached selection was: don't use any of the results
+                                if (selectedResult == -1) {
+                                    importLatLon(geocoderResults[lastResult].item, null, null);
+                                }
+                                else {
+                                    importLatLon(geocoderResults[lastResult].item,
+                                        geocoderResults[lastResult].results[selectedResult].lat,
+                                        geocoderResults[lastResult].results[selectedResult].lon
+                                    );
+                                }
                             }
                         }
                         else {
