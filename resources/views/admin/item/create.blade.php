@@ -373,7 +373,12 @@
                         @include('includes.form_input_help')
                         <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id .'.start') }}</span>
                         <br/>
-                        <input class="btn btn-primary" type="button" value="@lang('common.save')" onClick="checkDateRange({{ $cm->column->column_id }});">
+                        <input
+                            type="button"
+                            class="btn btn-primary"
+                            onClick="checkDateRange({{ $cm->column->column_id }});"
+                            value="@lang('common.apply')"
+                        />
                     </div>
                     <!-- Hidden form fields for time range passed to laravel controller -->
                     <input

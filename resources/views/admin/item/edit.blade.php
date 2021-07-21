@@ -441,7 +441,7 @@
                             type="button"
                             class="btn btn-primary"
                             onClick="checkDateRange({{ $cm->column->column_id }});"
-                            value="@lang('common.save')"
+                            value="@lang('common.apply')"
                         />
                     </div>
                     <!-- Hidden form fields for time range passed to laravel controller -->

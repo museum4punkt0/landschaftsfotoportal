@@ -22,6 +22,7 @@ return [
     'edit' => 'bearbeiten',
     'delete' => 'löschen',
     'save' => 'speichern',
+    'apply' => 'übernehmen',
     'download' => 'herunterladen',
     'upload' => 'hochladen',
     'sort' => 'sortieren',
