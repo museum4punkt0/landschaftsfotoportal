@@ -408,13 +408,13 @@
                             id="fieldsInput-{{ $cm->column->column_id }}"
                             name="fields[{{ $cm->column->column_id }}]"
                             aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
-                            class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                            class="form-control @if($errors->has('fields.'.$cm->column->column_id.'.start')) is-invalid @endif"
                             data-column="{{ $cm->column->column_id }}"
                             value="{{ old('fields.'. $cm->column->column_id .'.start', 
                             optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from())->toDateString()) }}"
                         />
                         @include('includes.form_input_help')
-                        <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                        <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id .'.start') }}</span>
                     </div>
                     <!-- Form fields for the date (period of time) -->
                     @if(old('date_type') == 'period' || !old('date_type') && $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from() != $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to())
@@ -434,6 +434,9 @@
                                 old('end_day', optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to())->day),
                             ],
                         ])
+                        @include('includes.form_input_help')
+                        <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id .'.start') }}</span>
+                        <br/>
                         <input
                             type="button"
                             class="btn btn-primary"

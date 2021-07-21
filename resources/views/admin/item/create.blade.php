@@ -345,12 +345,12 @@
                             type="date"
                             name="fields[{{ $cm->column->column_id }}]"
                             aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
-                            class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                            class="form-control @if($errors->has('fields.'.$cm->column->column_id.'.start')) is-invalid @endif"
                             data-column="{{ $cm->column->column_id }}"
                             value="{{ old('fields.'. $cm->column->column_id .'.start') }}"
                         />
                         @include('includes.form_input_help')
-                        <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                        <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id .'.start') }}</span>
                     </div>
                     <!-- Form fields for the date (period of time) -->
                     @if(old('date_type') == 'period')
@@ -370,6 +370,9 @@
                                 old('end_day', date('j')),
                             ],
                         ])
+                        @include('includes.form_input_help')
+                        <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id .'.start') }}</span>
+                        <br/>
                         <input class="btn btn-primary" type="button" value="@lang('common.save')" onClick="checkDateRange({{ $cm->column->column_id }});">
                     </div>
                     <!-- Hidden form fields for time range passed to laravel controller -->
