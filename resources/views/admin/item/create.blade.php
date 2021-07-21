@@ -524,8 +524,8 @@
                     <div id="map" class="map"></div>
                     <script type="text/javascript">
                         // Default values, used if geolocation API fails or is disabled
-                        var lon = {{ old('fields.'. $cm->getConfigValue('map_lon_col'), Config::get('geo.map_lon', 14.986)) }};
-                        var lat = {{ old('fields.'. $cm->getConfigValue('map_lat_col'), Config::get('geo.map_lat', 51.15)) }};
+                        var lon = {{ floatval(old('fields.'. $cm->getConfigValue('map_lon_col'), Config::get('geo.map_lon', 14.986))) }};
+                        var lat = {{ floatval(old('fields.'. $cm->getConfigValue('map_lat_col'), Config::get('geo.map_lat', 51.15))) }};
                         var zoom = {{ $cm->getConfigValue('map_zoom') }};
                         
                         // Use browser's geolocation API if available and enabled in config
