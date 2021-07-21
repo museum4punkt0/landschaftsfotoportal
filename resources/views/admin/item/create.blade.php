@@ -220,6 +220,7 @@
                             class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                             placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
                             value="{{old('fields.'. $cm->column->column_id)}}"
+                            @if($cm->getConfigValue('editable') == 'readonly' && !$options['edit.meta']) readonly @endif
                         />
                     @endif
                     @if($cm->getConfigValue('data_subtype') == 'location_city')

@@ -212,6 +212,7 @@
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
                         value="{{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_int) }}"
+                        @if($cm->getConfigValue('editable') == 'readonly' && !$options['edit.meta']) readonly @endif
                     />
                     
                     @include('includes.form_input_help')
@@ -233,6 +234,7 @@
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
                         value="{{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_float) }}"
+                        @if($cm->getConfigValue('editable') == 'readonly' && !$options['edit.meta']) readonly @endif
                     />
                     
                     @include('includes.form_input_help')
@@ -276,6 +278,7 @@
                                 placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
                                 value="{{ old('fields.'. $cm->column->column_id, 
                                 $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
+                                @if($cm->getConfigValue('editable') == 'readonly' && !$options['edit.meta']) readonly @endif
                             />
                         @endif
                         @if($cm->getConfigValue('data_subtype') == 'location_city')
