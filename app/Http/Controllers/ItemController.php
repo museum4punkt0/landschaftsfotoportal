@@ -65,7 +65,7 @@ class ItemController extends Controller
         
         $options = ['edit.meta' => false, 'route' => 'item.store.own'];
         
-        return view('admin.item.create', compact('colmap', 'lists', 'data_types', 'translations', 'placeholders', 'descriptions', 'options'));
+        return view('item.create', compact('colmap', 'lists', 'data_types', 'translations', 'placeholders', 'descriptions', 'options'));
     }
 
     /**
@@ -454,7 +454,7 @@ class ItemController extends Controller
         
         $options = ['edit.meta' => false, 'route' => 'item.update.own'];
         
-        return view('admin.item.edit', compact('item', 'details', 'colmap', 'lists', 'data_types', 'translations', 'placeholders', 'descriptions', 'options'));
+        return view('item.edit', compact('item', 'details', 'colmap', 'lists', 'data_types', 'translations', 'placeholders', 'descriptions', 'options'));
     }
 
     /**
