@@ -3,12 +3,12 @@
 @section('content')
 
     <!-- Timeline -->
-    <section class="page-section" id="timeline">
-        <div class="container">
-            <div class="text-center">
-                <h2 class="section-heading text-uppercase">Zeitstrahl</h2>
-                <h3 class="section-subheading text-muted">Lorem ipsum dolor sit amet consectetur.</h3>
-            </div>
+    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
+        'section_id' => 'timeline',
+        'section_heading' => 'Zeitstrahl',
+        'section_subheading' => 'Lorem ipsum dolor sit amet consectetur.',
+    ])
+    
             <ul class="timeline">
             @foreach($decades as $decade => $count)
                 @if($loop->even)
@@ -45,7 +45,7 @@
             @endforeach
             
             </ul>
-        </div>
-    </section>
-
+    
+    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_footer')
+    
 @endsection

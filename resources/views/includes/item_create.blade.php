@@ -1,3 +1,12 @@
+{{-- Don't include if we are using a backend route --}}
+@unless (Route::currentRouteName() == 'item.create')
+    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
+        'section_id' => 'edit_form',
+        'section_heading' => __('items.my_own'),
+        'section_subheading' => 'Lorem ipsum dolor sit amet consectetur.',
+    ])
+@endunless
+
 <div class="container">
 @if ($errors->any())
     <div class="alert alert-danger">
@@ -729,3 +738,8 @@
 @endif
 
 </div>
+
+{{-- Don't include if we are using a backend route --}}
+@unless (Route::currentRouteName() == 'item.create')
+    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_footer')
+@endunless

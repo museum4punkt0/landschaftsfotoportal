@@ -1,10 +1,10 @@
 <!-- Portfolio Grid, Gallery -->
-<section class="page-section bg-light" id="portfolio">
-    <div class="container">
-        <div class="text-center">
-            <h2 class="section-heading text-uppercase">{{ $heading }}</h2>
-            <h3 class="section-subheading text-muted">{{ $subheading }}</h3>
-        </div>
+    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
+        'section_id' => 'portfolio',
+        'section_heading' => $heading,
+        'section_subheading' => $subheading,
+    ])
+    
         <div class="row">
         @foreach($items as $item)
             {{-- Limit the number of shown entries, used for search results --}}
@@ -84,7 +84,8 @@
                 </div>
             </div>
             @endif
+        
         @endforeach
         </div>
-    </div>
-</section>
+    
+    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_footer')

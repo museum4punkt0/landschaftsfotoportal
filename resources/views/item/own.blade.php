@@ -3,15 +3,16 @@
 @section('content')
 
     <!-- My own items -->
-    <section class="page-section bg-light" id="portfolio">
-        <div class="container">
-            <div class="text-center">
-                <h2 class="section-heading text-uppercase">@lang('items.my_own')</h2>
-                <h3 class="section-subheading text-muted">Lorem ipsum dolor sit amet consectetur.</h3>
-            </div>
+    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
+        'section_id' => 'portfolio',
+        'section_heading' => __('items.my_own'),
+        'section_subheading' => 'Lorem ipsum dolor sit amet consectetur.',
+    ])
+    
             <div class="container my-5">
                 <a href="{{route('item.create.own', ['item_type'=>$item_type])}}" class="btn btn-primary">@lang('items.new')</a>
             </div>
+            
             <div class="row">
             @foreach($items as $item)
                 <div class="col-lg-4 col-sm-6 mb-4">
@@ -82,8 +83,8 @@
             <div>
                 {{ $items->links() }}
             </div>
-        </div>
-    </section>
+    
+    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_footer')
     
     @include('includes.modal_alert')
     @include('includes.modal_cart_remove')

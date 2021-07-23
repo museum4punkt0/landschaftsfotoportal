@@ -32,73 +32,15 @@
 
 @section('content')
 
-{{-- Quick hack for LFP mock-up --}}
-@if(Config::get('ui.frontend_layout') == 'landschaftsfotoportal')
-
     <!-- Image details -->
-    <section class="page-section" id="details">
-        <div class="container">
-            <div class="text-center">
-                <h2 class="section-heading text-uppercase">Bilddetails</h2>
-                <h3 class="section-subheading text-muted">Lorem ipsum dolor sit amet consectetur.</h3>
-                @if($details->firstWhere('column_fk', 13))
-                <a href="{{ asset('storage/'. Config::get('media.full_dir') .
-                    $item->details->firstWhere('column_fk', 13)->value_string) }}">
-                <img class="img-fluid" src="{{ asset('storage/'. Config::get('media.medium_dir') .
-                    $item->details->firstWhere('column_fk', 13)->value_string) }}" alt="" />
-                </a>
-                @endif
-            </div>
-            <div class="card">
-                <div class="card-body">
-                <div>
-                    <!-- Icons for user interaction -->
-                    <span class="fa-stack fa-2x">
-                    @guest
-                        <a href="#" data-toggle="modal" data-target="#downloadModal" data-href="{{ route('item.download', $item->item_id) }}" title="@lang('common.download')">
-                    @else
-                        <a href="{{ route('item.download', $item->item_id) }}" title="@lang('common.download')">
-                    @endguest
-                            <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                            <i class="fas {{ Config::get('ui.icon_download') }} fa-stack-1x fa-inverse"></i>
-                        </a>
-                    </span>
-                    <span class="fa-stack fa-2x">
-                    @guest
-                        <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('cart.add')">
-                            <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                            <i class="fas {{ Config::get('ui.icon_cart_add') }} fa-stack-1x fa-inverse"></i>
-                    @else
-                        @if(!$item->carts->firstWhere('created_by', Auth::id()))
-                            <a href="#" class="cartAddBtn" data-href="{{ route('cart.add', $item->item_id) }}" title="@lang('cart.add')">
-                                <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                                <i class="fas {{ Config::get('ui.icon_cart_add') }} fa-stack-1x fa-inverse"></i>
-                        @else
-                            <a href="#" data-toggle="modal" data-target="#cartRemoveModal" data-href="{{ route('cart.remove', $item->carts->firstWhere('created_by', Auth::id())->cart_id) }}" title="@lang('cart.remove')">
-                                <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                                <i class="fas {{ Config::get('ui.icon_cart_remove') }} fa-stack-1x fa-inverse"></i>
-                        @endif
-                    @endguest
-                        </a>
-                    </span>
-                    <span class="fa-stack fa-2x">
-                    @guest
-                        <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('comments.new')">
-                    @else
-                        <a href="#" data-toggle="modal" data-target="#commentModal" data-href="{{ route('comment.store', $item->item_id) }}" title="@lang('comments.new')">
-                    @endguest
-                            <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                            <i class="fas {{ Config::get('ui.icon_comment') }} fa-stack-1x fa-inverse"></i>
-                        </a>
-                    </span>
-                    <span class="fa-stack fa-2x">
-                        <a href="{{ route('item.show.public', $item->item_id) }}" title="@lang('common.permalink')">
-                            <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                            <i class="fas {{ Config::get('ui.icon_permalink') }} fa-stack-1x fa-inverse"></i>
-                        </a>
-                    </span>
-                </div>
-@endif
+    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
+        'section_id' => 'details',
+        'section_heading' => 'Bilddetails',
+        'section_subheading' => 'Lorem ipsum dolor sit amet consectetur.',
+        'options' => ['image_medium' => true],
+    ])
+    <!-- Icons for user interaction -->
+    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.item_buttons')
 
 @foreach($colmap->groupBy('column_group_fk') as $cg)
     
@@ -461,19 +403,12 @@
     
 @endforeach
 
-{{-- Quick hack for LFP mock-up --}}
-@if(Config::get('ui.frontend_layout') == 'landschaftsfotoportal')
-                </div>
-            </div>
-        </div>
-    </section>
+    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_footer')
     
     @include('includes.modal_login_request')
     @include('includes.modal_download')
     @include('includes.modal_alert')
     @include('includes.modal_cart_remove')
     @include('includes.modal_comment_add')
-    
-@endif
 
 @endsection
