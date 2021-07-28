@@ -17,18 +17,11 @@
 
 @section('content')
 
-{{-- Quick hack for LFP mock-up --}}
-@if(Config::get('ui.frontend_layout') == 'landschaftsfotoportal')
-
-    <!-- Section and container for search results gallery -->
-    <section class="page-section" id="search">
-        <div class="container">
-            <div class="text-center">
-                <h2 class="section-heading text-uppercase">@lang('search.header')</h2>
-                <h3 class="section-subheading text-muted">Lorem ipsum dolor sit amet consectetur.</h3>
-            </div>
-
-@endif
+@includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
+    'section_id' => 'search',
+    'section_heading' => __('search.header'),
+    'section_subheading' => 'Lorem ipsum dolor sit amet consectetur.',
+])
 
 <div class="container">
     @if (session('warning'))
@@ -186,11 +179,6 @@
 
 </div>
 
-{{-- Quick hack for LFP mock-up --}}
-@if(Config::get('ui.frontend_layout') == 'landschaftsfotoportal')
-            </div>
-        </div>
-    </section>
-@endif
+@includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_footer')
 
 @endsection
