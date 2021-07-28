@@ -168,6 +168,9 @@ class ImportCSVController extends Controller
             
             // Process each column (= table cell)
             foreach ($line as $colnr => $cell) {
+                // Strip whitespaces from beginning and end
+                $cell = trim($cell);
+                
                 // Check for column's attribute chosen by user
                 if ($selected_attr[$colnr] > 0) {
                     $value_data = [

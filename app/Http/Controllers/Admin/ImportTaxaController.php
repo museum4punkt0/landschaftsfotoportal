@@ -184,6 +184,9 @@ class ImportTaxaController extends Controller
             
             // Process each column (= table cell)
             foreach ($line as $colnr => $cell) {
+                // Strip whitespaces from beginning and end
+                $cell = trim($cell);
+                
                 switch ($selected_attr[$colnr]) {
                     // Save primary key (=ID) of the recent element to temporary tree
                     case 'bfn_namnr':
