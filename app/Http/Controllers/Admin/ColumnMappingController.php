@@ -184,6 +184,8 @@ class ColumnMappingController extends Controller
             'column_group' => 'required|integer',
             'item_type' => 'required|integer',
             'taxon' => 'nullable|integer',
+            'public' => 'required|integer',
+            'config' => 'nullable|string',
         ]);
         
         $mapcount = 0;
@@ -196,6 +198,8 @@ class ColumnMappingController extends Controller
                 'column_group_fk' => $request->input('column_group'),
                 'item_type_fk' => $request->input('item_type'),
                 'taxon_fk' => $request->input('taxon'),
+                'public' => $request->input('public'),
+                'config' => $request->input('config'),
             ];
             ColumnMapping::create($data);
             
