@@ -13,6 +13,7 @@ use App\Taxon;
 use App\Utils\Localization;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Debugbar;
 
 class SearchController extends Controller
 {
@@ -91,17 +92,32 @@ class SearchController extends Controller
         $search_details = null;
         $items_details = collect([]);
         
-        // Make sure there is at least one dropdown available
+        // Make sure there is at least one dropdown selected or text input filled
         if ($request->input('fields')) {
             // Get only selected columns to search within
             $search_columns = array_filter($request->input('fields'), function ($val) {
-                return $val > 0;
+                // Arrays are used for min/max values, e.g. with lat/lon input fields
+                if (is_array($val)) {
+                    return array_sum($val);
+                }
+                // Select input fields contain 0 if not selected by user
+                else {
+                    return $val != 0;
+                }
             });
-            // Prepare the search query using selected columns
+            Debugbar::debug($search_columns);
+            
+            // Prepare the search query WHERE clause using selected columns
             foreach ($search_columns as $col => $val) {
                 switch (Column::find($col)->getDataType()) {
                     case '_list_':
                         $search_details[] = [['column_fk', $col], ['element_fk', intval($val)]];
+                    break;
+                    case '_float_':
+                        $search_details[] = [
+                            ['column_fk', $col], ['value_float', '>=', floatval(strtr($val['min'], ',', '.'))],
+                            ['column_fk', $col], ['value_float', '<=', floatval(strtr($val['max'], ',', '.'))],
+                        ];
                     break;
                     case '_date_range_':
                         $daterange = '['. date('Y-m-d', mktime(0, 0, 0, 1, 1, intval($val))) .','.
@@ -110,6 +126,9 @@ class SearchController extends Controller
                     break;
                 }
             }
+            Debugbar::debug($search_details);
+            
+            // Details search (except for full text)
             if ($search_details) {
                 $details = Detail::where(function ($query) use ($search_details) {
                     foreach ($search_details as $n => $s) {
