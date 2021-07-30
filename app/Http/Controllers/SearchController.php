@@ -114,10 +114,17 @@ class SearchController extends Controller
                         $search_details[] = [['column_fk', $col], ['element_fk', intval($val)]];
                     break;
                     case '_float_':
-                        $search_details[] = [
-                            ['column_fk', $col], ['value_float', '>=', floatval(strtr($val['min'], ',', '.'))],
-                            ['column_fk', $col], ['value_float', '<=', floatval(strtr($val['max'], ',', '.'))],
-                        ];
+                        $min_max = null;
+                        // Handle unset min/max input fields
+                        if (!is_null($val['min'])) {
+                            $min_max[] = ['column_fk', $col];
+                            $min_max[] = ['value_float', '>=', floatval(strtr($val['min'], ',', '.'))];
+                        }
+                        if (!is_null($val['max'])) {
+                            $min_max[] = ['column_fk', $col];
+                            $min_max[] = ['value_float', '<=', floatval(strtr($val['max'], ',', '.'))];
+                        }
+                        $search_details[] = $min_max;
                     break;
                     case '_date_range_':
                         $daterange = '['. date('Y-m-d', mktime(0, 0, 0, 1, 1, intval($val))) .','.
