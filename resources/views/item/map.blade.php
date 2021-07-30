@@ -64,8 +64,28 @@
                                         });
                                         $(element).popover('show');
                                     }
-                                } else {
-                                    $(element).popover('dispose');
+                                    else {
+                                        var extent = osm_map.getExtendOfFeatures(feature.get('features'));
+                                        //console.log(extent);
+                                        
+                                        // Destroy old popups
+                                        $(element).popover('dispose');
+                                        var coordinates = feature.getGeometry().getCoordinates();
+                                        osm_map.popup.setPosition(coordinates);
+                                        var content = '<a href="{{ route("search.index") }}';
+                                        content += '?fields[25][min]=' + extent[0];
+                                        content += '&fields[25][max]=' + extent[2];
+                                        content += '&fields[24][min]=' + extent[1];
+                                        content += '&fields[24][max]=' + extent[3];
+                                        content += '">@lang("common.showall")</a>';
+                                        $(element).popover({
+                                            placement: 'bottom',
+                                            html: true,
+                                            title: feature.get('features').length + ' @lang("items.header")',
+                                            content: content,
+                                        });
+                                        $(element).popover('show');
+                                    }
                                 }
                             });
                             

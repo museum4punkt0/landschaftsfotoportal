@@ -5,9 +5,10 @@ import VectorSource from 'ol/source/Vector';
 import ClusterSource from 'ol/source/Cluster';
 import GeoJSON from 'ol/format/GeoJSON';
 import {Icon, Style, Circle as CircleStyle, Fill, Stroke, Text} from 'ol/style';
+import * as olExtent from 'ol/extent';
 import Point from 'ol/geom/Point';
 import OSM from 'ol/source/OSM';
-import {fromLonLat, transform} from 'ol/proj';
+import {fromLonLat, toLonLat, transform, transformExtent} from 'ol/proj';
 
 var osm_map = {
     map: false,
@@ -123,6 +124,15 @@ var osm_map = {
             },
         });
         this.map.addLayer(geoJsonLayer);
+    },
+    
+    getExtendOfFeatures: function (features) {
+        var extent = features[0].getGeometry().getExtent().slice(0);
+        features.forEach(function (feature) {
+            olExtent.extend(extent, feature.getGeometry().getExtent());
+        });
+        
+        return transformExtent(extent, 'EPSG:3857','EPSG:4326');
     },
 }
 
