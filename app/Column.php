@@ -77,11 +77,68 @@ class Column extends Model
     }
     
     /**
+     * Scope a query to only include columns with a given data type.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  mixed  $type
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOfDataType($query, $type)
+    {
+        return $query->whereHas('data_type', function ($query) use ($type) {
+            $query->whereHas('values', function ($query) use ($type) {
+                $query->where('value', $type);
+            });
+        });
+    }
+    
+    /**
+     * Scope a query to only include columns with a given data subtype.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  mixed  $type
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOfSubType($query, $type)
+    {
+        return $query->whereHas('column_mapping', function ($query) use ($type) {
+            $query->where('config', 'ILIKE', "%{$type}%");
+        });
+    }
+    
+    /**
+     * Scope a query to only include columns with a given item type.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  mixed  $type
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOfItemType($query, $type)
+    {
+        return $query->whereHas('column_mapping', function ($query) use ($type) {
+            $query->whereHas('item_type', function ($query) use ($type) {
+                $query->whereHas('values', function ($query) use ($type) {
+                    $query->where('value', $type);
+                });
+            });
+        });
+    }
+    
+    
+    /**
      * Get the data type of the column.
      */
     public function getDataType()
     {
         return $this->data_type->attributes()->firstWhere('name', 'code')->pivot->value;
+    }
+    
+    /**
+     * Get the data subtype of the column.
+     */
+    public function getDataSubType()
+    {
+        return $this->column_mapping()->first()->getConfigValue('data_subtype');
     }
     
     /**
