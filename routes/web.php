@@ -42,6 +42,7 @@ Route::resource('/item', 'ItemController')->except(['index', 'destroy'])->names(
 ]);
 
 Route::get('map/all', 'AjaxMapController@all')->name('map.all');
+Route::get('map/search', 'AjaxMapController@searchResults')->name('map.search');
 Route::post('comment/{item}/store', 'AjaxCommentController@store')->name('comment.store');
 Route::post('comment/{comment}/update', 'AjaxCommentController@update')->name('ajax.comment.update');
 Route::post('comment/{comment}/destroy', 'AjaxCommentController@destroy')->name('ajax.comment.destroy');

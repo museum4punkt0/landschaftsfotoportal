@@ -412,9 +412,10 @@ class ItemController extends Controller
     /**
      * Display a map showing all items.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function map()
+    public function map(Request $request)
     {
         $column_ids['lon'] = Column::ofDataType('_float_')->ofItemType('_image_')->ofSubType('location_lon')
             ->first()->column_id;
@@ -422,7 +423,15 @@ class ItemController extends Controller
             ->first()->column_id;
         Debugbar::debug($column_ids);
         
-        return view('item.map', compact('column_ids'));
+        // There are different URLs for AJAX requests to get the items to be displayed on the map
+        if ($request->query('show') == 'search') {
+            $options = ['ajax_url' => route('map.search')];
+        }
+        else {
+            $options = ['ajax_url' => route('map.all')];
+        }
+        
+        return view('item.map', compact('column_ids', 'options'));
     }
 
     /**

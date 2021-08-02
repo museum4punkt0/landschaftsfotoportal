@@ -182,6 +182,14 @@ class SearchController extends Controller
             $items = $items_details->concat($items_full_text);
         }
         
+        // Save primary keys of all found items to session
+        if ($items->count()) {
+            $request->session()->put('search_results', $items->modelKeys());
+        }
+        else {
+            $request->session()->forget('search_results');
+        }
+        
         // Taxon search: full name or native name
         $taxa = collect([]);
         $search_taxa = $request->input('taxon_name');

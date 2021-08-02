@@ -12,6 +12,7 @@
                     <div id="map" class="map"
                         data-column-lat={{ $column_ids['lat']}}
                         data-column-lon={{ $column_ids['lon']}}
+                        data-ajax-url={{ $options['ajax_url']}}
                     >
                         <div id="popup"></div>
                     </div>
@@ -39,14 +40,15 @@
                         
                         {{-- Init and display the map --}}
                         function initMap() {
-                            osm_map.display(lon, lat, zoom);
-                            osm_map.addGeoJsonLayer('{{ route("map.all") }}');
-                            
-                            osm_map.addMarker(14.986789,  51.153432, '{{ asset("storage/images/logos/mein-smng.png") }}');
-                            
-                            var element = document.getElementById('popup');
+                            var element = $('#popup');
+                            var ajaxUrl = $('#map').data('ajax-url');
                             var columnLat = $('#map').data('column-lat');
                             var columnLon = $('#map').data('column-lon');
+                            
+                            osm_map.display(lon, lat, zoom);
+                            osm_map.addGeoJsonLayer(ajaxUrl);
+                            
+                            osm_map.addMarker(14.986789,  51.153432, '{{ asset("storage/images/logos/mein-smng.png") }}');
                             
                             // Display popup on click
                             osm_map.map.on('click', function (evt) {

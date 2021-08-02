@@ -157,6 +157,13 @@
                         'subheading' => 'Lorem ipsum dolor sit amet consectetur.'
                     ])
                     
+                    @if(count($items))
+                        <!-- Button with link to map showing the search results-->
+                        <div class="container">
+                            <a class="btn btn-primary" href="{{ route('item.map', ['show' => 'search']) }}">@lang('search.results_map')</a>
+                        </div>
+                    @endif
+                    
                     @include('includes.modal_login_request')
                     @include('includes.modal_download')
                     @include('includes.modal_alert')
