@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Redirect;
+use Debugbar;
 
 class ItemController extends Controller
 {
@@ -415,7 +416,13 @@ class ItemController extends Controller
      */
     public function map()
     {
-        return view('item.map');
+        $column_ids['lon'] = Column::ofDataType('_float_')->ofItemType('_image_')->ofSubType('location_lon')
+            ->first()->column_id;
+        $column_ids['lat'] = Column::ofDataType('_float_')->ofItemType('_image_')->ofSubType('location_lat')
+            ->first()->column_id;
+        Debugbar::debug($column_ids);
+        
+        return view('item.map', compact('column_ids'));
     }
 
     /**

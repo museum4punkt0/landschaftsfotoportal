@@ -9,7 +9,12 @@
         'section_subheading' => 'Lorem ipsum dolor sit amet consectetur.',
     ])
     
-                    <div id="map" class="map"><div id="popup"></div></div>
+                    <div id="map" class="map"
+                        data-column-lat={{ $column_ids['lat']}}
+                        data-column-lon={{ $column_ids['lon']}}
+                    >
+                        <div id="popup"></div>
+                    </div>
                     <script type="text/javascript">
                         // Default values, used if geolocation API fails or is disabled
                         var lon = {{ Config::get('geo.map_lon', 14.986) }};
@@ -40,6 +45,8 @@
                             osm_map.addMarker(14.986789,  51.153432, '{{ asset("storage/images/logos/mein-smng.png") }}');
                             
                             var element = document.getElementById('popup');
+                            var columnLat = $('#map').data('column-lat');
+                            var columnLon = $('#map').data('column-lon');
                             
                             // Display popup on click
                             osm_map.map.on('click', function (evt) {
@@ -73,10 +80,10 @@
                                         var coordinates = feature.getGeometry().getCoordinates();
                                         osm_map.popup.setPosition(coordinates);
                                         var content = '<a href="{{ route("search.index") }}';
-                                        content += '?fields[25][min]=' + extent[0];
-                                        content += '&fields[25][max]=' + extent[2];
-                                        content += '&fields[24][min]=' + extent[1];
-                                        content += '&fields[24][max]=' + extent[3];
+                                        content += '?fields[' + columnLon + '][min]=' + extent[0];
+                                        content += '&fields[' + columnLon + '][max]=' + extent[2];
+                                        content += '&fields[' + columnLat + '][min]=' + extent[1];
+                                        content += '&fields[' + columnLat + '][max]=' + extent[3];
                                         content += '">@lang("common.showall")</a>';
                                         $(element).popover({
                                             placement: 'bottom',
