@@ -103180,6 +103180,14 @@ var osm_map = {
       ol_extent__WEBPACK_IMPORTED_MODULE_7__["extend"](extent, feature.getGeometry().getExtent());
     });
     return Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
+  },
+  getBoundsOfView: function getBoundsOfView() {
+    var extent = this.map.getView().calculateExtent(this.map.getSize());
+    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
+  },
+  wrapLon: function wrapLon(value) {
+    var worlds = Math.floor((value + 180) / 360);
+    return value - worlds * 360;
   }
 };
 /* harmony default export */ __webpack_exports__["default"] = (osm_map);

@@ -134,6 +134,16 @@ var osm_map = {
         
         return transformExtent(extent, 'EPSG:3857','EPSG:4326');
     },
+    
+    getBoundsOfView: function () {
+        const extent = this.map.getView().calculateExtent(this.map.getSize());
+        return transformExtent(extent, 'EPSG:3857', 'EPSG:4326');
+    },
+    
+    wrapLon: function (value) {
+        const worlds = Math.floor((value + 180) / 360);
+        return value - worlds * 360;
+    },
 }
 
 export default osm_map;

@@ -16,6 +16,12 @@
                     >
                         <div id="popup"></div>
                     </div>
+                @unless(request()->query('show') == 'search')
+                    <div class="my-4">
+                        <a id="searchLink" class="btn btn-primary" href="#">@lang('search.results_gallery')</a>
+                    </div>
+                @endunless
+                
                     <script type="text/javascript">
                         // Default values, used if geolocation API fails or is disabled
                         var lon = {{ Config::get('geo.map_lon', 14.986) }};
@@ -107,6 +113,19 @@
                                 var pixel = osm_map.map.getEventPixel(e.originalEvent);
                                 var hit = osm_map.map.hasFeatureAtPixel(pixel);
                                 osm_map.map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+                            });
+                            
+                            // Change link after map has been moved
+                            osm_map.map.on('moveend', function (evt) {
+                                //const map = evt.map;
+                                //const extent = map.getView().calculateExtent(map.getSize());
+                                const extent = osm_map.getBoundsOfView();
+                                url = '{{ route("search.index") }}';
+                                url += '?fields[' + columnLon + '][min]=' + osm_map.wrapLon(extent[0]);
+                                url += '&fields[' + columnLon + '][max]=' + osm_map.wrapLon(extent[2]);
+                                url += '&fields[' + columnLat + '][min]=' + extent[1];
+                                url += '&fields[' + columnLat + '][max]=' + extent[3];
+                                $('#searchLink').attr('href', url);
                             });
                         }
 
