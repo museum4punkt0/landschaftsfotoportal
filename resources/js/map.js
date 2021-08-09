@@ -30,6 +30,7 @@ var osm_map = {
         var view = new View({
             center: position,
             zoom: zoom,
+            maxZoom: 19,
         });
 
         this.map = new Map({

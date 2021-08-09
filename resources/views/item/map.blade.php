@@ -70,8 +70,11 @@
                             
                             function moveMapToFeatureExtent(vectorSrc) {
                                 let extent = vectorSrc.getExtent();
-                                //console.log(osm_map.transformExtent(vectorSrc.getExtent(extent)));
-                                osm_map.map.getView().fit(extent, { padding: [25, 25, 25, 25], });
+                                console.log(osm_map.transformExtent(vectorSrc.getExtent(extent)));
+                                osm_map.map.getView().fit(extent, {
+                                    padding: [25, 25, 25, 25],
+                                    maxZoom: 17,
+                                });
                             }
                             
                             // Display popup on click

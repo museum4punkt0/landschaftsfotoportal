@@ -103086,7 +103086,8 @@ var osm_map = {
     var position = Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]);
     var view = new ol__WEBPACK_IMPORTED_MODULE_0__["View"]({
       center: position,
-      zoom: zoom
+      zoom: zoom,
+      maxZoom: 19
     });
     this.map = new ol__WEBPACK_IMPORTED_MODULE_0__["Map"]({
       target: 'map',
