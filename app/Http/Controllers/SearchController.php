@@ -168,9 +168,10 @@ class SearchController extends Controller
                 })
                 ->with('item')
                 ->get();
+            
             $items_full_text = $details->map(function ($row) {
                 return $row->item;
-            });
+            })->unique();
         }
         
         // Intersect all results on items
