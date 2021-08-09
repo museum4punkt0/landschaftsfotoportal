@@ -103081,6 +103081,7 @@ var osm_map = {
       features: false
     })
   }),
+  geoJsonLayer: false,
   display: function display(lon, lat, zoom) {
     var position = Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]);
     var view = new ol__WEBPACK_IMPORTED_MODULE_0__["View"]({
@@ -103133,9 +103134,12 @@ var osm_map = {
   transformCoordinate: function transformCoordinate(coordinate) {
     return Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["transform"])(coordinate, 'EPSG:3857', 'EPSG:4326');
   },
+  transformExtent: function transformExtent(extent) {
+    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
+  },
   addGeoJsonLayer: function addGeoJsonLayer(url) {
     var styleCache = {};
-    var geoJsonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
+    this.geoJsonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
       source: new ol_source_Cluster__WEBPACK_IMPORTED_MODULE_4__["default"]({
         distance: 30,
         source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
@@ -103172,13 +103176,31 @@ var osm_map = {
         return style;
       }
     });
-    this.map.addLayer(geoJsonLayer);
+    this.map.addLayer(this.geoJsonLayer);
+  },
+  isCluster: function isCluster(feature) {
+    console.log(feature);
+
+    if (!feature || !feature.get('features')) {
+      return false;
+    }
+
+    return feature.get('features').length > 1;
   },
   getExtendOfFeatures: function getExtendOfFeatures(features) {
-    var extent = features[0].getGeometry().getExtent().slice(0);
-    features.forEach(function (feature) {
-      ol_extent__WEBPACK_IMPORTED_MODULE_7__["extend"](extent, feature.getGeometry().getExtent());
-    });
+    if (this.isCluster(features)) {
+      // is a cluster, so loop through all the underlying features
+      var clusteredFeatures = features.get('features');
+      var extent = clusteredFeatures[0].getGeometry().getExtent().slice(0);
+
+      for (var i = 0; i < clusteredFeatures.length; i++) {
+        ol_extent__WEBPACK_IMPORTED_MODULE_7__["extend"](extent, clusteredFeatures[i].getGeometry().getExtent());
+      }
+    } else {
+      // not a cluster
+      var extent = features.getGeometry().getExtent().slice(0);
+    }
+
     return Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
   },
   getBoundsOfView: function getBoundsOfView() {

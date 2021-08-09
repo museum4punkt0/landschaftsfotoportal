@@ -13,6 +13,9 @@
                         data-column-lat={{ $column_ids['lat']}}
                         data-column-lon={{ $column_ids['lon']}}
                         data-ajax-url={{ $options['ajax_url']}}
+                    @if(request()->query('show') == 'search')
+                        data-zoom-to="extent"
+                    @endif
                     >
                         <div id="popup"></div>
                     </div>
@@ -50,11 +53,26 @@
                             var ajaxUrl = $('#map').data('ajax-url');
                             var columnLat = $('#map').data('column-lat');
                             var columnLon = $('#map').data('column-lon');
+                            var zoomTo = $('#map').data('zoom-to');
                             
                             osm_map.display(lon, lat, zoom);
                             osm_map.addGeoJsonLayer(ajaxUrl);
                             
                             osm_map.addMarker(14.986789,  51.153432, '{{ asset("storage/images/logos/mein-smng.png") }}');
+                            
+                            osm_map.map.on('rendercomplete', function () {
+                                if (zoomTo == 'extent') {
+                                    // Reset the flag: zoom only once on init
+                                    zoomTo = false;
+                                    moveMapToFeatureExtent(osm_map.geoJsonLayer.getSource());
+                                }
+                            });
+                            
+                            function moveMapToFeatureExtent(vectorSrc) {
+                                let extent = vectorSrc.getExtent();
+                                //console.log(osm_map.transformExtent(vectorSrc.getExtent(extent)));
+                                osm_map.map.getView().fit(extent, { padding: [25, 25, 25, 25], });
+                            }
                             
                             // Display popup on click
                             osm_map.map.on('click', function (evt) {
@@ -80,7 +98,7 @@
                                         $(element).popover('show');
                                     }
                                     else {
-                                        var extent = osm_map.getExtendOfFeatures(feature.get('features'));
+                                        var extent = osm_map.getExtendOfFeatures(feature);
                                         //console.log(extent);
                                         
                                         // Destroy old popups

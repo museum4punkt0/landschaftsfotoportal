@@ -21,6 +21,8 @@ var osm_map = {
         })
     }),
     
+    geoJsonLayer: false,
+    
     display: function (lon, lat, zoom) {
         
         var position = fromLonLat([lon, lat]);
@@ -88,10 +90,14 @@ var osm_map = {
         return transform(coordinate, 'EPSG:3857', 'EPSG:4326');
     },
     
+    transformExtent: function (extent) {
+        return transformExtent(extent, 'EPSG:3857','EPSG:4326');
+    },
+    
     addGeoJsonLayer: function (url) {
         var styleCache = {};
         
-        var geoJsonLayer = new VectorLayer({
+        this.geoJsonLayer = new VectorLayer({
             source: new ClusterSource({
                 distance: 30,
                 source: new VectorSource({
@@ -123,14 +129,29 @@ var osm_map = {
                 return style;
             },
         });
-        this.map.addLayer(geoJsonLayer);
+        this.map.addLayer(this.geoJsonLayer);
+    },
+    
+    isCluster: function (feature) {
+        console.log(feature);
+        if (!feature || !feature.get('features')) { 
+            return false;
+        }
+        return feature.get('features').length > 1;
     },
     
     getExtendOfFeatures: function (features) {
-        var extent = features[0].getGeometry().getExtent().slice(0);
-        features.forEach(function (feature) {
-            olExtent.extend(extent, feature.getGeometry().getExtent());
-        });
+        if (this.isCluster(features)) {
+            // is a cluster, so loop through all the underlying features
+            var clusteredFeatures = features.get('features');
+            var extent = clusteredFeatures[0].getGeometry().getExtent().slice(0);
+            for (var i = 0; i < clusteredFeatures.length; i++) {
+                olExtent.extend(extent, clusteredFeatures[i].getGeometry().getExtent());
+            }
+        } else {
+            // not a cluster
+            var extent = features.getGeometry().getExtent().slice(0);
+        }
         
         return transformExtent(extent, 'EPSG:3857','EPSG:4326');
     },
