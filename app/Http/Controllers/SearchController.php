@@ -180,7 +180,13 @@ class SearchController extends Controller
         }
         // Concat all results on items
         else {
-            $items = $items_details->concat($items_full_text);
+            // Simple concatenating isn't sufficient because we need an eloquent collection for modelKeys()
+            if ($items_details->count()) {
+                $items = $items_details->concat($items_full_text);
+            }
+            else {
+                $items = $items_full_text->concat($items_details);
+            }
         }
         
         // Save primary keys of all found items to session
