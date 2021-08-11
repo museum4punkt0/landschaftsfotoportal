@@ -167,10 +167,10 @@ class Image
             
             // Load original image and scale it to new size
             $original = imagecreatefromjpeg(Storage::disk('public')->path($src_path . $filename));
-            $scaled = imagescale($original, $width_thumb, $height_thumb, IMG_BICUBIC_FIXED);
+            $scaled = imagescale($original, $width_thumb, $height_thumb, IMG_SINC);
             
             // Store thumbnail to disk
-            imagejpeg($scaled, Storage::disk('public')->path($dest_path) . $filename);
+            imagejpeg($scaled, Storage::disk('public')->path($dest_path) . $filename, 85);
             
             Log::info(__('items.resized_image_created') . $dest_path . $filename);
         }
