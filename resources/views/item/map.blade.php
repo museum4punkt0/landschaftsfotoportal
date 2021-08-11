@@ -123,6 +123,9 @@
                                         $(element).popover('show');
                                     }
                                 }
+                                else {
+                                    $(element).popover('dispose');
+                                }
                             });
                             
                             // Change mouse cursor when over marker
@@ -134,6 +137,11 @@
                                 var pixel = osm_map.map.getEventPixel(e.originalEvent);
                                 var hit = osm_map.map.hasFeatureAtPixel(pixel);
                                 osm_map.map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+                            });
+                            
+                            // Hide and destroy popover on zooming in or out
+                            osm_map.map.getView().on('change:resolution', function () {
+                                $(element).popover('dispose');
                             });
                             
                             // Change link after map has been moved
