@@ -577,9 +577,7 @@
                         @endif
                         </div>
                         <div class="col">
-                            {{-- Don't force to upload new image on edit, even if field is required
                             <input type="hidden" name="fields[{{ $cm->column->column_id }}][dummy]" value=0 />
-                            --}}
                             <input
                                 type="file"
                                 id="fieldsInput-{{ $cm->column->column_id }}"

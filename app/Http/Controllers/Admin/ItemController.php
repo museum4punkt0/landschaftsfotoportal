@@ -446,7 +446,13 @@ class ItemController extends Controller
 
         // Validation rules for all fields associated with columns
         foreach ($request->input('fields') as $column_id => $value) {
-            $required = $colmap->firstWhere('column_fk', $column_id)->getRequiredRule();
+            // Uploading a new image is never required on updating items
+            if (Column::find($column_id)->getDataType() == '_image_') {
+                $required = 'nullable|';
+            }
+            else {
+                $required = $colmap->firstWhere('column_fk', $column_id)->getRequiredRule();
+            }
             $rule = Column::find($column_id)->getValidationRule();
             $validation_rules['fields.' . $column_id] = $required . $rule[0];
 
