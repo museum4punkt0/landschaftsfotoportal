@@ -36,6 +36,7 @@ return [
     'no_column_for_image_height' => 'Keine Anzeigespalte für Bildhöhe konfiguriert!',
     'no_column_for_image_size' => 'Keine Anzeigespalte für Bildgröße konfiguriert!',
     'file_not_found' => 'Datei ":file" nicht vorhanden!',
+    'file_max_size' => 'Die Datei darf maximal :max Kilobytes groß sein.',
     'resized_image_created' => 'Bild wurde in geänderter Größe gespeichert: ',
     'file_ext_fixed' => 'Für :count Bild-Datensätze wurde die Endung des Dateinamens korrigiert.',
     'no_home_page' => 'Es wurde keine Seite als Homepage konfiguriert.',
