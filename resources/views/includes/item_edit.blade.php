@@ -577,22 +577,35 @@
                         @endif
                         </div>
                         <div class="col">
-                            {{-- Don't force to upload new image on edit, even if field is required
                             <input type="hidden" name="fields[{{ $cm->column->column_id }}][dummy]" value=0 />
-                            --}}
                             <input
                                 type="file"
                                 id="fieldsInput-{{ $cm->column->column_id }}"
                                 name="fields[{{ $cm->column->column_id }}][file]"
                                 aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                                 class="form-control-file @if($errors->has('fields.'.$cm->column->column_id.'.file')) is-invalid @endif"
+                                accept=".jpg, .jpeg"
                             />
                             @include('includes.form_input_help')
-                            <span class="form-text text-muted">@lang('columns.image_hint')</span>
+                            <span class="form-text text-muted">@lang('items.file_max_size', ['max' => config('media.image_max_size', 2048)]) @lang('columns.image_hint')</span>
                         </div>
                     </div>
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id .'.file') }}</span>
                 </div>
+
+                <script type="text/javascript">
+                    $('#fieldsInput-{{ $cm->column->column_id }}').on('change', function (e) {
+                        if (this.files[0].size > {{ intval(config('media.image_max_size', 2048)) * 1024 }}) {
+                            //console.log(this.files);
+                            this.value = '';
+                            let error_message = '@lang("items.file_max_size", ["max" => config("media.image_max_size", 2048)])';
+                            // Show modal with error message
+                            //$('#alertModalLabel').text('@lang("common.laravel_error")');
+                            $('#alertModalContent').html('<div class="alert alert-danger">' + error_message + '</div>');
+                            $('#alertModal').modal('show');
+                        }
+                    });
+                </script>
                 @break
             
             {{-- Data_type of form field is map --}}

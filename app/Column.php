@@ -114,7 +114,10 @@ class Column extends Model
             case '_url_':
                 return ['url'];
             case '_image_':
-                return ['', ['file' => 'image|mimes:jpeg|max:8192', 'dummy' => 'integer']];
+                return ['', [
+                    'file' => 'image|mimes:jpeg|max:' . config('media.image_max_size', 2048),
+                    'dummy' => 'integer',
+                ]];
             default:
                 return [''];
         }
