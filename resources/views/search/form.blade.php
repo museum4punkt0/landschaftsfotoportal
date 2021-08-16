@@ -160,7 +160,7 @@
                     @if(count($items))
                         <!-- Button with link to map showing the search results-->
                         <div class="container">
-                            <a class="btn btn-primary" href="{{ route('item.map', ['show' => 'search']) }}">@lang('search.results_map')</a>
+                            <a class="btn btn-primary" href="{{ route('item.map', ['source' => 'search']) }}&{{ $query_str }}">@lang('search.results_map')</a>
                         </div>
                     @endif
                     

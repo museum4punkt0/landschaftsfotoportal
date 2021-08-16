@@ -424,11 +424,17 @@ class ItemController extends Controller
         Debugbar::debug($column_ids);
         
         // There are different URLs for AJAX requests to get the items to be displayed on the map
-        if ($request->query('show') == 'search') {
-            $options = ['ajax_url' => route('map.search')];
+        if ($request->query('source') == 'search') {
+            $options = [
+                'ajax_url' => route('map.search'),
+                'search_url' => route('search.index', $request->query()),
+            ];
         }
         else {
-            $options = ['ajax_url' => route('map.all')];
+            $options = [
+                'ajax_url' => route('map.all'),
+                'search_url' => route('search.index', ['source' => 'all']),
+            ];
         }
         
         return view('item.map', compact('column_ids', 'options'));

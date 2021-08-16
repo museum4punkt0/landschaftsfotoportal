@@ -12,18 +12,17 @@
                     <div id="map" class="map"
                         data-column-lat={{ $column_ids['lat']}}
                         data-column-lon={{ $column_ids['lon']}}
+                        data-search-url={{ $options['search_url']}}
                         data-ajax-url={{ $options['ajax_url']}}
-                    @if(request()->query('show') == 'search')
+                    @if(request()->query('source') == 'search')
                         data-zoom-to="extent"
                     @endif
                     >
                         <div id="popup"></div>
                     </div>
-                @unless(request()->query('show') == 'search')
                     <div class="my-4">
                         <a id="searchLink" class="btn btn-primary" href="#">@lang('search.results_gallery')</a>
                     </div>
-                @endunless
                 
                     <script type="text/javascript">
                         // Default values, used if geolocation API fails or is disabled
@@ -50,6 +49,7 @@
                         {{-- Init and display the map --}}
                         function initMap() {
                             var element = $('#popup');
+                            var searchUrl = $('#map').data('search-url');
                             var ajaxUrl = $('#map').data('ajax-url');
                             var columnLat = $('#map').data('column-lat');
                             var columnLon = $('#map').data('column-lon');
@@ -108,8 +108,8 @@
                                         $(element).popover('dispose');
                                         var coordinates = feature.getGeometry().getCoordinates();
                                         osm_map.popup.setPosition(coordinates);
-                                        var content = '<a href="{{ route("search.index") }}';
-                                        content += '?fields[' + columnLon + '][min]=' + extent[0];
+                                        var content = '<a href="' + searchUrl;
+                                        content += '&fields[' + columnLon + '][min]=' + extent[0];
                                         content += '&fields[' + columnLon + '][max]=' + extent[2];
                                         content += '&fields[' + columnLat + '][min]=' + extent[1];
                                         content += '&fields[' + columnLat + '][max]=' + extent[3];
@@ -149,8 +149,8 @@
                                 //const map = evt.map;
                                 //const extent = map.getView().calculateExtent(map.getSize());
                                 const extent = osm_map.getBoundsOfView();
-                                url = '{{ route("search.index") }}';
-                                url += '?fields[' + columnLon + '][min]=' + osm_map.wrapLon(extent[0]);
+                                url = searchUrl;
+                                url += '&fields[' + columnLon + '][min]=' + osm_map.wrapLon(extent[0]);
                                 url += '&fields[' + columnLon + '][max]=' + osm_map.wrapLon(extent[2]);
                                 url += '&fields[' + columnLat + '][min]=' + extent[1];
                                 url += '&fields[' + columnLat + '][max]=' + extent[3];

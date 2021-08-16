@@ -210,7 +210,23 @@ class SearchController extends Controller
         }
         
         $search_terms = $request->input();
+
+        // Get all HTTP query parameters except for lat/lon
+        $column_ids['lon'] = Column::ofDataType('_float_')->ofItemType('_image_')->ofSubType('location_lon')
+            ->first()->column_id;
+        $column_ids['lat'] = Column::ofDataType('_float_')->ofItemType('_image_')->ofSubType('location_lat')
+            ->first()->column_id;
+        $request_query = $request->except([
+            'fields.' . $column_ids['lon'],
+            'fields.' . $column_ids['lat'],
+            'source',
+        ]);
+        Debugbar::debug($request_query);
+        
+        // Prepare the query string to be passed to the map controller
+        $query_str = http_build_query($request_query);
+
         return view('search.form', compact('menu_root', 'search_terms', 'lists', 'dateranges',
-            'colmap', 'translations', 'taxa', 'items'));
+            'colmap', 'translations', 'taxa', 'items', 'query_str'));
     }
 }
