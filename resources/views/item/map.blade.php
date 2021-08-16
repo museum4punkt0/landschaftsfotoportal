@@ -64,7 +64,7 @@
                                 if (zoomTo == 'extent') {
                                     // Reset the flag: zoom only once on init
                                     zoomTo = false;
-                                    moveMapToFeatureExtent(osm_map.geoJsonLayer.getSource());
+                                    moveMapToFeatureExtent(osm_map.geoJsonLayer.getSource().getSource());
                                 }
                             });
                             
