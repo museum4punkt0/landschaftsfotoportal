@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Redirect;
+use Debugbar;
 
 class ItemController extends Controller
 {
@@ -411,11 +412,32 @@ class ItemController extends Controller
     /**
      * Display a map showing all items.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function map()
+    public function map(Request $request)
     {
-        return view('item.map');
+        $column_ids['lon'] = Column::ofDataType('_float_')->ofItemType('_image_')->ofSubType('location_lon')
+            ->first()->column_id;
+        $column_ids['lat'] = Column::ofDataType('_float_')->ofItemType('_image_')->ofSubType('location_lat')
+            ->first()->column_id;
+        Debugbar::debug($column_ids);
+        
+        // There are different URLs for AJAX requests to get the items to be displayed on the map
+        if ($request->query('source') == 'search') {
+            $options = [
+                'ajax_url' => route('map.search'),
+                'search_url' => route('search.index', $request->query()),
+            ];
+        }
+        else {
+            $options = [
+                'ajax_url' => route('map.all'),
+                'search_url' => route('search.index', ['source' => 'all']),
+            ];
+        }
+        
+        return view('item.map', compact('column_ids', 'options'));
     }
 
     /**

@@ -103058,9 +103058,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var ol_source_Cluster__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ol/source/Cluster */ "./node_modules/ol/source/Cluster.js");
 /* harmony import */ var ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ol/format/GeoJSON */ "./node_modules/ol/format/GeoJSON.js");
 /* harmony import */ var ol_style__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ol/style */ "./node_modules/ol/style.js");
-/* harmony import */ var ol_geom_Point__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ol/geom/Point */ "./node_modules/ol/geom/Point.js");
-/* harmony import */ var ol_source_OSM__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ol/source/OSM */ "./node_modules/ol/source/OSM.js");
-/* harmony import */ var ol_proj__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ol/proj */ "./node_modules/ol/proj.js");
+/* harmony import */ var ol_extent__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ol/extent */ "./node_modules/ol/extent.js");
+/* harmony import */ var ol_geom_Point__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ol/geom/Point */ "./node_modules/ol/geom/Point.js");
+/* harmony import */ var ol_source_OSM__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ol/source/OSM */ "./node_modules/ol/source/OSM.js");
+/* harmony import */ var ol_proj__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ol/proj */ "./node_modules/ol/proj.js");
+
 
 
 
@@ -103079,16 +103081,18 @@ var osm_map = {
       features: false
     })
   }),
+  geoJsonLayer: false,
   display: function display(lon, lat, zoom) {
-    var position = Object(ol_proj__WEBPACK_IMPORTED_MODULE_9__["fromLonLat"])([lon, lat]);
+    var position = Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]);
     var view = new ol__WEBPACK_IMPORTED_MODULE_0__["View"]({
       center: position,
-      zoom: zoom
+      zoom: zoom,
+      maxZoom: 19
     });
     this.map = new ol__WEBPACK_IMPORTED_MODULE_0__["Map"]({
       target: 'map',
       layers: [new ol_layer_Tile__WEBPACK_IMPORTED_MODULE_1__["default"]({
-        source: new ol_source_OSM__WEBPACK_IMPORTED_MODULE_8__["default"]()
+        source: new ol_source_OSM__WEBPACK_IMPORTED_MODULE_9__["default"]()
       }), this.vectorLayer],
       view: view
     });
@@ -103109,7 +103113,7 @@ var osm_map = {
   },
   addMarker: function addMarker(lon, lat, icon, color) {
     var marker = new ol__WEBPACK_IMPORTED_MODULE_0__["Feature"]({
-      geometry: new ol_geom_Point__WEBPACK_IMPORTED_MODULE_7__["default"](Object(ol_proj__WEBPACK_IMPORTED_MODULE_9__["fromLonLat"])([lon, lat]))
+      geometry: new ol_geom_Point__WEBPACK_IMPORTED_MODULE_8__["default"](Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]))
     });
     marker.setStyle(new ol_style__WEBPACK_IMPORTED_MODULE_6__["Style"]({
       image: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Icon"]({
@@ -103122,18 +103126,21 @@ var osm_map = {
     this.vectorLayer.getSource().addFeature(marker);
   },
   updatePosition: function updatePosition(lon, lat, zoom) {
-    this.map.getView().setCenter(Object(ol_proj__WEBPACK_IMPORTED_MODULE_9__["fromLonLat"])([lon, lat]));
+    this.map.getView().setCenter(Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]));
   },
   moveMarker: function moveMarker(lon, lat) {
-    var coordinates = Object(ol_proj__WEBPACK_IMPORTED_MODULE_9__["fromLonLat"])([lon, lat]);
+    var coordinates = Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]);
     this.vectorLayer.getSource().getFeatures()[0].getGeometry().setCoordinates(coordinates);
   },
   transformCoordinate: function transformCoordinate(coordinate) {
-    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_9__["transform"])(coordinate, 'EPSG:3857', 'EPSG:4326');
+    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["transform"])(coordinate, 'EPSG:3857', 'EPSG:4326');
+  },
+  transformExtent: function transformExtent(extent) {
+    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
   },
   addGeoJsonLayer: function addGeoJsonLayer(url) {
     var styleCache = {};
-    var geoJsonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
+    this.geoJsonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
       source: new ol_source_Cluster__WEBPACK_IMPORTED_MODULE_4__["default"]({
         distance: 30,
         source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
@@ -103170,7 +103177,40 @@ var osm_map = {
         return style;
       }
     });
-    this.map.addLayer(geoJsonLayer);
+    this.map.addLayer(this.geoJsonLayer);
+  },
+  isCluster: function isCluster(feature) {
+    console.log(feature);
+
+    if (!feature || !feature.get('features')) {
+      return false;
+    }
+
+    return feature.get('features').length > 1;
+  },
+  getExtendOfFeatures: function getExtendOfFeatures(features) {
+    if (this.isCluster(features)) {
+      // is a cluster, so loop through all the underlying features
+      var clusteredFeatures = features.get('features');
+      var extent = clusteredFeatures[0].getGeometry().getExtent().slice(0);
+
+      for (var i = 0; i < clusteredFeatures.length; i++) {
+        ol_extent__WEBPACK_IMPORTED_MODULE_7__["extend"](extent, clusteredFeatures[i].getGeometry().getExtent());
+      }
+    } else {
+      // not a cluster
+      var extent = features.getGeometry().getExtent().slice(0);
+    }
+
+    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
+  },
+  getBoundsOfView: function getBoundsOfView() {
+    var extent = this.map.getView().calculateExtent(this.map.getSize());
+    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
+  },
+  wrapLon: function wrapLon(value) {
+    var worlds = Math.floor((value + 180) / 360);
+    return value - worlds * 360;
   }
 };
 /* harmony default export */ __webpack_exports__["default"] = (osm_map);

@@ -9,7 +9,21 @@
         'section_subheading' => 'Lorem ipsum dolor sit amet consectetur.',
     ])
     
-                    <div id="map" class="map"><div id="popup"></div></div>
+                    <div id="map" class="map"
+                        data-column-lat={{ $column_ids['lat']}}
+                        data-column-lon={{ $column_ids['lon']}}
+                        data-search-url={{ $options['search_url']}}
+                        data-ajax-url={{ $options['ajax_url']}}
+                    @if(request()->query('source') == 'search')
+                        data-zoom-to="extent"
+                    @endif
+                    >
+                        <div id="popup"></div>
+                    </div>
+                    <div class="my-4">
+                        <a id="searchLink" class="btn btn-primary" href="#">@lang('search.results_gallery')</a>
+                    </div>
+                
                     <script type="text/javascript">
                         // Default values, used if geolocation API fails or is disabled
                         var lon = {{ Config::get('geo.map_lon', 14.986) }};
@@ -34,12 +48,34 @@
                         
                         {{-- Init and display the map --}}
                         function initMap() {
+                            var element = $('#popup');
+                            var searchUrl = $('#map').data('search-url');
+                            var ajaxUrl = $('#map').data('ajax-url');
+                            var columnLat = $('#map').data('column-lat');
+                            var columnLon = $('#map').data('column-lon');
+                            var zoomTo = $('#map').data('zoom-to');
+                            
                             osm_map.display(lon, lat, zoom);
-                            osm_map.addGeoJsonLayer('{{ route("map.all") }}');
+                            osm_map.addGeoJsonLayer(ajaxUrl);
                             
                             osm_map.addMarker(14.986789,  51.153432, '{{ asset("storage/images/logos/mein-smng.png") }}');
                             
-                            var element = document.getElementById('popup');
+                            osm_map.map.on('rendercomplete', function () {
+                                if (zoomTo == 'extent') {
+                                    // Reset the flag: zoom only once on init
+                                    zoomTo = false;
+                                    moveMapToFeatureExtent(osm_map.geoJsonLayer.getSource().getSource());
+                                }
+                            });
+                            
+                            function moveMapToFeatureExtent(vectorSrc) {
+                                let extent = vectorSrc.getExtent();
+                                console.log(osm_map.transformExtent(vectorSrc.getExtent(extent)));
+                                osm_map.map.getView().fit(extent, {
+                                    padding: [25, 25, 25, 25],
+                                    maxZoom: 17,
+                                });
+                            }
                             
                             // Display popup on click
                             osm_map.map.on('click', function (evt) {
@@ -64,7 +100,30 @@
                                         });
                                         $(element).popover('show');
                                     }
-                                } else {
+                                    else {
+                                        var extent = osm_map.getExtendOfFeatures(feature);
+                                        //console.log(extent);
+                                        
+                                        // Destroy old popups
+                                        $(element).popover('dispose');
+                                        var coordinates = feature.getGeometry().getCoordinates();
+                                        osm_map.popup.setPosition(coordinates);
+                                        var content = '<a href="' + searchUrl;
+                                        content += '&fields[' + columnLon + '][min]=' + extent[0];
+                                        content += '&fields[' + columnLon + '][max]=' + extent[2];
+                                        content += '&fields[' + columnLat + '][min]=' + extent[1];
+                                        content += '&fields[' + columnLat + '][max]=' + extent[3];
+                                        content += '">@lang("common.showall")</a>';
+                                        $(element).popover({
+                                            placement: 'bottom',
+                                            html: true,
+                                            title: feature.get('features').length + ' @lang("items.header")',
+                                            content: content,
+                                        });
+                                        $(element).popover('show');
+                                    }
+                                }
+                                else {
                                     $(element).popover('dispose');
                                 }
                             });
@@ -78,6 +137,24 @@
                                 var pixel = osm_map.map.getEventPixel(e.originalEvent);
                                 var hit = osm_map.map.hasFeatureAtPixel(pixel);
                                 osm_map.map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+                            });
+                            
+                            // Hide and destroy popover on zooming in or out
+                            osm_map.map.getView().on('change:resolution', function () {
+                                $(element).popover('dispose');
+                            });
+                            
+                            // Change link after map has been moved
+                            osm_map.map.on('moveend', function (evt) {
+                                //const map = evt.map;
+                                //const extent = map.getView().calculateExtent(map.getSize());
+                                const extent = osm_map.getBoundsOfView();
+                                url = searchUrl;
+                                url += '&fields[' + columnLon + '][min]=' + osm_map.wrapLon(extent[0]);
+                                url += '&fields[' + columnLon + '][max]=' + osm_map.wrapLon(extent[2]);
+                                url += '&fields[' + columnLat + '][min]=' + extent[1];
+                                url += '&fields[' + columnLat + '][max]=' + extent[3];
+                                $('#searchLink').attr('href', url);
                             });
                         }
 

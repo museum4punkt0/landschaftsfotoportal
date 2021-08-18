@@ -53,6 +53,31 @@
                     
                     @foreach($colmap as $cm)
                         
+                        <!-- Dropdown menus for latitude / longitude -->
+                        @if($cm->getConfigValue('data_subtype') == 'location_lat' ||
+                            $cm->getConfigValue('data_subtype') == 'location_lon')
+                            <div class="form-group">
+                                <span>
+                                    {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
+                                </span>
+                                <input
+                                    type="text"
+                                    name="fields[{{ $cm->column->column_id }}][min]"
+                                    class="form-control"
+                                    placeholder="min"
+                                    value="{{$search_terms['fields'][$cm->column->column_id]['min'] ?? ""}}"
+                                />
+                                <input
+                                    type="text"
+                                    name="fields[{{ $cm->column->column_id }}][max]"
+                                    class="form-control"
+                                    placeholder="max"
+                                    value="{{$search_terms['fields'][$cm->column->column_id]['max'] ?? ""}}"
+                                />
+                                <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                            </div>
+                        @endif
+                    
                         <!-- Dropdown menus for select lists -->
                         @if($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value == '_list_')
                             <div class="form-group">
@@ -131,6 +156,13 @@
                         'heading' => __('search.results'),
                         'subheading' => 'Lorem ipsum dolor sit amet consectetur.'
                     ])
+                    
+                    @if(count($items))
+                        <!-- Button with link to map showing the search results-->
+                        <div class="container">
+                            <a class="btn btn-primary" href="{{ route('item.map', ['source' => 'search']) }}&{{ $query_str }}">@lang('search.results_map')</a>
+                        </div>
+                    @endif
                     
                     @include('includes.modal_login_request')
                     @include('includes.modal_download')

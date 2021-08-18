@@ -5,9 +5,10 @@ import VectorSource from 'ol/source/Vector';
 import ClusterSource from 'ol/source/Cluster';
 import GeoJSON from 'ol/format/GeoJSON';
 import {Icon, Style, Circle as CircleStyle, Fill, Stroke, Text} from 'ol/style';
+import * as olExtent from 'ol/extent';
 import Point from 'ol/geom/Point';
 import OSM from 'ol/source/OSM';
-import {fromLonLat, transform} from 'ol/proj';
+import {fromLonLat, toLonLat, transform, transformExtent} from 'ol/proj';
 
 var osm_map = {
     map: false,
@@ -20,6 +21,8 @@ var osm_map = {
         })
     }),
     
+    geoJsonLayer: false,
+    
     display: function (lon, lat, zoom) {
         
         var position = fromLonLat([lon, lat]);
@@ -27,6 +30,7 @@ var osm_map = {
         var view = new View({
             center: position,
             zoom: zoom,
+            maxZoom: 19,
         });
 
         this.map = new Map({
@@ -87,10 +91,14 @@ var osm_map = {
         return transform(coordinate, 'EPSG:3857', 'EPSG:4326');
     },
     
+    transformExtent: function (extent) {
+        return transformExtent(extent, 'EPSG:3857','EPSG:4326');
+    },
+    
     addGeoJsonLayer: function (url) {
         var styleCache = {};
         
-        var geoJsonLayer = new VectorLayer({
+        this.geoJsonLayer = new VectorLayer({
             source: new ClusterSource({
                 distance: 30,
                 source: new VectorSource({
@@ -122,7 +130,41 @@ var osm_map = {
                 return style;
             },
         });
-        this.map.addLayer(geoJsonLayer);
+        this.map.addLayer(this.geoJsonLayer);
+    },
+    
+    isCluster: function (feature) {
+        console.log(feature);
+        if (!feature || !feature.get('features')) { 
+            return false;
+        }
+        return feature.get('features').length > 1;
+    },
+    
+    getExtendOfFeatures: function (features) {
+        if (this.isCluster(features)) {
+            // is a cluster, so loop through all the underlying features
+            var clusteredFeatures = features.get('features');
+            var extent = clusteredFeatures[0].getGeometry().getExtent().slice(0);
+            for (var i = 0; i < clusteredFeatures.length; i++) {
+                olExtent.extend(extent, clusteredFeatures[i].getGeometry().getExtent());
+            }
+        } else {
+            // not a cluster
+            var extent = features.getGeometry().getExtent().slice(0);
+        }
+        
+        return transformExtent(extent, 'EPSG:3857','EPSG:4326');
+    },
+    
+    getBoundsOfView: function () {
+        const extent = this.map.getView().calculateExtent(this.map.getSize());
+        return transformExtent(extent, 'EPSG:3857', 'EPSG:4326');
+    },
+    
+    wrapLon: function (value) {
+        const worlds = Math.floor((value + 180) / 360);
+        return value - worlds * 360;
     },
 }
 
