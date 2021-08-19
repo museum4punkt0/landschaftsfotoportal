@@ -374,7 +374,7 @@ class ColumnMappingController extends Controller
         foreach ($results as $result) {
             $response[] = array(
                 "value" => $result->colmap_id,
-                "label" => $result->column->description,
+                "label" => $result->column->description . '; ' . $result->taxon->full_name,
                 "edit_url" => route('colmap.edit', $result->colmap_id),
             );
         }
