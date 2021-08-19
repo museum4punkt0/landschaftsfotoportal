@@ -18,10 +18,10 @@
 
 <form action="{{ route($options['route'], $item->item_id) }}" method="POST" enctype="multipart/form-data">
     
-    @if($options['edit.meta'])
+@if($options['edit.meta'])
     <div class="form-group">
         <span>@lang('items.menu_title')</span>
-        <input type="text" name="title" class="form-control" value="{{old('title', $item->title)}}" />
+        <input type="text" name="title" class="form-control" value="{{old('title', $item->title)}}" autofocus />
         <span class="text-danger">{{ $errors->first('title') }}</span>
     </div>
     <div class="form-group">
@@ -83,7 +83,7 @@
             //window.location.reload(true);
         }
     </script>
-    @endif
+@endif
     
     @foreach($colmap as $cm)
         {{-- Don't show columns which have auto generated content, e.g. image size/dimensions --}}
@@ -103,6 +103,7 @@
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                         size=1
+                        @if($loop->first && !$options['edit.meta']) autofocus @endif
                     >
                         <option value="">@lang('common.choose')</option>
                         @foreach($lists[$cm->column->list_fk] as $element)
@@ -141,6 +142,7 @@
                         class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                         size=5
                         multiple
+                        @if($loop->first && !$options['edit.meta']) autofocus @endif
                     >
                         @foreach($lists[$cm->column->list_fk] as $element)
                             <option value="{{$element->element_id}}"
@@ -191,6 +193,7 @@
                             value=1
                             @if(old('fields.'. $cm->column->column_id, 
                             $details->firstWhere('column_fk', $cm->column->column_id)->value_int)) checked @endif
+                            @if($loop->first && !$options['edit.meta']) autofocus @endif
                         />
                         {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
                         @include('includes.form_input_help')
@@ -216,6 +219,7 @@
                         value="{{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_int) }}"
                         @if($cm->getConfigValue('editable') == 'readonly' && !$options['edit.meta']) readonly @endif
+                        @if($loop->first && !$options['edit.meta']) autofocus @endif
                     />
                     
                     @include('includes.form_input_help')
@@ -238,6 +242,7 @@
                         value="{{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_float) }}"
                         @if($cm->getConfigValue('editable') == 'readonly' && !$options['edit.meta']) readonly @endif
+                        @if($loop->first && !$options['edit.meta']) autofocus @endif
                     />
                     
                     @include('includes.form_input_help')
@@ -267,6 +272,7 @@
                                 class="form-control {{ $cm->getConfigValue('data_subtype') }} @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                                 placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
                                 rows="{{$cm->getConfigValue('textarea')}}"
+                                @if($loop->first && !$options['edit.meta']) autofocus @endif
                             >{{
                                 old('fields.'. $cm->column->column_id, 
                                     $details->firstWhere('column_fk', $cm->column->column_id)->value_string)
@@ -282,6 +288,7 @@
                                 value="{{ old('fields.'. $cm->column->column_id, 
                                 $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
                                 @if($cm->getConfigValue('editable') == 'readonly' && !$options['edit.meta']) readonly @endif
+                                @if($loop->first && !$options['edit.meta']) autofocus @endif
                             />
                         @endif
                         @if($cm->getConfigValue('data_subtype') == 'location_city')
@@ -310,6 +317,7 @@
                         class="form-control summernote @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
                         rows=5
+                        @if($loop->first && !$options['edit.meta']) autofocus @endif
                     >{!!
                         old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_string)
@@ -342,6 +350,7 @@
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
                         value="{{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
+                        @if($loop->first && !$options['edit.meta']) autofocus @endif
                     />
                     
                     @include('includes.form_input_help')
@@ -362,6 +371,7 @@
                         class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                         value="{{ old('fields.'. $cm->column->column_id, 
                         $details->firstWhere('column_fk', $cm->column->column_id)->value_date) }}"
+                        @if($loop->first && !$options['edit.meta']) autofocus @endif
                     />
                     
                     @include('includes.form_input_help')
@@ -585,6 +595,7 @@
                                 aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                                 class="form-control-file @if($errors->has('fields.'.$cm->column->column_id.'.file')) is-invalid @endif"
                                 accept=".jpg, .jpeg"
+                                @if($loop->first && !$options['edit.meta']) autofocus @endif
                             />
                             @include('includes.form_input_help')
                             <span class="form-text text-muted">@lang('items.file_max_size', ['max' => config('media.image_max_size', 2048)]) @lang('columns.image_hint')</span>
