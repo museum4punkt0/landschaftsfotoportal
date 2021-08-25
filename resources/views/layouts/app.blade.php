@@ -20,10 +20,15 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     
     <!-- Custom styles for this template -->
+    <!-- TODO: move to /ressources/sass/backend.css CSS file-->
     <style>
       .map {
         height: 500px;
         width: 100%;
+      }
+      .thumbnail-table {
+        max-width: 150px;
+        max-height: 100px;
       }
     </style>
 </head>

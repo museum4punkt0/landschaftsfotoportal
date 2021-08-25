@@ -203,6 +203,12 @@ header.masthead .masthead-heading {
     margin-bottom: 4rem;
   }
 }
+
+.thumbnail-table {
+  max-width: 150px;
+  max-height: 100px;
+}
+
 #portfolio .portfolio-item {
   max-width: 25rem;
   margin-left: auto;

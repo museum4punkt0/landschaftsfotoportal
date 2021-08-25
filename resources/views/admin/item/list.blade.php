@@ -92,12 +92,13 @@
                                 {{$item->item_id}}
                             </td>
                             <td>
-                                <div class="portfolio-item">
-                                    <a class="portfolio-link d-flex justify-content-center" href="{{route('item.show.public', $item->item_id)}}#details">
+                                <div class="container">
+                                    <a href="{{route('item.show.public', $item->item_id)}}#details">
                                     @if($item->details->firstWhere('column_fk', 13))
-                                        <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
+                                        <img class="img-fluid thumbnail-table"
+                                            src="{{ asset('storage/'. Config::get('media.preview_dir') .
                                             $item->details->firstWhere('column_fk', 13)->value_string) }}"
-                                            height=100 alt=""
+                                            alt=""
                                             title="{{ $item->details->firstWhere('column_fk', 23)->value_string }}"/>
                                     @endif
                                     </a>
