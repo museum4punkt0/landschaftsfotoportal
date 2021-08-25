@@ -43,10 +43,14 @@
 
     // Collapse Navbar
     var navbarCollapse = function () {
-        if ($("#mainNav").offset().top > 100) {
+        if ($("#mainNav").offset().top > 100 || window.innerWidth < 992) {
             $("#mainNav").addClass("navbar-shrink");
+            let logoUrl = $("#sgnLogo").attr("src").replace("sgn_logo.", "sgn_logo_inverted.");
+            $("#sgnLogo").attr("src", logoUrl);
         } else {
             $("#mainNav").removeClass("navbar-shrink");
+            let logoUrl = $("#sgnLogo").attr("src").replace("sgn_logo_inverted.", "sgn_logo.");
+            $("#sgnLogo").attr("src", logoUrl);
         }
     };
     // Collapse now if page is not at top
