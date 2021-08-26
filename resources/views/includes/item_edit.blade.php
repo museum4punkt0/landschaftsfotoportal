@@ -57,32 +57,15 @@
     </div>
     <div class="form-group">
         <span>@lang('taxon.list')</span>
-        <select name="taxon" id="taxon_select" class="form-control" size=1 readonly>
-            <option value="">@lang('common.none')</option>
-            @foreach($taxa as $taxon)
-                @unless($taxon->valid_name)
-                    <option value="{{$taxon->taxon_id}}"
-                        @if(old('taxon', $item->taxon_fk) == $taxon->taxon_id) selected @endif>
-                        @for ($i = 0; $i < $taxon->depth; $i++)
-                            |___
-                        @endfor
-                        {{$taxon->taxon_name}} {{$taxon->taxon_author}} ({{$taxon->native_name}})
-                    </option>
-                @endunless
-            @endforeach
-        </select>
-        <span class="text-danger">{{ $errors->first('taxon') }}</span>
+        <input
+            type="text"
+            name="taxon_name"
+            class="form-control"
+            value="@if($taxon) {{$taxon->full_name}} ({{$taxon->native_name}}) @else @lang('common.none') @endif"
+            readonly
+        />
+        <input type="hidden" name="taxon" value="{{optional($taxon)->taxon_id}}" />
     </div>
-    <script type="text/javascript">
-        var elem = document.getElementById("taxon_select");
-        elem.addEventListener("change", TaxonChanged);
-
-        function TaxonChanged() {
-            var tax = document.getElementById("taxon_select").selectedIndex;
-            alert('Changing the Taxon is not allowed!');
-            //window.location.reload(true);
-        }
-    </script>
 @endif
     
     @foreach($colmap as $cm)

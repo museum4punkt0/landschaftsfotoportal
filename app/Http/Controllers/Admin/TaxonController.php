@@ -38,9 +38,7 @@ class TaxonController extends Controller
      */
     public function create()
     {
-        $taxa = Taxon::tree()->depthFirst()->get();
-        
-        return view('admin.taxon.create', compact('taxa'));
+        return view('admin.taxon.create');
     }
 
     /**
@@ -105,12 +103,7 @@ class TaxonController extends Controller
      */
     public function edit(Taxon $taxon)
     {
-        $taxa = Taxon::tree()->depthFirst()->get();
-        
-        // Remove all descendants to avoid circular dependencies
-        $taxa = $taxa->diff($taxon->descendantsAndSelf()->get());
-        
-        return view('admin.taxon.edit', compact('taxon', 'taxa'));
+        return view('admin.taxon.edit', compact('taxon'));
     }
 
     /**
@@ -123,7 +116,15 @@ class TaxonController extends Controller
     public function update(Request $request, Taxon $taxon)
     {
         $request->validate([
-            'parent' => 'nullable|integer',
+            //'parent' => 'nullable|integer',
+            'parent' =>
+                // Check for circular dependency (parent must not be its own descendant)
+                function ($attribute, $value, $fail) use ($taxon, $request) {
+                    // Check for missing attributes, at least one (column) must be selected
+                    if ($taxon->descendantsAndSelf()->get()->contains($request->input('parent'))) {
+                        $fail(__('taxon.circular_parent'));
+                    }
+                },
             'taxon_name' => 'required|string',
             'taxon_author' => 'nullable|string',
             'taxon_suppl' => 'nullable|string',
@@ -187,9 +188,16 @@ class TaxonController extends Controller
      */
     public function autocomplete(Request $request)
     {
+        $search = $request->query('search');
+
         $results = Taxon::select('taxon_id', 'full_name', 'native_name')
-            ->where('full_name', 'ILIKE', "%{$request->search}%")
-            ->orWhere('native_name', 'ILIKE', "%{$request->search}%")
+            ->when($request->query('valid', false), function ($query) {
+                return $query->whereNull('valid_name');
+            })
+            ->where(function ($query) use ($search) {
+                $query->where('full_name', 'ILIKE', "%{$search}%")
+                    ->orWhere('native_name', 'ILIKE', "%{$search}%");
+            })
             ->orderBy('full_name')
             ->limit(config('ui.autocomplete_results', 5))
             ->get();
