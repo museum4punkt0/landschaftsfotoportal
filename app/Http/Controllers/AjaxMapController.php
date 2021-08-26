@@ -16,6 +16,15 @@ class AjaxMapController extends Controller
     public function all()
     {
         $items = Item::where('public', 1)->where('item_type_fk', 39)
+            // Exclude items without latitude/longitude
+            ->whereHas('details', function ($query) {
+                $query->where('column_fk', 24)
+                      ->whereNotNull('value_float');
+            })
+            ->whereHas('details', function ($query) {
+                $query->where('column_fk', 25)
+                      ->whereNotNull('value_float');
+            })
             ->with('details')
             ->get();
         
@@ -63,6 +72,8 @@ class AjaxMapController extends Controller
      * @return array
      */
     private function createPointFeaturesFromItems($items) {
+        $features = false;
+        
         foreach ($items as $item) {
             // Check for missing lat/lon details
             if ($item->details->firstWhere('column_fk', 25) && $item->details->firstWhere('column_fk', 24)) {
