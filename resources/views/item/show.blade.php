@@ -111,7 +111,11 @@
                         @lang('common.not_chosen')
                     @endif
                 @else
-                    <span>detail column {{$cm->column->column_id}} for list not found</span>
+                    @can('show-admin')
+                        <span class="text-danger">
+                            @lang('items.no_detail_for_column', ['column' => $cm->column->column_id])
+                        </span>
+                    @endcan
                 @endif
                 </div>
                 @break
@@ -343,7 +347,11 @@
                                 @lang('columns.image_not_available')
                             @endif
                         @else
-                            <span>detail column {{$cm->column->column_id}} for image preview not found</span>
+                            @can('show-admin')
+                                <span class="text-danger">
+                                    @lang('items.no_detail_for_column', ['column' => $cm->column->column_id])
+                                </span>
+                            @endcan
                         @endif
                     @endif
                     
@@ -373,7 +381,11 @@
                         <p>@lang('items.no_iframe')</p>
                         </iframe>
                     @else
-                        <span>detail column {{$cm->column->column_id}} for map not found</span>
+                        @can('show-admin')
+                            <span class="text-danger">
+                                @lang('items.no_detail_for_column', ['column' => $cm->column->column_id])
+                            </span>
+                        @endcan
                     @endif
                 @endif
                 @if($cm->getConfigValue('map') == 'inline')
