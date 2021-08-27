@@ -316,8 +316,8 @@ class AjaxImportController extends Controller
     {
         // Get HTTP parameters from request
         $item = intval($request->item);
-        $lat = floatval($request->lat);
-        $lon = floatval($request->lon);
+        $lat = $request->lat ? floatval($request->lat) : null;
+        $lon = $request->lon ? floatval($request->lon) : null;
         
         $warning_status_msg = null;
         #dd($request);
