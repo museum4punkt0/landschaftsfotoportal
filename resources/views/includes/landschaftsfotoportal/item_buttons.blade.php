@@ -34,7 +34,13 @@
                     @else
                         <a href="#" data-toggle="modal" data-target="#commentModal" data-href="{{ route('comment.store', $item->item_id) }}" title="@lang('comments.new')">
                     @endguest
-                            <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                            <i class="fas fa-circle fa-stack-2x
+                            @if(!empty($item->details->firstWhere('column_fk', 22)->value_string))
+                                text-primary
+                            @else
+                                sgn-color-2
+                            @endif
+                            "></i>
                             <i class="fas {{ Config::get('ui.icon_comment') }} fa-stack-1x fa-inverse"></i>
                         </a>
                     </span>

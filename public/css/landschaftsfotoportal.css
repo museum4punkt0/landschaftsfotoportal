@@ -13,6 +13,13 @@ p {
   line-height: 1.75;
 }
 
+.sgn-color-1 {
+  color: #0063B4 !important;
+}
+.sgn-color-2 {
+  color: #A4AF00 !important;
+}
+
 .page-section {
   padding: 6rem 0;
 }
