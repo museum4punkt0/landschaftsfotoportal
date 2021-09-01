@@ -113,6 +113,7 @@
                                         content += '&fields[' + columnLon + '][max]=' + extent[2];
                                         content += '&fields[' + columnLat + '][min]=' + extent[1];
                                         content += '&fields[' + columnLat + '][max]=' + extent[3];
+                                        content += '#searchResults';
                                         content += '">@lang("common.showall")</a>';
                                         $(element).popover({
                                             placement: 'bottom',
@@ -154,6 +155,7 @@
                                 url += '&fields[' + columnLon + '][max]=' + osm_map.wrapLon(extent[2]);
                                 url += '&fields[' + columnLat + '][min]=' + extent[1];
                                 url += '&fields[' + columnLat + '][max]=' + extent[3];
+                                url += '#searchResults';
                                 $('#searchLink').attr('href', url);
                             });
                         }

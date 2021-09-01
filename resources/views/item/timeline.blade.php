@@ -17,7 +17,7 @@
                     <li>
                 @endif
                 
-                    <a href="{{ route('search.index', ['fields[27]' => $decade]) }}">
+                    <a href="{{ route('search.index', ['fields[27]' => $decade]) }}#searchResults">
                     <div class="timeline-image">
                         <h4>
                         @if($decade)
