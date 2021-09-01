@@ -212,10 +212,16 @@ class SearchController extends Controller
         $search_terms = $request->input();
 
         // Get all HTTP query parameters except for lat/lon
-        $column_ids['lon'] = Column::ofDataType('_float_')->ofItemType('_image_')->ofSubType('location_lon')
-            ->first()->column_id;
-        $column_ids['lat'] = Column::ofDataType('_float_')->ofItemType('_image_')->ofSubType('location_lat')
-            ->first()->column_id;
+        $column_ids['lon'] = optional(Column::ofDataType('_float_')
+                                            ->ofItemType('_image_')
+                                            ->ofSubType('location_lon')
+                                            ->first())
+                                            ->column_id;
+        $column_ids['lat'] = optional(Column::ofDataType('_float_')
+                                            ->ofItemType('_image_')
+                                            ->ofSubType('location_lat')
+                                            ->first())
+                                            ->column_id;
         $request_query = $request->except([
             'fields.' . $column_ids['lon'],
             'fields.' . $column_ids['lat'],
