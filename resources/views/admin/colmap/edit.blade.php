@@ -32,7 +32,7 @@
         'input_placeholder' => '',
         'input_label' => __('taxon.list'),
         'null_label' => __('common.all'),
-        'taxon_name' => old('taxon_name', optional($colmap->taxon_fk)->full_name ?? __('common.all')),
+        'taxon_name' => old('taxon_name', optional($colmap->taxon)->full_name ?? __('common.all')),
         'taxon_id' => old('taxon', $colmap->taxon_fk),
     ])
     <div class="form-group">
