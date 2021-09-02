@@ -144,6 +144,9 @@ return [
             'max'       => 'Die Datei darf maximal :max Kilobytes groß sein.',
             'mimes'     => 'Die Datei muss den Dateityp :values haben.',
         ],
+        'multivalues' => [
+            'required' => 'Dieses Feld muss ausgefüllt werden.',
+        ],
     ],
 
     /*

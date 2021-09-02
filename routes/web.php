@@ -92,8 +92,13 @@ Route::resource('admin/taxon', 'Admin\TaxonController');
 Route::resource('admin/user', 'Admin\UserController');
 
 Route::get('admin/lists/list/{id}/element/autocomplete', 'Admin\Lists\ElementController@autocomplete')->name('element.autocomplete');
+Route::get('admin/lists/list/{id}/element/create_batch',
+'Admin\Lists\ElementController@createBatch')->name('element.create_batch');
+Route::post('admin/lists/list/{id}/element/store_batch',
+'Admin\Lists\ElementController@storeBatch')->name('list.element.store_batch');
 Route::resource('admin/lists/list.element', 'Admin\Lists\ElementController')->shallow();
 Route::resource('admin/lists/element.value', 'Admin\Lists\ValueController')->shallow();
+
 
 Route::get('admin/lists/list/internal', 'Admin\Lists\ListController@internal')->name('list.internal');
 Route::get('admin/lists/list/{id}/tree', 'Admin\Lists\ListController@tree')->name('list.tree');

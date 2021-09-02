@@ -136,6 +136,9 @@ return [
         'fileUpload' => [
             'required' => 'No file chosen for upload.',
         ],
+        'multivalue' => [
+            'required' => 'This field is required.',
+        ],
     ],
 
     /*

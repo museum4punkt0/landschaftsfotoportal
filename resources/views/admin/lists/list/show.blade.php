@@ -20,6 +20,9 @@
                 <div class="row">
                     <div class="col align-self-start">
                         <a href="{{route('list.element.create', $list->list_id)}}" class="btn btn-primary">@lang('elements.new')</a>
+                        @if (auth()->user()->inGroup('super-admin') && !$list->hierarchical)  
+                            <a href="{{route('element.create_batch', $list->list_id)}}" class="btn btn-primary">@lang('elements.new_batch')</a>
+                        @endif
                         <a href="{{route('list.export', $list->list_id)}}" class="btn btn-primary">@lang('common.export')</a>
                     </div>
                     
