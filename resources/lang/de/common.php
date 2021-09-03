@@ -38,6 +38,7 @@ return [
     'update_success' => 'Erfolgreich aktualisiert',
     
     'root' => 'Wurzelelement',
+    'relation' => 'Beziehung',
     'id' => 'ID',
     'name' => 'Name',
     'description' => 'Beschreibung',

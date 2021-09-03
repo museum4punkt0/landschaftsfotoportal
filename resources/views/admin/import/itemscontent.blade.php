@@ -35,15 +35,15 @@
                                     <option value="0">@lang('common.ignore')</option>
                                     <option value="-1"
                                         @if(old('fields.'.$loop->index) == -1) selected @endif>
-                                        @lang('import.parent_details')
+                                        * @lang('common.relation'): @lang('import.parent_details')
                                     </option>
                                     <option value="-2"
                                         @if(old('fields.'.$loop->index) == -2) selected @endif>
-                                        @lang('import.parent_taxon')
+                                        * @lang('common.relation'): @lang('import.parent_taxon')
                                     </option>
                                     <option value="-3"
                                         @if(old('fields.'.$loop->index) == -3) selected @endif>
-                                        @lang('import.taxon_name')
+                                        * @lang('common.relation'): @lang('import.taxon_name')
                                     </option>
                                     @foreach($colmaps->unique('column_fk') as $colmap)
                                         {{-- Exclude columns with data type 'taxon' --}}
