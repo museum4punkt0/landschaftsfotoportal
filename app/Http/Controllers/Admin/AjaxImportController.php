@@ -75,7 +75,7 @@ class AjaxImportController extends Controller
                 $taxon = Taxon::where('full_name', trim($line[array_search('-3', $selected_attr)]))->first();
                 if (empty($taxon)) {
                     // Taxon not found: skip this one and set warning message
-                    $warning_status_msg .= " ". __('import.taxon_not_found', ['full_name' => $line[array_search('-3', $selected_attr)]]);
+                    $warning_status_msg .= " " .  __('import.taxon_not_found', ['full_name' => $line[array_search('-3', $selected_attr)]]) . "\n";
                     $request->session()->flash('warning', $warning_status_msg);
                     // TODO: use messageBag for arrays
                     #$messageBag->add('warning', $warning_status_msg);
@@ -88,7 +88,7 @@ class AjaxImportController extends Controller
                         ['item_type_fk', $request->session()->get('item_type')],
                     ])->first();
                     if (!empty($existing_item) && $request->session()->has('unique_taxa')) {
-                        $warning_status_msg .= " ". __('import.taxon_exists', ['full_name' => $line[array_search('-3', $selected_attr)]]);
+                        $warning_status_msg .= " " .  __('import.taxon_exists', ['full_name' => $line[array_search('-3', $selected_attr)]]) . "\n";
                         $request->session()->flash('warning', $warning_status_msg);
                         // TODO: use messageBag for arrays
                         continue;
