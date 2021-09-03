@@ -72,7 +72,7 @@ class AjaxImportController extends Controller
             // Check if a taxon is associated to item to be imported
             if (array_search('-3', $selected_attr)) {
                 // Try to match taxon for given full scientific name
-                $taxon = Taxon::where('full_name', $line[array_search('-3', $selected_attr)])->first();
+                $taxon = Taxon::where('full_name', trim($line[array_search('-3', $selected_attr)]))->first();
                 if (empty($taxon)) {
                     // Taxon not found: skip this one and set warning message
                     $warning_status_msg .= " ". __('import.taxon_not_found', ['full_name' => $line[array_search('-3', $selected_attr)]]);
