@@ -2,11 +2,11 @@
 
 namespace App\Policies;
 
-use App\Item;
+use App\Comment;
 use App\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class ItemPolicy
+class CommentPolicy
 {
     use HandlesAuthorization;
 
@@ -31,26 +31,19 @@ class ItemPolicy
      */
     public function viewAny(User $user)
     {
-        return $user->hasAccess(['viewAny-item']);
+        return $user->hasAccess(['viewAny-comment']);
     }
 
     /**
      * Determine whether the user can view the model.
      *
      * @param  \App\User  $user
-     * @param  \App\Item  $item
+     * @param  \App\Comment  $comment
      * @return mixed
      */
-    public function view(User $user = null, Item $item)
+    public function view(User $user, Comment $comment)
     {
-        // WARNING: Guest users are allowed to view by default!
-        if (is_null($user)) {
-            return true;
-        }
-        // Following rule does only apply on authentificated user!
-        else {
-            return $user->hasAccess(['view-item']);
-        }
+        return $user->hasAccess(['view-comment']);
     }
 
     /**
@@ -61,23 +54,23 @@ class ItemPolicy
      */
     public function create(User $user)
     {
-        return $user->hasAccess(['create-item']);
+        return $user->hasAccess(['create-comment']);
     }
 
     /**
      * Determine whether the user can update the model.
      *
      * @param  \App\User  $user
-     * @param  \App\Item  $item
+     * @param  \App\Comment  $comment
      * @return mixed
      */
-    public function update(User $user, Item $item)
+    public function update(User $user, Comment $comment)
     {
-        if ($user->id === $item->creator->id) {
+        if ($user->id === $comment->creator->id) {
             return true;
         }
         else {
-            return $user->hasAccess(['update-item']);
+            return $user->hasAccess(['update-comment']);
         }
     }
 
@@ -85,16 +78,16 @@ class ItemPolicy
      * Determine whether the user can delete the model.
      *
      * @param  \App\User  $user
-     * @param  \App\Item  $item
+     * @param  \App\Comment  $comment
      * @return mixed
      */
-    public function delete(User $user, Item $item)
+    public function delete(User $user, Comment $comment)
     {
-        if ($user->id === $item->creator->id) {
+        if ($user->id === $comment->creator->id) {
             return true;
         }
         else {
-            return $user->hasAccess(['delete-item']);
+            return $user->hasAccess(['delete-comment']);
         }
     }
 
@@ -102,10 +95,10 @@ class ItemPolicy
      * Determine whether the user can restore the model.
      *
      * @param  \App\User  $user
-     * @param  \App\Item  $item
+     * @param  \App\Comment  $comment
      * @return mixed
      */
-    public function restore(User $user, Item $item)
+    public function restore(User $user, Comment $comment)
     {
         //
     }
@@ -114,23 +107,12 @@ class ItemPolicy
      * Determine whether the user can permanently delete the model.
      *
      * @param  \App\User  $user
-     * @param  \App\Item  $item
+     * @param  \App\Comment  $comment
      * @return mixed
      */
-    public function forceDelete(User $user, Item $item)
+    public function forceDelete(User $user, Comment $comment)
     {
         //
-    }
-
-    /**
-     * Determine whether the user can update titles of the model.
-     *
-     * @param  \App\User  $user
-     * @return mixed
-     */
-    public function titles(User $user)
-    {
-        return $user->hasAccess(['titles-item']);
     }
 
     /**
@@ -140,9 +122,9 @@ class ItemPolicy
      * @param  \App\Item  $item
      * @return mixed
      */
-    public function publish(User $user, Item $item = null)
+    public function publish(User $user, Comment $comment = null)
     {
-        return $user->hasAccess(['publish-item']);
+        return $user->hasAccess(['publish-comment']);
     }
 
     /**
@@ -153,19 +135,6 @@ class ItemPolicy
      */
     public function viewOwn(User $user)
     {
-        return $user->hasAccess(['viewOwn-item']);
+        return $user->hasAccess(['viewOwn-comment']);
     }
-
-    /**
-     * Determine whether the user can download models.
-     *
-     * @param  \App\User  $user
-     * @param  \App\Item  $item
-     * @return mixed
-     */
-    public function download(User $user, Item $item)
-    {
-        return $user->hasAccess(['download-item']);
-    }
-
 }

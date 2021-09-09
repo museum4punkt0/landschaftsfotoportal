@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Cart;
 use Illuminate\Http\Request;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 
 class CartController extends Controller
 {
@@ -25,6 +25,8 @@ class CartController extends Controller
      */
     public function index()
     {
+        $this->authorize('viewOwn', Cart::class);
+
         $cart = Cart::myOwn(Auth::user()->id)->with('item')->latest()->paginate(10);
         
         return view('cart', compact('cart'));

@@ -23,6 +23,9 @@ class ElementController extends Controller
     public function __construct()
     {
         $this->middleware('verified');
+
+        // Use app\Policies\ElementPolicy for authorizing ressource controller
+        $this->authorizeResource(Element::class, 'element');
     }
 
     /**

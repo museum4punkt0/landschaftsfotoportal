@@ -17,6 +17,9 @@ class TaxonController extends Controller
     public function __construct()
     {
         $this->middleware('verified');
+
+        // Use app\Policies\TaxonPolicy for authorizing ressource controller
+        $this->authorizeResource(Taxon::class, 'taxon');
     }
 
     /**

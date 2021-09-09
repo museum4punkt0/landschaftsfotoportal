@@ -38,6 +38,8 @@ class AjaxImportController extends Controller
      */
     public function importLine(Request $request)
     {
+        $this->authorize('import-taxa', ImportItemsController::class);
+
         // Get HTTP parameters from request
         $start = intval($request->start); // line number to start from, counting from 1
         $limit = intval($request->limit); // max number of lines to import per loop cycle
@@ -314,6 +316,8 @@ class AjaxImportController extends Controller
      */
     public function importLatLon(Request $request)
     {
+        $this->authorize('import-items', ImportItemsController::class);
+
         // Get HTTP parameters from request
         $item = intval($request->item);
         $lat = floatval($request->lat);

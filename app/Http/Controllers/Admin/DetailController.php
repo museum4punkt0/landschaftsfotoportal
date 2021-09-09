@@ -16,6 +16,9 @@ class DetailController extends Controller
     public function __construct()
     {
         $this->middleware('verified');
+
+        // Use app\Policies\DetailPolicy for authorizing ressource controller
+        $this->authorizeResource(Detail::class, 'detail');
     }
 
     /**

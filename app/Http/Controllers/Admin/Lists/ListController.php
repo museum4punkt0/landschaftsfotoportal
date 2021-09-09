@@ -21,6 +21,9 @@ class ListController extends Controller
     public function __construct()
     {
         $this->middleware('verified');
+
+        // Use app\Policies\ListPolicy for authorizing ressource controller
+        $this->authorizeResource(Selectlist::class, 'list');
     }
 
     /**
@@ -42,6 +45,8 @@ class ListController extends Controller
      */
     public function internal()
     {
+        $this->authorize('internal', Selectlist::class);
+
         $data['lists'] = Selectlist::where('internal', true)->orderBy('name')->paginate(10);
         
         return view('admin.lists.list.list', $data);
@@ -104,6 +109,8 @@ class ListController extends Controller
      */
     public function tree($id)
     {
+        $this->authorize('tree', Selectlist::find($id));
+
         $data['list'] = Selectlist::find($id);
         
         $constraint = function (Builder $query) use ($id) {
@@ -123,6 +130,8 @@ class ListController extends Controller
      */
     public function export($id)
     {
+        $this->authorize('export', Selectlist::find($id));
+
         $data['list'] = Selectlist::find($id);
         $data['attributes'] = Attribute::orderBy('attribute_id')->get();
         

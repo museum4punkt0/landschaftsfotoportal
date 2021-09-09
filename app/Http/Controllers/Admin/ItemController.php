@@ -84,7 +84,7 @@ class ItemController extends Controller
      */
     public function new()
     {
-        $this->authorize('new', Item::class);
+        $this->authorize('create', Item::class);
 
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
@@ -344,7 +344,7 @@ class ItemController extends Controller
      */
     public function list_unpublished()
     {
-        $this->authorize('unpublished', Item::class);
+        $this->authorize('publish', Item::class);
 
         $items = Item::where('public', 0)->latest('updated_at')->paginate(10);
 
