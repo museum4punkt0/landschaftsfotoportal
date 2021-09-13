@@ -92,7 +92,7 @@
                         @foreach($lists[$cm->column->list_fk] as $element)
                             <option value="{{$element->element_id}}"
                                 @if(old('fields.'. $cm->column->column_id, 
-                                    $details->firstWhere('column_fk', $cm->column->column_id)->element_fk) == 
+                                    optional($details->firstWhere('column_fk', $cm->column->column_id))->element_fk) == 
                                      $element->element_id)
                                         selected
                                 @endif
@@ -175,7 +175,7 @@
                             class="form-check-input @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                             value=1
                             @if(old('fields.'. $cm->column->column_id, 
-                            $details->firstWhere('column_fk', $cm->column->column_id)->value_int)) checked @endif
+                            optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int)) checked @endif
                             @if($loop->first && !$options['edit.meta']) autofocus @endif
                         />
                         {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
@@ -200,7 +200,7 @@
                         class="form-control {{ $cm->getConfigValue('data_subtype') }} @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
                         value="{{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_int) }}"
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int) }}"
                         @if($cm->getConfigValue('editable') == 'readonly' && !$options['edit.meta']) readonly @endif
                         @if($loop->first && !$options['edit.meta']) autofocus @endif
                     />
@@ -223,7 +223,7 @@
                         class="form-control {{ $cm->getConfigValue('data_subtype') }} @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
                         value="{{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_float) }}"
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_float) }}"
                         @if($cm->getConfigValue('editable') == 'readonly' && !$options['edit.meta']) readonly @endif
                         @if($loop->first && !$options['edit.meta']) autofocus @endif
                     />
@@ -258,7 +258,7 @@
                                 @if($loop->first && !$options['edit.meta']) autofocus @endif
                             >{{
                                 old('fields.'. $cm->column->column_id, 
-                                    $details->firstWhere('column_fk', $cm->column->column_id)->value_string)
+                                    optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string)
                             }}</textarea>
                         @else
                             <input
@@ -269,7 +269,7 @@
                                 class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                                 placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
                                 value="{{ old('fields.'. $cm->column->column_id, 
-                                $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
+                                optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string) }}"
                                 @if($cm->getConfigValue('editable') == 'readonly' && !$options['edit.meta']) readonly @endif
                                 @if($loop->first && !$options['edit.meta']) autofocus @endif
                             />
@@ -303,7 +303,7 @@
                         @if($loop->first && !$options['edit.meta']) autofocus @endif
                     >{!!
                         old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string)
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string)
                     !!}</textarea>
                     
                     @include('includes.form_input_help')
@@ -332,7 +332,7 @@
                         class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
                         value="{{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string) }}"
                         @if($loop->first && !$options['edit.meta']) autofocus @endif
                     />
                     
@@ -353,7 +353,7 @@
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                         value="{{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_date) }}"
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_date) }}"
                         @if($loop->first && !$options['edit.meta']) autofocus @endif
                     />
                     
@@ -630,8 +630,8 @@
                 @if($cm->getConfigValue('map') == 'inline')
                     <div id="map" class="map"></div>
                     <script type="text/javascript">
-                        var lon = {{ floatval($details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col'))->value_float) }};
-                        var lat = {{ floatval($details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col'))->value_float) }};
+                        var lon = {{ floatval(optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col')))->value_float) }};
+                        var lat = {{ floatval(optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col')))->value_float) }};
                         var zoom = {{ $cm->getConfigValue('map_zoom') }};
                         // Init and display the map
                         osm_map.display(lon, lat, zoom);
