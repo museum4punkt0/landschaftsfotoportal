@@ -5,9 +5,11 @@
     @endif
     
     {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }}
-    ({{ $cm->column->description }}, 
-    @lang('columns.data_type'): 
-    {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
+    @can('show-admin')
+        ({{ $cm->column->description }}, 
+        @lang('columns.data_type'): 
+        {{ $data_types->firstWhere('element_fk', $cm->column->data_type_fk)->value }})
+    @endcan
     
     @if($descriptions->firstWhere('element_fk', $cm->column->translation_fk))
         <i class="fas {{ Config::get('ui.icon_description', 'fa-info') }}"
