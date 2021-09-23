@@ -210,7 +210,7 @@ class ItemController extends Controller
         
         // Check for missing details from form input and add them
         // especially useful for drop-down lists with multiple selection if no option was selected
-        #$this->addMissingDetails($item, $colmap);
+        $this->addMissingDetails($item, $colmap);
         
         return redirect()->route('item.show.own')
             ->with('success', __('items.created'));
@@ -453,7 +453,7 @@ class ItemController extends Controller
         
         // Check for missing details and add them
         // Should be not necessary but allows editing items with somehow incomplete data
-        #$this->addMissingDetails($item, $colmap);
+        $this->addMissingDetails($item, $colmap);
         
         // Load all details for this item
         $details = Detail::where('item_fk', $item->item_id)->get();
@@ -500,7 +500,7 @@ class ItemController extends Controller
         
         // Validation rules for all fields associated with columns
         foreach ($request->input('fields') as $column_id => $value) {
-            /// Uploading a new image is never required on updating items
+            // Uploading a new image is never required on updating items
             if (Column::find($column_id)->getDataType() == '_image_') {
                 $required = 'nullable|';
             }
@@ -607,5 +607,25 @@ class ItemController extends Controller
         
         return redirect()->route('item.show.own')
             ->with('success', __('items.updated'));
+    }
+
+    /**
+     * Check for missing details and add them to database.
+     *
+     * @param  \App\Item  $item
+     * @param  \Illuminate\Database\Eloquent\Collection  $colmap
+     * @return void
+     */
+    private function addMissingDetails(Item $item, $colmap)
+    {
+        // Check all columns for existing details
+        foreach ($colmap as $cm) {
+            Detail::firstOrCreate([
+                'item_fk' => $item->item_id,
+                'column_fk' => $cm->column->column_id,
+            ]);
+        }
+
+        // TODO: logging for debug purpose
     }
 }

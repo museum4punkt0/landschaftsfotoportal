@@ -246,41 +246,37 @@
                 <div class="form-group">
                     @include('includes.column_label')
                     
-                    @if($details->firstWhere('column_fk', $cm->column->column_id))
-                        @if($cm->getConfigValue('textarea'))
-                            <textarea
-                                id="fieldsInput-{{ $cm->column->column_id }}"
-                                name="fields[{{ $cm->column->column_id }}]"
-                                aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
-                                class="form-control {{ $cm->getConfigValue('data_subtype') }} @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
-                                placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
-                                rows="{{$cm->getConfigValue('textarea')}}"
-                                @if($loop->first && !$options['edit.meta']) autofocus @endif
-                            >{{
-                                old('fields.'. $cm->column->column_id, 
-                                    optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string)
-                            }}</textarea>
-                        @else
-                            <input
-                                type="text"
-                                id="fieldsInput-{{ $cm->column->column_id }}"
-                                name="fields[{{ $cm->column->column_id }}]"
-                                aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
-                                class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
-                                placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
-                                value="{{ old('fields.'. $cm->column->column_id, 
-                                optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string) }}"
-                                @if($cm->getConfigValue('editable') == 'readonly' && !$options['edit.meta']) readonly @endif
-                                @if($loop->first && !$options['edit.meta']) autofocus @endif
-                            />
-                        @endif
-                        @if($cm->getConfigValue('data_subtype') == 'location_city')
-                            <button type="button" class="btn btn-primary btn-sm searchAddressBtn">
-                                @lang('common.get_latlon')
-                            </button>
-                        @endif
+                    @if($cm->getConfigValue('textarea'))
+                        <textarea
+                            id="fieldsInput-{{ $cm->column->column_id }}"
+                            name="fields[{{ $cm->column->column_id }}]"
+                            aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
+                            class="form-control {{ $cm->getConfigValue('data_subtype') }} @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                            placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
+                            rows="{{$cm->getConfigValue('textarea')}}"
+                            @if($loop->first && !$options['edit.meta']) autofocus @endif
+                        >{{
+                            old('fields.'. $cm->column->column_id, 
+                                optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string)
+                        }}</textarea>
                     @else
-                        <span>detail column {{$cm->column->column_id}} for map not found</span>
+                        <input
+                            type="text"
+                            id="fieldsInput-{{ $cm->column->column_id }}"
+                            name="fields[{{ $cm->column->column_id }}]"
+                            aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
+                            class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                            placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
+                            value="{{ old('fields.'. $cm->column->column_id, 
+                            optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string) }}"
+                            @if($cm->getConfigValue('editable') == 'readonly' && !$options['edit.meta']) readonly @endif
+                            @if($loop->first && !$options['edit.meta']) autofocus @endif
+                        />
+                    @endif
+                    @if($cm->getConfigValue('data_subtype') == 'location_city')
+                        <button type="button" class="btn btn-primary btn-sm searchAddressBtn">
+                            @lang('common.get_latlon')
+                        </button>
                     @endif
                     
                     @include('includes.form_input_help')
