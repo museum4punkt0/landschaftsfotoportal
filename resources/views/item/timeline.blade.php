@@ -5,8 +5,8 @@
     <!-- Timeline -->
     @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
         'section_id' => 'timeline',
-        'section_heading' => 'Zeitstrahl',
-        'section_subheading' => 'Lorem ipsum dolor sit amet consectetur.',
+        'section_heading' => __(config('ui.frontend_layout') . '.timeline_heading'),
+        'section_subheading' => __(config('ui.frontend_layout') . '.timeline_subheading'),
     ])
     
             <ul class="timeline">

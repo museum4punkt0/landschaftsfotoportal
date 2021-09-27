@@ -35,8 +35,8 @@
     <!-- Image details -->
     @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
         'section_id' => 'details',
-        'section_heading' => 'Bilddetails',
-        'section_subheading' => 'Lorem ipsum dolor sit amet consectetur.',
+        'section_heading' => __(config('ui.frontend_layout') . '.details_heading'),
+        'section_subheading' => __(config('ui.frontend_layout') . '.details_subheading'),
         'options' => ['image_medium' => true],
     ])
     <!-- Icons for user interaction -->

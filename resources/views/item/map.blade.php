@@ -5,8 +5,8 @@
     <!-- Map -->
     @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
         'section_id' => 'big_map',
-        'section_heading' => 'Karte',
-        'section_subheading' => 'Lorem ipsum dolor sit amet consectetur.',
+        'section_heading' => __(config('ui.frontend_layout') . '.map_heading'),
+        'section_subheading' => __(config('ui.frontend_layout') . '.map_subheading'),
     ])
     
                     <div id="map" class="map"

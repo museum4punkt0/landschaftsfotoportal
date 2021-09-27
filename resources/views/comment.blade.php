@@ -18,11 +18,17 @@
 @include('includes.modal_comment_delete')
 
 <!-- My comments table -->
-<div class="page-section bg-light">
-<div class="container">
+    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
+        'section_id' => 'portfolio',
+        'section_heading' => __(config('ui.frontend_layout') . '.my_comments_heading'),
+        'section_subheading' => __(config('ui.frontend_layout') . '.my_comments_subheading'),
+    ])
+
     <div class="card">
         @if (true || Auth::check())
+            <!--
             <div class="card-header">@lang('comments.my_own')</div>
+            -->
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table mt-4">
@@ -108,7 +114,7 @@
             {{ $comments->links() }}
         </div>
     </div>
-</div>
-</div>
+
+    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_footer')
 
 @endsection

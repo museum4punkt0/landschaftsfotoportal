@@ -14,7 +14,7 @@
             <div class="modal-footer">
                 <div class="form-group">
                     <input type="hidden" id="cartRemoveUrl" value="" />
-                    <button type="submit" class="btn btn-danger" id="cartRemoveBtn">@lang('common.delete')</button>
+                    <button type="submit" class="btn btn-danger" id="cartRemoveBtn">@lang('common.remove')</button>
                 </div>
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">@lang('common.cancel')</button>
             </div>

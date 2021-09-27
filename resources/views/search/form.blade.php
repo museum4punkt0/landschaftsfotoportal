@@ -20,7 +20,7 @@
 @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
     'section_id' => 'search',
     'section_heading' => __('search.header'),
-    'section_subheading' => 'Lorem ipsum dolor sit amet consectetur.',
+    'section_subheading' => __(config('ui.frontend_layout') . '.search_subheading'),
 ])
 
 <div class="container">
@@ -165,8 +165,8 @@
                     @include('includes.item_gallery', [
                         'items' => $items,
                         'limit' => Config::get('ui.search_results'),
-                        'heading' => __('search.results'),
-                        'subheading' => 'Lorem ipsum dolor sit amet consectetur.'
+                        'heading' => __(config('ui.frontend_layout') . '.search_results_heading'),
+                        'subheading' => __(config('ui.frontend_layout') . '.search_results_subheading')
                     ])
                     
                     @if(count($items))

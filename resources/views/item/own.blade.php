@@ -5,12 +5,14 @@
     <!-- My own items -->
     @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
         'section_id' => 'portfolio',
-        'section_heading' => __('items.my_own'),
-        'section_subheading' => 'Lorem ipsum dolor sit amet consectetur.',
+        'section_heading' => __(config('ui.frontend_layout') . '.my_items_heading'),
+        'section_subheading' => __(config('ui.frontend_layout') . '.my_items_subheading'),
     ])
     
             <div class="container my-5">
-                <a href="{{route('item.create.own', ['item_type'=>$item_type])}}" class="btn btn-primary">@lang('items.new')</a>
+                <a href="{{route('item.create.own', ['item_type'=>$item_type])}}" class="btn btn-primary">
+                    @lang(config('ui.frontend_layout') . '.new_item')
+                </a>
             </div>
             
             <div class="row">
