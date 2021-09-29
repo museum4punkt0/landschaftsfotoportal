@@ -58,7 +58,7 @@
                             osm_map.display(lon, lat, zoom);
                             osm_map.addGeoJsonLayer(ajaxUrl);
                             
-                            osm_map.addMarker(14.986789,  51.153432, '{{ asset("storage/images/logos/mein-smng.png") }}');
+                            //osm_map.addMarker(14.986789,  51.153432, '{{ asset("storage/images/logos/mein-smng.png") }}');
                             
                             osm_map.map.on('rendercomplete', function () {
                                 if (zoomTo == 'extent') {
