@@ -386,8 +386,8 @@ class ItemController extends Controller
         }
         
         // For items without any date (value_daterange = null)
-        // Get number of items per decade
-        $decades[0] = Detail::
+        // Get number of items w/o date
+        $decades[-1] = Detail::
             whereHas('item', function (Builder $query) {
                 $query->where('public', 1);
             })
@@ -395,8 +395,8 @@ class ItemController extends Controller
             ->where('value_daterange', null)
             ->count();
         
-        // Get some random items per decade, to be shown as examples
-        $details[0] = Detail::with('item')
+        // Get some random items w/o date, to be shown as examples
+        $details[-1] = Detail::with('item')
             ->whereHas('item', function (Builder $query) {
                 $query->where('public', 1);
             })

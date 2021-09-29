@@ -124,12 +124,17 @@
                                     </span>
                                     <select name="fields[{{ $cm->column->column_id }}]" class="form-control" size=1 >
                                         <option value=0>- @lang('common.all') -</option>
+                                        <option value=-1
+                                            @if(($search_terms['fields'][$cm->column->column_id] ?? "") == -1)
+                                                selected
+                                            @endif
+                                        >
+                                        @lang('common.unknown')</option>
                                         @foreach($dateranges[$cm->column_fk] as $range => $count)
                                             @if($count)
                                                 <option value="{{$range}}"
-                                                    @if(($search_terms['fields'][$cm->column->column_id] ?? "") == 
-                                                        $range)
-                                                            selected
+                                                    @if(($search_terms['fields'][$cm->column->column_id] ?? "") == $range)
+                                                        selected
                                                     @endif
                                                 >
                                                     {{$range}}@lang('common.decade_suffix')

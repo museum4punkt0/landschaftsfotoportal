@@ -127,9 +127,16 @@ class SearchController extends Controller
                         $search_details[] = $min_max;
                     break;
                     case '_date_range_':
-                        $daterange = '['. date('Y-m-d', mktime(0, 0, 0, 1, 1, intval($val))) .','.
-                            date('Y-m-d', mktime(0, 0, 0, 1, 1, intval($val) + 10)) .')';
-                        $search_details[] = [['column_fk', $col], ['value_daterange', '&&', $daterange]];
+                        // Valid decade
+                        if ($val > 0) {
+                            $daterange = '['. date('Y-m-d', mktime(0, 0, 0, 1, 1, intval($val))) .','.
+                                date('Y-m-d', mktime(0, 0, 0, 1, 1, intval($val) + 10)) .')';
+                            $search_details[] = [['column_fk', $col], ['value_daterange', '&&', $daterange]];
+                        }
+                        // Unknown date (date range not set)
+                        else {
+                            $search_details[] = [['column_fk', $col], ['value_daterange', null]];
+                        }
                     break;
                 }
             }

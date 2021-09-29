@@ -20,10 +20,10 @@
                     <a href="{{ route('search.index', ['fields[27]' => $decade]) }}#searchResults">
                     <div class="timeline-image">
                         <h4>
-                        @if($decade)
+                        @if($decade > 0)
                             {{ $decade }}@lang('common.decade_suffix')
                         @else
-                            Unbekannt
+                            @lang('common.unknown')
                         @endif
                         </h4>
                     </div>
