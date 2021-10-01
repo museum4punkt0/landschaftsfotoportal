@@ -636,6 +636,7 @@
                         //osm_map.updateSize();
                     </script>
                 @endif
+                @include('includes.form_input_help')
                 </div>
                 @break
             
