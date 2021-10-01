@@ -43,7 +43,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarResponsive">
                 <ul class="navbar-nav text-uppercase ml-auto">
-                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.gallery') }}#portfolio">Portal</a></li>
+                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('über') }}">@lang('common.about')</a></li>
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('search.index') }}">@lang('search.header')</a></li>
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.timeline') }}">@lang('landschaftsfotoportal.timeline')</a></li>
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.map') }}">@lang('landschaftsfotoportal.map')</a></li>
@@ -71,7 +71,7 @@
         <div class="container">
             <div class="masthead-subheading">@lang('landschaftsfotoportal.slogan')</div>
             <div class="masthead-heading text-uppercase">Landschafts&shy;fotoportal</div>
-            <a class="btn btn-primary btn-xl text-uppercase js-scroll-trigger" href="#services">@lang('landschaftsfotoportal.join')</a>
+            <a class="btn btn-primary btn-xl text-uppercase js-scroll-trigger" href="{{ route('über') }}">@lang('landschaftsfotoportal.join')</a>
         </div>
     </header>
     
@@ -141,9 +141,9 @@
                     <a class="btn btn-dark btn-social mx-2" target="_blank" href="https://twitter.com/Senckenberg"><i class="fab fa-twitter"></i></a>
                 </div>
                 <div class="col-lg-4 text-lg-right">
-                    <a class="mr-3" href="#!">Impressum</a>
-                    <a class="mr-3" href="#!">Kontakt</a>
-                    <a href="#!">Danksagung</a>
+                    <a class="mr-3" href="{{ route('impressum') }}">@lang('common.legal')</a>
+                    <a class="mr-3" href="{{ route('datenschutz') }}">@lang('common.privacy')</a>
+                    <a href="{{ route('danksagung') }}">@lang('common.credits')</a>
                 </div>
             </div>
         </div>

@@ -22,6 +22,10 @@ Auth::routes(['verify' => true]);
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/frontend', 'HomeController@frontend')->name('frontend');
+Route::get('/impressum', 'HomeController@frontend')->name('impressum');
+Route::get('/privacy', 'HomeController@frontend')->name('datenschutz');
+Route::get('/credits', 'HomeController@frontend')->name('danksagung');
+Route::get('/about', 'HomeController@frontend')->name('über');
 Route::get('/locale/{locale}', 'HomeController@locale')->name('locale');
 Route::get('/search', 'SearchController@index')->name('search.index');
 

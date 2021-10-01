@@ -89,4 +89,9 @@ return [
     'geocoder_no_result' => 'Der Geocoder konnte den Ort ":location" nicht finden!',
     'geocoder_api_key_error' => 'API-Key für Geocoder ungültig!',
     'get_latlon' => 'Koordinaten bestimmen',
+    
+    'about' => 'Über',
+    'credits' => 'Danksagung',
+    'legal' => 'Impressum',
+    'privacy' => 'Datenschutz',
 ];
