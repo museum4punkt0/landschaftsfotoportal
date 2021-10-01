@@ -24,11 +24,69 @@ class TaxonController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $taxa = Taxon::tree()->depthFirst()->paginate(10);
-        
-        return view('admin.taxon.list', compact('taxa'));
+        $aFilter = [
+            'taxon_id' => $request->input('taxon_id'),
+            'taxon_name' => $request->input('taxon_name'),
+            'native_name' => $request->input('native_name'),
+            'valid_name' => $request->input('valid_name'),
+            'rank_abbr' => $request->input('rank_abbr'),
+            'gsl_id' => $request->input('gsl_id'),
+            'bfn_namnr' => $request->input('bfn_namnr'),
+            'bfn_sipnr' => $request->input('bfn_sipnr'),
+        ];
+//        dd($aFilter);
+        $orderby = $request->input('orderby', 'taxon_id');
+        $limit = $request->input('limit', 10);
+        $sort = $request->input('sort', 'desc');
+
+        $aWhere = [];
+        if (!is_null($aFilter['taxon_id'])) {
+            $aWhere[] = ['taxon_id', '=', $aFilter['taxon_id']];
+        }
+        if (!is_null($aFilter['taxon_name'])) {
+            $aWhere[] = ['taxon_name', 'ilike', '%' . $aFilter['taxon_name'] . '%'];
+        }
+        if (!is_null($aFilter['native_name'])) {
+            $aWhere[] = ['native_name', 'ilike', '%' . $aFilter['native_name'] . '%'];
+        }
+        if (!is_null($aFilter['valid_name'])) {
+            if($aFilter['valid_name'] == -1){
+                $aWhere[] = ['valid_name', '!=', null];
+            }else{
+                $aWhere[] = ['valid_name', '=', null];
+            }
+        }
+        if (!is_null($aFilter['rank_abbr'])) {
+            $aWhere[] = ['rank_abbr', 'ilike', '%' . $aFilter['rank_abbr'] . '%'];
+        }
+        if (!is_null($aFilter['gsl_id'])) {
+            $aWhere[] = ['gsl_id', 'ilike', '%' . $aFilter['gsl_id']. '%'];
+        }
+        if (!is_null($aFilter['bfn_namnr'])) {
+            $aWhere[] = ['bfn_namnr', 'ilike', '%' . $aFilter['bfn_namnr']. '%'];
+        }
+        if (!is_null($aFilter['bfn_sipnr'])) {
+            $aWhere[] = ['bfn_sipnr', 'ilike', '%' . $aFilter['bfn_sipnr']. '%'];
+        }
+
+        if (count($aWhere) > 0) {
+            $taxa = Taxon::orderBy($orderby, $sort)
+                    ->orWhere($aWhere)
+                    ->paginate($limit)
+                    ->withQueryString();
+        }
+        elseif( !is_null($request->input('sort')) ){
+            $taxa = Taxon::orderBy($orderby, $sort)
+                    ->paginate($limit)
+                    ->withQueryString();
+        }
+        else {
+             $taxa = Taxon::tree()->depthFirst()->paginate($limit);
+        }
+//        dd($taxa);
+        return view('admin.taxon.list', compact('taxa', 'aFilter'));
     }
 
     /**

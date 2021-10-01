@@ -38,13 +38,130 @@
                 <table class="table mt-4">
                 <thead>
                     <tr>
-                        <th colspan="1">@lang('common.id')</th>
+                        <th colspan="1" >@lang('common.id')</th>
                         <th colspan="1">@lang('common.description')</th>
                         <th colspan="1">@lang('columns.list')</th>
                         <th colspan="1">@lang('columns.column_group')</th>
                         <th colspan="1">@lang('taxon.list')</th>
                         <th colspan="1">@lang('colmaps.item_type')</th>
                         <th colspan="1">@lang('common.actions')</th>
+                    </tr>
+                    <tr>
+                        <th colspan="1">
+                            <input type="text" id="colmap_id" size="3" class="form-control Listfilter" value="{{$aFilter['colmap_id']}}" />
+                        </th>
+                        <th colspan="1">
+                            <input type="text" id="description" size="12" class="form-control Listfilter" style="width:100%;" value="{{$aFilter['description']}}" />
+                        </th>
+                        <th colspan="1">
+                        </th>
+                        <th colspan="1">
+                            <select id="column_group_fk" style="width:100%;" class="form-control Listfilter" >
+                                <option value="">@lang('common.showall')</option>
+                                @foreach($column_groups as $ColumnGroup)
+                                    <option value="{{$ColumnGroup->element_fk}}" @if ($ColumnGroup->element_fk == $aFilter['column_group_fk']) selected="selected" @endif>
+                                        {{$ColumnGroup->value}}</option>
+                                @endforeach
+                            </select>
+                        </th>
+                        <th colspan="1">
+                            <select id="taxon_fk" style="width:100%;" class="form-control Listfilter" >
+                                <option value="">@lang('common.showall')</option>
+                                @foreach($taxa as $taxon)
+                                    <option value="{{$taxon->taxon_id}}" @if ($taxon->taxon_id == $aFilter['taxon_fk']) selected="selected" @endif>
+                                        {{$taxon->full_name}}</option>
+                                @endforeach
+                            </select>
+                        </th>
+                        <th colspan="1">
+                            <select id="item_type_fk" style="width:100%;" class="form-control Listfilter" >
+                                <option value="">@lang('common.showall')</option>
+                                @foreach($item_types as $ItemType)
+                                    <option value="{{$ItemType->element_fk}}" @if ($ItemType->element_fk == $aFilter['item_type_fk']) selected="selected" @endif>
+                                        {{$ItemType->value}}</option>
+                                @endforeach
+                            </select>
+                        </th>
+                        <th colspan="1">
+                            <form action="{{route(@Route::currentRouteName())}}" method="GET" id="frmListFilter">
+                                <script type="text/javascript">
+                                    function param(name) {
+                                        return (location.search.split(name + '=')[1] || '').split('&')[0];
+                                    }
+
+                                    $(document).ready(function () {
+                                        $('.Listfilter').tooltip();
+                                        $('#limit').change(function (e){
+                                            if(!$('#hidden_limit').length){
+                                                $('#frmListFilter').append('<input type="hidden" name="limit" class="hiddenlistfilter" id="hidden_limit" value="' + this.value + '" />');
+                                            }else{
+                                                $('#hidden_limit').val(this.value);
+                                            }
+                                            if(param('sort') !== '' && column === param('orderby') ){    
+                                                if( $('#hidden_sort').val() === 'desc' ){
+                                                    $('#hidden_sort').val('asc');
+                                                }else{
+                                                    $('#hidden_sort').val('desc');
+                                                }
+                                            }
+                                            $('#frmListFilter').submit();
+
+                                        });
+                                        if(param('limit') > 0 ){
+                                            $('#frmListFilter').append('<input type="hidden" name="limit" class="hiddenlistfilter" id="hidden_limit" value="' + param('limit') + '" />');
+                                        }
+
+                                        $('#limit > option').each(function(){
+                                            if(this.value === param('limit')){
+                                                $(this).attr('selected', 1);
+                                            }
+                                        });
+
+                                        //Suche
+                                        var aFields = [
+                                            {name: 'colmap_id', type: 'string', element: 'text'},
+                                            {name: 'description', type: 'string', element: 'text'},
+                                            {name: 'item_type_fk', type: 'string', element: 'text'},
+                                            {name: 'taxon_fk', type: 'string', element: 'text'}, //$colmap->taxon->taxon_name
+                                            {name: 'column_fk', type: 'string', element: 'text'}, //$colmap->column_group->values as $v    $v->attribute->name
+                                            {name: 'column_group_fk', type: 'string', element: 'text'}, //$colmap->column_group->values as $v    $v->attribute->name
+                                        ];
+                                        for (field in aFields) {
+                                            switch (aFields[field].element) {
+                                                case 'select':
+                                                    $('#frmListFilter').append('<input type="hidden" name="' + aFields[field].name + '" class="hiddenlistfilter" id="hidden_' + aFields[field].name + '" value="' + param(aFields[field].name) + '" />');
+                                                    break;
+                                                case 'text':
+                                                    $('#frmListFilter').append('<input type="hidden" name="' + aFields[field].name + '" class="hiddenlistfilter" id="hidden_' + aFields[field].name + '" value="' + param(aFields[field].name) + '" />');
+                                                    break;
+                                            }
+                                        }
+
+                                        //Übernahme der Werte in die Versteckten Felder
+                                        //transfer values from input-fields in the hidden ones
+                                        $('.Listfilter').keyup(function (e) {
+                                            $('#hidden_' + this.id).val(this.value);
+                                            if (e.key === 'Enter') {
+                                                $('#frmListFilter').submit();
+                                            }
+                                        });
+
+                                        $('.Listfilter').change(function (e) {
+                                            $('#hidden_' + this.id).val(this.value);
+                                        });
+
+                                        $('#btnReset').click(function () {
+                                            for (field in aFields) {
+                                                $('#hidden_' + aFields[field].name).val('');
+                                                $('.Listfilter').val('');
+                                            }
+                                        });
+                                    });
+                                </script>
+                                <button class="btn btn-primary" type="submit">@lang('common.filter')</button>
+                                <button class="btn btn-primary" type="reset" id="btnReset">@lang('common.reset')</button>
+                            </form>
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
@@ -106,6 +223,14 @@
         @endif
         <div class="card-footer">
             {{ $colmaps->links() }}
+             @lang('common.rowsperpage')<div style="width: 100px;">                
+                <select id="limit" class="form-control">
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
         </div>
     </div>
 </div>
