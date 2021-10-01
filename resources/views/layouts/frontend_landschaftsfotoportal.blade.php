@@ -113,17 +113,19 @@
     
 @if (Route::currentRouteName() == 'item.gallery')
     <!-- Partner Logos -->
-    <div class="py-5 bg-light">
+    <div class="py-5 bg-white">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-4 col-sm-6 my-3">
-                    <a href="https://www.senckenberg.de/" target="_blank"><img class="img-fluid d-block mx-auto" src="{{ asset('storage/images/logos/sgn_logo.png') }}" alt="" /></a>
+                    <a href="https://www.bundesregierung.de/breg-de/suche/kultur-fuer-alle-1543646"><img class="img-fluid d-block mx-auto" src="{{ asset('storage/images/logos/bkm_logo.png') }}" alt="" /></a>
                 </div>
                 <div class="col-md-4 col-sm-6 my-3">
+                    <div>Im Rahmen von:</div>
                     <a href="https://www.museum4punkt0.de/teilprojekt/forschung-in-museen-erklaeren-verstehen-mitmachen/"><img class="img-fluid d-block mx-auto" src="{{ asset('storage/images/logos/museum4punkt0_logo.png') }}" alt="" /></a>
                 </div>
                 <div class="col-md-4 col-sm-6 my-3">
-                    <a href="https://www.bundesregierung.de/breg-de/suche/kultur-fuer-alle-1543646"><img class="img-fluid d-block mx-auto" src="{{ asset('storage/images/logos/bkm_logo.png') }}" alt="" /></a>
+                    <div>Ein Projekt von:</div>
+                    <a href="https://www.senckenberg.de/" target="_blank"><img class="img-fluid d-block mx-auto" src="{{ asset('storage/images/logos/sgn_logo.png') }}" alt="" /></a>
                 </div>
             </div>
         </div>
