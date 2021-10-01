@@ -33,4 +33,5 @@ return [
     'actions' => 'actions',
     'language' => 'language',
     'ordering' => 'ordering',
+    'rowsperpage' => 'Rows per Page:',
 ];

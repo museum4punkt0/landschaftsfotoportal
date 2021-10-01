@@ -15,6 +15,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Redirect;
+use Debugbar;
 
 class ColumnMappingController extends Controller
 {
@@ -33,11 +34,60 @@ class ColumnMappingController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $colmaps = ColumnMapping::orderByRaw('item_type_fk, column_order')->paginate(10);
+        $aFilter = [
+            'colmap_id' => $request->input('colmap_id'),
+            'description' => $request->input('description'),
+            'element' => $request->input('element_id'),
+            'item_type_fk' => $request->input('item_type_fk'),
+            'column_group_fk' => $request->input('column_group_fk'),
+            'taxon_fk' => $request->input('taxon_fk'),
+        ];
         
-        return view('admin.colmap.list', compact('colmaps'));
+        $orderby = $request->input('orderby', 'colmap_id');
+        $limit = $request->input('limit', 10);
+        $sort = $request->input('sort', 'desc');
+        
+        $aWhere = [];
+        if (!is_null($aFilter['colmap_id'])) {
+            $aWhere[] = ['colmap_id', '=', $aFilter['colmap_id']];
+        }
+        if (!is_null($aFilter['description'])) {
+            // just a dummy, should always be true
+            $aWhere[] = ['colmap_id', '>', 0];
+        }
+        if (!is_null($aFilter['item_type_fk'])) {
+            $aWhere[] = ['item_type_fk', '=', $aFilter['item_type_fk']];
+        }
+        if (!is_null($aFilter['taxon_fk'])) {
+            $aWhere[] = ['taxon_fk', '=', $aFilter['taxon_fk']];
+        }
+        if (!is_null($aFilter['column_group_fk'])) {
+            $aWhere[] = ['column_group_fk', '=', $aFilter['column_group_fk']];
+        }
+
+        if (count($aWhere) > 0) {
+            $colmaps = ColumnMapping::orderBy($orderby, $sort)
+                    ->when(!is_null($aFilter['description']), function ($query) use ($aFilter) {
+                        return $query->whereHas('column', function ($query) use ($aFilter) {
+                            $query->where('description', 'ILIKE', '%'.$aFilter['description'].'%');
+                        });
+                    })
+                    ->where($aWhere)
+                    ->paginate($limit)
+                    ->withQueryString(); //append the get parameters
+        }
+        else {
+              $colmaps = ColumnMapping::orderBy($orderby, $sort)->paginate($limit);
+        }
+        
+        $lang = app()->getLocale();
+        $item_types = Localization::getItemTypes($lang);             
+        $column_groups = Localization::getColumnGroups($lang);
+        $taxa = Taxon::has('column_mapping')->orderBy('full_name')->get();
+        
+        return view('admin.colmap.list', compact('colmaps', 'aFilter', 'item_types', 'column_groups', 'taxa'));
     }
 
     /**
@@ -269,9 +319,9 @@ class ColumnMappingController extends Controller
         if ($request->has('ids')) {
             $arr = explode(',', $request->input('ids'));
             
-            foreach ($arr as $sortOrder => $id) {
+            foreach ($arr as $order => $id) {
                 $colmap = ColumnMapping::firstWhere('colmap_id', $id);
-                $colmap->column_order = $sortOrder;
+                $colmap->column_order = $order;
                 $colmap->save();
             }
             return ['success'=>true, 'message'=>'Updated'];

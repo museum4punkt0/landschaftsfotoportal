@@ -45,28 +45,32 @@ class ItemController extends Controller
     {
         $aFilter = [
             'id' => $request->input('id'),
-            'name' => $request->input('name'),
+            'title' => $request->input('title'),
             'item_type' => $request->input('item_type'),
         ];
+        $orderby = $request->input('orderby', 'item_id');
+        $sort = $request->input('sort', 'desc');
+        $limit = $request->input('limit', 10);
 
         $aWhere = [];
         if (!is_null($aFilter['id'])) {
             $aWhere[] = ['item_id', '=', $aFilter['id']];
         }
-        if (!is_null($aFilter['name'])) {
-            $aWhere[] = ['title', 'ilike', '%' . $aFilter['name'] . '%'];
+        if (!is_null($aFilter['title'])) {
+            $aWhere[] = ['title', 'ilike', '%' . $aFilter['title'] . '%'];
         }
         if (!is_null($aFilter['item_type'])) {
             $aWhere[] = ['item_type_fk', '=', $aFilter['item_type']];
         }
 
         if (count($aWhere) > 0) {
-            $items = Item::orderBy('item_id', 'desc')
+            $items = Item::orderBy($orderby, $sort)
                     ->orWhere($aWhere)
-                    ->paginate(10);
+                    ->paginate($limit)
+                    ->withQueryString(); //append the get parameters
         }
         else {
-            $items = Item::orderBy('item_id', 'desc')->paginate(10);
+            $items = Item::orderBy($orderby, $sort)->paginate($limit);
         }
 
         // Get current UI language

@@ -57,7 +57,7 @@ class Taxon extends Model
      */
     public function column_mapping()
     {
-        return $this->hasMany('App\ColumnMapping', 'column_fk', 'column_id');
+        return $this->hasMany('App\ColumnMapping', 'taxon_fk', 'taxon_id');
     }
     
     /**
