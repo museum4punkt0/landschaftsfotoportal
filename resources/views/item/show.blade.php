@@ -32,16 +32,26 @@
 
 @section('content')
 
-    <!-- Image details -->
-    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
-        'section_id' => 'details',
-        'section_heading' => __(config('ui.frontend_layout') . '.details_heading'),
-        'section_subheading' => __(config('ui.frontend_layout') . '.details_subheading'),
-        'options' => ['image_medium' => true],
-    ])
-    <!-- Icons for user interaction -->
-    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.item_buttons')
-
+    @if($item->item_type->attributes->firstWhere('name', 'code')->pivot->value != '_static_')
+        <!-- Image details -->
+        @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
+            'section_id' => 'details',
+            'section_heading' => __(config('ui.frontend_layout') . '.details_heading'),
+            'section_subheading' => __(config('ui.frontend_layout') . '.details_subheading'),
+            'options' => ['image_medium' => true],
+        ])
+        
+        <!-- Icons for user interaction -->
+        @includeIf('includes.' . Config::get('ui.frontend_layout') . '.item_buttons')
+    @else
+        <!-- Display only the heading from database item -->
+        @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
+            'section_id' => 'details',
+            'section_heading' => $item->title,
+            'section_subheading' => '',
+        ])
+    @endif
+    
 @foreach($colmap->groupBy('column_group_fk') as $cg)
     
     @unless($cg->first()->column_group->getConfigValue('hide_heading'))
