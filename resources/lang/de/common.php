@@ -77,6 +77,7 @@ return [
     'filter' => 'Filtern',
     'showall' => 'Zeige alle',
     'reset' => 'Zurücksetzen',
+    'top' => 'Nach oben',
     'meta_data' => 'Metadaten',
     'permalink' => 'Permalink',
     'created' => 'erstellt',
@@ -90,6 +91,7 @@ return [
     'geocoder_api_key_error' => 'API-Key für Geocoder ungültig!',
     'get_latlon' => 'Koordinaten bestimmen',
     
+    'home' => 'Start',
     'about' => 'Über',
     'credits' => 'Danksagung',
     'legal' => 'Impressum',
