@@ -159,8 +159,6 @@
             {{-- Data_type of form field is boolean --}}
             @case('_boolean_')
                 <div class="form-group">
-                    @include('includes.column_label')
-                    
                     <div class="form-check @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif">
                         <input type="hidden" name="fields[{{ $cm->column->column_id }}]" value=0 />
                         <input
@@ -173,12 +171,11 @@
                             @if(old('fields.'. $cm->column->column_id)) checked @endif
                             @if($loop->first && !$options['edit.meta']) autofocus @endif
                         />
-                        {{ $cm->column->translation->attributes->
-                            firstWhere('name', 'name_'.app()->getLocale())->pivot->value }} 
-                        
-                        @include('includes.form_input_help')
-                        <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                        @include('includes.column_label', ['css_class' => 'form-check-label'])
                     </div>
+                    
+                    @include('includes.form_input_help')
+                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 @break
             

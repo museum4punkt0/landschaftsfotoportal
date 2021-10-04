@@ -1,4 +1,4 @@
-<label for="fieldsInput-{{ $cm->column->column_id }}">
+<label for="fieldsInput-{{ $cm->column->column_id }}" class="{{ $css_class ?? '' }}">
     @if($cm->public != 1)
         <i class="fas {{ Config::get('ui.icon_unpublished', 'fa-eye-slash') }}"
             title="@lang('common.unpublished')"></i>

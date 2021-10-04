@@ -163,8 +163,6 @@
             {{-- Data_type of form field is boolean --}}
             @case('_boolean_')
                 <div class="form-group">
-                    @include('includes.column_label')
-                    
                     <div class="form-check">
                         <input type="hidden" name="fields[{{ $cm->column->column_id }}]" value=0 />
                         <input
@@ -178,10 +176,11 @@
                             optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int)) checked @endif
                             @if($loop->first && !$options['edit.meta']) autofocus @endif
                         />
-                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
-                        @include('includes.form_input_help')
-                        <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                        @include('includes.column_label', ['css_class' => 'form-check-label'])
                     </div>
+                    
+                    @include('includes.form_input_help')
+                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 @break
             
