@@ -125,16 +125,14 @@
     <div class="py-5 bg-white">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-md-4 col-sm-6 my-3">
+                <div class="col-md-4 col-sm-12 my-3">
                     <a href="https://www.bundesregierung.de/breg-de/suche/kultur-fuer-alle-1543646"><img class="img-fluid d-block mx-auto" src="{{ asset('storage/images/logos/bkm_logo.png') }}" alt="" /></a>
                 </div>
-                <div class="col-md-4 col-sm-6 my-3">
-                    <div>Im Rahmen von:</div>
+                <div class="col-md-4 col-sm-12 my-3">
                     <a href="https://www.museum4punkt0.de/teilprojekt/forschung-in-museen-erklaeren-verstehen-mitmachen/"><img class="img-fluid d-block mx-auto" src="{{ asset('storage/images/logos/museum4punkt0_logo.png') }}" alt="" /></a>
                 </div>
-                <div class="col-md-4 col-sm-6 my-3">
-                    <div>Ein Projekt von:</div>
-                    <a href="https://www.senckenberg.de/" target="_blank"><img class="img-fluid d-block mx-auto" src="{{ asset('storage/images/logos/sgn_logo.png') }}" alt="" /></a>
+                <div class="col-md-4 col-sm-12 my-3">
+                    <a href="https://www.senckenberg.de/" target="_blank"><img class="img-fluid d-block mx-auto mt-5" src="{{ asset('storage/images/logos/sgn_logo.png') }}" alt="" /></a>
                 </div>
             </div>
         </div>
