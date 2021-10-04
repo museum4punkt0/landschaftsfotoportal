@@ -75,6 +75,15 @@
         </div>
     </header>
     
+    <!-- Mission statement -->
+    <section class="page-section" id="mission">
+        <div class="container text-center">
+            <h3 class="section-subheading text-muted">
+                @lang('landschaftsfotoportal.mission_statement')
+            </h3>
+        </div>
+    </section>
+    
     <!-- Services -->
     <section class="page-section" id="services">
         <div class="container">

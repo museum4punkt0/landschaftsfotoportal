@@ -11,6 +11,7 @@ return [
     */
 
     'slogan' => 'Erhalten - Erschließen - Nutzbar machen',
+    'mission_statement' => 'Wie haben sich die uns umgebenden Landschaften im letzten Jahrhundert verändert?<br>Landschaftsfotografien als wichtige Dokumente der Landschaftsentwicklung in Raum und Zeit, können zur Beantwortung dieser Frage erste Anhaltspunkte liefern. Ob Papierfoto, Dia oder Digitalbild - Fotografien aus privaten Beständen werden hier im Portal gesammelt, erschlossen und als wertvolle Quellen für die Erforschung von Veränderungen der Naturräume nutzbar gemacht.',
     'join' => 'Jetzt mitmachen!',
 
     'new_item' => 'Neues Foto hochladen',
