@@ -381,7 +381,7 @@ class ItemController extends Controller
                 ->where('column_fk', $daterange_column)
                 ->whereRaw("value_daterange && '$daterange'")
                 ->inRandomOrder()
-                ->take(5)
+                ->take(4)
                 ->get();
         }
         
@@ -403,7 +403,7 @@ class ItemController extends Controller
             ->where('column_fk', $daterange_column)
             ->where('value_daterange', null)
             ->inRandomOrder()
-            ->take(5)
+            ->take(4)
             ->get();
         
         return view('item.timeline', compact('decades', 'details'));
