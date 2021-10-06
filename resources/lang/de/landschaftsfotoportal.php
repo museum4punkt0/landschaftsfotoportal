@@ -14,6 +14,9 @@ return [
     'mission_statement' => 'Wie haben sich die uns umgebenden Landschaften im letzten Jahrhundert verändert?<br>Landschaftsfotografien als wichtige Dokumente der Landschaftsentwicklung in Raum und Zeit, können zur Beantwortung dieser Frage erste Anhaltspunkte liefern. Ob Papierfoto, Dia oder Digitalbild - Fotografien aus privaten Beständen werden hier im Portal gesammelt, erschlossen und als wertvolle Quellen für die Erforschung von Veränderungen der Naturräume nutzbar gemacht.',
     'join' => 'Jetzt mitmachen!',
 
+    'download_title' => 'Foto in Originalgröße herunterladen',
+    'download_terms' => 'Mit dem Herunterladen von Bildern erkläre ich mich mit den folgenden Nutzungsbedingungen einverstanden:<br>Die Bilder des Landschaftsfotoportals stehen unter der <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.de" target="_blank">Creative Commons-Lizenz CC BY-SA 4.0</a> kostenfrei zur Verfügung.',
+
     'new_item' => 'Neues Foto hochladen',
 
     'upload' => 'Fotos hochladen',

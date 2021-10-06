@@ -4,7 +4,11 @@
                     @guest
                         <a href="#" data-toggle="modal" data-target="#downloadModal" data-href="{{ route('item.download', $item->item_id) }}" title="@lang('common.download')">
                     @else
-                        <a href="{{ route('item.download', $item->item_id) }}" title="@lang('common.download')">
+                        @if(Config::get('ui.download_terms_auth'))
+                            <a href="#" data-toggle="modal" data-target="#downloadModal" data-href="{{ route('item.download', $item->item_id) }}" title="@lang('common.download')">
+                        @else
+                            <a href="{{ route('item.download', $item->item_id) }}" title="@lang('common.download')">
+                        @endif
                     @endguest
                             <i class="fas fa-circle fa-stack-2x text-primary"></i>
                             <i class="fas {{ Config::get('ui.icon_download') }} fa-stack-1x fa-inverse"></i>

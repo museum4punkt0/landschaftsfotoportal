@@ -95,5 +95,16 @@ return [
     
     'start_year' => 1930,
     'end_year' => null,
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Accepting terms is required for downloading
+    |--------------------------------------------------------------------------
+    |
+    | A authenticated user must accept terms before downloading an item or image.
+    |
+    */
+    
+    'download_terms_auth' => true,
 
 ];
