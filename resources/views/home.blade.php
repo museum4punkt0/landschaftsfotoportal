@@ -21,9 +21,11 @@
                             </div>
                         @endif
 
-                        @lang('auth.logged_in')
-                        @lang('users.group'): @lang('users.group_'. $user->group->name)
-                        
+                        <h4 class="text-center mb-5">
+                            @lang('auth.logged_in')
+                            @lang('users.group'): @lang('users.group_'. $user->group->name)
+                        </h4>
+
                         <!-- Links for user actions, depending on template -->
                         @if(Config::get('ui.frontend_layout') == 'landschaftsfotoportal')
                             <div class="container"><div class="row text-center my-3">
@@ -34,7 +36,7 @@
                                             <i class="fas {{ Config::get('ui.icon_items_own') }} fa-stack-1x fa-inverse"></i>
                                         </a>
                                     </span>
-                                    <p class="font-weight-bold">@lang('landschaftsfotoportal.my_items_heading')</p>
+                                    <h4 class="my-3">@lang('landschaftsfotoportal.my_items_heading')</h4>
                                 </div>
                                 <div class="col">
                                     <span class="fa-stack fa-4x">
@@ -43,7 +45,7 @@
                                             <i class="fas {{ Config::get('ui.icon_cart_add') }} fa-stack-1x fa-inverse"></i>
                                         </a>
                                     </span>
-                                    <p class="font-weight-bold">@lang('cart.my_own')</p>
+                                    <h4 class="my-3">@lang('cart.my_own')</h4>
                                 </div>
                                 <div class="col">
                                     <span class="fa-stack fa-4x">
@@ -52,7 +54,7 @@
                                             <i class="fas {{ Config::get('ui.icon_comment') }} fa-stack-1x fa-inverse"></i>
                                         </a>
                                     </span>
-                                    <p class="font-weight-bold">@lang('comments.my_own')</p>
+                                    <h4 class="my-3">@lang('comments.my_own')</h4>
                                 </div>
                                 <div class="col">
                                     <span class="fa-stack fa-4x">
@@ -61,7 +63,7 @@
                                             <i class="fas {{ Config::get('ui.icon_email_address') }} fa-stack-1x fa-inverse"></i>
                                         </a>
                                     </span>
-                                    <p class="font-weight-bold">@lang('users.change_email')</p>
+                                    <h4 class="my-3">@lang('users.change_email')</h4>
                                 </div>
                             </div></div>
                         @endif
