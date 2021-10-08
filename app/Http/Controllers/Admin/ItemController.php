@@ -253,8 +253,13 @@ class ItemController extends Controller
                     case '_image_':
                         if ($file->isValid()) {
                             $path = config('media.full_dir');
-                            $name = $item->item_id . "_" . $column_id . "_" . date('YmdHis') . "_";
-                            $name .= $file->getClientOriginalName();
+                            $name = $item->item_id . "_" . $column_id . "_" . date('YmdHis');
+                            if (config('media.append_original_filename')) {
+                                $name .= "_" . $file->getClientOriginalName();
+                            }
+                            else {
+                                $name .= "." . $file->extension();
+                            }
 
                             // Store on local 'public' disc
                             $file->storeAs($path, $name, 'public');
@@ -526,8 +531,13 @@ class ItemController extends Controller
                     case '_image_':
                         if ($file->isValid()) {
                             $path = config('media.full_dir');
-                            $name = $item->item_id . "_" . $column_id . "_" . date('YmdHis') . "_";
-                            $name .= $file->getClientOriginalName();
+                            $name = $item->item_id . "_" . $column_id . "_" . date('YmdHis');
+                            if (config('media.append_original_filename')) {
+                                $name .= "_" . $file->getClientOriginalName();
+                            }
+                            else {
+                                $name .= "." . $file->extension();
+                            }
 
                             // Store on local 'public' disc
                             $file->storeAs($path, $name, 'public');
