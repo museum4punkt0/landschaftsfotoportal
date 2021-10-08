@@ -25,7 +25,7 @@
     </div>
 @else
 
-<form action="{{ route($options['route']) }}" method="POST" enctype="multipart/form-data">
+<form id="itemCreateForm" action="{{ route($options['route']) }}" method="POST" enctype="multipart/form-data">
     
 @if($options['edit.meta'])
     <div class="form-group">
@@ -742,7 +742,13 @@
     @endif
     
     <div class="form-group">
+    {{-- Check if we are using a backend route --}}
+    @if($options['edit.meta'] || !config('ui.upload_terms_auth'))
         <button type="submit" class="btn btn-primary">@lang('common.save')</button>
+    @else
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#uploadModal" data-form-id="itemCreateForm">@lang('common.save')</button>
+        @include('includes.modal_upload')
+    @endif
     </div>
     {{ csrf_field() }}
 </form>

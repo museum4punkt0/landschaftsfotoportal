@@ -87,9 +87,11 @@ return [
     |--------------------------------------------------------------------------
     |
     | Set the first and last year for form inputs representing a date range.
-    | To make the upper boundary the current year, set 'end_year' to 'null', without any quotes!
-    | The boundary values could be overwritten for for any call of the included blade view,
-    | please see explanation in resources/views/includes/form_date_range.blade.php
+    | To make the upper boundary the current year, set 'end_year' to 'null',
+    | without any quotes!
+    | The boundary values could be overwritten for for any call of the included
+    | blade view, please see explanation in
+    | resources/views/includes/form_date_range.blade.php
     |
     */
     
@@ -106,5 +108,16 @@ return [
     */
     
     'download_terms_auth' => true,
+    
+    /*
+    |--------------------------------------------------------------------------
+    | Accepting terms is required for uploading
+    |--------------------------------------------------------------------------
+    |
+    | A authenticated user must accept terms before uploading an image / creating an item.
+    |
+    */
+    
+    'upload_terms_auth' => true,
 
 ];
