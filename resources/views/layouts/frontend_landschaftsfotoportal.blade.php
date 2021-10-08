@@ -116,6 +116,10 @@
             </div>
         </div>
     </section>
+@else
+    <!-- Masthead -->
+    <header class="masthead masthead-mini">
+    </header>
 @endif
     
     <!-- Include the content section, e.g. gallery, timeline, image details -->

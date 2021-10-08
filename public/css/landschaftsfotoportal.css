@@ -177,6 +177,10 @@ header.masthead {
   background-position: center center;
   background-size: cover;
 }
+header.masthead-mini {
+  opacity: 0.9;
+  background-image: url("../storage/images/header-bg-mini.jpg");
+}
 header.masthead .masthead-subheading {
   font-size: 1.5rem;
   font-style: italic;
