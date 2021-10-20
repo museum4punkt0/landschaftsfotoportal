@@ -90,26 +90,40 @@
         <div class="container">
             <div class="row text-center">
                 <div class="col-md-4">
-                    <span class="fa-stack fa-4x">
-                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                        <i class="fas fa-upload fa-stack-1x fa-inverse"></i>
-                    </span>
+                @guest
+                    <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('comments.new')">
+                @else
+                    <a href="{{ route('item.show.own') }}">
+                @endguest
+                        <span class="fa-stack fa-4x btn-hover">
+                            <i class="fas fa-circle fa-stack-2x"></i>
+                            <i class="fas fa-upload fa-stack-1x fa-inverse"></i>
+                        </span>
+                    </a>
                     <h4 class="my-3">@lang('landschaftsfotoportal.upload')</h4>
                     <p class="text-muted">@lang('landschaftsfotoportal.upload_teaser')</p>
                 </div>
                 <div class="col-md-4">
-                    <span class="fa-stack fa-4x">
-                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                        <i class="fas fa-images fa-stack-1x fa-inverse"></i>
-                    </span>
+                @guest
+                    <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('comments.new')">
+                @else
+                    <a href="{{ route('cart.index') }}">
+                @endguest
+                        <span class="fa-stack fa-4x btn-hover">
+                            <i class="fas fa-circle fa-stack-2x"></i>
+                            <i class="fas fa-images fa-stack-1x fa-inverse"></i>
+                        </span>
+                    </a>
                     <h4 class="my-3">@lang('cart.my_own')</h4>
                     <p class="text-muted">@lang('landschaftsfotoportal.cart_teaser')</p>
                 </div>
                 <div class="col-md-4">
-                    <span class="fa-stack fa-4x">
-                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                        <i class="fas fa-map fa-stack-1x fa-inverse"></i>
-                    </span>
+                    <a href="{{ route('item.map') }}">
+                        <span class="fa-stack fa-4x btn-hover">
+                            <i class="fas fa-circle fa-stack-2x"></i>
+                            <i class="fas fa-map fa-stack-1x fa-inverse"></i>
+                        </span>
+                    </a>
                     <h4 class="my-3">@lang('landschaftsfotoportal.map')</h4>
                     <p class="text-muted">@lang('landschaftsfotoportal.map_teaser')</p>
                 </div>

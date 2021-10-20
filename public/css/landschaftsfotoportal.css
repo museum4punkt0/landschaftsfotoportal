@@ -94,6 +94,13 @@ img::-moz-selection {
   border-radius: 100%;
 }
 
+.btn-hover {
+  transition: color ease-in-out 0.25s;
+}
+.btn-hover:hover {
+  color: #A4AF00;
+}
+
 #mainNav {
   padding-top: 1rem;
   padding-bottom: 1rem;
