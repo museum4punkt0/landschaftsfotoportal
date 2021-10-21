@@ -36,7 +36,7 @@ return [
     'gallery_incomplete_heading' => 'Fotos ohne Ortsangabe',
     'gallery_incomplete_subheading' => 'Wissen Sie, wo das Foto aufgenommen wurde? Teilen Sie Ihr Wissen mit uns und senden Sie uns einen Kommentar!',
     'timeline_heading' => 'Zeitstrahl',
-    'timeline_subheading' => 'Alle Landschaftsfotos mit einer Zeitangabe werden hier nach Jahrzehnten geordnet.',
+    'timeline_subheading' => 'Alle Landschaftsfotos mit einer Zeitangabe werden hier nach Jahrzehnten geordnet. Mit Klick auf das Jahrzehnt werden diese als Suchanfrage angezeigt.',
     'map_heading' => 'Karte',
     'map_subheading' => 'Auf der Karte werden alle Landschaftsfotos mit einer Ortangabe angezeigt. Sie können die Karte verwenden, um nach Fotos an einem bestimmten Ort zu suchen und sich die Suchergebnisse aus dem gewählten Kartenausschnitt anzeigen lassen.',
     'details_heading' => 'Bildinformationen',
