@@ -32,6 +32,8 @@ Route::get('/search', 'SearchController@index')->name('search.index');
 Route::get('/email/change', 'Auth\ChangeEmailController@change')->name('email.change');
 Route::post('/email/store', 'Auth\ChangeEmailController@store')->name('email.store');
 
+Route::get('sipnr/{sipnr}', 'BfnController@redirectSipnr')->name('bfn.sipnr');
+
 Route::get('item/show/own', 'ItemController@own')->name('item.show.own');
 Route::get('download/{item}', 'ItemController@download')->name('item.download');
 Route::get('gallery', 'ItemController@gallery')->name('item.gallery');

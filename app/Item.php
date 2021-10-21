@@ -110,6 +110,22 @@ class Item extends Model
         return $query->where('created_by', $owner);
     }
     
+    /**
+     * Scope a query to only include items with a given data type.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  mixed  $type
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOfItemType($query, $type)
+    {
+        return $query->whereHas('item_type', function ($query) use ($type) {
+            $query->whereHas('values', function ($query) use ($type) {
+                $query->where('value', $type);
+            });
+        });
+    }
+
     
     use \Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
     
