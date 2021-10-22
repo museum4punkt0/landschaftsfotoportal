@@ -70,10 +70,21 @@ return [
     
     /*
     |--------------------------------------------------------------------------
+    | Number of items in cart or own items
+    |--------------------------------------------------------------------------
+    |
+    | How many thumbnails are displayed in a special gallery in user's profile
+    |
+    */
+    
+    'cart_items' => 12,
+    
+    /*
+    |--------------------------------------------------------------------------
     | Number of items in gallery
     |--------------------------------------------------------------------------
     |
-    | How many thumbnails are displayed in a gallery
+    | How many thumbnails are displayed in a single gallery on home page
     |
     */
     

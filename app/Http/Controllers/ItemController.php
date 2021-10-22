@@ -284,7 +284,9 @@ class ItemController extends Controller
             ->first()->element_id;
         
         $items = Item::myOwn(Auth::user()->id)->with('details')
-            ->where('item_type_fk', $item_type)->latest()->paginate(12);
+            ->where('item_type_fk', $item_type)
+            ->latest()
+            ->paginate(config('ui.cart_items'));
         
         return view('item.own', compact('items', 'item_type'));
     }

@@ -25,7 +25,9 @@ class CartController extends Controller
      */
     public function index()
     {
-        $cart = Cart::myOwn(Auth::user()->id)->with('item')->latest()->paginate(10);
+        $cart = Cart::myOwn(Auth::user()->id)->with('item')
+            ->latest()
+            ->paginate(config('ui.cart_items'));
         
         return view('cart', compact('cart'));
     }
