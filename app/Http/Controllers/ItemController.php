@@ -324,9 +324,17 @@ class ItemController extends Controller
             ->first()->element_id;
         
         $items['latest'] = Item::with('details')
-            ->where('public', 1)->where('item_type_fk', $item_type)->latest()->take(3)->get();
+            ->where('public', 1)
+            ->where('item_type_fk', $item_type)
+            ->latest()
+            ->take(config('ui.gallery_items'))
+            ->get();
         $items['random'] = Item::with('details')
-            ->where('public', 1)->where('item_type_fk', $item_type)->inRandomOrder()->take(3)->get();
+            ->where('public', 1)
+            ->where('item_type_fk', $item_type)
+            ->inRandomOrder()
+            ->take(config('ui.gallery_items'))
+            ->get();
         $items['incomplete'] = Item::with('details')
             ->where('public', 1)
             ->where('item_type_fk', $item_type)
@@ -336,7 +344,7 @@ class ItemController extends Controller
                     ->where('value_string', '');
             })
             ->inRandomOrder()
-            ->take(3)
+            ->take(config('ui.gallery_items'))
             ->get();
         
         return view('item.gallery', compact('items'));
