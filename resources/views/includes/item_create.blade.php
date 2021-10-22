@@ -108,9 +108,7 @@
                                 @for ($i = 0; $i < $element->depth; $i++)
                                     |___
                                 @endfor
-                                @foreach($element->values as $v)
-                                    {{$v->value}}, 
-                                @endforeach
+                                {{ $element->attributes->firstWhere('name', 'name_' . app()->getLocale())->pivot->value }}
                             </option>
                         @endforeach
                     </select>
@@ -144,9 +142,7 @@
                                 @for ($i = 0; $i < $element->depth; $i++)
                                     |___
                                 @endfor
-                                @foreach($element->values as $v)
-                                    {{$v->value}}, 
-                                @endforeach
+                                {{ $element->attributes->firstWhere('name', 'name_' . app()->getLocale())->pivot->value }}
                             </option>
                         @endforeach
                     </select>
