@@ -57,12 +57,12 @@
     @unless($cg->first()->column_group->getConfigValue('hide_heading'))
         <div class="mt-4 mb-0">
         @if($cg->first()->column_group->getConfigValue('show_collapsed'))
-            <a class="font-weight-bold" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="true" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
+            <a class="column-content" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="true" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
                 {{ $cg->first()->column_group->attributes
                 ->firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}
             </a>
         @else
-            <a class="font-weight-bold" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="false" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
+            <a class="column-content" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="false" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
                 {{ $cg->first()->column_group->attributes
                 ->firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}
             </a>
@@ -89,7 +89,7 @@
             {{-- Data_type of form field is taxon --}}
             @case('_taxon_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     @if($cm->getConfigValue('taxon_show') == 'full_name')
                         {{ $item->taxon->full_name }}
                     @endif
@@ -112,7 +112,7 @@
             @case('_list_')
                 {{-- dd($lists->firstWhere('list_id', $cm->column->list_fk)->elements) --}}
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                 @if($details->firstWhere('column_fk', $cm->column->column_id))
                     @if($details->firstWhere('column_fk', $cm->column->column_id)->element)
                     {{ $details->firstWhere('column_fk', $cm->column->column_id)->element->attributes->
@@ -133,7 +133,7 @@
             {{-- Data_type of form field is list with multiple elements --}}
             @case('_multi_list_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                 @if($details->firstWhere('column_fk', $cm->column->column_id))
                     <ul class="list-unstyled">
                     @foreach($details->firstWhere('column_fk', $cm->column->column_id)->elements()->get() as $element)
@@ -148,7 +148,7 @@
             {{-- Data_type of form field is boolean --}}
             @case('_boolean_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int ? __('common.yes') : __('common.no') }}
                 </div>
                 @break
@@ -158,7 +158,7 @@
             {{-- Data_type of form field is image pixel per inch --}}
             @case('_image_ppi_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     {{-- TODO: move scaling to controller or model --}}
                     @if($cm->getConfigValue('scale_factor'))
                         {{ round(optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int * $cm->getConfigValue('scale_factor'), $cm->getConfigValue('precision')) }}
@@ -171,7 +171,7 @@
             {{-- Data_type of form field is float --}}
             @case('_float_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_float }}
                 </div>
                 @break
@@ -183,7 +183,7 @@
             {{-- Data_type of form field is image copyright --}}
             @case('_image_copyright_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string }}
                 </div>
                 @break
@@ -191,7 +191,7 @@
             {{-- Data_type of form field is html --}}
             @case('_html_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content column-content-html">
                     {!! optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string !!}
                 </div>
                 @break
@@ -199,7 +199,7 @@
             {{-- Data_type of form field is URL --}}
             @case('_url_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string }}
                 </div>
                 @break
@@ -207,7 +207,7 @@
             {{-- Data_type of form field is date --}}
             @case('_date_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_date }}
                 </div>
                 @break
@@ -215,7 +215,7 @@
             {{-- Data_type of form field is date range --}}
             @case('_date_range_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                 @if($details->firstWhere('column_fk', $cm->column->column_id))
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from())->toDateString() }}
                     @if($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from() != $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to())
@@ -228,7 +228,7 @@
             {{-- Data_type of form field is image --}}
             @case('_image_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     @if($cm->getConfigValue('image_show') == 'gallery')
                         <div class="container">
                             <div class="row">
@@ -374,7 +374,7 @@
             {{-- Data_type of form field is map --}}
             @case('_map_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                 @if($cm->getConfigValue('map') == 'iframe')
                     @if($details->firstWhere('column_fk', $cm->column->column_id))
                         @if($cm->getConfigValue('map_iframe') == 'url')
