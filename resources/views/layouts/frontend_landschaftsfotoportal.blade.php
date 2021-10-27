@@ -91,13 +91,13 @@
             <div class="row text-center">
                 <div class="col-md-4">
                 @guest
-                    <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('comments.new')">
+                    <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('landschaftsfotoportal.upload')">
                 @else
                     <a href="{{ route('item.show.own') }}">
                 @endguest
                         <span class="fa-stack fa-4x btn-hover">
                             <i class="fas fa-circle fa-stack-2x"></i>
-                            <i class="fas fa-upload fa-stack-1x fa-inverse"></i>
+                            <i class="fas {{ Config::get('ui.icon_upload') }} fa-stack-1x fa-inverse"></i>
                         </span>
                     </a>
                     <h4 class="my-3">@lang('landschaftsfotoportal.upload')</h4>
@@ -105,27 +105,31 @@
                 </div>
                 <div class="col-md-4">
                 @guest
-                    <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('comments.new')">
+                    <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('cart.my_own')">
                 @else
                     <a href="{{ route('cart.index') }}">
                 @endguest
                         <span class="fa-stack fa-4x btn-hover">
                             <i class="fas fa-circle fa-stack-2x"></i>
-                            <i class="fas fa-images fa-stack-1x fa-inverse"></i>
+                            <i class="fas {{ Config::get('ui.icon_cart_add') }} fa-stack-1x fa-inverse"></i>
                         </span>
                     </a>
                     <h4 class="my-3">@lang('cart.my_own')</h4>
                     <p class="text-muted">@lang('landschaftsfotoportal.cart_teaser')</p>
                 </div>
                 <div class="col-md-4">
-                    <a href="{{ route('item.map') }}">
+                @guest
+                    <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('comments.my_own')">
+                @else
+                    <a href="{{ route('comment.index') }}">
+                @endguest
                         <span class="fa-stack fa-4x btn-hover">
                             <i class="fas fa-circle fa-stack-2x"></i>
-                            <i class="fas fa-map fa-stack-1x fa-inverse"></i>
+                            <i class="fas {{ Config::get('ui.icon_comment') }} fa-stack-1x fa-inverse"></i>
                         </span>
                     </a>
-                    <h4 class="my-3">@lang('landschaftsfotoportal.map')</h4>
-                    <p class="text-muted">@lang('landschaftsfotoportal.map_teaser')</p>
+                    <h4 class="my-3">@lang('comments.my_own')</h4>
+                    <p class="text-muted">@lang('landschaftsfotoportal.comment_teaser')</p>
                 </div>
             </div>
         </div>
