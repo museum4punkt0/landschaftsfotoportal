@@ -78,16 +78,10 @@
     
     <!-- Mission statement -->
     <section class="page-section" id="mission">
-        <div class="container text-center">
-            <h3 class="section-subheading text-muted">
+        <div class="container">
+            <h3 class="section-subheading text-center text-muted">
                 @lang('landschaftsfotoportal.mission_statement')
             </h3>
-        </div>
-    </section>
-    
-    <!-- Services -->
-    <section class="page-section" id="services">
-        <div class="container">
             <div class="row text-center">
                 <div class="col-md-4">
                 @guest
