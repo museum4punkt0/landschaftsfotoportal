@@ -23,22 +23,9 @@
                                 </i>
                             </div>
                         </div>
-                        <img class="img-fluid" src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                $item->details->firstWhere('column_fk', 13)->value_string) }}" alt="" />
+                        <div class="img-preview-square" style="background-image: url('{{ str_replace(['(',')'],['\(','\)'],asset('storage/' . Config::get('media.preview_dir') . $item->details->firstWhere('column_fk', 13)->value_string)) }}');">&nbsp;</div>
                     </a>
                     <div class="portfolio-caption">
-                        <div class="portfolio-caption-heading">
-                        @if(!empty($item->details->firstWhere('column_fk', 22)->value_string))
-                            {{ $item->details->firstWhere('column_fk', 22)->value_string }},
-                        @endif
-                        @if(!empty($item->details->firstWhere('column_fk', 20)->value_string))
-                            {{ $item->details->firstWhere('column_fk', 20)->value_string }},
-                        @endif
-                            {{ $item->details->firstWhere('column_fk', 19)->value_string }}
-                        </div>
-                        <div class="portfolio-caption-subheading text-muted">
-                            {{ $item->details->firstWhere('column_fk', 5)->value_string }}
-                        </div>
                         <!-- Icons for user interaction -->
                         <div class="my-2" style="font-size: 0.6rem;">
                             <span class="fa-stack fa-2x">
@@ -89,6 +76,19 @@
                                     <i class="fas {{ Config::get('ui.icon_comment') }} fa-stack-1x fa-inverse"></i>
                                 </a>
                             </span>
+                        </div>
+                        <!-- Image caption -->
+                        <div class="portfolio-caption-heading">
+                        @if(!empty($item->details->firstWhere('column_fk', 22)->value_string))
+                            {{ $item->details->firstWhere('column_fk', 22)->value_string }},
+                        @endif
+                        @if(!empty($item->details->firstWhere('column_fk', 20)->value_string))
+                            {{ $item->details->firstWhere('column_fk', 20)->value_string }},
+                        @endif
+                            {{ $item->details->firstWhere('column_fk', 19)->value_string }}
+                        </div>
+                        <div class="portfolio-caption-subheading text-muted">
+                            {{ $item->details->firstWhere('column_fk', 5)->value_string }}
                         </div>
                     </div>
                 </div>
