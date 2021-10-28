@@ -189,9 +189,14 @@ class ItemController extends Controller
                     case '_image_':
                         if ($file->isValid()) {
                             $path = config('media.full_dir');
-                            $name = $item->item_id ."_". $column_id ."_". date('YmdHis') ."_";
-                            $name .= $file->getClientOriginalName();
-                            
+                            $name = $item->item_id ."_". $column_id ."_". date('YmdHis');
+                            if (config('media.append_original_filename')) {
+                                $name .= "_" . $file->getClientOriginalName();
+                            }
+                            else {
+                                $name .= "." . $file->extension();
+                            }
+
                             // Store on local 'public' disc
                             $file->storeAs($path, $name, 'public');
                             $detail_data['value_string']  = $name;
@@ -213,7 +218,7 @@ class ItemController extends Controller
         
         // Check for missing details from form input and add them
         // especially useful for drop-down lists with multiple selection if no option was selected
-        #$this->addMissingDetails($item, $colmap);
+        $this->addMissingDetails($item, $colmap);
         
         return redirect()->route('item.show.own')
             ->with('success', __('items.created'));
@@ -284,7 +289,9 @@ class ItemController extends Controller
             ->first()->element_id;
         
         $items = Item::myOwn(Auth::user()->id)->with('details')
-            ->where('item_type_fk', $item_type)->latest()->paginate(12);
+            ->where('item_type_fk', $item_type)
+            ->latest()
+            ->paginate(config('ui.cart_items'));
         
         return view('item.own', compact('items', 'item_type'));
     }
@@ -324,9 +331,17 @@ class ItemController extends Controller
             ->first()->element_id;
         
         $items['latest'] = Item::with('details')
-            ->where('public', 1)->where('item_type_fk', $item_type)->latest()->take(3)->get();
+            ->where('public', 1)
+            ->where('item_type_fk', $item_type)
+            ->latest()
+            ->take(config('ui.gallery_items'))
+            ->get();
         $items['random'] = Item::with('details')
-            ->where('public', 1)->where('item_type_fk', $item_type)->inRandomOrder()->take(3)->get();
+            ->where('public', 1)
+            ->where('item_type_fk', $item_type)
+            ->inRandomOrder()
+            ->take(config('ui.gallery_items'))
+            ->get();
         $items['incomplete'] = Item::with('details')
             ->where('public', 1)
             ->where('item_type_fk', $item_type)
@@ -336,7 +351,7 @@ class ItemController extends Controller
                     ->where('value_string', '');
             })
             ->inRandomOrder()
-            ->take(3)
+            ->take(config('ui.gallery_items'))
             ->get();
         
         return view('item.gallery', compact('items'));
@@ -386,13 +401,13 @@ class ItemController extends Controller
                 ->where('column_fk', $daterange_column)
                 ->whereRaw("value_daterange && '$daterange'")
                 ->inRandomOrder()
-                ->take(5)
+                ->take(config('ui.timeline_items'))
                 ->get();
         }
         
         // For items without any date (value_daterange = null)
-        // Get number of items per decade
-        $decades[0] = Detail::
+        // Get number of items w/o date
+        $decades[-1] = Detail::
             whereHas('item', function (Builder $query) {
                 $query->where('public', 1);
             })
@@ -400,15 +415,15 @@ class ItemController extends Controller
             ->where('value_daterange', null)
             ->count();
         
-        // Get some random items per decade, to be shown as examples
-        $details[0] = Detail::with('item')
+        // Get some random items w/o date, to be shown as examples
+        $details[-1] = Detail::with('item')
             ->whereHas('item', function (Builder $query) {
                 $query->where('public', 1);
             })
             ->where('column_fk', $daterange_column)
             ->where('value_daterange', null)
             ->inRandomOrder()
-            ->take(5)
+            ->take(config('ui.timeline_items'))
             ->get();
         
         return view('item.timeline', compact('decades', 'details'));
@@ -458,7 +473,7 @@ class ItemController extends Controller
         
         // Check for missing details and add them
         // Should be not necessary but allows editing items with somehow incomplete data
-        #$this->addMissingDetails($item, $colmap);
+        $this->addMissingDetails($item, $colmap);
         
         // Load all details for this item
         $details = Detail::where('item_fk', $item->item_id)->get();
@@ -505,7 +520,7 @@ class ItemController extends Controller
         
         // Validation rules for all fields associated with columns
         foreach ($request->input('fields') as $column_id => $value) {
-            /// Uploading a new image is never required on updating items
+            // Uploading a new image is never required on updating items
             if (Column::find($column_id)->getDataType() == '_image_') {
                 $required = 'nullable|';
             }
@@ -590,9 +605,14 @@ class ItemController extends Controller
                     case '_image_':
                         if ($file->isValid()) {
                             $path = config('media.full_dir');
-                            $name = $item->item_id ."_". $column_id ."_". date('YmdHis') ."_";
-                            $name .= $file->getClientOriginalName();
-                            
+                            $name = $item->item_id ."_". $column_id ."_". date('YmdHis');
+                            if (config('media.append_original_filename')) {
+                                $name .= "_" . $file->getClientOriginalName();
+                            }
+                            else {
+                                $name .= "." . $file->extension();
+                            }
+
                             // Store on local 'public' disc
                             $file->storeAs($path, $name, 'public');
                             $detail->value_string  = $name;
@@ -612,5 +632,25 @@ class ItemController extends Controller
         
         return redirect()->route('item.show.own')
             ->with('success', __('items.updated'));
+    }
+
+    /**
+     * Check for missing details and add them to database.
+     *
+     * @param  \App\Item  $item
+     * @param  \Illuminate\Database\Eloquent\Collection  $colmap
+     * @return void
+     */
+    private function addMissingDetails(Item $item, $colmap)
+    {
+        // Check all columns for existing details
+        foreach ($colmap as $cm) {
+            Detail::firstOrCreate([
+                'item_fk' => $item->item_id,
+                'column_fk' => $cm->column->column_id,
+            ]);
+        }
+
+        // TODO: logging for debug purpose
     }
 }

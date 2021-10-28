@@ -115,9 +115,7 @@ class ColumnMappingController extends Controller
                 ->with('warning', __('colmaps.no_item_type'));
         }
         
-        $taxa = Taxon::tree()->depthFirst()->get();
-        
-        return view('admin.colmap.create', compact('columns', 'column_groups', 'item_types', 'taxa'));
+        return view('admin.colmap.create', compact('columns', 'column_groups', 'item_types'));
     }
 
     /**
@@ -201,8 +199,6 @@ class ColumnMappingController extends Controller
             $item_type = $item_types->first()->element_id;
         }
         
-        $taxa = Taxon::tree()->depthFirst()->get();
-        
         // Get all columns mapped to the given item type
         $columns_mapped = Column::whereHas('column_mapping', function (Builder $query) use ($item_type) {
             $query->where('item_type_fk', $item_type);
@@ -217,7 +213,6 @@ class ColumnMappingController extends Controller
             'item_type',
             'column_groups',
             'item_types',
-            'taxa',
             'columns_mapped',
             'columns_avail'
         ));
@@ -351,9 +346,7 @@ class ColumnMappingController extends Controller
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
-        $taxa = Taxon::tree()->depthFirst()->get();
-        
-        return view('admin.colmap.edit', compact('colmap', 'columns', 'column_groups', 'item_types', 'taxa'));
+        return view('admin.colmap.edit', compact('colmap', 'columns', 'column_groups', 'item_types'));
     }
 
     /**
@@ -425,9 +418,10 @@ class ColumnMappingController extends Controller
         
         $response = array();
         foreach ($results as $result) {
+            $tax_str = $result->taxon ? '; ' . $result->taxon->full_name : '';
             $response[] = array(
                 "value" => $result->colmap_id,
-                "label" => $result->column->description,
+                "label" => $result->column->description . $tax_str,
                 "edit_url" => route('colmap.edit', $result->colmap_id),
             );
         }

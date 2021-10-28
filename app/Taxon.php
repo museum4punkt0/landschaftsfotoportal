@@ -45,6 +45,14 @@ class Taxon extends Model
     ];
     
     /**
+     * Get the valid taxon of the taxon.
+     */
+    public function valid_taxon()
+    {
+        return $this->belongsTo('App\Taxon', 'valid_name', 'taxon_id');
+    }
+    
+    /**
      * Get the items of the taxon.
      */
     public function items()

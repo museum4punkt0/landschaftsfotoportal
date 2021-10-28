@@ -18,11 +18,17 @@
 @include('includes.modal_comment_delete')
 
 <!-- My comments table -->
-<div class="page-section bg-light">
-<div class="container">
+    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
+        'section_id' => 'portfolio',
+        'section_heading' => __(config('ui.frontend_layout') . '.my_comments_heading'),
+        'section_subheading' => __(config('ui.frontend_layout') . '.my_comments_subheading'),
+    ])
+
     <div class="card">
         @if (true || Auth::check())
+            <!--
             <div class="card-header">@lang('comments.my_own')</div>
+            -->
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table mt-4">
@@ -39,10 +45,13 @@
                         @foreach($comments as $comment)
                             <tr>
                                 <td>
-                                    <div class="portfolio-item">
-                                    <a class="portfolio-link d-flex justify-content-center" href="{{route('item.show.public', $comment->item->item_id)}}#details">
-                                        <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                            $comment->item->details->firstWhere('column_fk', 13)->value_string) }}" height=100 alt="" title="{{ $comment->item->details->firstWhere('column_fk', 23)->value_string }}"/>
+                                    <div class="container">
+                                    <a href="{{route('item.show.public', $comment->item->item_id)}}#details">
+                                        <img class="img-fluid thumbnail-table"
+                                            src="{{ asset('storage/'. Config::get('media.preview_dir') .
+                                            $comment->item->details->firstWhere('column_fk', 13)->value_string) }}"
+                                            alt=""
+                                            title="{{ $comment->item->details->firstWhere('column_fk', 23)->value_string }}"/>
                                     </a>
                                     </div>
                                 </td>
@@ -105,7 +114,7 @@
             {{ $comments->links() }}
         </div>
     </div>
-</div>
-</div>
+
+    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_footer')
 
 @endsection

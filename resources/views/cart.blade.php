@@ -7,12 +7,12 @@
     @include('includes.modal_comment_add')
     
     <!-- My Cart Gallery -->
-    <section class="page-section bg-light" id="portfolio">
-        <div class="container">
-            <div class="text-center">
-                <h2 class="section-heading text-uppercase">@lang('cart.my_own')</h2>
-                <h3 class="section-subheading text-muted">Lorem ipsum dolor sit amet consectetur.</h3>
-            </div>
+    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
+        'section_id' => 'portfolio',
+        'section_heading' => __(config('ui.frontend_layout') . '.my_cart_heading'),
+        'section_subheading' => __(config('ui.frontend_layout') . '.my_cart_subheading'),
+    ])
+
             <div class="row">
             @foreach($cart as $item)
                 <div class="col-lg-4 col-sm-6 mb-4">
@@ -25,22 +25,9 @@
                                     </i>
                                 </div>
                             </div>
-                            <img class="img-fluid" src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                    $item->item->details->firstWhere('column_fk', 13)->value_string) }}" alt="" />
+                            <div class="img-preview-square" style="background-image: url('{{ str_replace(['(',')'],['\(','\)'],asset('storage/' . Config::get('media.preview_dir') . $item->item->details->firstWhere('column_fk', 13)->value_string)) }}');">&nbsp;</div>
                         </a>
                         <div class="portfolio-caption">
-                            <div class="portfolio-caption-heading">
-                            @if(!empty($item->item->details->firstWhere('column_fk', 22)->value_string))
-                                {{ $item->item->details->firstWhere('column_fk', 22)->value_string }},
-                            @endif
-                            @if(!empty($item->item->details->firstWhere('column_fk', 20)->value_string))
-                                {{ $item->item->details->firstWhere('column_fk', 20)->value_string }},
-                            @endif
-                                {{ $item->item->details->firstWhere('column_fk', 19)->value_string }}
-                            </div>
-                            <div class="portfolio-caption-subheading text-muted">
-                                {{ $item->item->details->firstWhere('column_fk', 5)->value_string }}
-                            </div>
                             <!-- Icons for user interaction -->
                             <div class="my-2" style="font-size: 0.6rem;">
                                 <span class="fa-stack fa-2x">
@@ -62,6 +49,19 @@
                                     </a>
                                 </span>
                             </div>
+                            <!-- Image caption -->
+                            <div class="portfolio-caption-heading">
+                            @if(!empty($item->item->details->firstWhere('column_fk', 22)->value_string))
+                                {{ $item->item->details->firstWhere('column_fk', 22)->value_string }},
+                            @endif
+                            @if(!empty($item->item->details->firstWhere('column_fk', 20)->value_string))
+                                {{ $item->item->details->firstWhere('column_fk', 20)->value_string }},
+                            @endif
+                                {{ $item->item->details->firstWhere('column_fk', 19)->value_string }}
+                            </div>
+                            <div class="portfolio-caption-subheading text-muted">
+                                {{ $item->item->details->firstWhere('column_fk', 5)->value_string }}
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -72,7 +72,7 @@
             <div>
                 {{ $cart->links() }}
             </div>
-        </div>
-    </section>
+
+    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_footer')
 
 @endsection

@@ -2,24 +2,26 @@
 
 @section('content')
 
+    <div id="homeGallery">
     <!-- Portfolio Grid, Gallery with latest items-->
     @include('includes.item_gallery', [
         'items' => $items['latest'],
-        'heading' => 'Neueste Bilder',
-        'subheading' => 'Lorem ipsum dolor sit amet consectetur.'
+        'heading' => __('landschaftsfotoportal.gallery_latest_heading'),
+        'subheading' => __('landschaftsfotoportal.gallery_latest_subheading')
     ])
     <!-- Portfolio Grid, Gallery with random items-->
     @include('includes.item_gallery', [
         'items' => $items['random'],
-        'heading' => 'Zufällige Bilder',
-        'subheading' => 'Lorem ipsum dolor sit amet consectetur.'
+        'heading' => __('landschaftsfotoportal.gallery_random_heading'),
+        'subheading' => __('landschaftsfotoportal.gallery_random_subheading')
     ])
     <!-- Portfolio Grid, Gallery with incomplete items-->
     @include('includes.item_gallery', [
         'items' => $items['incomplete'],
-        'heading' => 'Bilder mit fehlenden Ortsangaben',
-        'subheading' => 'Lorem ipsum dolor sit amet consectetur.'
+        'heading' => __('landschaftsfotoportal.gallery_incomplete_heading'),
+        'subheading' => __('landschaftsfotoportal.gallery_incomplete_subheading')
     ])
+    </div>
     
     @include('includes.modal_login_request')
     @include('includes.modal_download')

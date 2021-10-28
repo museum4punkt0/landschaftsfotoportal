@@ -99,9 +99,7 @@ class ItemController extends Controller
                              ->with('warning', __('colmaps.no_item_type'));
         }
 
-        $taxa = Taxon::tree()->depthFirst()->get();
-
-        return view('admin.item.new', compact('item_types', 'taxa'));
+        return view('admin.item.new', compact('item_types'));
     }
 
     /**
@@ -113,7 +111,7 @@ class ItemController extends Controller
     public function create(Request $request)
     {
         $items = Item::tree()->depthFirst()->get();
-        $taxa = Taxon::tree()->depthFirst()->get();
+        $taxon = Taxon::find($request->taxon);
 
         // Only columns associated with this item's taxon or its descendants
         $colmap = ColumnMapping::forItem($request->item_type, $request->taxon);
@@ -136,12 +134,10 @@ class ItemController extends Controller
 
         // Save item_type ID to session
         $request->session()->put('item_type', $request->item_type);
-        // Save taxon ID to session
-        $request->session()->put('taxon', $request->taxon);
 
         $options = ['edit.meta' => true, 'route' => 'item.store'];
 
-        return view('admin.item.create', compact('items', 'taxa', 'colmap', 'lists', 'data_types', 'translations', 'placeholders', 'descriptions', 'options'));
+        return view('admin.item.create', compact('items', 'taxon', 'colmap', 'lists', 'data_types', 'translations', 'placeholders', 'descriptions', 'options'));
     }
 
     /**
@@ -261,8 +257,13 @@ class ItemController extends Controller
                     case '_image_':
                         if ($file->isValid()) {
                             $path = config('media.full_dir');
-                            $name = $item->item_id . "_" . $column_id . "_" . date('YmdHis') . "_";
-                            $name .= $file->getClientOriginalName();
+                            $name = $item->item_id . "_" . $column_id . "_" . date('YmdHis');
+                            if (config('media.append_original_filename')) {
+                                $name .= "_" . $file->getClientOriginalName();
+                            }
+                            else {
+                                $name .= "." . $file->extension();
+                            }
 
                             // Store on local 'public' disc
                             $file->storeAs($path, $name, 'public');
@@ -396,7 +397,7 @@ class ItemController extends Controller
         // Remove all descendants to avoid circular dependencies
         $items = $items->diff($item->descendantsAndSelf()->get());
 
-        $taxa = Taxon::tree()->depthFirst()->get();
+        $taxon = $item->taxon;
 
         // Only columns associated with this item's taxon or its descendants
         $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk);
@@ -426,7 +427,7 @@ class ItemController extends Controller
 
         $options = ['edit.meta' => true, 'route' => 'item.update'];
 
-        return view('admin.item.edit', compact('item', 'items', 'taxa', 'details', 'colmap', 'lists', 'data_types', 'translations', 'placeholders', 'descriptions', 'options'));
+        return view('admin.item.edit', compact('item', 'items', 'taxon', 'details', 'colmap', 'lists', 'data_types', 'translations', 'placeholders', 'descriptions', 'options'));
     }
 
     /**
@@ -534,8 +535,13 @@ class ItemController extends Controller
                     case '_image_':
                         if ($file->isValid()) {
                             $path = config('media.full_dir');
-                            $name = $item->item_id . "_" . $column_id . "_" . date('YmdHis') . "_";
-                            $name .= $file->getClientOriginalName();
+                            $name = $item->item_id . "_" . $column_id . "_" . date('YmdHis');
+                            if (config('media.append_original_filename')) {
+                                $name .= "_" . $file->getClientOriginalName();
+                            }
+                            else {
+                                $name .= "." . $file->extension();
+                            }
 
                             // Store on local 'public' disc
                             $file->storeAs($path, $name, 'public');

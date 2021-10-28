@@ -127,9 +127,16 @@ class SearchController extends Controller
                         $search_details[] = $min_max;
                     break;
                     case '_date_range_':
-                        $daterange = '['. date('Y-m-d', mktime(0, 0, 0, 1, 1, intval($val))) .','.
-                            date('Y-m-d', mktime(0, 0, 0, 1, 1, intval($val) + 10)) .')';
-                        $search_details[] = [['column_fk', $col], ['value_daterange', '&&', $daterange]];
+                        // Valid decade
+                        if ($val > 0) {
+                            $daterange = '['. date('Y-m-d', mktime(0, 0, 0, 1, 1, intval($val))) .','.
+                                date('Y-m-d', mktime(0, 0, 0, 1, 1, intval($val) + 10)) .')';
+                            $search_details[] = [['column_fk', $col], ['value_daterange', '&&', $daterange]];
+                        }
+                        // Unknown date (date range not set)
+                        else {
+                            $search_details[] = [['column_fk', $col], ['value_daterange', null]];
+                        }
                     break;
                 }
             }
@@ -212,10 +219,16 @@ class SearchController extends Controller
         $search_terms = $request->input();
 
         // Get all HTTP query parameters except for lat/lon
-        $column_ids['lon'] = Column::ofDataType('_float_')->ofItemType('_image_')->ofSubType('location_lon')
-            ->first()->column_id;
-        $column_ids['lat'] = Column::ofDataType('_float_')->ofItemType('_image_')->ofSubType('location_lat')
-            ->first()->column_id;
+        $column_ids['lon'] = optional(Column::ofDataType('_float_')
+                                            ->ofItemType('_image_')
+                                            ->ofSubType('location_lon')
+                                            ->first())
+                                            ->column_id;
+        $column_ids['lat'] = optional(Column::ofDataType('_float_')
+                                            ->ofItemType('_image_')
+                                            ->ofSubType('location_lat')
+                                            ->first())
+                                            ->column_id;
         $request_query = $request->except([
             'fields.' . $column_ids['lon'],
             'fields.' . $column_ids['lat'],

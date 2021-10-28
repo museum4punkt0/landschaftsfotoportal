@@ -74,10 +74,10 @@ class AjaxImportController extends Controller
             // Check if a taxon is associated to item to be imported
             if (array_search('-3', $selected_attr)) {
                 // Try to match taxon for given full scientific name
-                $taxon = Taxon::where('full_name', $line[array_search('-3', $selected_attr)])->first();
+                $taxon = Taxon::where('full_name', trim($line[array_search('-3', $selected_attr)]))->first();
                 if (empty($taxon)) {
                     // Taxon not found: skip this one and set warning message
-                    $warning_status_msg .= " ". __('import.taxon_not_found', ['full_name' => $line[array_search('-3', $selected_attr)]]);
+                    $warning_status_msg .= " " .  __('import.taxon_not_found', ['full_name' => $line[array_search('-3', $selected_attr)]]) . "\n";
                     $request->session()->flash('warning', $warning_status_msg);
                     // TODO: use messageBag for arrays
                     #$messageBag->add('warning', $warning_status_msg);
@@ -90,7 +90,7 @@ class AjaxImportController extends Controller
                         ['item_type_fk', $request->session()->get('item_type')],
                     ])->first();
                     if (!empty($existing_item) && $request->session()->has('unique_taxa')) {
-                        $warning_status_msg .= " ". __('import.taxon_exists', ['full_name' => $line[array_search('-3', $selected_attr)]]);
+                        $warning_status_msg .= " " .  __('import.taxon_exists', ['full_name' => $line[array_search('-3', $selected_attr)]]) . "\n";
                         $request->session()->flash('warning', $warning_status_msg);
                         // TODO: use messageBag for arrays
                         continue;
@@ -320,8 +320,8 @@ class AjaxImportController extends Controller
 
         // Get HTTP parameters from request
         $item = intval($request->item);
-        $lat = floatval($request->lat);
-        $lon = floatval($request->lon);
+        $lat = $request->lat ? floatval($request->lat) : null;
+        $lon = $request->lon ? floatval($request->lon) : null;
         
         $warning_status_msg = null;
         #dd($request);

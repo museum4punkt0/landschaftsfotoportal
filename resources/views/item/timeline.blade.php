@@ -5,8 +5,8 @@
     <!-- Timeline -->
     @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
         'section_id' => 'timeline',
-        'section_heading' => 'Zeitstrahl',
-        'section_subheading' => 'Lorem ipsum dolor sit amet consectetur.',
+        'section_heading' => __(config('ui.frontend_layout') . '.timeline_heading'),
+        'section_subheading' => __(config('ui.frontend_layout') . '.timeline_subheading'),
     ])
     
             <ul class="timeline">
@@ -17,28 +17,29 @@
                     <li>
                 @endif
                 
-                    <a href="{{ route('search.index', ['fields[27]' => $decade]) }}">
+                    <a href="{{ route('search.index', ['fields[27]' => $decade]) }}#searchResults">
                     <div class="timeline-image">
                         <h4>
-                        @if($decade)
+                        @if($decade > 0)
                             {{ $decade }}@lang('common.decade_suffix')
                         @else
-                            Unbekannt
+                            @lang('common.unknown')
                         @endif
                         </h4>
+                        <p>
+                            {{ $count }} @lang(config('ui.frontend_layout') . '.items')
+                        </p>
                     </div>
                     </a>
                     <div class="timeline-panel">
-                        <div class="timeline-heading">
-                            <h4 class="subheading">{{ $count }} Fotos</h4>
-                        </div>
                         <div class="timeline-body">
-                            <div class="row"><p class="text-muted">
+                            <div class="row">
                             @foreach($details[$decade] as $detail)
-                                <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                    $detail->item->details->firstWhere('column_fk', 13)->value_string) }}" height=100 alt="" />
+                                <a href="{{ route('item.show.public', $detail->item->item_id) }}">
+                                    <div class="timelinethumb" style="background-image: url({{ asset('storage/'. Config::get('media.preview_dir') . $detail->item->details->firstWhere('column_fk', 13)->value_string) }});"></div>
+                                </a>
                             @endforeach
-                            </p></div>
+                            </div>
                         </div>
                     </div>
                 </li>

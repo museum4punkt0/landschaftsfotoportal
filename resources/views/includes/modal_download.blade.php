@@ -3,13 +3,13 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="downloadModalLabel">Foto in Originalgröße herunterladen</h5>
+                <h5 class="modal-title" id="downloadModalLabel">@lang(config('ui.frontend_layout') . '.download_title')</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <p>Mit dem Herunterladen akzeptieren Sie die Lizenzbedingungen!</p>
+                <p>@lang(config('ui.frontend_layout') . '.download_terms')</p>
             </div>
             <div class="modal-footer">
                 <a class="btn btn-primary" href="#" onClick="$('#downloadModal').modal('hide')">@lang('common.download')</a>
@@ -19,7 +19,7 @@
     </div>
 </div>
 <script type="text/javascript">
-    // Triggered when comment modal is shown
+    // Triggered when download modal is shown
     $('#downloadModal').on('shown.bs.modal', function(event) {
         // Store the URL for the download request
         var url = $(event.relatedTarget).data('href');

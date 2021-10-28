@@ -16,12 +16,12 @@
 
 <h2>@lang('items.edit')</h2>
 
-<form action="{{ route($options['route'], $item->item_id) }}" method="POST" enctype="multipart/form-data">
+<form id="itemEditForm" action="{{ route($options['route'], $item->item_id) }}" method="POST" enctype="multipart/form-data">
     
-    @if($options['edit.meta'])
+@if($options['edit.meta'])
     <div class="form-group">
         <span>@lang('items.menu_title')</span>
-        <input type="text" name="title" class="form-control" value="{{old('title', $item->title)}}" />
+        <input type="text" name="title" class="form-control" value="{{old('title', $item->title)}}" autofocus />
         <span class="text-danger">{{ $errors->first('title') }}</span>
     </div>
     <div class="form-group">
@@ -57,33 +57,16 @@
     </div>
     <div class="form-group">
         <span>@lang('taxon.list')</span>
-        <select name="taxon" id="taxon_select" class="form-control" size=1 readonly>
-            <option value="">@lang('common.none')</option>
-            @foreach($taxa as $taxon)
-                @unless($taxon->valid_name)
-                    <option value="{{$taxon->taxon_id}}"
-                        @if(old('taxon', $item->taxon_fk) == $taxon->taxon_id) selected @endif>
-                        @for ($i = 0; $i < $taxon->depth; $i++)
-                            |___
-                        @endfor
-                        {{$taxon->taxon_name}} {{$taxon->taxon_author}} ({{$taxon->native_name}})
-                    </option>
-                @endunless
-            @endforeach
-        </select>
-        <span class="text-danger">{{ $errors->first('taxon') }}</span>
+        <input
+            type="text"
+            name="taxon_name"
+            class="form-control"
+            value="@if($taxon) {{$taxon->full_name}} ({{$taxon->native_name}}) @else @lang('common.none') @endif"
+            readonly
+        />
+        <input type="hidden" name="taxon" value="{{optional($taxon)->taxon_id}}" />
     </div>
-    <script type="text/javascript">
-        var elem = document.getElementById("taxon_select");
-        elem.addEventListener("change", TaxonChanged);
-
-        function TaxonChanged() {
-            var tax = document.getElementById("taxon_select").selectedIndex;
-            alert('Changing the Taxon is not allowed!');
-            //window.location.reload(true);
-        }
-    </script>
-    @endif
+@endif
     
     @foreach($colmap as $cm)
         {{-- Don't show columns which have auto generated content, e.g. image size/dimensions --}}
@@ -103,12 +86,13 @@
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                         size=1
+                        @if($loop->first && !$options['edit.meta']) autofocus @endif
                     >
                         <option value="">@lang('common.choose')</option>
                         @foreach($lists[$cm->column->list_fk] as $element)
                             <option value="{{$element->element_id}}"
                                 @if(old('fields.'. $cm->column->column_id, 
-                                    $details->firstWhere('column_fk', $cm->column->column_id)->element_fk) == 
+                                    optional($details->firstWhere('column_fk', $cm->column->column_id))->element_fk) == 
                                      $element->element_id)
                                         selected
                                 @endif
@@ -116,9 +100,7 @@
                                 @for ($i = 0; $i < $element->depth; $i++)
                                     |___
                                 @endfor
-                                @foreach($element->values as $v)
-                                    {{$v->value}}, 
-                                @endforeach
+                                {{ $element->attributes->firstWhere('name', 'name_' . app()->getLocale())->pivot->value }}
                             </option>
                         @endforeach
                     </select>
@@ -141,6 +123,7 @@
                         class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                         size=5
                         multiple
+                        @if($loop->first && !$options['edit.meta']) autofocus @endif
                     >
                         @foreach($lists[$cm->column->list_fk] as $element)
                             <option value="{{$element->element_id}}"
@@ -163,9 +146,7 @@
                                 @for ($i = 0; $i < $element->depth; $i++)
                                     |___
                                 @endfor
-                                @foreach($element->values as $v)
-                                    {{$v->value}}, 
-                                @endforeach
+                                {{ $element->attributes->firstWhere('name', 'name_' . app()->getLocale())->pivot->value }}
                             </option>
                         @endforeach
                     </select>
@@ -178,8 +159,6 @@
             {{-- Data_type of form field is boolean --}}
             @case('_boolean_')
                 <div class="form-group">
-                    @include('includes.column_label')
-                    
                     <div class="form-check">
                         <input type="hidden" name="fields[{{ $cm->column->column_id }}]" value=0 />
                         <input
@@ -190,12 +169,14 @@
                             class="form-check-input @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                             value=1
                             @if(old('fields.'. $cm->column->column_id, 
-                            $details->firstWhere('column_fk', $cm->column->column_id)->value_int)) checked @endif
+                            optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int)) checked @endif
+                            @if($loop->first && !$options['edit.meta']) autofocus @endif
                         />
-                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
-                        @include('includes.form_input_help')
-                        <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                        @include('includes.column_label', ['css_class' => 'form-check-label'])
                     </div>
+                    
+                    @include('includes.form_input_help')
+                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
                 </div>
                 @break
             
@@ -214,8 +195,9 @@
                         class="form-control {{ $cm->getConfigValue('data_subtype') }} @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
                         value="{{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_int) }}"
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int) }}"
                         @if($cm->getConfigValue('editable') == 'readonly' && !$options['edit.meta']) readonly @endif
+                        @if($loop->first && !$options['edit.meta']) autofocus @endif
                     />
                     
                     @include('includes.form_input_help')
@@ -236,8 +218,9 @@
                         class="form-control {{ $cm->getConfigValue('data_subtype') }} @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
                         value="{{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_float) }}"
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_float) }}"
                         @if($cm->getConfigValue('editable') == 'readonly' && !$options['edit.meta']) readonly @endif
+                        @if($loop->first && !$options['edit.meta']) autofocus @endif
                     />
                     
                     @include('includes.form_input_help')
@@ -258,39 +241,37 @@
                 <div class="form-group">
                     @include('includes.column_label')
                     
-                    @if($details->firstWhere('column_fk', $cm->column->column_id))
-                        @if($cm->getConfigValue('textarea'))
-                            <textarea
-                                id="fieldsInput-{{ $cm->column->column_id }}"
-                                name="fields[{{ $cm->column->column_id }}]"
-                                aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
-                                class="form-control {{ $cm->getConfigValue('data_subtype') }} @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
-                                placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
-                                rows="{{$cm->getConfigValue('textarea')}}"
-                            >{{
-                                old('fields.'. $cm->column->column_id, 
-                                    $details->firstWhere('column_fk', $cm->column->column_id)->value_string)
-                            }}</textarea>
-                        @else
-                            <input
-                                type="text"
-                                id="fieldsInput-{{ $cm->column->column_id }}"
-                                name="fields[{{ $cm->column->column_id }}]"
-                                aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
-                                class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
-                                placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
-                                value="{{ old('fields.'. $cm->column->column_id, 
-                                $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
-                                @if($cm->getConfigValue('editable') == 'readonly' && !$options['edit.meta']) readonly @endif
-                            />
-                        @endif
-                        @if($cm->getConfigValue('data_subtype') == 'location_city')
-                            <button type="button" class="btn btn-primary btn-sm searchAddressBtn">
-                                @lang('common.get_latlon')
-                            </button>
-                        @endif
+                    @if($cm->getConfigValue('textarea'))
+                        <textarea
+                            id="fieldsInput-{{ $cm->column->column_id }}"
+                            name="fields[{{ $cm->column->column_id }}]"
+                            aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
+                            class="form-control {{ $cm->getConfigValue('data_subtype') }} @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                            placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
+                            rows="{{$cm->getConfigValue('textarea')}}"
+                            @if($loop->first && !$options['edit.meta']) autofocus @endif
+                        >{{
+                            old('fields.'. $cm->column->column_id, 
+                                optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string)
+                        }}</textarea>
                     @else
-                        <span>detail column {{$cm->column->column_id}} for map not found</span>
+                        <input
+                            type="text"
+                            id="fieldsInput-{{ $cm->column->column_id }}"
+                            name="fields[{{ $cm->column->column_id }}]"
+                            aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
+                            class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                            placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
+                            value="{{ old('fields.'. $cm->column->column_id, 
+                            optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string) }}"
+                            @if($cm->getConfigValue('editable') == 'readonly' && !$options['edit.meta']) readonly @endif
+                            @if($loop->first && !$options['edit.meta']) autofocus @endif
+                        />
+                    @endif
+                    @if($cm->getConfigValue('data_subtype') == 'location_city')
+                        <button type="button" class="btn btn-primary btn-sm searchAddressBtn">
+                            @lang('common.get_latlon')
+                        </button>
                     @endif
                     
                     @include('includes.form_input_help')
@@ -310,9 +291,10 @@
                         class="form-control summernote @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
                         rows=5
+                        @if($loop->first && !$options['edit.meta']) autofocus @endif
                     >{!!
                         old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string)
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string)
                     !!}</textarea>
                     
                     @include('includes.form_input_help')
@@ -341,7 +323,8 @@
                         class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
                         value="{{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string) }}"
+                        @if($loop->first && !$options['edit.meta']) autofocus @endif
                     />
                     
                     @include('includes.form_input_help')
@@ -361,7 +344,8 @@
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                         value="{{ old('fields.'. $cm->column->column_id, 
-                        $details->firstWhere('column_fk', $cm->column->column_id)->value_date) }}"
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->value_date) }}"
+                        @if($loop->first && !$options['edit.meta']) autofocus @endif
                     />
                     
                     @include('includes.form_input_help')
@@ -585,6 +569,7 @@
                                 aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                                 class="form-control-file @if($errors->has('fields.'.$cm->column->column_id.'.file')) is-invalid @endif"
                                 accept=".jpg, .jpeg"
+                                @if($loop->first && !$options['edit.meta']) autofocus @endif
                             />
                             @include('includes.form_input_help')
                             <span class="form-text text-muted">@lang('items.file_max_size', ['max' => config('media.image_max_size', 2048)]) @lang('columns.image_hint')</span>
@@ -636,8 +621,8 @@
                 @if($cm->getConfigValue('map') == 'inline')
                     <div id="map" class="map"></div>
                     <script type="text/javascript">
-                        var lon = {{ floatval($details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col'))->value_float) }};
-                        var lat = {{ floatval($details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col'))->value_float) }};
+                        var lon = {{ floatval(optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col')))->value_float) }};
+                        var lat = {{ floatval(optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col')))->value_float) }};
                         var zoom = {{ $cm->getConfigValue('map_zoom') }};
                         // Init and display the map
                         osm_map.display(lon, lat, zoom);
@@ -646,6 +631,7 @@
                         //osm_map.updateSize();
                     </script>
                 @endif
+                @include('includes.form_input_help')
                 </div>
                 @break
             
@@ -666,7 +652,13 @@
     @endif
     
     <div class="form-group">
+    {{-- Check if we are using a backend route --}}
+    @if($options['edit.meta'] || !config('ui.upload_terms_auth'))
         <button type="submit" class="btn btn-primary">@lang('common.save')</button>
+    @else
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#uploadModal" data-form-id="itemEditForm">@lang('common.save')</button>
+        @include('includes.modal_upload')
+    @endif
     </div>
     {{ csrf_field() }}
     @method('PATCH')

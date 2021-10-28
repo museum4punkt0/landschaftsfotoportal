@@ -29,11 +29,11 @@
                                 @if($list->hierarchical)
                                     <option value="-1"
                                         @if(old('fields.'.$key) == -1) selected @endif>
-                                        @lang('import.element_id')
+                                        * @lang('common.relation'): @lang('import.element_id')
                                     </option>
                                     <option value="-2"
                                         @if(old('fields.'.$key) == -2) selected @endif>
-                                        @lang('import.parent_id')
+                                        * @lang('common.relation'): @lang('import.parent_id')
                                     </option>
                                 @endif
                                 @foreach ($attributes as $attr)

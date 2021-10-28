@@ -22,11 +22,17 @@ Auth::routes(['verify' => true]);
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/frontend', 'HomeController@frontend')->name('frontend');
+Route::get('/impressum', 'HomeController@frontend')->name('impressum');
+Route::get('/privacy', 'HomeController@frontend')->name('datenschutz');
+Route::get('/credits', 'HomeController@frontend')->name('danksagung');
+Route::get('/about', 'HomeController@frontend')->name('über');
 Route::get('/locale/{locale}', 'HomeController@locale')->name('locale');
 Route::get('/search', 'SearchController@index')->name('search.index');
 
 Route::get('/email/change', 'Auth\ChangeEmailController@change')->name('email.change');
 Route::post('/email/store', 'Auth\ChangeEmailController@store')->name('email.store');
+
+Route::get('sipnr/{sipnr}', 'BfnController@redirectSipnr')->name('bfn.sipnr');
 
 Route::get('item/show/own', 'ItemController@own')->name('item.show.own');
 Route::get('download/{item}', 'ItemController@download')->name('item.download');

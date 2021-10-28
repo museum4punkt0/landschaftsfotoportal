@@ -24,6 +24,8 @@ return [
     'item_type' => 'Datensatztyp',
     'no_title_column' => 'Kein Anzeigefeld als Name definiert.',
     'no_iframe' => 'Ihr Browser kann leider keine eingebetteten Frames anzeigen.',
+    'no_position_for_map' => 'Es liegen keine genauen Ortsangaben für die Kartendarstellung vor.',
+    'no_detail_for_column' => 'Kein Eintrag für Anzeigespalte #:column in der Datenbank vorhanden!',
     'show_frontend' => 'Im Frontend anzeigen',
     'menu_title' => 'Name des Datensatzes (im Menü angezeigt)',
     'add_titles' => 'Titel übernehmen',

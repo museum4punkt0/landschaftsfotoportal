@@ -32,42 +32,28 @@
         <input type="text" name="native_name" class="form-control" value="{{old('native_name')}}" />
         <span class="text-danger">{{ $errors->first('native_name') }}</span>
     </div>
-    <div class="form-group">
-        <span>@lang('taxon.valid_name')</span>
-        <select name="valid_name" class="form-control" size=1 >
-            <option value="">@lang('taxon.valid')</option>
-            @foreach($taxa as $taxon)
-                @unless($taxon->valid_name)
-                    <option value="{{$taxon->taxon_id}}"
-                        @if(old('valid_name') == $taxon->taxon_id) selected @endif>
-                        @for ($i = 0; $i < $taxon->depth; $i++)
-                            |___
-                        @endfor
-                        {{$taxon->taxon_name}} {{$taxon->taxon_author}} ({{$taxon->native_name}})
-                    </option>
-                @endunless
-            @endforeach
-        </select>
-        <span class="text-danger">{{ $errors->first('valid_name') }}</span>
-    </div>
-    <div class="form-group">
-        <span>@lang('taxon.parent')</span>
-        <select name="parent" class="form-control" size=1 >
-            <option value="">@lang('common.root')</option>
-            @foreach($taxa as $taxon)
-                @unless($taxon->valid_name)
-                    <option value="{{$taxon->taxon_id}}"
-                        @if(old('parent') == $taxon->taxon_id) selected @endif>
-                        @for ($i = 0; $i < $taxon->depth; $i++)
-                            |___
-                        @endfor
-                        {{$taxon->taxon_name}} {{$taxon->taxon_author}} ({{$taxon->native_name}})
-                    </option>
-                @endunless
-            @endforeach
-        </select>
-        <span class="text-danger">{{ $errors->first('parent') }}</span>
-    </div>
+
+    @include('includes.form_taxon_autocomplete', [
+        'search_url' => route('taxon.autocomplete', ['valid' => true]),
+        'div_class' => 'form-group',
+        'name' => 'valid_name',
+        'input_placeholder' => '',
+        'input_label' => __('taxon.valid_name'),
+        'null_label' => __('taxon.valid'),
+        'taxon_name' => old('valid_name_name', __('taxon.valid')),
+        'taxon_id' => old('valid_name'),
+    ])
+    @include('includes.form_taxon_autocomplete', [
+        'search_url' => route('taxon.autocomplete', ['valid' => true]),
+        'div_class' => 'form-group',
+        'name' => 'parent',
+        'input_placeholder' => '',
+        'input_label' => __('taxon.parent'),
+        'null_label' => __('common.root'),
+        'taxon_name' => old('parent_name', __('common.root')),
+        'taxon_id' => old('parent'),
+    ])
+
     <div class="form-group">
         <span>@lang('taxon.rank_abbr')</span>
         <input type="text" name="rank_abbr" class="form-control" value="{{old('rank_abbr')}}" />

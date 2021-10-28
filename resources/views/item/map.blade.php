@@ -5,8 +5,8 @@
     <!-- Map -->
     @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
         'section_id' => 'big_map',
-        'section_heading' => 'Karte',
-        'section_subheading' => 'Lorem ipsum dolor sit amet consectetur.',
+        'section_heading' => __(config('ui.frontend_layout') . '.map_heading'),
+        'section_subheading' => __(config('ui.frontend_layout') . '.map_subheading'),
     ])
     
                     <div id="map" class="map"
@@ -58,7 +58,7 @@
                             osm_map.display(lon, lat, zoom);
                             osm_map.addGeoJsonLayer(ajaxUrl);
                             
-                            osm_map.addMarker(14.986789,  51.153432, '{{ asset("storage/images/logos/mein-smng.png") }}');
+                            //osm_map.addMarker(14.986789,  51.153432, '{{ asset("storage/images/logos/mein-smng.png") }}');
                             
                             osm_map.map.on('rendercomplete', function () {
                                 if (zoomTo == 'extent') {
@@ -113,6 +113,7 @@
                                         content += '&fields[' + columnLon + '][max]=' + extent[2];
                                         content += '&fields[' + columnLat + '][min]=' + extent[1];
                                         content += '&fields[' + columnLat + '][max]=' + extent[3];
+                                        content += '#searchResults';
                                         content += '">@lang("common.showall")</a>';
                                         $(element).popover({
                                             placement: 'bottom',
@@ -154,6 +155,7 @@
                                 url += '&fields[' + columnLon + '][max]=' + osm_map.wrapLon(extent[2]);
                                 url += '&fields[' + columnLat + '][min]=' + extent[1];
                                 url += '&fields[' + columnLat + '][max]=' + extent[3];
+                                url += '#searchResults';
                                 $('#searchLink').attr('href', url);
                             });
                         }

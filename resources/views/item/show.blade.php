@@ -32,27 +32,37 @@
 
 @section('content')
 
-    <!-- Image details -->
-    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
-        'section_id' => 'details',
-        'section_heading' => 'Bilddetails',
-        'section_subheading' => 'Lorem ipsum dolor sit amet consectetur.',
-        'options' => ['image_medium' => true],
-    ])
-    <!-- Icons for user interaction -->
-    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.item_buttons')
-
+    @if($item->item_type->attributes->firstWhere('name', 'code')->pivot->value != '_static_')
+        <!-- Image details -->
+        @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
+            'section_id' => 'details',
+            'section_heading' => __(config('ui.frontend_layout') . '.details_heading'),
+            'section_subheading' => __(config('ui.frontend_layout') . '.details_subheading'),
+            'options' => ['image_medium' => true],
+        ])
+        
+        <!-- Icons for user interaction -->
+        @includeIf('includes.' . Config::get('ui.frontend_layout') . '.item_buttons')
+    @else
+        <!-- Display only the heading from database item -->
+        @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
+            'section_id' => 'details',
+            'section_heading' => $item->title,
+            'section_subheading' => '',
+        ])
+    @endif
+    
 @foreach($colmap->groupBy('column_group_fk') as $cg)
     
     @unless($cg->first()->column_group->getConfigValue('hide_heading'))
         <div class="mt-4 mb-0">
         @if($cg->first()->column_group->getConfigValue('show_collapsed'))
-            <a class="font-weight-bold" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="true" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
+            <a class="column-content" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="true" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
                 {{ $cg->first()->column_group->attributes
                 ->firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}
             </a>
         @else
-            <a class="font-weight-bold" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="false" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
+            <a class="column-content" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="false" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
                 {{ $cg->first()->column_group->attributes
                 ->firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}
             </a>
@@ -79,7 +89,7 @@
             {{-- Data_type of form field is taxon --}}
             @case('_taxon_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     @if($cm->getConfigValue('taxon_show') == 'full_name')
                         {{ $item->taxon->full_name }}
                     @endif
@@ -102,7 +112,7 @@
             @case('_list_')
                 {{-- dd($lists->firstWhere('list_id', $cm->column->list_fk)->elements) --}}
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                 @if($details->firstWhere('column_fk', $cm->column->column_id))
                     @if($details->firstWhere('column_fk', $cm->column->column_id)->element)
                     {{ $details->firstWhere('column_fk', $cm->column->column_id)->element->attributes->
@@ -111,7 +121,11 @@
                         @lang('common.not_chosen')
                     @endif
                 @else
-                    <span>detail column {{$cm->column->column_id}} for list not found</span>
+                    @can('show-admin')
+                        <span class="text-danger">
+                            @lang('items.no_detail_for_column', ['column' => $cm->column->column_id])
+                        </span>
+                    @endcan
                 @endif
                 </div>
                 @break
@@ -119,7 +133,7 @@
             {{-- Data_type of form field is list with multiple elements --}}
             @case('_multi_list_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                 @if($details->firstWhere('column_fk', $cm->column->column_id))
                     <ul class="list-unstyled">
                     @foreach($details->firstWhere('column_fk', $cm->column->column_id)->elements()->get() as $element)
@@ -134,7 +148,7 @@
             {{-- Data_type of form field is boolean --}}
             @case('_boolean_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int ? __('common.yes') : __('common.no') }}
                 </div>
                 @break
@@ -144,7 +158,7 @@
             {{-- Data_type of form field is image pixel per inch --}}
             @case('_image_ppi_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     {{-- TODO: move scaling to controller or model --}}
                     @if($cm->getConfigValue('scale_factor'))
                         {{ round(optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int * $cm->getConfigValue('scale_factor'), $cm->getConfigValue('precision')) }}
@@ -157,7 +171,7 @@
             {{-- Data_type of form field is float --}}
             @case('_float_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_float }}
                 </div>
                 @break
@@ -169,7 +183,7 @@
             {{-- Data_type of form field is image copyright --}}
             @case('_image_copyright_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string }}
                 </div>
                 @break
@@ -177,7 +191,7 @@
             {{-- Data_type of form field is html --}}
             @case('_html_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content column-content-html">
                     {!! optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string !!}
                 </div>
                 @break
@@ -185,7 +199,7 @@
             {{-- Data_type of form field is URL --}}
             @case('_url_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string }}
                 </div>
                 @break
@@ -193,7 +207,7 @@
             {{-- Data_type of form field is date --}}
             @case('_date_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_date }}
                 </div>
                 @break
@@ -201,7 +215,7 @@
             {{-- Data_type of form field is date range --}}
             @case('_date_range_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                 @if($details->firstWhere('column_fk', $cm->column->column_id))
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from())->toDateString() }}
                     @if($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from() != $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to())
@@ -214,7 +228,7 @@
             {{-- Data_type of form field is image --}}
             @case('_image_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     @if($cm->getConfigValue('image_show') == 'gallery')
                         <div class="container">
                             <div class="row">
@@ -343,7 +357,11 @@
                                 @lang('columns.image_not_available')
                             @endif
                         @else
-                            <span>detail column {{$cm->column->column_id}} for image preview not found</span>
+                            @can('show-admin')
+                                <span class="text-danger">
+                                    @lang('items.no_detail_for_column', ['column' => $cm->column->column_id])
+                                </span>
+                            @endcan
                         @endif
                     @endif
                     
@@ -356,7 +374,7 @@
             {{-- Data_type of form field is map --}}
             @case('_map_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                 @if($cm->getConfigValue('map') == 'iframe')
                     @if($details->firstWhere('column_fk', $cm->column->column_id))
                         @if($cm->getConfigValue('map_iframe') == 'url')
@@ -373,19 +391,50 @@
                         <p>@lang('items.no_iframe')</p>
                         </iframe>
                     @else
-                        <span>detail column {{$cm->column->column_id}} for map not found</span>
+                        @can('show-admin')
+                            <span class="text-danger">
+                                @lang('items.no_detail_for_column', ['column' => $cm->column->column_id])
+                            </span>
+                        @endcan
                     @endif
                 @endif
                 @if($cm->getConfigValue('map') == 'inline')
-                    <div id="map" class="map"></div>
+                    <div id="map" class="map"><div id="popup"></div></div>
                     <script type="text/javascript">
                         var lon = {{ optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col')))->value_float ?? 0 }};
                         var lat = {{ optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col')))->value_float ?? 0 }};
                         var zoom = {{ $cm->getConfigValue('map_zoom') }};
+                        var coordinatesAvailabe = true;
+
+                        if (!lon && !lat) {
+                            lon = {{ Config::get('geo.map_lon', 14.986) }};
+                            lat = {{ Config::get('geo.map_lat', 51.15) }};
+                            coordinatesAvailabe = false;
+                        }
                         
                         {{-- Init and display the map --}}
                         osm_map.display(lon, lat, zoom);
-                        osm_map.addMarker(lon, lat, '{{ asset("storage/images/dot.svg") }}');
+                        if (coordinatesAvailabe) {
+                            osm_map.addMarker(lon, lat, '{{ asset("storage/images/dot.svg") }}');
+                        }
+                        else {
+                            var coordinates = osm_map.map.getView().getCenter();
+                            osm_map.popup.setPosition(coordinates);
+                            var content = '<b>@lang("items.no_position_for_map")</b>';
+                            $('#popup').popover({
+                                placement: 'bottom',
+                                html: true,
+                                title: '',
+                                content: content,
+                            });
+                            $('#popup').popover('show');
+                            
+                            // Move popover after moving the map
+                            osm_map.map.on('moveend', function (evt) {
+                                var coordinates = osm_map.map.getView().getCenter();
+                                osm_map.popup.setPosition(coordinates);
+                            });
+                        }
                         
                         {{-- Resize the map after un-collapsing the container --}}
                         $('#collapseCG{{ $cm->column_group_fk }}').on('shown.bs.collapse', function () {

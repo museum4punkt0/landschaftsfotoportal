@@ -4,7 +4,7 @@
 <!-- Admin dashboard -->
 <div class="container">
     <div class="card">
-        <div class="card-header">@lang('users.dashboard')</div>
+        <div class="card-header">@lang('users.profile')</div>
 
         <div class="card-body">
             @if (session('status'))

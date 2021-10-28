@@ -61,6 +61,16 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Append original file name of uploaded file
+    |--------------------------------------------------------------------------
+    |
+    | The default file name prefix is: "itemID_columnID_uploadTimestamp_"
+    |
+    */
+    'append_original_filename' => false,
+
+    /*
+    |--------------------------------------------------------------------------
     | Parameters for zoomify image viewer
     |--------------------------------------------------------------------------
     */

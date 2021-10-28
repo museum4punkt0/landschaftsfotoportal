@@ -20,7 +20,7 @@
 @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
     'section_id' => 'search',
     'section_heading' => __('search.header'),
-    'section_subheading' => 'Lorem ipsum dolor sit amet consectetur.',
+    'section_subheading' => __(config('ui.frontend_layout') . '.search_subheading'),
 ])
 
 <div class="container">
@@ -50,88 +50,103 @@
                         <input type="text" name="full_text" class="form-control" value="{{$search_terms['full_text'] ?? ""}}" />
                         <span class="text-danger">{{ $errors->first('full_text') }}</span>
                     </div>
-                    
-                    @foreach($colmap as $cm)
-                        
-                        <!-- Dropdown menus for latitude / longitude -->
-                        @if($cm->getConfigValue('data_subtype') == 'location_lat' ||
-                            $cm->getConfigValue('data_subtype') == 'location_lon')
-                            <div class="form-group">
-                                <span>
-                                    {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
-                                </span>
-                                <input
-                                    type="text"
-                                    name="fields[{{ $cm->column->column_id }}][min]"
-                                    class="form-control"
-                                    placeholder="min"
-                                    value="{{$search_terms['fields'][$cm->column->column_id]['min'] ?? ""}}"
-                                />
-                                <input
-                                    type="text"
-                                    name="fields[{{ $cm->column->column_id }}][max]"
-                                    class="form-control"
-                                    placeholder="max"
-                                    value="{{$search_terms['fields'][$cm->column->column_id]['max'] ?? ""}}"
-                                />
-                                <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
-                            </div>
-                        @endif
-                    
-                        <!-- Dropdown menus for select lists -->
-                        @if($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value == '_list_')
-                            <div class="form-group">
-                                <span>
-                                    {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
-                                </span>
-                                <select name="fields[{{ $cm->column->column_id }}]" class="form-control" size=1 >
-                                    <option value=0>- @lang('common.all') -</option>
-                                    @foreach($lists[$cm->column->list_fk] as $element)
-                                        <option value="{{$element->element_id}}"
-                                            @if(($search_terms['fields'][$cm->column->column_id] ?? "") == 
-                                                $element->element_id)
-                                                    selected
-                                            @endif
-                                        >
-                                            @for ($i = 0; $i < $element->depth; $i++)
-                                                |___
-                                            @endfor
-                                            @foreach($element->values as $v)
-                                                {{$v->value}}, 
-                                            @endforeach
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
-                            </div>
-                        @endif
-                        
-                        <!-- Dropdown menus for date ranges -->
-                        @if($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value == '_date_range_')
-                            <div class="form-group">
-                                <span>
-                                    {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
-                                </span>
-                                <select name="fields[{{ $cm->column->column_id }}]" class="form-control" size=1 >
-                                    <option value=0>- @lang('common.all') -</option>
-                                    @foreach($dateranges[$cm->column_fk] as $range => $count)
-                                        @if($count)
-                                            <option value="{{$range}}"
+
+                    <div class="container px-0 px-lg-0">
+                        <div class="row mx-n3 mx-lg-0">
+                        @foreach($colmap as $cm)
+
+                            <!-- Dropdown menus for latitude / longitude -->
+                            @if($cm->getConfigValue('data_subtype') == 'location_lat' ||
+                                $cm->getConfigValue('data_subtype') == 'location_lon')
+                                <!-- Force next columns to break to new line -->
+                                <div class="w-100"></div>
+                                <div class="form-group col-12 px-3 px-lg-0">
+                                    <span>
+                                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
+                                    </span>
+                                    <div class="row">
+                                        <div class="col col-6 col-lg-12">
+                                            <input
+                                                type="text"
+                                                name="fields[{{ $cm->column->column_id }}][min]"
+                                                class="form-control"
+                                                placeholder="min"
+                                                value="{{$search_terms['fields'][$cm->column->column_id]['min'] ?? ""}}"
+                                            />
+                                        </div>
+                                        <div class="col col-6 col-lg-12">
+                                            <input
+                                                type="text"
+                                                name="fields[{{ $cm->column->column_id }}][max]"
+                                                class="form-control"
+                                                placeholder="max"
+                                                value="{{$search_terms['fields'][$cm->column->column_id]['max'] ?? ""}}"
+                                            />
+                                        </div>
+                                    </div>
+                                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                                </div>
+                            @endif
+
+                            <!-- Dropdown menus for select lists -->
+                            @if($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value == '_list_')
+                                <div class="form-group col-6 col-lg-12 px-3 px-lg-0">
+                                    <span>
+                                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
+                                    </span>
+                                    <select name="fields[{{ $cm->column->column_id }}]" class="form-control" size=1 >
+                                        <option value=0>- @lang('common.all') -</option>
+                                        @foreach($lists[$cm->column->list_fk] as $element)
+                                            <option value="{{$element->element_id}}"
                                                 @if(($search_terms['fields'][$cm->column->column_id] ?? "") == 
-                                                    $range)
+                                                    $element->element_id)
                                                         selected
                                                 @endif
                                             >
-                                                {{$range}}@lang('common.decade_suffix')
+                                                @for ($i = 0; $i < $element->depth; $i++)
+                                                    |___
+                                                @endfor
+                                                {{ $element->attributes->firstWhere('name', 'name_' . app()->getLocale())->pivot->value }}
                                             </option>
-                                        @endif
-                                    @endforeach
-                                </select>
-                                <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
-                            </div>
-                        @endif
-                    
-                    @endforeach
+                                        @endforeach
+                                    </select>
+                                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                                </div>
+                            @endif
+
+                            <!-- Dropdown menus for date ranges -->
+                            @if($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value == '_date_range_')
+                                <div class="form-group col-6 col-lg-12 px-lg-0">
+                                    <span>
+                                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
+                                    </span>
+                                    <select name="fields[{{ $cm->column->column_id }}]" class="form-control" size=1 >
+                                        <option value=0>- @lang('common.all') -</option>
+                                        <option value=-1
+                                            @if(($search_terms['fields'][$cm->column->column_id] ?? "") == -1)
+                                                selected
+                                            @endif
+                                        >
+                                        @lang('common.unknown')</option>
+                                        @foreach($dateranges[$cm->column_fk] as $range => $count)
+                                            @if($count)
+                                                <option value="{{$range}}"
+                                                    @if(($search_terms['fields'][$cm->column->column_id] ?? "") == $range)
+                                                        selected
+                                                    @endif
+                                                >
+                                                    {{$range}}@lang('common.decade_suffix')
+                                                </option>
+                                            @endif
+                                        @endforeach
+                                    </select>
+                                    <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                                </div>
+                            @endif
+                        
+                        @endforeach
+                        </div>
+                    </div>
                     
                     <div class="form-group">
                         <button type="submit" class="btn btn-secondary">@lang('search.search')</button>
@@ -153,8 +168,8 @@
                     @include('includes.item_gallery', [
                         'items' => $items,
                         'limit' => Config::get('ui.search_results'),
-                        'heading' => __('search.results'),
-                        'subheading' => 'Lorem ipsum dolor sit amet consectetur.'
+                        'heading' => __(config('ui.frontend_layout') . '.search_results_heading'),
+                        'subheading' => __(config('ui.frontend_layout') . '.search_results_subheading')
                     ])
                     
                     @if(count($items))

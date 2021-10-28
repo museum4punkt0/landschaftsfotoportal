@@ -112,7 +112,9 @@
                         @lang('common.not_chosen')
                     @endif
                 @else
-                    <span>detail column {{$cm->column->column_id}} for list not found</span>
+                    <span class="text-danger">
+                        @lang('items.no_detail_for_column', ['column' => $cm->column->column_id])
+                    </span>
                 @endif
                 </div>
                 @break
@@ -250,7 +252,9 @@
                             @lang('columns.image_not_available')
                         @endif
                     @else
-                        <span>detail column {{$cm->column->column_id}} for image preview not found</span>
+                        <span class="text-danger">
+                            @lang('items.no_detail_for_column', ['column' => $cm->column->column_id])
+                        </span>
                     @endif
                 @endif
                 </div>
@@ -277,18 +281,53 @@
                         <p>@lang('items.no_iframe')</p>
                         </iframe>
                     @else
-                        <span>detail column {{$cm->column->column_id}} for map not found</span>
+                        <span class="text-danger">
+                            @lang('items.no_detail_for_column', ['column' => $cm->column->column_id])
+                        </span>
                     @endif
                 @endif
                 @if($cm->getConfigValue('map') == 'inline')
-                    <div id="map" class="map"></div>
+                    <div id="map" class="map"><div id="popup"></div></div>
                     <script type="text/javascript">
                         var lon = {{ optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col')))->value_float ?? 0 }};
                         var lat = {{ optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col')))->value_float ?? 0 }};
                         var zoom = {{ $cm->getConfigValue('map_zoom') }};
+                        var coordinatesAvailabe = true;
+
+                        if (!lon && !lat) {
+                            lon = {{ Config::get('geo.map_lon', 14.986) }};
+                            lat = {{ Config::get('geo.map_lat', 51.15) }};
+                            coordinatesAvailabe = false;
+                        }
+                        
                         // Init and display the map
                         osm_map.display(lon, lat, zoom);
-                        osm_map.addMarker(lon, lat, '{{ asset("storage/images/dot.svg") }}');
+                        if (coordinatesAvailabe) {
+                            osm_map.addMarker(lon, lat, '{{ asset("storage/images/dot.svg") }}');
+                        }
+                        else {
+                            var coordinates = osm_map.map.getView().getCenter();
+                            osm_map.popup.setPosition(coordinates);
+                            var content = '<b>@lang("items.no_position_for_map")</b>';
+                            $('#popup').popover({
+                                placement: 'bottom',
+                                html: true,
+                                title: '',
+                                content: content,
+                            });
+                            $('#popup').popover('show');
+                            
+                            // Move popover after moving the map
+                            osm_map.map.on('moveend', function (evt) {
+                                var coordinates = osm_map.map.getView().getCenter();
+                                osm_map.popup.setPosition(coordinates);
+                            });
+                        }
+                        
+                        {{-- Resize the map after un-collapsing the container --}}
+                        $('#collapseCG{{ $cm->column_group_fk }}').on('shown.bs.collapse', function () {
+                            osm_map.updateSize();
+                        });
                     </script>
                 @endif
                 </div>

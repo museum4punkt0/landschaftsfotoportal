@@ -27,7 +27,10 @@ class CartController extends Controller
     {
         $this->authorize('viewOwn', Cart::class);
 
-        $cart = Cart::myOwn(Auth::user()->id)->with('item')->latest()->paginate(10);
+        $cart = Cart::myOwn(Auth::user()->id)
+            ->with('item')
+            ->latest()
+            ->paginate(config('ui.cart_items'));
         
         return view('cart', compact('cart'));
     }

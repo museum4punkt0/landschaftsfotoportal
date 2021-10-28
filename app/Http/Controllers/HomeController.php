@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Gate;
 use Auth;
 use Session;
 use Redirect;
+use Route;
 
 class HomeController extends Controller
 {
@@ -54,8 +55,14 @@ class HomeController extends Controller
      */
     public function frontend()
     {
-        // Get the item which holds the content of the home page
-        $item = Item::where('title', config('menu.home_item_title', 'Home'))->first();
+        // Get the item which holds the content of the requested page
+        $item = Item::where('title', 'ILIKE', '%'.Route::currentRouteName().'%')->first();
+
+        // Fallback to home page
+        if (!$item) {
+            // Get the item which holds the content of the home page
+            $item = Item::where('title', config('menu.home_item_title', 'Home'))->first();
+        }
         
         // Check if item exists, otherwise redirect to search page
         if ($item) {

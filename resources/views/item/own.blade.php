@@ -5,12 +5,14 @@
     <!-- My own items -->
     @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
         'section_id' => 'portfolio',
-        'section_heading' => __('items.my_own'),
-        'section_subheading' => 'Lorem ipsum dolor sit amet consectetur.',
+        'section_heading' => __(config('ui.frontend_layout') . '.my_items_heading'),
+        'section_subheading' => __(config('ui.frontend_layout') . '.my_items_subheading'),
     ])
     
             <div class="container my-5">
-                <a href="{{route('item.create.own', ['item_type'=>$item_type])}}" class="btn btn-primary">@lang('items.new')</a>
+                <a href="{{route('item.create.own', ['item_type'=>$item_type])}}" class="btn btn-primary">
+                    @lang(config('ui.frontend_layout') . '.new_item')
+                </a>
             </div>
             
             <div class="row">
@@ -25,22 +27,9 @@
                                     </i>
                                 </div>
                             </div>
-                            <img class="img-fluid" src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                    $item->details->firstWhere('column_fk', 13)->value_string) }}" alt="" />
+                            <div class="img-preview-square" style="background-image: url('{{ str_replace(['(',')'],['\(','\)'],asset('storage/' . Config::get('media.preview_dir') . $item->details->firstWhere('column_fk', 13)->value_string)) }}');">&nbsp;</div>
                         </a>
                         <div class="portfolio-caption">
-                            <div class="portfolio-caption-heading">
-                            @if(!empty($item->details->firstWhere('column_fk', 22)->value_string))
-                                {{ $item->details->firstWhere('column_fk', 22)->value_string }},
-                            @endif
-                            @if(!empty($item->details->firstWhere('column_fk', 20)->value_string))
-                                {{ $item->details->firstWhere('column_fk', 20)->value_string }},
-                            @endif
-                                {{ $item->details->firstWhere('column_fk', 19)->value_string }}
-                            </div>
-                            <div class="portfolio-caption-subheading text-muted">
-                                {{ $item->details->firstWhere('column_fk', 5)->value_string }}
-                            </div>
                             <!-- Icons for user interaction -->
                             <div class="my-2" style="font-size: 0.6rem;">
                                 <span class="fa-stack fa-2x">
@@ -73,6 +62,19 @@
                                         <i class="fas {{ Config::get('ui.icon_comment') }} fa-stack-1x fa-inverse"></i>
                                     </a>
                                 </span>
+                            </div>
+                            <!-- Image caption -->
+                            <div class="portfolio-caption-heading">
+                            @if(!empty($item->details->firstWhere('column_fk', 22)->value_string))
+                                {{ $item->details->firstWhere('column_fk', 22)->value_string }},
+                            @endif
+                            @if(!empty($item->details->firstWhere('column_fk', 20)->value_string))
+                                {{ $item->details->firstWhere('column_fk', 20)->value_string }},
+                            @endif
+                                {{ $item->details->firstWhere('column_fk', 19)->value_string }}
+                            </div>
+                            <div class="portfolio-caption-subheading text-muted">
+                                {{ $item->details->firstWhere('column_fk', 5)->value_string }}
                             </div>
                         </div>
                     </div>
