@@ -2,6 +2,7 @@
 
 @section('content')
 
+    <div id="homeGallery">
     <!-- Portfolio Grid, Gallery with latest items-->
     @include('includes.item_gallery', [
         'items' => $items['latest'],
@@ -20,6 +21,7 @@
         'heading' => __('landschaftsfotoportal.gallery_incomplete_heading'),
         'subheading' => __('landschaftsfotoportal.gallery_incomplete_subheading')
     ])
+    </div>
     
     @include('includes.modal_login_request')
     @include('includes.modal_download')
