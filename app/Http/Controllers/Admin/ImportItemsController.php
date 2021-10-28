@@ -38,6 +38,8 @@ class ImportItemsController extends Controller
      */
     public function index()
     {
+        $this->authorize('import-items');
+
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
@@ -52,6 +54,8 @@ class ImportItemsController extends Controller
      */
     public function save(Request $request)
     {
+        $this->authorize('import-items');
+
         // Validate file size and extension
         $request->validate([
             'fileUpload' => 'required|mimes:csv,txt|max:4096',
@@ -89,6 +93,8 @@ class ImportItemsController extends Controller
      */
     public function preview(Request $request)
     {
+        $this->authorize('import-items');
+
         // Get selected attributes from cookie
         $selected_attr = json_decode($request->cookie('import_'. $request->item_type), true);
         $geocoder_attr = json_decode($request->cookie('import_geocoder_'. $request->item_type), true);
@@ -134,6 +140,8 @@ class ImportItemsController extends Controller
      */
     public function process(Request $request)
     {
+        $this->authorize('import-items');
+
         // Validate the form inputs
         $validator = Validator::make($request->all(), [
             'fields' => [
@@ -224,6 +232,8 @@ class ImportItemsController extends Controller
      */
     public function fix_ext()
     {
+        $this->authorize('import-items');
+
         $details = Detail::where('column_fk', 63)->get();
         
         $count = 0;

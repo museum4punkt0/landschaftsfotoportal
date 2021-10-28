@@ -31,13 +31,25 @@ class AuthServiceProvider extends ServiceProvider
                 return true;
             }
         });
-        
+
         Gate::define('show-admin', function ($user) {
             return $user->hasAccess(['show-admin']);
         });
-        
+
         Gate::define('show-dashboard', function ($user) {
             return $user->hasAccess(['show-dashboard']);
+        });
+
+        Gate::define('import-csv', function ($user) {
+            return $user->hasAccess(['import-csv']);
+        });
+
+        Gate::define('import-items', function ($user) {
+            return $user->hasAccess(['import-items']);
+        });
+
+        Gate::define('import-taxa', function ($user) {
+            return $user->hasAccess(['import-taxa']);
         });
     }
 }

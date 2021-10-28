@@ -2,10 +2,11 @@
 
 namespace App\Policies;
 
+use App\Column;
 use App\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class UserPolicy
+class ColumnPolicy
 {
     use HandlesAuthorization;
 
@@ -30,19 +31,19 @@ class UserPolicy
      */
     public function viewAny(User $user)
     {
-        //
+        return $user->hasAccess(['viewAny-column']);
     }
 
     /**
      * Determine whether the user can view the model.
      *
      * @param  \App\User  $user
-     * @param  \App\User  $model
+     * @param  \App\Column  $column
      * @return mixed
      */
-    public function view(User $user, User $model)
+    public function view(User $user, Column $column)
     {
-        return $user->hasAccess(['viewAny-user']);
+        return $user->hasAccess(['view-column']);
     }
 
     /**
@@ -53,41 +54,41 @@ class UserPolicy
      */
     public function create(User $user)
     {
-        return $user->hasAccess(['view-user']);
+        return $user->hasAccess(['create-column']);
     }
 
     /**
      * Determine whether the user can update the model.
      *
      * @param  \App\User  $user
-     * @param  \App\User  $model
+     * @param  \App\Column  $column
      * @return mixed
      */
-    public function update(User $user, User $model)
+    public function update(User $user, Column $column)
     {
-        return $user->hasAccess(['update-user']);
+        return $user->hasAccess(['update-column']);
     }
 
     /**
      * Determine whether the user can delete the model.
      *
      * @param  \App\User  $user
-     * @param  \App\User  $model
+     * @param  \App\Column  $column
      * @return mixed
      */
-    public function delete(User $user, User $model)
+    public function delete(User $user, Column $column)
     {
-        return $user->hasAccess(['delete-user']);
+        return $user->hasAccess(['delete-column']);
     }
 
     /**
      * Determine whether the user can restore the model.
      *
      * @param  \App\User  $user
-     * @param  \App\User  $model
+     * @param  \App\Column  $column
      * @return mixed
      */
-    public function restore(User $user, User $model)
+    public function restore(User $user, Column $column)
     {
         //
     }
@@ -96,10 +97,10 @@ class UserPolicy
      * Determine whether the user can permanently delete the model.
      *
      * @param  \App\User  $user
-     * @param  \App\User  $model
+     * @param  \App\Column  $column
      * @return mixed
      */
-    public function forceDelete(User $user, User $model)
+    public function forceDelete(User $user, Column $column)
     {
         //
     }

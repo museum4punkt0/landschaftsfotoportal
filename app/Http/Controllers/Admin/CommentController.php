@@ -18,6 +18,9 @@ class CommentController extends Controller
     public function __construct()
     {
         $this->middleware('verified');
+
+        // Use app\Policies\CommentPolicy for authorizing ressource controller
+        $this->authorizeResource(Comment::class, 'comment');
     }
 
     /**
@@ -92,7 +95,7 @@ class CommentController extends Controller
      */
     public function list_unpublished()
     {
-        //$this->authorize('unpublished', Comment::class);
+        $this->authorize('publish', Comment::class);
         
         $comments = Comment::where('public', '<', 1)->with('item')->latest('updated_at')->paginate(10);
         
@@ -107,7 +110,7 @@ class CommentController extends Controller
      */
     public function publish(Comment $comment)
     {
-        //$this->authorize('publish', $comment);
+        $this->authorize('publish', $comment);
         
         // Check for single comment or batch
         if ($comment->comment_id) {

@@ -29,6 +29,8 @@ class AjaxCommentController extends Controller
      */
     public function store(Request $request, $item_id)
     {
+        $this->authorize('create', Comment::class);
+
         $request->validate([
             'message' => 'required|string',
         ]);
@@ -54,6 +56,8 @@ class AjaxCommentController extends Controller
      */
     public function update(Request $request, Comment $comment)
     {
+        $this->authorize('update', $comment);
+
         $request->validate([
             'message' => 'required|string',
         ]);
@@ -74,6 +78,8 @@ class AjaxCommentController extends Controller
      */
     public function destroy(Comment $comment)
     {
+        $this->authorize('delete', $comment);
+
         $comment->delete();
         
         return response()->json(['success' => __('comments.deleted')]);

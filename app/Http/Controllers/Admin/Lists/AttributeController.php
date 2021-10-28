@@ -18,7 +18,10 @@ class AttributeController extends Controller
     public function __construct()
     {
         $this->middleware('verified');
-    }
+    
+        // Use app\Policies\AttributePolicy for authorizing ressource controller
+        $this->authorizeResource(Attribute::class, 'attribute');
+}
 
     /**
      * Display a listing of the resource.

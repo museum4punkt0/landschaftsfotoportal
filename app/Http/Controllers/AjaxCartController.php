@@ -29,6 +29,8 @@ class AjaxCartController extends Controller
      */
     public function add(Request $request, $item_id)
     {
+        $this->authorize('add', Cart::class);
+
         // Prevent duplicate items per user
         if (Cart::where([['item_fk', $item_id], ['created_by', $request->user()->id]])->get()->isEmpty()) {
             $data = [
@@ -50,6 +52,8 @@ class AjaxCartController extends Controller
      */
     public function remove(Cart $cart)
     {
+        $this->authorize('remove', $cart);
+
         $cart->delete();
         
         return response()->json(['success' => __('cart.removed')]);

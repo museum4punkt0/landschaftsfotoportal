@@ -30,6 +30,9 @@ class ItemController extends Controller
     public function __construct()
     {
         $this->middleware('verified')->except(['show', 'download', 'gallery', 'map', 'timeline']);
+
+        // Use app\Policies\ItemPolicy for authorizing ressource controller
+        $this->authorizeResource(Item::class, 'item');
     }
 
     /**
@@ -269,6 +272,8 @@ class ItemController extends Controller
      */
     public function own()
     {
+        $this->authorize('viewOwn', Item::class);
+
         // Get the item_type for '_image_' items
         // TODO: this should be more flexible; allow configuration of multiple/different item_types
         $it_list = Selectlist::where('name', '_item_type_')->first();

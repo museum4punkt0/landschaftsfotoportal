@@ -23,6 +23,9 @@ class ColumnController extends Controller
     public function __construct()
     {
         $this->middleware('verified');
+
+        // Use app\Policies\ColumnPolicy for authorizing ressource controller
+        $this->authorizeResource(Column::class, 'column');
     }
 
     /**

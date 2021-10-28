@@ -20,6 +20,9 @@ class ValueController extends Controller
     public function __construct()
     {
         $this->middleware('verified');
+
+        // Use app\Policies\ValuePolicy for authorizing ressource controller
+        $this->authorizeResource(Value::class, 'value');
     }
 
     /**

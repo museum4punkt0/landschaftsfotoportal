@@ -26,6 +26,8 @@ class ImportCSVController extends Controller
 
     public function index()
     {
+        $this->authorize('import-csv');
+
         $lists = Selectlist::orderBy('name')->get();
         
         return view('admin.import.csvupload', compact('lists'));
@@ -33,6 +35,8 @@ class ImportCSVController extends Controller
  
     public function save(Request $request)
     {
+        $this->authorize('import-csv');
+
         // Validate file size and extension
         $request->validate([
             'fileUpload' => 'required|mimes:csv,txt|max:4096',
@@ -63,6 +67,8 @@ class ImportCSVController extends Controller
     
     public function preview(Request $request)
     {
+        $this->authorize('import-csv');
+
         // Get CSV file path from session
         $csv_file = $request->session()->get('csv_file');
         // Get original CSV file name from session
@@ -84,6 +90,8 @@ class ImportCSVController extends Controller
     
     public function process(Request $request)
     {
+        $this->authorize('import-csv');
+
         // Validate the form inputs
         $validator = Validator::make($request->all(), [
             'fields' => [
