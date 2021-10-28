@@ -26,8 +26,8 @@
                             @lang('common.unknown')
                         @endif
                         </h4>
-                        <p class="imagecounter">
-                            @lang('common.showall')<br />{{ $count }} @lang(config('ui.frontend_layout') . '.items')
+                        <p>
+                            {{ $count }} @lang(config('ui.frontend_layout') . '.items')
                         </p>
                     </div>
                     </a>

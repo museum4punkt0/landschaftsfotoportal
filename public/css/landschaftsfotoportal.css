@@ -179,6 +179,7 @@ img::-moz-selection {
     margin-right: 0;
   }
 }
+
 header.masthead {
   padding-top: 10.5rem;
   padding-bottom: 6rem;
@@ -234,12 +235,12 @@ header.masthead .masthead-heading {
 }
 
 #portfolio .img-preview-square {
-    display: grid;
-    background-repeat: no-repeat;
-    background-position: center center;    
-    background-size: cover;
-    height: 300px;
-    width: 100%;    
+  display: grid;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  height: 300px;
+  width: 100%;
 }
 #portfolio .portfolio-item {
   height: 100%;
@@ -423,10 +424,6 @@ header.masthead .masthead-heading {
   margin-top: 0;
   color: inherit;
 }
-.timeline > li .timeline-image p{
-  line-height: 1;
-  font-size:9px;
-}
 .timeline .timeline-heading h4.subheading {
   text-transform: none;
 }
@@ -435,26 +432,16 @@ header.masthead .masthead-heading {
   margin-bottom: 0;
 }
  
-.timelinethumb{
-    display: grid;
-    background-repeat: no-repeat;
-    background-position: center center;	
-    background-size: cover;
-    height: 80px;
-    width: 80px;	
-    border: 7px solid #e9ecef;
-    border-radius: 100%;
-    margin: 2px;
-}
-.timeline-image .imagecounter{
-    /*color: darkslategrey;*/
-}
-/* --breakpoint-sm */
-@media (min-width: 576px) {
-    .timelinethumb{
-        height: 80px;
-        width: 80px;	
-    }
+.timelinethumb {
+  display: grid;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  height: 80px;
+  width: 80px;
+  border: 7px solid #e9ecef;
+  border-radius: 100%;
+  margin: 2px;
 }
 
 @media (min-width: 768px) {
@@ -482,19 +469,15 @@ header.masthead .masthead-heading {
     line-height: 18px;
     margin-top: 16px;
   }
-  .timeline > li .timeline-image p{
-      line-height: 1;
-      font-size:11px;
-  }
   .timeline > li.timeline-inverted > .timeline-panel {
     float: right;
     padding: 0 30px 20px 20px;
     text-align: left;
   }
-    .timelinethumb{
-        height: 100px;
-        width: 100px;	
-    }
+  .timelinethumb {
+    height: 100px;
+    width: 100px;
+  }
 }
 @media (min-width: 992px) {
   .timeline > li {
@@ -513,17 +496,13 @@ header.masthead .masthead-heading {
     line-height: 26px;
     margin-top: 30px;
   }
-  .timeline > li .timeline-image p{
-      line-height: 1;
-      font-size:18px;
-  }
   .timeline > li.timeline-inverted > .timeline-panel {
     padding: 0 20px 20px;
   }
-    .timelinethumb{
-        height: 150px;
-        width: 150px;	
-    }
+  .timelinethumb {
+    height: 150px;
+    width: 150px;
+  }
 }
 @media (min-width: 1200px) {
   .timeline > li {
@@ -540,71 +519,13 @@ header.masthead .masthead-heading {
   .timeline > li .timeline-image h4 {
     margin-top: 40px;
   }
-  .timeline > li .timeline-image p{
-      line-height: 1;
-      font-size:16px;
-  }
   .timeline > li.timeline-inverted > .timeline-panel {
     padding: 0 100px 20px 20px;
   }
-    .timelinethumb{
-        height: 170px;
-        width: 170px;	
-    }
-}
-/* timeline end */
-section#contact {
-  background-color: #212529;
-  background-image: url("../assets/img/map-image.png");
-  background-repeat: no-repeat;
-  background-position: center;
-}
-section#contact .section-heading {
-  color: #fff;
-}
-section#contact form#contactForm .form-group {
-  margin-bottom: 1.5rem;
-}
-section#contact form#contactForm .form-group input,
-section#contact form#contactForm .form-group textarea {
-  padding: 1.25rem;
-}
-section#contact form#contactForm .form-group input.form-control {
-  height: auto;
-}
-section#contact form#contactForm .form-group-textarea {
-  height: 100%;
-}
-section#contact form#contactForm .form-group-textarea textarea {
-  height: 100%;
-  min-height: 10rem;
-}
-section#contact form#contactForm p.help-block {
-  margin: 0;
-}
-section#contact form#contactForm .form-control:focus {
-  border-color: #a4aa00;
-  box-shadow: none;
-}
-section#contact form#contactForm ::-webkit-input-placeholder {
-  font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  font-weight: 700;
-  color: #ced4da;
-}
-section#contact form#contactForm :-moz-placeholder {
-  font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  font-weight: 700;
-  color: #ced4da;
-}
-section#contact form#contactForm ::-moz-placeholder {
-  font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  font-weight: 700;
-  color: #ced4da;
-}
-section#contact form#contactForm :-ms-input-placeholder {
-  font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  font-weight: 700;
-  color: #ced4da;
+  .timelinethumb {
+    height: 170px;
+    width: 170px;
+  }
 }
 
 .footer {
