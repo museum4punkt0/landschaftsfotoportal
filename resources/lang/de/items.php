@@ -34,6 +34,7 @@ return [
     'remove_orphans' => 'Details bereinigen',
     'orphans_removed' => ':count verwaiste Details wurden bereinigt.',
     'published' => ':count Datensätze wurden veröffentlicht.',
+    'editing_draft' => 'Sie bearbeiten einen noch nicht veröffentlichten Entwurf.',
 
     'image_dimensions' => 'Bildgröße',
     'image_size' => 'Dateigröße',

@@ -2,8 +2,9 @@
 
 namespace App\Utils;
 
-use App\Detail;
+use App\Item;
 use App\Column;
+use App\ItemRevision;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -27,13 +28,13 @@ class Image
     /**
      * Store size (bytes) of a given image file.
      *
+     * @param  \App\Item $item
      * @param  string $image_path
      * @param  string $filename
-     * @param  integer $item_id
      * @param  integer $fcolumn_id
      * @return void
      */
-    public static function storeImageSize($image_path, $filename, $item_id, $column_id)
+    public static function storeImageSize(Item $item, $image_path, $filename, $column_id)
     {
         if (Image::checkFileExists($image_path . $filename)) {
         
@@ -47,10 +48,12 @@ class Image
             // Find the column holding the image height
             $size_column = $cm->getConfigValue('image_size_col');
             if ($size_column) {
-                Detail::updateOrCreate(
-                    ['item_fk' => $item_id, 'column_fk' => $size_column],
+                $item->details()->updateOrCreate(
+                    ['column_fk' => $size_column],
                     ['value_int' => $size]
                 );
+                // Add foreign keys
+                Image::addForeignKeysToDetailRevision($item, $size_column);
             } else {
                 Log::warning(__('items.no_column_for_image_size'), ['colmap' => $cm->colmap_id]);
             }
@@ -60,13 +63,13 @@ class Image
     /**
      * Store width and height of a given image file.
      *
+     * @param  \App\Item $item
      * @param  string $image_path
      * @param  string $filename
-     * @param  integer $item_id
      * @param  integer $fcolumn_id
      * @return void
      */
-    public static function storeImageDimensions($image_path, $filename, $item_id, $column_id)
+    public static function storeImageDimensions(Item $item, $image_path, $filename, $column_id)
     {
         if (Image::checkFileExists($image_path . $filename)) {
         
@@ -82,10 +85,12 @@ class Image
             // Find the column holding the image width
             $width_column = $cm->getConfigValue('image_width_col');
             if ($width_column) {
-                Detail::updateOrCreate(
-                    ['item_fk' => $item_id , 'column_fk' => $width_column],
+                $item->details()->updateOrCreate(
+                    ['column_fk' => $width_column],
                     ['value_int' => $width_orig]
                 );
+                // Add foreign keys
+                Image::addForeignKeysToDetailRevision($item, $width_column);
             } else {
                 Log::warning(__('items.no_column_for_image_width'), ['colmap' => $cm->colmap_id]);
             }
@@ -93,10 +98,12 @@ class Image
             // Find the column holding the image height
             $height_column = $cm->getConfigValue('image_height_col');
             if ($height_column) {
-                Detail::updateOrCreate(
-                    ['item_fk' => $item_id, 'column_fk' => $height_column],
+                $item->details()->updateOrCreate(
+                    ['column_fk' => $height_column],
                     ['value_int' => $height_orig]
                 );
+                // Add foreign keys
+                Image::addForeignKeysToDetailRevision($item, $height_column);
             } else {
                 Log::warning(__('items.no_column_for_image_height'), ['colmap' => $cm->colmap_id]);
             }
@@ -173,6 +180,26 @@ class Image
             imagejpeg($scaled, Storage::disk('public')->path($dest_path) . $filename, 85);
             
             Log::info(__('items.resized_image_created') . $dest_path . $filename);
+        }
+    }
+
+    /**
+     * Store foreign keys for item and detail to a DetailRevision.
+     *
+     * @param  \App\Item $item
+     * @param  integer $fcolumn_fk
+     * @return void
+     */
+    private static function addForeignKeysToDetailRevision(Item $item, $column_fk) {
+        if ($item instanceof ItemRevision) {
+            $detail_fk = $item->item->details()->where('column_fk', $column_fk)->first()->detail_id;
+
+            /*
+            $item->details()->update(
+                ['column_fk' => $column_fk],
+                ['item_fk' => $item->item_fk, 'detail_fk' => $detail_fk]
+            );
+            */
         }
     }
 }

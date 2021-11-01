@@ -13,10 +13,15 @@
         @lang('common.form_validation_error')
     </div>
 @endif
+@if (session('info'))
+    <div class="alert alert-info">
+        {{ session('info') }}
+    </div>
+@endif
 
 <h2>@lang('items.edit')</h2>
 
-<form id="itemEditForm" action="{{ route($options['route'], $item->item_id) }}" method="POST" enctype="multipart/form-data">
+<form id="itemEditForm" action="{{ route($options['route'], $item->original_item_id) }}" method="POST" enctype="multipart/form-data">
     
 @if($options['edit.meta'])
     <div class="form-group">

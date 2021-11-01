@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Item;
+use App\ItemRevision;
 use App\Detail;
+use App\DetailRevision;
 use App\Column;
 use App\ColumnMapping;
 use App\DateRange;
@@ -120,6 +122,8 @@ class ItemController extends Controller
             'created_by' => $request->user()->id,
             'updated_by' => $request->user()->id,
         ];
+        
+        $moderated = true;
         $item = Item::create($item_data);
         
         // Save the details for all columns that belong to the item
@@ -189,7 +193,7 @@ class ItemController extends Controller
                     case '_image_':
                         if ($file->isValid()) {
                             $path = config('media.full_dir');
-                            $name = $item->item_id ."_". $column_id ."_". date('YmdHis');
+                            $name = $item->original_item_id ."_". $column_id ."_". date('YmdHis');
                             if (config('media.append_original_filename')) {
                                 $name .= "_" . $file->getClientOriginalName();
                             }
@@ -202,15 +206,15 @@ class ItemController extends Controller
                             $detail_data['value_string']  = $name;
                             
                             // Store image dimensions in database
-                            Image::storeImageDimensions($path, $name, $item->item_id, $column_id);
-                            Image::storeImageSize($path, $name, $item->item_id, $column_id);
+                            Image::storeImageDimensions($item, $path, $name, $column_id);
+                            Image::storeImageSize($item, $path, $name, $column_id);
                             
                             // Create resized images
                             Image::processImageResizing($path, $name);
                         }
                         break;
                 }
-                Detail::where('item_fk', $item->item_id)
+                $item->details()
                     ->where('column_fk', $column_id)
                     ->update($detail_data);
             }
@@ -220,6 +224,11 @@ class ItemController extends Controller
         // especially useful for drop-down lists with multiple selection if no option was selected
         $this->addMissingDetails($item, $colmap);
         
+        // Copy this updated item to revisions archive
+        if (config('ui.revisions')) {
+            $item->createRevisionWithDetails($moderated);
+        }
+
         return redirect()->route('item.show.own')
             ->with('success', __('items.created'));
     }
@@ -468,6 +477,20 @@ class ItemController extends Controller
      */
     public function edit(Item $item)
     {
+        $moderated = true;
+        if (config('ui.revisions') && $moderated) {
+            $revision = $item->moderatedRevisionAvailable();
+            // Check if a draft revision is available
+            if ($revision) {
+                Debugbar::info('rev: ' . $revision);
+                // Load the (draft) revision instead of the original item
+                $item = $item->revisions()->myOwn(Auth::user()->id)
+                        ->where('revision', $revision)->first();
+                // Put some info for the users into the session
+                session()->flash('info', __('items.editing_draft'));
+            }
+        }
+
         // Only columns associated with this item's taxon or its descendants
         $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk)->where('public', 1);
         
@@ -476,7 +499,7 @@ class ItemController extends Controller
         $this->addMissingDetails($item, $colmap);
         
         // Load all details for this item
-        $details = Detail::where('item_fk', $item->item_id)->get();
+        $details = $item->details;
         
         // Load all list elements of lists used by this item's columns
         $lists = Element::getTrees($colmap);
@@ -541,18 +564,37 @@ class ItemController extends Controller
         
         $request->validate($validation_rules);
         
+        $moderated = true;
+        if (config('ui.revisions') && $moderated) {
+            $revision = $item->moderatedRevisionAvailable();
+            // Check if a draft revision is available
+            if (!$revision) {
+                $revision = $item->getLatestRevisionNumber(false);
+            }
+            // Load the (draft) revision instead of the original item
+            $item = $item->revisions()->myOwn(Auth::user()->id)
+                    ->where('revision', $revision)->first();
+            // Copy that revision to a new one
+            $item = $item->cloneRevisionWithDetails($moderated);
+            // Reload the item and eager load all of its details
+            $item->refresh();
+            $item->load('details');
+        }
+
         $item->title = $request->input('title');
         $item->parent_fk = $request->input('parent');
         $item->taxon_fk = $request->input('taxon');
         $item->public = 0;
         $item->updated_by = $request->user()->id;
         $item->save();
-        
-        $details = Detail::where('item_fk', $item->item_id)->get();
-        
+
+        // Load all details for this item
+        $details = $item->details;
+
         // Save the details for all columns that belong to the item
         foreach ($request->input('fields') as $column_id => $value) {
             $detail = $details->where('column_fk', $column_id)->first();
+            $detail_elements = null;
             
             $data_type = Column::find($column_id)->getDataType();
             
@@ -561,9 +603,9 @@ class ItemController extends Controller
                     $detail->element_fk = $value == '' ? null : intval($value);
                     break;
                 case '_multi_list_':
-                    $detail->elements()->sync(array_values(array_filter($value, function ($v, $k) {
+                    $detail_elements = array_values(array_filter($value, function ($v, $k) {
                         return $k !== 'dummy';
-                    }, ARRAY_FILTER_USE_BOTH)));
+                    }, ARRAY_FILTER_USE_BOTH));
                     break;
                 case '_boolean_':
                 case '_integer_':
@@ -591,6 +633,11 @@ class ItemController extends Controller
                     break;
             }
             $detail->save();
+
+            // Save chosen elements for drop-down lists with multiple selections
+            if ($detail_elements) {
+                $detail->elements()->sync($detail_elements);
+            }
         }
         
         // Save uploaded files and their details
@@ -605,7 +652,7 @@ class ItemController extends Controller
                     case '_image_':
                         if ($file->isValid()) {
                             $path = config('media.full_dir');
-                            $name = $item->item_id ."_". $column_id ."_". date('YmdHis');
+                            $name = $item->original_item_id ."_". $column_id ."_". date('YmdHis');
                             if (config('media.append_original_filename')) {
                                 $name .= "_" . $file->getClientOriginalName();
                             }
@@ -618,8 +665,8 @@ class ItemController extends Controller
                             $detail->value_string  = $name;
                             
                             // Store image dimensions in database
-                            Image::storeImageDimensions($path, $name, $item->item_id, $column_id);
-                            Image::storeImageSize($path, $name, $item->item_id, $column_id);
+                            Image::storeImageDimensions($item, $path, $name, $column_id);
+                            Image::storeImageSize($item, $path, $name, $column_id);
                             
                             // Create resized images
                             Image::processImageResizing($path, $name);
@@ -629,7 +676,12 @@ class ItemController extends Controller
                 $detail->save();
             }
         }
-        
+
+        if (config('ui.revisions') && !$moderated) {
+            // Copy this updated item to revisions archive
+            $item->createRevisionWithDetails(false);
+        }
+
         return redirect()->route('item.show.own')
             ->with('success', __('items.updated'));
     }
@@ -645,8 +697,7 @@ class ItemController extends Controller
     {
         // Check all columns for existing details
         foreach ($colmap as $cm) {
-            Detail::firstOrCreate([
-                'item_fk' => $item->item_id,
+            $item->details()->firstOrCreate([
                 'column_fk' => $cm->column->column_id,
             ]);
         }

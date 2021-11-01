@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Item;
+use App\ItemRevision;
 use App\Taxon;
 use App\Cart;
 use App\Comment;
@@ -270,8 +271,8 @@ class ItemController extends Controller
                             $detail_data['value_string'] = $name;
 
                             // Store image dimensions in database
-                            Image::storeImageDimensions($path, $name, $item->item_id, $column_id);
-                            Image::storeImageSize($path, $name, $item->item_id, $column_id);
+                            Image::storeImageDimensions($item, $path, $name, $column_id);
+                            Image::storeImageSize($item, $path, $name, $column_id);
 
                             // Create resized images
                             Image::processImageResizing($path, $name);
@@ -287,6 +288,11 @@ class ItemController extends Controller
         // Check for missing details from form input and add them
         // especially useful for drop-down lists with multiple selection if no option was selected
         $this->addMissingDetails($item, $colmap);
+
+        // Copy this updated item to revisions archive
+        if (config('ui.revisions')) {
+            $item->createRevisionWithDetails();
+        }
 
         return Redirect::to('admin/item')
                         ->with('success', __('items.created'));
@@ -407,7 +413,7 @@ class ItemController extends Controller
         $this->addMissingDetails($item, $colmap);
 
         // Load all details for this item
-        $details = Detail::where('item_fk', $item->item_id)->get();
+        $details = $item->details;
 
         // Load all list elements of lists used by this item's columns
         $lists = Element::getTrees($colmap);
@@ -478,7 +484,8 @@ class ItemController extends Controller
         $item->updated_by = $request->user()->id;
         $item->save();
 
-        $details = Detail::where('item_fk', $item->item_id)->get();
+        // Load all details for this item
+        $details = $item->details;
 
         // Save the details for all columns that belong to the item
         foreach ($request->input('fields') as $column_id => $value) {
@@ -548,8 +555,8 @@ class ItemController extends Controller
                             $detail->value_string = $name;
 
                             // Store image dimensions in database
-                            Image::storeImageDimensions($path, $name, $item->item_id, $column_id);
-                            Image::storeImageSize($path, $name, $item->item_id, $column_id);
+                            Image::storeImageDimensions($item, $path, $name, $column_id);
+                            Image::storeImageSize($item, $path, $name, $column_id);
 
                             // Create resized images
                             Image::processImageResizing($path, $name);
@@ -558,6 +565,11 @@ class ItemController extends Controller
                 }
                 $detail->save();
             }
+        }
+
+        // Copy this updated item to revisions archive
+        if (config('ui.revisions')) {
+            $item->createRevisionWithDetails();
         }
 
         return Redirect::to('admin/item')
@@ -629,8 +641,7 @@ class ItemController extends Controller
     {
         // Check all columns for existing details
         foreach ($colmap as $cm) {
-            Detail::firstOrCreate([
-                'item_fk' => $item->item_id,
+            $item->details()->firstOrCreate([
                 'column_fk' => $cm->column->column_id,
             ]);
         }

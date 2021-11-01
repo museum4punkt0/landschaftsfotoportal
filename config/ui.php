@@ -154,4 +154,15 @@ return [
     
     'upload_terms_auth' => true,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Enable revisions (versions) for items
+    |--------------------------------------------------------------------------
+    |
+    | Whenever an item is created or updated a revision is saved to database.
+    |
+    */
+
+    'revisions' => true,
+
 ];

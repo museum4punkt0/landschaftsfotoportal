@@ -225,16 +225,16 @@ class AjaxImportController extends Controller
                             if ($cell) {
                                 // Store image dimensions to database
                                 Image::storeImageDimensions(
+                                    $item,
                                     config('media.full_dir'),
                                     $cell,
-                                    $item->item_id,
                                     $selected_attr[$colnr]
                                 );
                                 // Store image size to database
                                 Image::storeImageSize(
+                                    $item,
                                     config('media.full_dir'),
                                     $cell,
-                                    $item->item_id,
                                     $selected_attr[$colnr]
                                 );
                                 // Create resized images
