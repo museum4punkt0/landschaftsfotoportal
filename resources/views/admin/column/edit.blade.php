@@ -10,7 +10,7 @@
     <div class="form-group">
         <span>@lang('common.description')</span>
         <input type="text" name="description" class="form-control" 
-            value="{{ old('description', $column->description) }}"
+            value="{{ old('description', $column->description) }}" autofocus
         />
         <span class="text-danger">{{ $errors->first('description') }}</span>
     </div>

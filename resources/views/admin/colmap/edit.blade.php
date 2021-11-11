@@ -37,7 +37,7 @@
     ])
     <div class="form-group">
         <span>@lang('columns.column_group')</span>
-        <select name="column_group" class="form-control" size=1 >
+        <select name="column_group" class="form-control" size=1 autofocus>
             @foreach($column_groups as $group)
                 <option value="{{$group->element_fk}}"
                     @if(old('column_group', $colmap->column_group_fk) == $group->element_fk) selected @endif>

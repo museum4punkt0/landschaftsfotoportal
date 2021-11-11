@@ -31,7 +31,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <button type="button" id="startButton" class="btn btn-primary">
+                    <button type="button" id="startButton" class="btn btn-primary" autofocus>
                         @lang('import.import')
                     </button>
                 </div>

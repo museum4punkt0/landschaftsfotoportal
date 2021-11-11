@@ -30,7 +30,7 @@
                     <div class="form-row">
                         <div class="form-group col-md-8">
                             <span>@lang('colmaps.item_type')</span>
-                            <select name="item_type" id="item_type_select" class="form-control" size=1 >
+                            <select name="item_type" id="item_type_select" class="form-control" size=1 autofocus>
                                 @foreach($item_types as $type)
                                     <option value="{{$type->element_id}}"
                                         @if(old('item_type', $item_type) == $type->element_id) selected @endif>

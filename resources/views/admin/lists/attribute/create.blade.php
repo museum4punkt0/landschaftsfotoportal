@@ -9,7 +9,7 @@
     
     <div class="form-group">
         <span>@lang('common.name')</span>
-        <input type="text" name="name" class="form-control" value="{{old('name')}}" />
+        <input type="text" name="name" class="form-control" value="{{old('name')}}" autofocus />
         <span class="text-danger">{{ $errors->first('name') }}</span>
     </div>
     

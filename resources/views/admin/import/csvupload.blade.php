@@ -40,7 +40,7 @@
                     @csrf
                     <div class="form-group">
                         <span>@lang('lists.list')</span>
-                        <select name="list">
+                        <select name="list" class="form-control" autofocus>
                         @foreach ($lists as $list)
                             <option value="{{ $list->list_id }}">
                                 {{ $list->name }} ({{ $list->description }})

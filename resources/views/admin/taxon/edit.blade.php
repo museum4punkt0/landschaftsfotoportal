@@ -15,7 +15,7 @@
     
     <div class="form-group">
         <span>@lang('taxon.taxon_name')</span>
-        <input type="text" name="taxon_name" class="form-control" value="{{old('taxon_name', $taxon->taxon_name)}}" />
+        <input type="text" name="taxon_name" class="form-control" value="{{old('taxon_name', $taxon->taxon_name)}}" autofocus />
         <span class="text-danger">{{ $errors->first('taxon_name') }}</span>
     </div>
     <div class="form-group">

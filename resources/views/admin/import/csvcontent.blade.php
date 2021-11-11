@@ -24,7 +24,7 @@
                     <tr>
                     @foreach ($csv_data[0] as $key => $value)
                         <td>
-                            <select name="fields[{{ $key }}]" style="width: 8em;">
+                            <select name="fields[{{ $key }}]" style="width: 8em;" @if($loop->first) autofocus @endif >
                                 <option value="0">@lang('common.ignore')</option>
                                 @if($list->hierarchical)
                                     <option value="-1"

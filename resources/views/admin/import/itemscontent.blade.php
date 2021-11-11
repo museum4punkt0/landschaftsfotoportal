@@ -31,7 +31,7 @@
                                 @endforeach
                             </td>
                             <td>
-                                <select name="fields[{{ $loop->index }}]">
+                                <select name="fields[{{ $loop->index }}]" @if ($loop->first) autofocus @endif >
                                     <option value="0">@lang('common.ignore')</option>
                                     <option value="-1"
                                         @if(old('fields.'.$loop->index) == -1) selected @endif>

@@ -22,7 +22,7 @@
                     <tr>
                     @foreach ($csv_data[0] as $key => $value)
                         <td>
-                            <select name="fields[{{ $key }}]" style="width: 6em;">
+                            <select name="fields[{{ $key }}]" style="width: 6em;" @if($loop->first) autofocus @endif >
                                 <option value="0">@lang('common.ignore')</option>
                                 <option value="taxon_name"
                                     @if(old('fields.'.$key) == 'taxon_name') selected @endif>

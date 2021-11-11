@@ -9,7 +9,7 @@
     
     <div class="form-group">
         <span>@lang('comments.message')</span>
-        <input type="text" name="message" class="form-control" value="{{old('message', $comment->message)}}" />
+        <input type="text" name="message" class="form-control" value="{{old('message', $comment->message)}}" autofocus />
         <span class="text-danger">{{ $errors->first('message') }}</span>
     </div>
     <div class="form-group">

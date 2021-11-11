@@ -39,7 +39,7 @@
                 <form action="{{ route('import.taxa.save') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="form-group">
-                        <input type="file" class="form-control-file" name="fileUpload">
+                        <input type="file" class="form-control-file" name="fileUpload" autofocus>
                         <small class="form-text text-muted">@lang('import.file_hint')</small>
                     </div>
                     <div class="form-group">
