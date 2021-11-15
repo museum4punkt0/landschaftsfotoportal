@@ -67,8 +67,12 @@
                 </div>
 
                 <div class="form-group">
-                    <input type="checkbox" name="header" class="checkbox" value=1 @if(old('header')) checked @endif />
-                    <span>@lang('import.contains_header')</span>
+                    <div class="form-check">
+                        <input type="checkbox" id="headerCheckbox" name="header"
+                            class="form-check-input" value=1 @if(old('header')) checked @endif
+                        >
+                        <label for="headerCheckbox" class="form-check-label">@lang('import.contains_header')</label>
+                    </div>
                 </div>
 
                 <div class="form-group">

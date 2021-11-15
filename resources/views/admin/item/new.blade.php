@@ -8,8 +8,8 @@
 <form action="{{ route('item.create') }}" method="GET">
     
     <div class="form-group">
-        <span>@lang('colmaps.item_type')</span>
-        <select name="item_type" class="form-control" size=1 autofocus>
+        <label for="itemTypeSelect">@lang('colmaps.item_type')</label>
+        <select id="itemTypeSelect" name="item_type" class="form-control" size=1 autofocus>
             @foreach($item_types as $type)
                 <option value="{{$type->element_id}}"
                     @if(old('item_type') == $type->element_id) selected @endif>

@@ -85,17 +85,29 @@
                 </div>
 
                 <div class="form-group">
-                    <input type="checkbox" name="header" class="checkbox" value=1 @if(old('header')) checked @endif />
-                    <span>@lang('import.contains_header')</span>
-                </div>
-                <div class="form-group">
-                    <input type="checkbox" name="unique_taxa" class="checkbox" value=1 @if(old('unique_taxa')) checked @endif />
-                    <span>@lang('import.unique_taxa')</span>
+                    <div class="form-check">
+                        <input type="checkbox" id="headerCheckbox" name="header"
+                            class="form-check-input" value=1 @if(old('header')) checked @endif
+                        >
+                        <label for="headerCheckbox" class="form-check-label">
+                            @lang('import.contains_header')
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" id="uniqueTaxaCheckbox" name="unique_taxa"
+                            class="form-check-input" value=1 @if(old('unique_taxa')) checked @endif
+                        >
+                        <label for="uniqueTaxaCheckbox" class="form-check-label">
+                            @lang('import.unique_taxa')
+                        </label>
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <span>@lang('lists.parent')</span>
-                    <select name="parent" class="form-control" size=1 >
+                    <label for="parentSelect">@lang('lists.parent')</label>
+                    <select id="parentSelect" name="parent"
+                        aria-describedby="parentSelectHelpBlock" class="form-control" size=1
+                    >
                         <option value="">@lang('common.none')</option>
                         @foreach($items as $item)
                             <option value="{{$item->item_id}}"
@@ -107,13 +119,17 @@
                             </option>
                         @endforeach
                     </select>
-                    <span>@lang('import.parent_hint')<br/></span>
+                    <small id="parentSelectHelpBlock" class="form-text text-muted">
+                        @lang('import.parent_hint')<br/>
+                    </small>
                     <span class="text-danger">{{ $errors->first('parent') }}</span>
                 </div>
                 
                 <div class="form-group">
-                    <span>@lang('import.parent_item_type')</span>
-                    <select name="parent_item_type" class="form-control" size=1 >
+                    <label for="parentItemTypeSelect">@lang('import.parent_item_type')</label>
+                    <select id="parentItemTypeSelect" name="parent_item_type"
+                        aria-describedby="parentItemTypeSelectHelpBlock" class="form-control" size=1
+                    >
                         @foreach($item_types as $type)
                             <option value="{{$type->element_id}}"
                                 @if(old('parent_item_type') == $type->element_id) selected @endif>
@@ -125,29 +141,43 @@
                             </option>
                         @endforeach
                     </select>
-                    <span>@lang('import.parent_item_type_hint')<br/></span>
+                    <small id="parentItemTypeSelectHelpBlock" class="form-text text-muted">
+                        @lang('import.parent_item_type_hint')<br/>
+                    </small>
                     <span class="text-danger">{{ $errors->first('parent_item_type') }}</span>
                 </div>
                 
                 <!-- Form fields for geocoding -->
                 <div class="form-group">
-                    <input type="checkbox" name="geocoder_enable" class="checkbox" value=1 @if(old('geocoder_enable')) checked @endif />
-                    <span>@lang('import.geocoder_use')</span>
+                    <div class="form-check">
+                        <input type="checkbox" id="geocoderEnableCheckbox" name="geocoder_enable"
+                            class="form-check-input" value=1 @if(old('geocoder_enable')) checked @endif
+                        >
+                        <label for="geocoderEnableCheckbox" class="form-check-label">
+                            @lang('import.geocoder_use')
+                        </label>
+                    </div>
                 </div>
                 
                 <fieldset id="geocoderFieldset" class="collapse @if(old('geocoder'))show @endif">
                     <legend>@lang('import.geocoder_use')</legend>
                     
                     <div class="form-group">
-                        <input type="checkbox" name="geocoder_interactive" class="checkbox" value=1 @if(old('geocoder_interactive')) checked @endif />
-                        <span>@lang('import.geocoder_interactive')</span>
+                        <div class="form-check">
+                            <input type="checkbox" id="geocoderInteractiveCheckbox" name="geocoder_interactive"
+                                class="form-check-input" value=1 @if(old('geocoder_interactive')) checked @endif
+                            >
+                            <label for="geocoderInteractiveCheckbox" class="form-check-label">
+                                @lang('import.geocoder_interactive')
+                            </label>
+                        </div>
                     </div>
                 
                     <div class="form-text">@lang('import.geocoder_hint')</div>
                     
                     <div class="form-group">
-                        <span>@lang('common.country')</span>
-                        <select name="geocoder[country]" class="form-control" size=1 >
+                        <label for="geocoderCountry">@lang('common.country')</label>
+                        <select id="geocoderCountry" name="geocoder[country]" class="form-control" size=1 >
                             @foreach($csv_data[0] as $csv_header)
                                 <option value="{{$loop->index}}"
                                     @if(old('geocoder.country', $geocoder_attr['country']??null) == $loop->index) selected @endif>
@@ -159,8 +189,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <span>@lang('common.state')</span>
-                        <select name="geocoder[state]" class="form-control" size=1 >
+                        <label for="geocoderState">@lang('common.state')</label>
+                        <select id="geocoderState" name="geocoder[state]" class="form-control" size=1 >
                             @foreach($csv_data[0] as $csv_header)
                                 <option value="{{$loop->index}}"
                                     @if(old('geocoder.state', $geocoder_attr['state']??null) == $loop->index) selected @endif>
@@ -172,8 +202,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <span>@lang('common.county')</span>
-                        <select name="geocoder[county]" class="form-control" size=1 >
+                        <label for="geocoderCounty">@lang('common.county')</label>
+                        <select id="geocoderCounty" name="geocoder[county]" class="form-control" size=1 >
                             @foreach($csv_data[0] as $csv_header)
                                 <option value="{{$loop->index}}"
                                     @if(old('geocoder.county', $geocoder_attr['county']??null) == $loop->index) selected @endif>
@@ -185,8 +215,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <span>@lang('common.postcode')</span>
-                        <select name="geocoder[postcode]" class="form-control" size=1 >
+                        <label for="geocoderPostcode">@lang('common.postcode')</label>
+                        <select id="geocoderPostcode" name="geocoder[postcode]" class="form-control" size=1 >
                             @foreach($csv_data[0] as $csv_header)
                                 <option value="{{$loop->index}}"
                                     @if(old('geocoder.postcode', $geocoder_attr['postcode']??null) == $loop->index) selected @endif>
@@ -198,8 +228,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <span>@lang('common.city')</span>
-                        <select name="geocoder[city]" class="form-control" size=1 >
+                        <label for="geocoderCity">@lang('common.city')</label>
+                        <select id="geocoderCity" name="geocoder[city]" class="form-control" size=1 >
                             @foreach($csv_data[0] as $csv_header)
                                 <option value="{{$loop->index}}"
                                     @if(old('geocoder.city', $geocoder_attr['city']??null) == $loop->index) selected @endif>
@@ -211,8 +241,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <span>@lang('common.street')</span>
-                        <select name="geocoder[street]" class="form-control" size=1 >
+                        <label for="geocoderStreet">@lang('common.street')</label>
+                        <select id="geocoderStreet" name="geocoder[street]" class="form-control" size=1 >
                             @foreach($csv_data[0] as $csv_header)
                                 <option value="{{$loop->index}}"
                                     @if(old('geocoder.street', $geocoder_attr['street']??null) == $loop->index) selected @endif>
@@ -224,8 +254,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <span>@lang('common.locality')</span>
-                        <select name="geocoder[locality]" class="form-control" size=1 >
+                        <label for="geocoderLocality">@lang('common.locality')</label>
+                        <select id="geocoderLocality" name="geocoder[locality]" class="form-control" size=1 >
                             @foreach($csv_data[0] as $csv_header)
                                 <option value="{{$loop->index}}"
                                     @if(old('geocoder.locality', $geocoder_attr['locality']??null) == $loop->index) selected @endif>
@@ -237,8 +267,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <span>@lang('common.description')</span>
-                        <select name="geocoder[note]" class="form-control" size=1 >
+                        <label for="geocoderDescription">@lang('common.description')</label>
+                        <select id="geocoderDescription" name="geocoder[note]" class="form-control" size=1 >
                             @foreach($csv_data[0] as $csv_header)
                                 <option value="{{$loop->index}}"
                                     @if(old('geocoder.note', $geocoder_attr['note']??null) == $loop->index) selected @endif>
@@ -262,7 +292,7 @@
 
 <script type="text/javascript">
     // Triggered when checkbox for geocoder changed
-    $('.checkbox[name=geocoder_enable]').change(function(event) {
+    $('#geocoderEnableCheckbox').change(function(event) {
         if ($(this).prop('checked')) {
             $('#geocoderFieldset').collapse('show');
         }

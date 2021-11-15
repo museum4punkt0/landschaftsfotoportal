@@ -8,28 +8,38 @@
 <form action="{{ route('taxon.store') }}" method="POST">
     
     <div class="form-group">
-        <span>@lang('taxon.taxon_name')</span>
-        <input type="text" name="taxon_name" class="form-control" value="{{old('taxon_name')}}" autofocus />
+        <label for="taxonNameInput">@lang('taxon.taxon_name')</label>
+        <input type="text" id="taxonNameInput" name="taxon_name" class="form-control"
+            value="{{old('taxon_name')}}" autofocus
+        >
         <span class="text-danger">{{ $errors->first('taxon_name') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('taxon.taxon_author')</span>
-        <input type="text" name="taxon_author" class="form-control" value="{{old('taxon_author')}}" />
+        <label for="taxonAuthorInput">@lang('taxon.taxon_author')</label>
+        <input type="text" id="taxonAuthorInput" name="taxon_author" class="form-control"
+            value="{{old('taxon_author')}}"
+        >
         <span class="text-danger">{{ $errors->first('taxon_author') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('taxon.taxon_suppl')</span>
-        <input type="text" name="taxon_suppl" class="form-control" value="{{old('taxon_suppl')}}" />
+        <label for="taxonSupplInput">@lang('taxon.taxon_suppl')</label>
+        <input type="text" id="taxonSupplInput" name="taxon_suppl" class="form-control"
+            value="{{old('taxon_suppl')}}"
+        >
         <span class="text-danger">{{ $errors->first('taxon_suppl') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('taxon.full_name')</span>
-        <input type="text" name="full_name" class="form-control" value="{{old('full_name')}}" />
+        <label for="fullNameInput">@lang('taxon.full_name')</label>
+        <input type="text" id="fullNameInput" name="full_name" class="form-control"
+            value="{{old('full_name')}}"
+        >
         <span class="text-danger">{{ $errors->first('full_name') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('taxon.native_name')</span>
-        <input type="text" name="native_name" class="form-control" value="{{old('native_name')}}" />
+        <label for="nativeNameInput">@lang('taxon.native_name')</label>
+        <input type="text" id="nativeNameInput" name="native_name" class="form-control"
+            value="{{old('native_name')}}"
+        >
         <span class="text-danger">{{ $errors->first('native_name') }}</span>
     </div>
 
@@ -55,23 +65,31 @@
     ])
 
     <div class="form-group">
-        <span>@lang('taxon.rank_abbr')</span>
-        <input type="text" name="rank_abbr" class="form-control" value="{{old('rank_abbr')}}" />
+        <label for="rankAbbrInput">@lang('taxon.rank_abbr')</label>
+        <input type="text" id="rankAbbrInput" name="rank_abbr" class="form-control"
+            value="{{old('rank_abbr')}}"
+        >
         <span class="text-danger">{{ $errors->first('rank_abbr') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('taxon.gsl_id')</span>
-        <input type="text" name="gsl_id" class="form-control" value="{{old('gsl_id')}}" />
+        <label for="glsIdInput">@lang('taxon.gsl_id')</label>
+        <input type="text" id="glsIdInput" name="gsl_id" class="form-control"
+            value="{{old('gsl_id')}}"
+        >
         <span class="text-danger">{{ $errors->first('gsl_id') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('taxon.bfn_namnr')</span>
-        <input type="text" name="bfn_namnr" class="form-control" value="{{old('bfn_namnr')}}" />
+        <label for="BfnNamnrInput">@lang('taxon.bfn_namnr')</label>
+        <input type="text" id="BfnNamnrInput" name="bfn_namnr" class="form-control"
+            value="{{old('bfn_namnr')}}"
+        >
         <span class="text-danger">{{ $errors->first('bfn_namnr') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('taxon.bfn_sipnr')</span>
-        <input type="text" name="bfn_sipnr" class="form-control" value="{{old('bfn_sipnr')}}" />
+        <label for="bfnSipnrInput">@lang('taxon.bfn_sipnr')</label>
+        <input type="text" id="bfnSipnrInput" name="bfn_sipnr" class="form-control"
+            value="{{old('bfn_sipnr')}}"
+        >
         <span class="text-danger">{{ $errors->first('bfn_sipnr') }}</span>
     </div>
     

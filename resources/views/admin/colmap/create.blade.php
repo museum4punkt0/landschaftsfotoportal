@@ -8,8 +8,8 @@
 <form action="{{ route('colmap.store') }}" method="POST">
     
     <div class="form-group">
-        <span>@lang('colmaps.item_type')</span>
-        <select name="item_type" class="form-control" size=1 autofocus>
+        <label for="itemTypeSelect">@lang('colmaps.item_type')</label>
+        <select id="itemTypeSelect" name="item_type" class="form-control" size=1 autofocus>
             @foreach($item_types as $type)
                 <option value="{{$type->element_id}}"
                     @if(old('item_type') == $type->element_id) selected @endif>
@@ -34,8 +34,8 @@
         'taxon_id' => old('taxon'),
     ])
     <div class="form-group">
-        <span>@lang('columns.column_group')</span>
-        <select name="column_group" class="form-control" size=1 >
+        <label for="columnGroupSelect">@lang('columns.column_group')</label>
+        <select id="columnGroupSelect" name="column_group" class="form-control" size=1 >
             @foreach($column_groups as $group)
                 <option value="{{$group->element_fk}}"
                     @if(old('column_group') == $group->element_fk) selected @endif>
@@ -46,8 +46,8 @@
         <span class="text-danger">{{ $errors->first('column_group') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('columns.list')</span>
-        <select name="column" class="form-control" size=1 >
+        <label for="columnSelect">@lang('columns.list')</label>
+        <select id="columnSelect" name="column" class="form-control" size=1 >
             @foreach($columns as $column)
                 <option value="{{$column->column_id}}"
                     @if(old('column') == $column->column_id) selected @endif>
@@ -64,8 +64,8 @@
         <span class="text-danger">{{ $errors->first('column') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('common.published')</span>
-        <select name="public" class="form-control" size=1 >
+        <label for="publicSelect">@lang('common.published')</label>
+        <select id="publicSelect" name="public" class="form-control" size=1 >
             <option value="1"
                 @if(old('public') == 1) selected @endif>
                 @lang('common.yes')
@@ -78,8 +78,8 @@
         <span class="text-danger">{{ $errors->first('public') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('colmaps.config')</span>
-        <input type="text" name="config" class="form-control" value="{{old('config')}}" />
+        <label for="configInput">@lang('colmaps.config')</label>
+        <input type="text" id="configInput" name="config" class="form-control" value="{{old('config')}}" />
         <span class="text-danger">{{ $errors->first('config') }}</span>
     </div>
     

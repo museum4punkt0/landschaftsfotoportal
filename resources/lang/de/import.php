@@ -16,6 +16,7 @@ return [
     'lists_hint' => 'Hiermit kann der Inhalt von Auswahllisten aus CSV-Dateien importiert werden. Die entsprechende Liste muss vorher angelegt werden.',
     'taxa_hint' => 'Hiermit kann eine Taxliste aus einer CSV-Datei importiert werden. Bestehende Taxa bleiben erhalten.',
     'items_hint' => 'Hiermit können Datensätze aus einer CSV-Datei importiert werden.',
+    'file' => 'Zu importierende Datei',
     'file_hint' => 'Laden Sie eine gültige CSV-Datei (max. 4 MB) hoch.',
     'upload_error' => 'Fehler beim Hochladen: ',
     'save_error' => 'Speichern der Datei fehlgeschlagen.',

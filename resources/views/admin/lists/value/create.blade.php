@@ -8,13 +8,13 @@
 <form action="{{ route('element.value.store', $element->element_id) }}" method="POST">
     
     <div class="form-group">
-        <span>@lang('values.value')</span>
-        <input type="text" name="value" class="form-control" value="{{old('value')}}" autofocus />
+        <label for="valueInput">@lang('values.value')</label>
+        <input type="text" id="valueInput" name="value" class="form-control" value="{{old('value')}}" autofocus>
         <span class="text-danger">{{ $errors->first('value') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('lists.attribute')</span>
-        <select name="attribute" class="form-control" size=1 >
+        <label for="attributeSelect">@lang('lists.attribute')</label>
+        <select id="attributeSelect" name="attribute" class="form-control" size=1>
         @foreach($attributes as $attribute)
             <option value="{{$attribute->attribute_id}}"
             @if(old('attribute') == $attribute->attribute_id) selected @endif >

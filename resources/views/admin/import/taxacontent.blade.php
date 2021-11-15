@@ -11,7 +11,6 @@
                 {{ csrf_field() }}
 
                 <table class="table mx-0">
-                    
                     @foreach ($csv_data as $row)
                         <tr>
                         @foreach ($row as $key => $value)
@@ -19,6 +18,7 @@
                         @endforeach
                         </tr>
                     @endforeach
+
                     <tr>
                     @foreach ($csv_data[0] as $key => $value)
                         <td>
@@ -72,6 +72,7 @@
                         </td>
                     @endforeach
                     </tr>
+
                     <tr><td colspan={{ sizeof($csv_data[0]) }}>
                     @if ($errors->any())
                         <div class="alert alert-danger">
@@ -93,8 +94,12 @@
                 </div>
 
                 <div class="form-group">
-                    <input type="checkbox" name="header" class="checkbox" value=1 @if(old('header')) checked @endif />
-                    <span>@lang('import.contains_header')</span>
+                    <div class="form-check">
+                        <input type="checkbox" id="headerCheckbox" name="header"
+                            class="form-check-input" value=1 @if(old('header')) checked @endif
+                        >
+                        <label for="headerCheckbox" class="form-check-label">@lang('import.contains_header')</label>
+                    </div>
                 </div>
 
                 <div class="form-group">

@@ -29,8 +29,14 @@
                 <form action="{{ route('colmap.map', $item_type) }}" method="GET">
                     <div class="form-row">
                         <div class="form-group col-md-8">
-                            <span>@lang('colmaps.item_type')</span>
-                            <select name="item_type" id="item_type_select" class="form-control" size=1 autofocus>
+                            <label for="itemTypeSelect">@lang('colmaps.item_type')</label>
+                            <select
+                                id="itemTypeSelect"
+                                name="item_type"
+                                class="form-control"
+                                size=1
+                                autofocus
+                            >
                                 @foreach($item_types as $type)
                                     <option value="{{$type->element_id}}"
                                         @if(old('item_type', $item_type) == $type->element_id) selected @endif>
@@ -52,8 +58,16 @@
                     <input type="hidden" name="item_type" value="{{ $item_type }}" />
                     <div class="form-row">
                         <div class="form-group col-md-6">
-                            <span>@lang('colmaps.mapped')</span>
-                            <select name="column_mapped[]" class="form-control" size=25 multiple disabled="disabled">
+                            <label for="columnMappedSelect">@lang('colmaps.mapped')</label>
+                            <select
+                                id="columnMappedSelect"
+                                name="column_mapped[]"
+                                aria-describedby="columnMappedHelpBlock"
+                                class="form-control"
+                                size=25
+                                multiple
+                                disabled="disabled"
+                            >
                             @foreach($columns_mapped as $column)
                                 <option value="{{$column->column_id}}">
                                     @foreach($column->translation->values as $t)
@@ -69,12 +83,21 @@
                                 </option>
                             @endforeach
                             </select>
-                            <span>@lang('colmaps.mapped_hint')</span>
+                            <small id="columnMappedHelpBlock" class="form-text text-muted">
+                                @lang('colmaps.mapped_hint')
+                            </small>
                         </div>
 
                         <div class="form-group col-md-6">
-                            <span>@lang('colmaps.unmapped')</span>
-                            <select name="column_avail[]" class="form-control" size=25 multiple>
+                            <label for="columnAvailSelect">@lang('colmaps.unmapped')</label>
+                            <select
+                                id="columnAvailSelect"
+                                name="column_avail[]"
+                                aria-describedby="columnAvailHelpBlock"
+                                class="form-control"
+                                size=25
+                                multiple
+                            >
                             @foreach($columns_avail as $column)
                                 <option value="{{$column->column_id}}"
                                     @if(is_array(old('column_avail')) &&
@@ -91,7 +114,9 @@
                                 </option>
                             @endforeach
                             </select>
-                            <span>@lang('colmaps.unmapped_hint')</span>
+                            <small id="columnAvailHelpBlock" class="form-text text-muted">
+                                @lang('colmaps.unmapped_hint')
+                            </small>
                             <span class="text-danger">{{ $errors->first('column_avail') }}</span>
                         </div>
                     </div>
@@ -112,8 +137,13 @@
                                 'taxon_id' => old('taxon'),
                             ])
                             <div class="form-group">
-                                <span>@lang('columns.column_group')</span>
-                                <select name="column_group" class="form-control" size=1 >
+                                <label for="columnGroupSelect">@lang('columns.column_group')</label>
+                                <select
+                                    id="columnGroupSelect"
+                                    name="column_group"
+                                    class="form-control"
+                                    size=1
+                                >
                                     @foreach($column_groups as $group)
                                         <option value="{{$group->element_fk}}"
                                             @if(old('column_group') == $group->element_fk) selected @endif>
@@ -124,8 +154,8 @@
                                 <span class="text-danger">{{ $errors->first('column_group') }}</span>
                             </div>
                             <div class="form-group">
-                                <span>@lang('common.published')</span>
-                                <select name="public" class="form-control" size=1 >
+                                <label for="publicSelect">@lang('common.published')</label>
+                                <select id="publicSelect" name="public" class="form-control" size=1>
                                     <option value="1"
                                         @if(old('public') == 1) selected @endif>
                                         @lang('common.yes')
@@ -138,8 +168,14 @@
                                 <span class="text-danger">{{ $errors->first('public') }}</span>
                             </div>
                             <div class="form-group">
-                                <span>@lang('colmaps.config')</span>
-                                <input type="text" name="config" class="form-control" value="{{old('config')}}" />
+                                <label for="configInput">@lang('colmaps.config')</label>
+                                <input
+                                    type="text"
+                                    id="configInput"
+                                    name="config"
+                                    class="form-control"
+                                    value="{{old('config')}}"
+                                />
                                 <span class="text-danger">{{ $errors->first('config') }}</span>
                             </div>
                             <div class="form-group">
@@ -162,11 +198,11 @@
 </div>
 
 <script type="text/javascript">
-    var elem = document.getElementById("item_type_select");
-    elem.addEventListener("change", ItemTypeChanged);
+    var elem = document.getElementById("itemTypeSelect");
+    elem.addEventListener("change", itemTypeChanged);
 
-    function ItemTypeChanged() {
-        var item_type = document.getElementById("item_type_select").options[document.getElementById("item_type_select").selectedIndex].value;
+    function itemTypeChanged() {
+        var item_type = document.getElementById("itemTypeSelect").options[document.getElementById("itemTypeSelect").selectedIndex].value;
         window.location.href = "{{ route('colmap.map') }}/" + item_type;
     }
 </script>

@@ -29,13 +29,15 @@
     
 @if($options['edit.meta'])
     <div class="form-group">
-        <span>@lang('items.menu_title')</span>
-        <input type="text" name="title" class="form-control" value="{{old('title')}}" autofocus />
+        <label for="titleInput">@lang('items.menu_title')</label>
+        <input type="text" id="titleInput" name="title" class="form-control"
+            value="{{old('title')}}" autofocus
+        >
         <span class="text-danger">{{ $errors->first('title') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('common.published')</span>
-        <select name="public" class="form-control" size=1 >
+        <label for="publicSelect">@lang('common.published')</label>
+        <select id="publicSelect" name="public" class="form-control" size=1>
             <option value="1"
                 @if(old('public') == 1) selected @endif>
                 @lang('common.yes')
@@ -48,8 +50,8 @@
         <span class="text-danger">{{ $errors->first('public') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('lists.parent')</span>
-        <select name="parent" class="form-control" size=1 >
+        <label for="parentSelect">@lang('lists.parent')</label>
+        <select id="parentSelect" name="parent" class="form-control" size=1>
             <option value="">@lang('common.root')</option>
             @foreach($items as $item)
                 <option value="{{$item->item_id}}"
@@ -65,9 +67,10 @@
         <span class="text-danger">{{ $errors->first('parent') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('taxon.list')</span>
+        <label for="taxonNameInput">@lang('taxon.list')</label>
         <input
             type="text"
+            id="taxonNameInput"
             name="taxon_name"
             class="form-control"
             value="@if($taxon) {{$taxon->full_name}} ({{$taxon->native_name}}) @else @lang('common.none') @endif"

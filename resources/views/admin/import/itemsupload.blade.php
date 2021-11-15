@@ -39,8 +39,8 @@
                 <form action="{{ route('import.items.save') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="form-group">
-                        <span>@lang('colmaps.item_type')</span>
-                        <select name="item_type" class="form-control" size=1 autofocus>
+                        <label for="itemTypeSelect">@lang('colmaps.item_type')</label>
+                        <select id="itemTypeSelect" name="item_type" class="form-control" size=1 autofocus>
                             @foreach($item_types as $type)
                                 <option value="{{$type->element_id}}"
                                     @if(old('item_type') == $type->element_id) selected @endif>
@@ -55,12 +55,17 @@
                     </div>
                     
                     <div class="form-group">
-                        <input type="file" class="form-control-file" name="fileUpload">
-                        <small class="form-text text-muted">@lang('import.file_hint')</small>
+                        <label for="fileInput">@lang('import.file')</label>
+                        <input type="file" id="fileInput" name="fileUpload"
+                            aria-describedby="fileInputHelpBlock" class="form-control-file"
+                        >
+                        <small id="fileInputHelpBlock" class="form-text text-muted">
+                            @lang('import.file_hint')
+                        </small>
                     </div>
                     <div class="form-group">
-                        <label for="column_separator">@lang('import.column_separator')</label>
-                        <select name="column_separator" id="column_separator" class="form-control" size=1 >
+                        <label for="columnSeparatorSelect">@lang('import.column_separator')</label>
+                        <select id="columnSeparatorSelect" name="column_separator" class="form-control" size=1>
                             <option value=";" selected>;</option>
                             <option value=",">,</option>
                             <option value="|">|</option>
@@ -68,8 +73,8 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="element_separator">@lang('import.element_separator')</label>
-                        <select name="element_separator" id="element_separator" class="form-control" size=1 >
+                        <label for="elementSeparatorSelect">@lang('import.element_separator')</label>
+                        <select id="elementSeparatorSelect" name="element_separator" class="form-control" size=1>
                             <option value=";">;</option>
                             <option value="," selected>,</option>
                             <option value="|">|</option>

@@ -39,8 +39,8 @@
                 <form action="{{ route('import.csv.save') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="form-group">
-                        <span>@lang('lists.list')</span>
-                        <select name="list" class="form-control" autofocus>
+                        <label for="listSelect">@lang('lists.list')</label>
+                        <select id="listSelect" name="list" class="form-control" autofocus>
                         @foreach ($lists as $list)
                             <option value="{{ $list->list_id }}">
                                 {{ $list->name }} ({{ $list->description }})
@@ -49,12 +49,17 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <input type="file" class="form-control-file" name="fileUpload">
-                        <small class="form-text text-muted">@lang('import.file_hint')</small>
+                        <label for="fileInput">@lang('import.file')</label>
+                        <input type="file" id="fileInput" name="fileUpload"
+                            aria-describedby="fileInputHelpBlock" class="form-control-file"
+                        >
+                        <small id="fileInputHelpBlock" class="form-text text-muted">
+                            @lang('import.file_hint')
+                        </small>
                     </div>
                     <div class="form-group">
-                        <label for="column_separator">@lang('import.column_separator')</label>
-                        <select name="column_separator" id="column_separator" class="form-control" size=1 >
+                        <label for="columnSeparatorSelect">@lang('import.column_separator')</label>
+                        <select id="columnSeparatorSelect" name="column_separator" class="form-control" size=1>
                             <option value=";" selected>;</option>
                             <option value=",">,</option>
                             <option value="|">|</option>

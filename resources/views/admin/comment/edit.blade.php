@@ -8,13 +8,15 @@
 <form action="{{ route('comment.update', $comment->comment_id) }}" method="POST">
     
     <div class="form-group">
-        <span>@lang('comments.message')</span>
-        <input type="text" name="message" class="form-control" value="{{old('message', $comment->message)}}" autofocus />
+        <label for="messageInput">@lang('comments.message')</label>
+        <input type="text" id="messageInput" name="message" class="form-control"
+            value="{{old('message', $comment->message)}}" autofocus
+        />
         <span class="text-danger">{{ $errors->first('message') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('common.published')</span>
-        <select name="public" class="form-control" size=1 >
+        <label for="publicSelect">@lang('common.published')</label>
+        <select id="publicSelect" name="public" class="form-control" size=1>
             <option value="0"
                 @if(old('public', $comment->public) == 0) selected @endif>
                 @lang('comments.state_unpublished')

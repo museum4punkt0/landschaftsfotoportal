@@ -8,26 +8,22 @@
 <form action="{{ route('user.update', $user->id) }}" method="POST">
     
     <div class="form-group">
-        <span>@lang('users.name')</span>
-        <input type="text" name="name" class="form-control" value="{{old('name', $user->name)}}" autofocus />
+        <label for="nameInput">@lang('users.name')</label>
+        <input type="text" id="nameInput" name="name" class="form-control"
+            value="{{old('name', $user->name)}}" autofocus
+        >
         <span class="text-danger">{{ $errors->first('name') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('users.email')</span>
-        <input type="text" name="email" class="form-control" value="{{old('email', $user->email)}}" />
+        <label for="emailInput">@lang('users.email')</label>
+        <input type="text" id="emailInput" name="email" class="form-control"
+            value="{{old('email', $user->email)}}"
+        >
         <span class="text-danger">{{ $errors->first('email') }}</span>
     </div>
-    {{--
     <div class="form-group">
-        <span>@lang('users.group')</span>
-        <input type="text" name="group" class="form-control" value="{{old('group', $user->group_fk)}}" />
-        <span class="text-danger">{{ $errors->first('group') }}</span>
-    </div>
-    --}}
-    
-    <div class="form-group">
-        <span>@lang('users.group')</span>
-        <select name="group" class="form-control" size=1 >
+        <label for="groupSelect">@lang('users.group')</label>
+        <select id="groupSelect" name="group" class="form-control" size=1>
             @foreach($groups as $group)
                 <option value="{{$group->group_id}}"
                     @if(old('group', $user->group_fk) == $group->group_id) selected @endif>
