@@ -59,8 +59,8 @@ class ValueController extends Controller
     public function store(Request $request, $element_id)
     {
         $request->validate([
-            'value' => 'required',
-            'attribute' => 'required',
+            'value' => 'required|string|max:4095',
+            'attribute' => 'required|integer',
         ]);
         
         $value_data = [
@@ -111,8 +111,8 @@ class ValueController extends Controller
     public function update(Request $request, Value $value)
     {
         $request->validate([
-            'value' => 'required',
-            'attribute' => 'required',
+            'value' => 'required|string|max:4095',
+            'attribute' => 'required|integer',
         ]);
          
         $value->value = $request->input('value');

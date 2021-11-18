@@ -9,7 +9,9 @@
     
     <div class="form-group">
         <label for="valueInput">@lang('values.value')</label>
-        <input type="text" id="valueInput" name="value" class="form-control" value="{{$value->value}}" autofocus>
+        <input type="text" id="valueInput" name="value" class="form-control"
+            value="{{$value->value}}" maxlength="4095" autofocus
+        >
         <span class="text-danger">{{ $errors->first('value') }}</span>
     </div>
     <div class="form-group">

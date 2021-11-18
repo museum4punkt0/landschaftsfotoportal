@@ -16,35 +16,35 @@
     <div class="form-group">
         <label for="taxonNameInput">@lang('taxon.taxon_name')</label>
         <input type="text" id="taxonNameInput" name="taxon_name" class="form-control"
-            value="{{old('taxon_name', $taxon->taxon_name)}}" autofocus
+            value="{{old('taxon_name', $taxon->taxon_name)}}" maxlength="255" autofocus
         >
         <span class="text-danger">{{ $errors->first('taxon_name') }}</span>
     </div>
     <div class="form-group">
         <label for="taxonAuthorInput">@lang('taxon.taxon_author')</label>
         <input type="text" id="taxonAuthorInput" name="taxon_author" class="form-control"
-            value="{{old('taxon_author', $taxon->taxon_author)}}"
+            value="{{old('taxon_author', $taxon->taxon_author)}}" maxlength="255"
         >
         <span class="text-danger">{{ $errors->first('taxon_author') }}</span>
     </div>
     <div class="form-group">
         <label for="taxonSupplInput">@lang('taxon.taxon_suppl')</label>
         <input type="text" id="taxonSupplInput" name="taxon_suppl" class="form-control"
-            value="{{old('taxon_suppl', $taxon->taxon_suppl)}}"
+            value="{{old('taxon_suppl', $taxon->taxon_suppl)}}" maxlength="255"
         >
         <span class="text-danger">{{ $errors->first('taxon_suppl') }}</span>
     </div>
     <div class="form-group">
         <label for="fullNameInput">@lang('taxon.full_name')</label>
         <input type="text" id="fullNameInput" name="full_name" class="form-control"
-            value="{{old('full_name', $taxon->full_name)}}"
+            value="{{old('full_name', $taxon->full_name)}}" maxlength="255"
         >
         <span class="text-danger">{{ $errors->first('full_name') }}</span>
     </div>
     <div class="form-group">
         <label for="nativeNameInput">@lang('taxon.native_name')</label>
         <input type="text" id="nativeNameInput" name="native_name" class="form-control"
-            value="{{old('native_name', $taxon->native_name)}}"
+            value="{{old('native_name', $taxon->native_name)}}" maxlength="255"
         >
         <span class="text-danger">{{ $errors->first('native_name') }}</span>
     </div>
@@ -80,21 +80,21 @@
     <div class="form-group">
         <label for="glsIdInput">@lang('taxon.gsl_id')</label>
         <input type="text" id="glsIdInput" name="gsl_id" class="form-control"
-            value="{{old('gsl_id', $taxon->gsl_id)}}"
+            value="{{old('gsl_id', $taxon->gsl_id)}}" maxlength="10"
         >
         <span class="text-danger">{{ $errors->first('gsl_id') }}</span>
     </div>
     <div class="form-group">
         <label for="BfnNamnrInput">@lang('taxon.bfn_namnr')</label>
         <input type="text" id="BfnNamnrInput" name="bfn_namnr" class="form-control"
-            value="{{old('bfn_namnr', $taxon->bfn_namnr)}}"
+            value="{{old('bfn_namnr', $taxon->bfn_namnr)}}" maxlength="10"
         >
         <span class="text-danger">{{ $errors->first('bfn_namnr') }}</span>
     </div>
     <div class="form-group">
         <label for="bfnSipnrInput">@lang('taxon.bfn_sipnr')</label>
         <input type="text" id="bfnSipnrInput" name="bfn_sipnr" class="form-control"
-            value="{{old('bfn_sipnr', $taxon->bfn_sipnr)}}"
+            value="{{old('bfn_sipnr', $taxon->bfn_sipnr)}}" maxlength="10"
         >
         <span class="text-danger">{{ $errors->first('bfn_sipnr') }}</span>
     </div>

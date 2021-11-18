@@ -10,14 +10,14 @@
     <div class="form-group">
         <label for="nameInput">@lang('users.name')</label>
         <input type="text" id="nameInput" name="name" class="form-control"
-            value="{{old('name', $user->name)}}" autofocus
+            value="{{old('name', $user->name)}}" maxlength="255" autofocus
         >
         <span class="text-danger">{{ $errors->first('name') }}</span>
     </div>
     <div class="form-group">
         <label for="emailInput">@lang('users.email')</label>
         <input type="text" id="emailInput" name="email" class="form-control"
-            value="{{old('email', $user->email)}}"
+            value="{{old('email', $user->email)}}" maxlength="255"
         >
         <span class="text-danger">{{ $errors->first('email') }}</span>
     </div>

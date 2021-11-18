@@ -54,7 +54,7 @@ class AttributeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
+            'name' => 'required|string|max:255',
         ]);
         
         Attribute::create($request->all());
@@ -97,7 +97,7 @@ class AttributeController extends Controller
     public function update(Request $request, Attribute $attribute)
     {
         $request->validate([
-            'name' => 'required',
+            'name' => 'required|string|max:255',
         ]);
         
         $attribute->name = $request->input('name');

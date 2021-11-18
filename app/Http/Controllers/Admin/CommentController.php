@@ -60,7 +60,7 @@ class CommentController extends Controller
     public function store(Request $request, $item_id)
     {
         $request->validate([
-            'message' => 'required|string',
+            'message' => 'required|string|max:4095',
             'public' => 'required|integer',
         ]);
         
@@ -152,7 +152,7 @@ class CommentController extends Controller
     public function update(Request $request, Comment $comment)
     {
         $request->validate([
-            'message' => 'required|string',
+            'message' => 'required|string|max:4095',
             'public' => 'required|integer',
         ]);
         

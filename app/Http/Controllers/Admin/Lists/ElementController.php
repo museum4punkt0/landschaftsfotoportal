@@ -86,8 +86,8 @@ class ElementController extends Controller
     public function store(Request $request, $list_id)
     {
         $request->validate([
-            'value' => 'required',
-            'attribute' => 'required',
+            'value' => 'required|string|max:4095',
+            'attribute' => 'required|integer',
             'parent_fk' => 'nullable|integer',
         ]);
 
@@ -120,7 +120,7 @@ class ElementController extends Controller
     public function storeBatch(Request $request, $list_id)
     {
         $request->validate([
-            'multivalues' => 'required',
+            'multivalues' => 'required|string',
         ]);
 
         $aValues = explode("\n", $request->input('multivalues'));

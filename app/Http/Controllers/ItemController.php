@@ -87,7 +87,7 @@ class ItemController extends Controller
         $colmap = ColumnMapping::forItem($item_type, $request->taxon)->where('public', 1);
         
         // Validation rules for fields associated with this item
-        $validation_rules['title'] = 'nullable|string';
+        $validation_rules['title'] = 'nullable|string|max:255';
         $validation_rules['parent'] = 'nullable|integer';
         $validation_rules['taxon'] = 'nullable|integer';
         #$validation_rules['public'] = 'required|integer';
@@ -512,7 +512,7 @@ class ItemController extends Controller
         $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk)->where('public', 1);
         
         // Validation rules for fields associated with this item
-        $validation_rules['title'] = 'nullable|string';
+        $validation_rules['title'] = 'nullable|string|max:255';
         $validation_rules['parent'] = 'nullable|integer';
         $validation_rules['taxon'] = 'nullable|integer';
         #$validation_rules['public'] = 'required|integer';

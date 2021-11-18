@@ -11,7 +11,7 @@
             <div class="modal-body">
                 <div class="form-group">
                     <label for="messageTextarea">@lang('comments.message')</label>
-                    <textarea id="messageTextarea" name="message" class="form-control" rows=3>
+                    <textarea id="messageTextarea" name="message" class="form-control" maxlength="4095" rows=3>
                         {{old('message')}}
                     </textarea>
                     <input type="hidden" id="url" value="" />

@@ -32,7 +32,7 @@ class AjaxCommentController extends Controller
         $this->authorize('create', Comment::class);
 
         $request->validate([
-            'message' => 'required|string',
+            'message' => 'required|string|max:4095',
         ]);
         
         $data = [
@@ -59,7 +59,7 @@ class AjaxCommentController extends Controller
         $this->authorize('update', $comment);
 
         $request->validate([
-            'message' => 'required|string',
+            'message' => 'required|string|max:4095',
         ]);
         
         $comment->message = $request->input('message');

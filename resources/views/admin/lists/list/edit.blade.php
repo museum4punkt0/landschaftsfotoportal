@@ -14,14 +14,14 @@
     <div class="form-group">
         <label for="nameInput">@lang('common.name')</label>
         <input type="text" id="nameInput" name="name" class="form-control"
-            value="{{ old('name', $list->name) }}" autofocus
+            value="{{ old('name', $list->name) }}" maxlength="255" autofocus
         >
         <span class="text-danger">{{ $errors->first('name') }}</span>
     </div>
     <div class="form-group">
         <label for="descriptionInput">@lang('common.description')</label>
         <input type="text" id="descriptionInput" name="description" class="form-control"
-            value="{{ old('description', $list->description) }}"
+            value="{{ old('description', $list->description) }}" maxlength="255"
         >
         <span class="text-danger">{{ $errors->first('description') }}</span>
     </div>

@@ -22,7 +22,7 @@
     <div class="form-group">
         <label for="titleInput">@lang('items.menu_title')</label>
         <input type="text" id="titleInput" name="title" class="form-control"
-            value="{{old('title', $item->title)}}" autofocus
+            value="{{old('title', $item->title)}}" maxlength="255" autofocus
         >
         <span class="text-danger">{{ $errors->first('title') }}</span>
     </div>

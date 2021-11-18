@@ -138,8 +138,8 @@ class ListController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'description' => 'required',
+            'name' => 'required|string|max:255',
+            'description' => 'required|string|max:255',
             'hierarchical' => 'boolean',
             'internal' => 'boolean',
         ]);
@@ -262,8 +262,8 @@ class ListController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required',
-            'description' => 'required',
+            'name' => 'required|string|max:255',
+            'description' => 'required|string|max:255',
             'hierarchical' => 'boolean',
             'internal' => 'boolean',
         ]);
