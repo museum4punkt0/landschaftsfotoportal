@@ -36,6 +36,7 @@ return [
     'ignore' => 'ignorieren',
     'internal' => 'intern',
     'next' => 'Weiter',
+    'finish' => 'Beenden',
     'update_success' => 'Erfolgreich aktualisiert',
     
     'root' => 'Wurzelelement',

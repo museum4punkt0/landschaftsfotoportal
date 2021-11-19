@@ -15,7 +15,7 @@
                 </div>
             </div>
             
-            <form action="{{ route('item.index') }}" method="GET" class="form-horizontal">
+            <form action="{{ route('item.unpublished') }}" method="GET" class="form-horizontal">
                 {{ csrf_field() }}
                 <input type="hidden" id="batchSize" name="batch_size" value="{{ Config::get('ui.import_batch_size') }}">
                 
@@ -34,10 +34,13 @@
                     <button type="button" id="startButton" class="btn btn-primary" autofocus>
                         @lang('import.import')
                     </button>
-                </div>
-                <div class="form-group">
+                    <button type="button" id="addTitlesButton" class="btn btn-primary"
+                        data-href="{{ route('item.titles') }}" disabled
+                    >
+                        @lang('items.add_titles')
+                    </button>
                     <button type="submit" id="finishedButton" class="btn btn-primary" disabled>
-                        @lang('common.next')
+                        @lang('common.finish')
                     </button>
                 </div>
             </form>
@@ -69,6 +72,10 @@
                 // Start import
                 run();
             }
+        });
+        
+        $('#addTitlesButton').click(function (xhr) {
+            location.href = $('#addTitlesButton').data('href');
         });
         
         function run() {
@@ -145,7 +152,8 @@
                 $('#alertModalLabel').text('@lang("import.header")');
                 $('#alertModalContent').html('<div class="alert alert-success">@lang("import.done")</div>');
                 $('#alertModal').modal('show');
-                // Enable "Next" button below form
+                // Enable buttons below form
+                $('#addTitlesButton').attr('disabled', false);
                 $('#finishedButton').attr('disabled', false);
             }
         }
