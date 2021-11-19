@@ -204,21 +204,25 @@ class AjaxImportController extends Controller
                             }
                             break;
                         case '_image_':
-                            // Store image dimensions in database
-                            Image::storeImageDimensions(
-                                config('media.full_dir'),
-                                $cell,
-                                $item->item_id,
-                                $selected_attr[$colnr]
-                            );
-                            Image::storeImageSize(
-                                config('media.full_dir'),
-                                $cell,
-                                $item->item_id,
-                                $selected_attr[$colnr]
-                            );
-                            // Create resized images
-                            Image::processImageResizing(config('media.full_dir'), $cell);
+                            // Check if file name is available in CSV cell
+                            if ($cell) {
+                                // Store image dimensions to database
+                                Image::storeImageDimensions(
+                                    config('media.full_dir'),
+                                    $cell,
+                                    $item->item_id,
+                                    $selected_attr[$colnr]
+                                );
+                                // Store image size to database
+                                Image::storeImageSize(
+                                    config('media.full_dir'),
+                                    $cell,
+                                    $item->item_id,
+                                    $selected_attr[$colnr]
+                                );
+                                // Create resized images
+                                Image::processImageResizing(config('media.full_dir'), $cell);
+                            }
                             // no break, but fall through
                         case '_string_':
                         case '_title_':
