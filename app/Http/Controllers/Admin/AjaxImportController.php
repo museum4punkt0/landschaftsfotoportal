@@ -77,10 +77,17 @@ class AjaxImportController extends Controller
                 $taxon = Taxon::where('full_name', trim($line[array_search('-3', $selected_attr)]))->first();
                 if (empty($taxon)) {
                     // Taxon not found: skip this one and set warning message
-                    $warning_status_msg .= " " .  __('import.taxon_not_found', ['full_name' => $line[array_search('-3', $selected_attr)]]) . "\n";
-                    $request->session()->flash('warning', $warning_status_msg);
-                    // TODO: use messageBag for arrays
-                    #$messageBag->add('warning', $warning_status_msg);
+                    Log::channel('import')->warning(
+                        __('import.taxon_not_found', [
+                            'full_name' => $line[array_search('-3', $selected_attr)]
+                        ]), [
+                            'line' => $number,
+                        ]
+                    );
+                    $warning_status_msg .= " " . __('import.csv_line', ['line' => $number]) .
+                        __('import.taxon_not_found', [
+                            'full_name' => $line[array_search('-3', $selected_attr)]
+                        ]) . "\n";
                     continue;
                 } else {
                     $taxon_fk = $taxon->taxon_id;
@@ -90,9 +97,18 @@ class AjaxImportController extends Controller
                         ['item_type_fk', $request->session()->get('item_type')],
                     ])->first();
                     if (!empty($existing_item) && $request->session()->has('unique_taxa')) {
-                        $warning_status_msg .= " " .  __('import.taxon_exists', ['full_name' => $line[array_search('-3', $selected_attr)]]) . "\n";
-                        $request->session()->flash('warning', $warning_status_msg);
-                        // TODO: use messageBag for arrays
+                        // Item for this taxon exists: skip this one and set warning message
+                        Log::channel('import')->warning(
+                            __('import.taxon_exists', [
+                                'full_name' => $line[array_search('-3', $selected_attr)]
+                            ]), [
+                                'line' => $number,
+                            ]
+                        );
+                        $warning_status_msg .= " " . __('import.csv_line', ['line' => $number]) .
+                            __('import.taxon_exists', [
+                                'full_name' => $line[array_search('-3', $selected_attr)]
+                            ]) . "\n";
                         continue;
                     }
                 }
@@ -243,27 +259,83 @@ class AjaxImportController extends Controller
                 }
                 
                 // Set parent fkey of item if individually choosen per item
+                // The parent item could be a specific item type, if chosen by user
                 $pit = $request->session()->get('parent_item_type');
+                
                 // Try to match parent item using a detail
                 if ($selected_attr[$colnr] == -1) {
-                    // Try to match taxon for given full scientific name
                     $parent_item = Item::whereHas('details', function (Builder $query) use ($cell, $pit) {
                         $query->where('value_string', $cell);
                     })->where('item_type_fk', $pit)->first();
+                    // Save foreign key to parent item
                     if (!empty($parent_item)) {
                         $item->parent_fk = $parent_item->item_id;
                         $item->save();
                     }
+                    // No matching parent item found
+                    else {
+                        if ($item->parent_fk) {
+                            Log::channel('import')->info(
+                                __('import.parent_detail_not_found', [
+                                    'detail' => $cell
+                                ]), [
+                                    'item' => $item->item_id,
+                                    'line' => $number,
+                                ]
+                            );
+                        }
+                        else {
+                            Log::channel('import')->warning(
+                                __('import.parent_detail_not_found', [
+                                    'detail' => $cell
+                                ]), [
+                                    'item' => $item->item_id,
+                                    'line' => $number,
+                                ]
+                            );
+                            $warning_status_msg .= " " . __('import.csv_line', ['line' => $number]) .
+                                __('import.parent_detail_not_found', [
+                                    'detail' => $cell
+                                ]) . "\n";
+                        }
+                    }
                 }
                 // Try to match parent item using a taxon's full scientific name
                 if ($selected_attr[$colnr] == -2) {
-                    // Try to match taxon for given full scientific name
                     $parent_item = Item::whereHas('taxon', function (Builder $query) use ($cell, $pit) {
                         $query->where('full_name', $cell);
                     })->where('item_type_fk', $pit)->first();
+                    // Save foreign key to parent item
                     if (!empty($parent_item)) {
                         $item->parent_fk = $parent_item->item_id;
                         $item->save();
+                    }
+                    // No matching parent item found
+                    else {
+                        if ($item->parent_fk) {
+                            Log::channel('import')->info(
+                                __('import.parent_detail_not_found', [
+                                    'detail' => $cell
+                                ]), [
+                                    'item' => $item->item_id,
+                                    'line' => $number,
+                                ]
+                            );
+                        }
+                        else {
+                            Log::channel('import')->warning(
+                                __('import.parent_taxon_not_found', [
+                                    'full_name' => $cell
+                                ]), [
+                                    'item' => $item->item_id,
+                                    'line' => $number,
+                                ]
+                            );
+                            $warning_status_msg .= " " . __('import.csv_line', ['line' => $number]) .
+                                __('import.parent_taxon_not_found', [
+                                    'full_name' => $cell
+                                ]) . "\n";
+                        }
                     }
                 }
             }
