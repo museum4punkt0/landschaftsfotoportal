@@ -30,6 +30,8 @@ return [
     'menu_title' => 'Name des Datensatzes (im Menü angezeigt)',
     'add_titles' => 'Titel übernehmen',
     'titles_added' => 'Für :count Datensätze wurde ein Titel übernommen.',
+    'remove_orphans' => 'Details bereinigen',
+    'orphans_removed' => ':count verwaiste Details wurden bereinigt.',
     'published' => ':count Datensätze wurden veröffentlicht.',
 
     'image_dimensions' => 'Bildgröße',

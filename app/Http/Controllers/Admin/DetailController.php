@@ -96,4 +96,17 @@ class DetailController extends Controller
     {
         //
     }
+
+    /**
+     * Remove details from storage that don't belong to any item.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function removeOrphans()
+    {
+        $count = Detail::doesntHave('item')->delete();
+        
+        return redirect()->route('item.index')
+            ->with('success', __('items.orphans_removed', ['count' => $count]));
+    }
 }

@@ -70,6 +70,9 @@
                                     <a class="dropdown-item" href="{{ route('item.titles') }}">
                                         {{ __('items.add_titles') }}
                                     </a>
+                                    <a class="dropdown-item" href="{{ route('detail.orphans') }}">
+                                        {{ __('items.remove_orphans') }}
+                                    </a>
                                 </div>
                             </li>
                             <li class="nav-item dropdown">

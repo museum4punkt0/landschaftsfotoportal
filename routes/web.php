@@ -83,6 +83,7 @@ Route::get('admin/colmap/autocomplete', 'Admin\ColumnMappingController@autocompl
 Route::resource('admin/colmap', 'Admin\ColumnMappingController');
 Route::get('admin/column/autocomplete', 'Admin\ColumnController@autocomplete')->name('column.autocomplete');
 Route::resource('admin/column', 'Admin\ColumnController');
+Route::get('admin/detail/orphans', 'Admin\DetailController@removeOrphans')->name('detail.orphans');
 Route::resource('admin/detail', 'Admin\DetailController');
 
 Route::get('admin/item/new', 'Admin\ItemController@new')->name('item.new');
