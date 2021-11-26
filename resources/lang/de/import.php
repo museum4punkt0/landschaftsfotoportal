@@ -32,6 +32,7 @@ return [
     'fullname_hint' => 'Wenn "Vollname" nicht ausgewählt wird oder leer ist, wird dieser aus den anderen Namensbestandteilen verkettet.',
     'parent_hint' => 'Wählen Sie optional einen gemeinsamen übergeordneten Menü-Eintrag für alle zu importierenden Datensätze. Falls für eine Spalte der CSV-Datei eine "Beziehung: Elternelement" ausgewählt wurde, so hat jenes Vorrang. Dies ist unabhängig vom übergeordneten Taxon.',
     'parent_item_type_hint' => 'Falls für eine Spalte der CSV-Datei eine "Beziehung: Elternelement" ausgewählt wurde, können Sie den Datensatztyp der Elternelemente hiermit einschränken. Dies ist unabhängig vom übergeordneten Taxon.',
+    'public_hint' => 'Wählen Sie, ob alle importierten Datensätze auch veröffentlicht werden sollen.',
     'geocoder_hint' => 'Wählen Sie die passenden Spalten der CSV-Datei aus, welche die Ortsangaben beeinhalten.',
     
     'attribute_once' => '":attribute" darf nur für eine Spalte ausgewählt werden!',

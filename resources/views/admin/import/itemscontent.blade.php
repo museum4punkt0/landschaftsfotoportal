@@ -104,6 +104,26 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="publicSelect">@lang('common.published')</label>
+                    <select id="publicSelect" name="public"
+                        aria-describedby="publicSelectHelpBlock" class="form-control" size=1
+                    >
+                        <option value="1"
+                            @if(old('public') == 1) selected @endif>
+                            @lang('common.yes')
+                        </option>
+                        <option value="0"
+                            @if(old('public') == 0) selected @endif>
+                            @lang('common.no')
+                        </option>
+                    </select>
+                    <small id="publicSelectHelpBlock" class="form-text text-muted">
+                        @lang('import.public_hint')<br/>
+                    </small>
+                    <span class="text-danger">{{ $errors->first('public') }}</span>
+                </div>
+
+                <div class="form-group">
                     <label for="parentSelect">@lang('lists.parent')</label>
                     <select id="parentSelect" name="parent"
                         aria-describedby="parentSelectHelpBlock" class="form-control" size=1

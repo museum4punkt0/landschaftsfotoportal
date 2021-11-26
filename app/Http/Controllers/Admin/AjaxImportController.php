@@ -118,6 +118,7 @@ class AjaxImportController extends Controller
                 'parent_fk' => $request->session()->get('parent'),
                 'item_type_fk' => $request->session()->get('item_type'),
                 'taxon_fk' => $taxon_fk,
+                'public' => $request->session()->get('public'),
                 'created_by' => $request->user()->id,
                 'updated_by' => $request->user()->id,
             ];
