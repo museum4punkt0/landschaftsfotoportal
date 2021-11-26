@@ -18,8 +18,18 @@
     @if (true || Auth::check())
         <div class="card-header">@lang('items.header')</div>
         <div class="card-body">
-            <a href="{{route('item.new')}}" class="btn btn-primary">@lang('items.new')</a>
-            <a href="{{route('item.unpublished')}}" class="btn btn-primary">@lang('items.unpublished')</a>
+            <div class="row">
+                <div class="col align-self-start">
+                    <a href="{{route('item.new')}}" class="btn btn-primary">@lang('items.new')</a>
+                    <a href="{{route('item.unpublished')}}" class="btn btn-primary">@lang('items.unpublished')</a>
+
+                </div>
+                @include('includes.form_autocomplete_search', [
+                    'search_url' => route('item.autocomplete'),
+                    'div_class' => 'col align-self-end',
+                    'input_placeholder' => __('search.search'),
+                ])
+            </div>
 
             <div class="table-responsive">
                 <table class="table mt-4">

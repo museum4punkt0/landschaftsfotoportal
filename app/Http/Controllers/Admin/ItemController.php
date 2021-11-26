@@ -589,6 +589,36 @@ class ItemController extends Controller
     }
 
     /**
+     * Get resource for AJAX autocompletion search field.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function autocomplete(Request $request)
+    {
+        // Get current UI language
+        $lang = app()->getLocale();
+
+        $results = Item::select('item_id', 'title', 'item_type_fk')
+            ->where('title', 'ILIKE', "%{$request->search}%")
+            ->orderBy('title')
+            ->limit(config('ui.autocomplete_results', 5))
+            ->get();
+        
+        $response = array();
+        foreach ($results as $result) {
+            $item_type = $result->item_type->attributes()->firstWhere('name', 'name_' . $lang);
+            $response[] = array(
+                "value" => $result->item_id,
+                "label" => $result->title . " (" . $item_type->pivot->value . ")",
+                "edit_url" => route('item.edit', $result->item_id),
+            );
+        }
+        
+        return response()->json($response);
+    }
+
+    /**
      * Check for missing details and add them to database.
      *
      * @param  \App\Item  $item
