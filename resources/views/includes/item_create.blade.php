@@ -521,27 +521,52 @@
             {{-- Data_type of form field is map --}}
             @case('_map_')
                 <div class="form-group">
-                    @include('includes.column_label')
-                    
+                @include('includes.column_label')
+                
                 @if($cm->getConfigValue('map') == 'iframe')
-                    @if($details->firstWhere('column_fk', $cm->column->column_id))
-                        @if($cm->getConfigValue('map_iframe') == 'url')
-                            <iframe width="100%" height="670px" scrolling="no" marginheight="0" marginwidth="0" frameborder="0"
-                                src="{{ old('fields.'. $cm->column->column_id, 
-                                $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
-                            >
-                        @endif
-                        @if($cm->getConfigValue('map_iframe') == 'service')
-                            <iframe width="100%" height="670px" scrolling="no" marginheight="0" marginwidth="0" frameborder="0"
-                                src="{{ Config::get('media.mapservice_url') }}artid={{ old('fields.'. $cm->column->column_id, 
-                                $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
-                            >
-                        @endif
-                        <p>@lang('items.no_iframe')</p>
-                        </iframe>
-                    @else
-                        <span>detail column {{$cm->column->column_id}} for map not found</span>
+                    @if($cm->getConfigValue('map_iframe') == 'url')
+                        <input
+                            type="url"
+                            id="fieldsInput-{{ $cm->column->column_id }}"
+                            name="fields[{{ $cm->column->column_id }}]"
+                            aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
+                            class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                            placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
+                            value="{{ old('fields.'. $cm->column->column_id) }}"
+                            @if($loop->first && !$options['edit.meta']) autofocus @endif
+                        />
+                        <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                        
+                        <iframe width="100%" height="670px" scrolling="no" marginheight="0" marginwidth="0" frameborder="0"
+                            src="{{ old('fields.'. $cm->column->column_id) }}"
+                        >
                     @endif
+                    @if($cm->getConfigValue('map_iframe') == 'service')
+                        <input
+                            type="text"
+                            name="fields-info[{{ $cm->column->column_id }}]"
+                            class="form-control"
+                            value="{{ Config::get('media.mapservice_url') . 'artid=' }}"
+                            readonly
+                        />
+                        <input
+                            type="text"
+                            id="fieldsInput-{{ $cm->column->column_id }}"
+                            name="fields[{{ $cm->column->column_id }}]"
+                            aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
+                            class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                            placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
+                            value="{{ old('fields.'. $cm->column->column_id) }}"
+                            @if($loop->first && !$options['edit.meta']) autofocus @endif
+                        />
+                        <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                        
+                        <iframe width="100%" height="670px" scrolling="no" marginheight="0" marginwidth="0" frameborder="0"
+                            src="{{ Config::get('media.mapservice_url') }}artid={{ old('fields.'. $cm->column->column_id) }}"
+                        >
+                    @endif
+                    <p>@lang('items.no_iframe')</p>
+                    </iframe>
                 @endif
                 @if($cm->getConfigValue('map') == 'inline')
                     <div id="map" class="map"></div>
@@ -715,6 +740,7 @@
                         });
                     </script>
                 @endif
+                
                 @include('includes.form_input_help')
                 </div>
                 @break
