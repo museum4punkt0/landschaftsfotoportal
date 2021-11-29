@@ -40,23 +40,18 @@
         </select>
         <span class="text-danger">{{ $errors->first('public') }}</span>
     </div>
-    <div class="form-group">
-        <label for="parentSelect">@lang('lists.parent')</label>
-        <select id="parentSelect" name="parent" class="form-control" size=1>
-            <option value="">@lang('common.root')</option>
-            @foreach($items as $it)
-                <option value="{{$it->item_id}}"
-                    @if(old('parent', $item->parent_fk) == $it->item_id) selected @endif>
-                    @for ($i = 0; $i < $it->depth + 1; $i++)
-                        |___
-                    @endfor
-                    {{ $it->title }}
-                    ({{ $it->item_type_fk }})
-                </option>
-            @endforeach
-        </select>
-        <span class="text-danger">{{ $errors->first('parent') }}</span>
-    </div>
+    {{-- Input with autocomplete for parent item, despite the name of the include --}}
+    @include('includes.form_taxon_autocomplete', [
+        'search_url' => route('item.autocomplete'),
+        'div_class' => 'form-group',
+        'name' => 'parent',
+        'input_placeholder' => '',
+        'input_label' => __('lists.parent'),
+        'input_help' =>  __('items.autocomplete_help'),
+        'null_label' => __('common.none'),
+        'taxon_name' => old('parent_name', optional($item->parent)->title ?? __('common.none')),
+        'taxon_id' => old('parent', $item->parent_fk),
+    ])
     <div class="form-group">
         <label for="taxonNameInput">@lang('taxon.list')</label>
         <input

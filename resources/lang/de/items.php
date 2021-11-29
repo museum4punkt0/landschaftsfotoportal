@@ -27,6 +27,7 @@ return [
     'no_position_for_map' => 'Es liegen keine genauen Ortsangaben für die Kartendarstellung vor.',
     'no_detail_for_column' => 'Kein Eintrag für Anzeigespalte #:column in der Datenbank vorhanden!',
     'show_frontend' => 'Im Frontend anzeigen',
+    'autocomplete_help' => 'Geben Sie den Anfang des Namens (Menü-Titel) ein. Leer lassen, falls nicht zutreffend.',
     'menu_title' => 'Name des Datensatzes (im Menü angezeigt)',
     'add_titles' => 'Titel übernehmen',
     'titles_added' => 'Für :count Datensätze wurde ein Titel übernommen.',

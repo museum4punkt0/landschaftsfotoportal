@@ -123,28 +123,19 @@
                     <span class="text-danger">{{ $errors->first('public') }}</span>
                 </div>
 
-                <div class="form-group">
-                    <label for="parentSelect">@lang('lists.parent')</label>
-                    <select id="parentSelect" name="parent"
-                        aria-describedby="parentSelectHelpBlock" class="form-control" size=1
-                    >
-                        <option value="">@lang('common.none')</option>
-                        @foreach($items as $item)
-                            <option value="{{$item->item_id}}"
-                                @if(old('parent') == $item->item_id) selected @endif>
-                                @for ($i = 0; $i < $item->depth + 1; $i++)
-                                    |___
-                                @endfor
-                                {{ $item->title }}
-                            </option>
-                        @endforeach
-                    </select>
-                    <small id="parentSelectHelpBlock" class="form-text text-muted">
-                        @lang('import.parent_hint')<br/>
-                    </small>
-                    <span class="text-danger">{{ $errors->first('parent') }}</span>
-                </div>
-                
+                {{-- Input with autocomplete for parent item, despite the name of the include --}}
+                @include('includes.form_taxon_autocomplete', [
+                    'search_url' => route('item.autocomplete'),
+                    'div_class' => 'form-group',
+                    'name' => 'parent',
+                    'input_placeholder' => '',
+                    'input_label' => __('lists.parent'),
+                    'input_help' =>  __('import.parent_hint') .' '. __('items.autocomplete_help'),
+                    'null_label' => __('common.none'),
+                    'taxon_name' => old('parent_name', __('common.none')),
+                    'taxon_id' => old('parent'),
+                ])
+
                 <div class="form-group">
                     <label for="parentItemTypeSelect">@lang('import.parent_item_type')</label>
                     <select id="parentItemTypeSelect" name="parent_item_type"

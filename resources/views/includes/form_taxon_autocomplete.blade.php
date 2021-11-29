@@ -12,7 +12,11 @@
     <input type="hidden" id="{{ $name }}Id" name="{{ $name }}" value="{{ $taxon_id }}" />
     
     <small id="{{ $name }}HelpBlock" class="form-text text-muted">
-        @lang('taxon.autocomplete_help')
+        @if(!empty($input_help))
+            {{ $input_help }}
+        @else
+            @lang('taxon.autocomplete_help')
+        @endif
     </small>
     <span class="text-danger">{{ $errors->first($name) }}</span>
 </div>
