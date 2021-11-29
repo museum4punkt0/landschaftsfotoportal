@@ -93,8 +93,12 @@
                         @endforeach
                     @endif
                     @if($cm->getConfigValue('taxon_parent'))
-                        {{ $item->taxon->getAncestorWhereRank($cm->getConfigValue('taxon_parent'))->taxon_name }}
-                        ({{ $item->taxon->getAncestorWhereRank($cm->getConfigValue('taxon_parent'))->native_name }})
+                        @if($item->taxon->getAncestorWhereRank($cm->getConfigValue('taxon_parent')))
+                            {{ $item->taxon->getAncestorWhereRank($cm->getConfigValue('taxon_parent'))->taxon_name }}
+                            ({{ $item->taxon->getAncestorWhereRank($cm->getConfigValue('taxon_parent'))->native_name }})
+                        @else
+                            @lang('common.not_applicable')
+                        @endif
                     @endif
                 </div>
                 @break

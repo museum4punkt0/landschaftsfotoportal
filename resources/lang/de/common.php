@@ -14,6 +14,7 @@ return [
     'none' => 'keine',
     'none_of_these' => 'keines davon',
     'unknown' => 'unbekannt',
+    'not_applicable' => 'nicht zutreffend',
     'yes' => 'ja',
     'no' => 'nein',
     'cancel' => 'Abbrechen',
