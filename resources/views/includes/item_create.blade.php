@@ -2,8 +2,8 @@
 @unless (Route::currentRouteName() == 'item.create')
     @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
         'section_id' => 'edit_form',
-        'section_heading' => __('items.my_own'),
-        'section_subheading' => 'Lorem ipsum dolor sit amet consectetur.',
+        'section_heading' => _'',
+        'section_subheading' => '',
     ])
 @endunless
 
