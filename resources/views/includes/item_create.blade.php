@@ -2,7 +2,7 @@
 @unless (Route::currentRouteName() == 'item.create')
     @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
         'section_id' => 'edit_form',
-        'section_heading' => _'',
+        'section_heading' => '',
         'section_subheading' => '',
     ])
 @endunless
