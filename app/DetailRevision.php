@@ -73,11 +73,19 @@ class DetailRevision extends Detail
     }*/
 
     /**
-     * Get the item that owns the detail.
+     * Get the (original) item that owns the detail.
+     */
+    public function original_item()
+    {
+        return $this->belongsTo('App\Item', 'item_fk', 'item_id');
+    }
+
+    /**
+     * Get the item (revision) that owns the detail.
      */
     public function item()
     {
-        return $this->belongsTo('App\ItemRevision', 'item_revision_fk', 'item_revsion_id');
+        return $this->belongsTo('App\ItemRevision', 'item_revision_fk', 'item_revision_id');
     }
 
     /**

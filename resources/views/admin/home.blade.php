@@ -51,6 +51,14 @@
             <div class="container">
                 <div class="row py-1">
                     <div class="col">
+                        @lang('revisions.moderated'): {{ $moderated }}
+                    </div>
+                    <div class="col">
+                        <a href="{{route('revision.index')}}" class="btn btn-primary">@lang('common.show')</a>
+                    </div>
+                </div>
+                <div class="row py-1">
+                    <div class="col">
                         @lang('items.unpublished'): {{ $items }}
                     </div>
                     <div class="col">

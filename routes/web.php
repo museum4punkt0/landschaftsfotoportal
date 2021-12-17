@@ -95,6 +95,8 @@ Route::resource('admin/item', 'Admin\ItemController');
 Route::get('admin/comment/unpublished', 'Admin\CommentController@list_unpublished')->name('comment.unpublished');
 Route::get('admin/comment/publish/{comment?}', 'Admin\CommentController@publish')->name('comment.publish');
 Route::resource('admin/item.comment', 'Admin\CommentController')->shallow();
+Route::delete('admin/revision/{revision}/draft', 'Admin\ItemRevisionController@destroyDraft')->name('revision.destroy.draft');
+Route::resource('admin/revision', 'Admin\ItemRevisionController');
 Route::get('admin/taxon/autocomplete', 'Admin\TaxonController@autocomplete')->name('taxon.autocomplete');
 Route::resource('admin/taxon', 'Admin\TaxonController');
 Route::resource('admin/user', 'Admin\UserController');

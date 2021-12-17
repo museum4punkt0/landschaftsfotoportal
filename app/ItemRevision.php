@@ -74,6 +74,43 @@ class ItemRevision extends Item
 
 
     /**
+     * Scope a query to only include draft revisions.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeDraft($query)
+    {
+        return $query->where('revision', '<', 0);
+    }
+
+    /**
+     * Scope a query to only include revisions of a given user.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  mixed  $owner
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOwner($query, $owner)
+    {
+        return $query->where('updated_by', $owner);
+    }
+
+
+    /**
+     * Delete a revision and all its details.
+     *
+     * @return \App\ItemRevision
+     */
+    public function deleteRevisionWithDetails()
+    {
+        // Delete all details belonging to this revision
+        $this->details()->delete();
+        // Delete the revisions itself
+        $this->delete();
+    }
+
+    /**
      * Create a new revision of this item including all details.
      *
      * @param  bool  $draft

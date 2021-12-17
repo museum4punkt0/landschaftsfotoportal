@@ -213,6 +213,27 @@ class Item extends Model
         return $this->revisions()->save($revision);
     }
 
+    /**
+     * Delete all draft revisions of this item.
+     *
+     * @param  mixed  $owner
+     * @return void
+     */
+    public final function deleteAllDrafts($owner = null)
+    {
+        if ($owner) {
+            $drafts = $this->revisions()->draft()->owner($owner)->get();
+        }
+        // No owner given: get drafts of all owners
+        else {
+            $drafts = $this->revisions()->draft()->get();
+        }
+
+        foreach ($drafts as $draft) {
+            $draft->deleteRevisionWithDetails();
+        }
+    }
+
     public final function moderatedRevisionAvailable() {
         return $this->getLatestRevisionNumber(true);
     }

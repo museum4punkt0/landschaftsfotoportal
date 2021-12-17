@@ -44,6 +44,7 @@ return [
     'icon_description' => 'fa-info',
     'icon_items_own' => 'fa-images',
     'icon_email_address' => 'fa-at',
+    'icon_show' => 'fa-tv',
     'icon_edit' => 'fa-pencil-alt',
     'icon_delete' => 'fa-trash',
 

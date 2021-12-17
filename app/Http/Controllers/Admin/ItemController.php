@@ -308,6 +308,9 @@ class ItemController extends Controller
     {
         $details = Detail::where('item_fk', $item->item_id)->get();
 
+        // Load all revisions of the item
+        $revisions = $item->revisions()->latest()->get();
+
         // Only columns associated with this item's taxon or its descendants
         $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk);
 
@@ -320,7 +323,8 @@ class ItemController extends Controller
         // Get localized names of columns
         $translations = Localization::getTranslations($lang, 'name');
 
-        return view('admin.item.show', compact('item', 'details', 'colmap', 'lists', 'translations'));
+        return view('admin.item.show',
+            compact('item', 'revisions', 'details', 'colmap', 'lists', 'translations'));
     }
 
     /**
@@ -570,6 +574,12 @@ class ItemController extends Controller
         // Copy this updated item to revisions archive
         if (config('ui.revisions')) {
             $item->createRevisionWithDetails();
+
+            // Delete all draft revisions
+            if ($request->input('delete_drafts')) {
+                $item->deleteAllDrafts($request->user()->id);
+                return redirect()->route('revision.index')->with('success', __('items.updated'));
+            }
         }
 
         return Redirect::to('admin/item')
