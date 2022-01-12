@@ -52,8 +52,6 @@ class Image
                     ['column_fk' => $size_column],
                     ['value_int' => $size]
                 );
-                // Add foreign keys
-                Image::addForeignKeysToDetailRevision($item, $size_column);
             } else {
                 Log::warning(__('items.no_column_for_image_size'), ['colmap' => $cm->colmap_id]);
             }
@@ -89,8 +87,6 @@ class Image
                     ['column_fk' => $width_column],
                     ['value_int' => $width_orig]
                 );
-                // Add foreign keys
-                Image::addForeignKeysToDetailRevision($item, $width_column);
             } else {
                 Log::warning(__('items.no_column_for_image_width'), ['colmap' => $cm->colmap_id]);
             }
@@ -102,8 +98,6 @@ class Image
                     ['column_fk' => $height_column],
                     ['value_int' => $height_orig]
                 );
-                // Add foreign keys
-                Image::addForeignKeysToDetailRevision($item, $height_column);
             } else {
                 Log::warning(__('items.no_column_for_image_height'), ['colmap' => $cm->colmap_id]);
             }
@@ -180,26 +174,6 @@ class Image
             imagejpeg($scaled, Storage::disk('public')->path($dest_path) . $filename, 85);
             
             Log::info(__('items.resized_image_created') . $dest_path . $filename);
-        }
-    }
-
-    /**
-     * Store foreign keys for item and detail to a DetailRevision.
-     *
-     * @param  \App\Item $item
-     * @param  integer $fcolumn_fk
-     * @return void
-     */
-    private static function addForeignKeysToDetailRevision(Item $item, $column_fk) {
-        if ($item instanceof ItemRevision) {
-            $detail_fk = $item->item->details()->where('column_fk', $column_fk)->first()->detail_id;
-
-            /*
-            $item->details()->update(
-                ['column_fk' => $column_fk],
-                ['item_fk' => $item->item_fk, 'detail_fk' => $detail_fk]
-            );
-            */
         }
     }
 }

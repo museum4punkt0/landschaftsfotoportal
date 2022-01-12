@@ -9,6 +9,7 @@ use App\Element;
 use App\ItemRevision;
 use App\Utils\Localization;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class ItemRevisionController extends Controller
 {
@@ -98,7 +99,7 @@ class ItemRevisionController extends Controller
 
         // Check for missing details and add them
         // Should be not necessary but allows editing items with somehow incomplete data
-        #$this->addMissingDetails($item, $colmap);
+        $this->addMissingDetails($item);
 
         // Load all details for this item
         $details = $item->details;
@@ -181,5 +182,37 @@ class ItemRevisionController extends Controller
 
         return redirect()->route('revision.index')
                          ->with('success', __('revisions.deleted'));
+    }
+
+    /**
+     * Check for missing details and add them to database.
+     *
+     * @param  \App\ItemRevision  $item
+     * @return void
+     */
+    private function addMissingDetails(ItemRevision $item)
+    {
+        // Only columns associated with this item's taxon or its descendants
+        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk);
+
+        // Check all columns for existing details
+        foreach ($colmap as $cm) {
+            $d = $item->details()->firstOrCreate([
+                'column_fk' => $cm->column_fk,
+            ]);
+            // Add foreign keys and write to log file
+            if ($d->wasRecentlyCreated) {
+                $d->item_fk = $item->item_fk;
+                $d->detail_fk = $item->item->details()->firstOrCreate([
+                    'column_fk' => $cm->column_fk,
+                ])->detail_id;
+                $d->save();
+
+                Log::info(__('items.added_missing_detail'), [
+                    'item' => $d->item_fk, 'column' => $d->column_fk,
+                    'item_rev' => $item->item_revision_id, 'rev' => $item->revision
+                ]);
+            }
+        }
     }
 }

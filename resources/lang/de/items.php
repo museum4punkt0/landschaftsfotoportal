@@ -36,6 +36,7 @@ return [
     'published' => ':count Datensätze wurden veröffentlicht.',
     'editing_draft' => 'Sie bearbeiten einen noch nicht veröffentlichten Entwurf.',
 
+    'added_missing_detail' => 'Fehlendes Detail gespeichert.',
     'image_dimensions' => 'Bildgröße',
     'image_size' => 'Dateigröße',
     'no_column_for_image_width' => 'Keine Anzeigespalte für Bildbreite konfiguriert!',

@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Redirect;
 use Debugbar;
@@ -222,7 +223,7 @@ class ItemController extends Controller
         
         // Check for missing details from form input and add them
         // especially useful for drop-down lists with multiple selection if no option was selected
-        $this->addMissingDetails($item, $colmap);
+        $this->addMissingDetails($item);
         
         // Copy this updated item to revisions archive
         if (config('ui.revisions')) {
@@ -496,7 +497,7 @@ class ItemController extends Controller
         
         // Check for missing details and add them
         // Should be not necessary but allows editing items with somehow incomplete data
-        $this->addMissingDetails($item, $colmap);
+        $this->addMissingDetails($item);
         
         // Load all details for this item
         $details = $item->details;
@@ -576,6 +577,8 @@ class ItemController extends Controller
                     ->where('revision', $revision)->first();
             // Copy that revision to a new one
             $item = $item->cloneRevisionWithDetails($moderated);
+            // Check for missing revision details and add them
+            $this->addMissingDetails($item);
             // Reload the item and eager load all of its details
             $item->refresh();
             $item->load('details');
@@ -690,18 +693,39 @@ class ItemController extends Controller
      * Check for missing details and add them to database.
      *
      * @param  \App\Item  $item
-     * @param  \Illuminate\Database\Eloquent\Collection  $colmap
      * @return void
      */
-    private function addMissingDetails(Item $item, $colmap)
+    private function addMissingDetails(Item $item)
     {
+        // Only columns associated with this item's taxon or its descendants
+        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk);
+
         // Check all columns for existing details
         foreach ($colmap as $cm) {
-            $item->details()->firstOrCreate([
-                'column_fk' => $cm->column->column_id,
+            $d = $item->details()->firstOrCreate([
+                'column_fk' => $cm->column_fk,
             ]);
-        }
+            // Add foreign keys and write to log file
+            if ($d->wasRecentlyCreated) {
+                if ($d instanceof DetailRevision) {
+                    $d->item_fk = $item->item_fk;
+                    $d->detail_fk = $item->item->details()->firstOrCreate([
+                        'column_fk' => $cm->column_fk,
+                    ])->detail_id;
+                    $d->save();
 
-        // TODO: logging for debug purpose
+                    Log::info(__('items.added_missing_detail'), [
+                        'item' => $d->item_fk, 'column' => $d->column_fk,
+                        'item_rev' => $item->item_revision_id, 'rev' => $item->revision
+                    ]);
+                }
+                // $d is instanceof Detail
+                else {
+                    Log::info(__('items.added_missing_detail'), [
+                        'item' => $d->item_fk, 'column' => $d->column_fk
+                    ]);
+                }
+            }
+        }
     }
 }
