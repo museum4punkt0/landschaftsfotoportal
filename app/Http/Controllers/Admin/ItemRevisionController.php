@@ -119,7 +119,7 @@ class ItemRevisionController extends Controller
         // Get localized description/help for columns
         $descriptions = Localization::getTranslations($lang, 'description');
 
-        $options = ['edit.meta' => true, 'route' => 'item.update'];
+        $options = ['edit.meta' => true, 'edit.revision' => true, 'route' => 'item.update'];
 
         return view('admin.item.edit', compact('item', 'taxon', 'details', 'colmap', 'lists',
             'data_types', 'translations', 'placeholders', 'descriptions', 'options'));

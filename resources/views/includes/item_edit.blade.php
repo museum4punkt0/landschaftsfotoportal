@@ -32,6 +32,7 @@
             value="{{old('title', $item->title)}}" maxlength="255" autofocus
         >
         <span class="text-danger">{{ $errors->first('title') }}</span>
+        @includeWhen(isset($options['edit.revision']), 'includes.form_history_meta', ['data_type' => 'title'])
     </div>
     <div class="form-group">
         <label for="publicSelect">@lang('common.published')</label>
@@ -46,6 +47,7 @@
             </option>
         </select>
         <span class="text-danger">{{ $errors->first('public') }}</span>
+        @includeWhen(isset($options['edit.revision']), 'includes.form_history_meta', ['data_type' => 'public'])
     </div>
     {{-- Input with autocomplete for parent item, despite the name of the include --}}
     @include('includes.form_taxon_autocomplete', [
@@ -59,6 +61,7 @@
         'taxon_name' => old('parent_name', optional($item->parent)->title ?? __('common.none')),
         'taxon_id' => old('parent', $item->parent_fk),
     ])
+    @includeWhen(isset($options['edit.revision']), 'includes.form_history_meta', ['data_type' => 'parent'])
     <div class="form-group">
         <label for="taxonNameInput">@lang('taxon.list')</label>
         <input
@@ -112,6 +115,7 @@
                     
                     @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', ['data_type' => 'list'])
                 </div>
                 @break
             
@@ -158,6 +162,7 @@
                     
                     @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', ['data_type' => 'multi_list'])
                 </div>
                 @break
             
@@ -182,6 +187,7 @@
                     
                     @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', ['data_type' => 'int'])
                 </div>
                 @break
             
@@ -207,6 +213,7 @@
                     
                     @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', ['data_type' => 'int'])
                 </div>
                 @break
             
@@ -230,6 +237,7 @@
                     
                     @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', ['data_type' => 'float'])
                 </div>
                 @break
             
@@ -281,6 +289,7 @@
                     
                     @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', ['data_type' => 'string'])
                 </div>
                 @break
             
@@ -304,6 +313,7 @@
                     
                     @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', ['data_type' => 'string'])
                 </div>
                 <script type="text/javascript">
                     $(document).ready(function() {
@@ -334,6 +344,7 @@
                     
                     @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', ['data_type' => 'string'])
                 </div>
                 @break
             
@@ -355,6 +366,7 @@
                     
                     @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', ['data_type' => 'date'])
                 </div>
                 @break
             
@@ -410,6 +422,7 @@
                         />
                         @include('includes.form_input_help')
                         <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id .'.start') }}</span>
+                        @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', ['data_type' => 'daterange'])
                     </div>
                     <!-- Form fields for the date (period of time) -->
                     @if(old('date_type') == 'period' || !old('date_type') && $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from() != $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to())
@@ -431,6 +444,7 @@
                         ])
                         @include('includes.form_input_help')
                         <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id .'.start') }}</span>
+                        @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', ['data_type' => 'daterange'])
                         <br/>
                         <input
                             type="button"
@@ -581,6 +595,7 @@
                         </div>
                     </div>
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id .'.file') }}</span>
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', ['data_type' => 'string'])
                 </div>
 
                 <script type="text/javascript">
@@ -618,6 +633,7 @@
                                 @if($loop->first && !$options['edit.meta']) autofocus @endif
                             />
                             <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                            @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', ['data_type' => 'string'])
                             
                             <iframe width="100%" height="670px" scrolling="no" marginheight="0" marginwidth="0" frameborder="0"
                                 src="{{ old('fields.'. $cm->column->column_id, 
@@ -644,6 +660,7 @@
                                 @if($loop->first && !$options['edit.meta']) autofocus @endif
                             />
                             <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                            @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', ['data_type' => 'string'])
                             
                             <iframe width="100%" height="670px" scrolling="no" marginheight="0" marginwidth="0" frameborder="0"
                                 src="{{ Config::get('media.mapservice_url') }}artid={{ old('fields.'. $cm->column->column_id, 

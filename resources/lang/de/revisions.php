@@ -14,6 +14,7 @@ return [
     'header' => 'Datensatz-Historie',
     'list' => 'Datensatz-Version',
     'revision' => 'Version',
+    'history' => 'Verlauf',
     'draft' => 'Entwurf',
     'moderated' => 'Zu moderierende Entwürfe für Datensätze',
     'edit' => 'Datensatz-Version bearbeiten',

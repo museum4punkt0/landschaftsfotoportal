@@ -57,6 +57,14 @@ class ItemRevision extends Item
     }
 
     /**
+     * Get the parent of the (original) item.
+     */
+    public function original_parent()
+    {
+        return $this->belongsTo('App\Item', 'parent_fk', 'item_id');
+    }
+
+    /**
      * Get the (original) item that owns the item (revision).
      */
     public function item()
