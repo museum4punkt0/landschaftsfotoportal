@@ -14,15 +14,25 @@ use Illuminate\Support\Facades\Log;
 class ItemRevisionController extends Controller
 {
     /**
+     * Instantiate a new controller instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('verified');
+
+        // Use app\Policies\ItemRevisionPolicy for authorizing ressource controller
+        $this->authorizeResource(ItemRevision::class, 'revision');
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
     {
-        // TODO: implement policy for ItemRevision
-        $this->authorize('publish', Item::class);
-
         $items = ItemRevision::where('revision', '<', 0)
                             ->distinct('item_fk')
                             ->orderBy('item_fk', 'asc')
@@ -178,6 +188,8 @@ class ItemRevisionController extends Controller
      */
     public function destroyDraft(ItemRevision $revision)
     {
+        $this->authorize('deleteDraft', $revision);
+
         $revision->item->deleteAllDrafts();
 
         return redirect()->route('revision.index')
