@@ -130,6 +130,9 @@ class ItemRevisionController extends Controller
         // Get localized description/help for columns
         $descriptions = Localization::getTranslations($lang, 'description');
 
+        // Save editor of this revision to session
+        session(['delete_revisions_of_user' => $item->updated_by]);
+
         $options = ['edit.meta' => true, 'edit.revision' => true, 'route' => 'item.update'];
 
         return view('admin.item.edit', compact('item', 'taxon', 'details', 'colmap', 'lists',

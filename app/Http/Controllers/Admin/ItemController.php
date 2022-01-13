@@ -577,8 +577,11 @@ class ItemController extends Controller
             $item->createRevisionWithDetails();
 
             // Delete all draft revisions
-            if ($request->input('delete_drafts')) {
-                $item->deleteAllDrafts($request->user()->id);
+            if ($request->session()->has('delete_revisions_of_user')) {
+                // Get creator of revision from session (and delete value from session)
+                $revision_editor = $request->session()->pull('delete_revisions_of_user');
+                $item->deleteAllDrafts($revision_editor);
+
                 return redirect()->route('revision.index')->with('success', __('items.updated'));
             }
         }

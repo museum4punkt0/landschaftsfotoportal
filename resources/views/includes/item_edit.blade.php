@@ -712,24 +712,39 @@
         <button type="submit" aria-describedby="saveRevisionBtnHelpBlock" class="btn btn-primary">
             @lang('common.save')
         </button>
-        {{-- Show button for deleting this draft revision --}}
-        @if($item->revision < 0)
-            <input type="hidden" name="delete_drafts" value="1" />
-            <button type="button" class="btn btn-danger" data-toggle="modal"
-                data-target="#confirmDeleteModal"
-                data-href="{{ route('revision.destroy', $item) }}"
-                data-message="@lang('revisions.confirm_delete')"
-                data-title="@lang('revisions.delete_draft')"
-                title="@lang('revisions.delete_draft')"
-            >
-                @lang('revisions.delete_draft')
-            </button>
-            <small id="saveRevisionBtnHelpBlock" class="form-text text-muted">@lang('revisions.save_delete_drafts_help')</small>
-        @else
-            <small id="saveRevisionBtnHelpBlock" class="form-text text-muted">@lang('revisions.save_revision_help')</small>
+        @if(Config::get('ui.revisions'))
+            {{-- Show button for deleting this draft revision --}}
+            @if($item->revision < 0)
+                <button type="button" class="btn btn-danger" data-toggle="modal"
+                    data-target="#confirmDeleteModal"
+                    data-href="{{ route('revision.destroy', $item) }}"
+                    data-message="@lang('revisions.confirm_delete')"
+                    data-title="@lang('revisions.delete_draft')"
+                    title="@lang('revisions.delete_draft')"
+                >
+                    @lang('revisions.delete_draft')
+                </button>
+                <small id="saveRevisionBtnHelpBlock" class="form-text text-muted">@lang('revisions.save_delete_drafts_help')</small>
+            @else
+                <small id="saveRevisionBtnHelpBlock" class="form-text text-muted">@lang('revisions.save_revision_help')</small>
+            @endif
         @endif
     @else
         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#uploadModal" data-form-id="itemEditForm">@lang('common.save')</button>
+        @if(Config::get('ui.revisions'))
+            @if($item->revision < 0)
+                {{-- Show button for deleting this draft revision --}}
+                <button type="button" class="btn btn-danger" data-toggle="modal"
+                    data-target="#confirmDeleteModal"
+                    data-href="{{ route('item.destroy.draft', $item->original_item_id) }}"
+                    data-message="@lang('revisions.confirm_delete')"
+                    data-title="@lang('revisions.delete_draft')"
+                    title="@lang('revisions.delete_draft')"
+                >
+                    @lang('revisions.delete_draft')
+                </button>
+            @endif
+        @endif
         @include('includes.modal_upload')
     @endif
     </div>

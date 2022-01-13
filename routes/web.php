@@ -39,6 +39,7 @@ Route::get('download/{item}', 'ItemController@download')->name('item.download');
 Route::get('gallery', 'ItemController@gallery')->name('item.gallery');
 Route::get('timeline', 'ItemController@timeline')->name('item.timeline');
 Route::get('map', 'ItemController@map')->name('item.map');
+Route::delete('item/{item}/draft', 'ItemController@destroyDraft')->name('item.destroy.draft');
 Route::resource('/item', 'ItemController')->except(['index', 'destroy'])->names([
     'create' => 'item.create.own',
     'store' => 'item.store.own',

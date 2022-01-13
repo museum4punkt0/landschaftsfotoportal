@@ -690,6 +690,24 @@ class ItemController extends Controller
     }
 
     /**
+     * Remove all draft revisions of the specified resource from storage.
+     *
+     * @param  \App\ItemRevision  $itemRevision
+     * @return \Illuminate\Http\Response
+     */
+    public function destroyDraft(Item $item)
+    {
+        $this->authorize('deleteDraft', $item);
+
+        if (config('ui.revisions')) {
+            $item->deleteAllDrafts(Auth::user()->id);
+        }
+
+        return redirect()->route('item.show.own')
+                         ->with('success', __('revisions.deleted'));
+    }
+
+    /**
      * Check for missing details and add them to database.
      *
      * @param  \App\Item  $item
