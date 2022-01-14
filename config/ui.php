@@ -34,7 +34,7 @@ return [
     */
     
     'icon_cart_add' => 'fa-bookmark',
-    'icon_cart_remove' => 'fa-trash',
+    'icon_cart_remove' => 'fa-bookmark',
     'icon_comment' => 'fa-comment',
     'icon_upload' => 'fa-upload',
     'icon_download' => 'fa-download',

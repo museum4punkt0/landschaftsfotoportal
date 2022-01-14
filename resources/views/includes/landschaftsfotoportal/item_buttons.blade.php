@@ -26,7 +26,7 @@
                                 <i class="fas {{ Config::get('ui.icon_cart_add') }} fa-stack-1x fa-inverse"></i>
                         @else
                             <a href="#" data-toggle="modal" data-target="#cartRemoveModal" data-href="{{ route('cart.remove', $item->carts->firstWhere('created_by', Auth::id())->cart_id) }}" title="@lang('cart.remove')">
-                                <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                <i class="fas fa-circle fa-stack-2x text-danger"></i>
                                 <i class="fas {{ Config::get('ui.icon_cart_remove') }} fa-stack-1x fa-inverse"></i>
                         @endif
                     @endguest
