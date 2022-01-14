@@ -34,6 +34,7 @@
         var url = $(event.relatedTarget).data('href');
         $('.modal-body #url').val(url);
         $('textarea[name=message]').val($(event.relatedTarget).data('message'));
+        $('#messageTextarea').focus();
     });
     
     $.ajaxSetup({

@@ -33,6 +33,7 @@
         // Store the URL for the AJAX request
         var url = $(event.relatedTarget).data('href');
         $('.modal-body #url').val(url);
+        $('#messageTextarea').focus();
     });
     
     $.ajaxSetup({
