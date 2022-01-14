@@ -690,6 +690,30 @@ class ItemController extends Controller
     }
 
     /**
+     * Remove the specified resource from storage.
+     *
+     * @param  \App\Item  $item
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy(Item $item)
+    {
+        // Delete this item from all carts
+        $item->carts()->delete();
+
+        // Delete all comments owned by this item
+        $item->comments()->delete();
+
+        // Delete all details owned by this item
+        $item->details()->delete();
+
+        // Delete the item itself
+        $item->delete();
+
+        return redirect()->route('item.show.own')
+                        ->with('success', __('items.deleted'));
+    }
+
+    /**
      * Remove all draft revisions of the specified resource from storage.
      *
      * @param  \App\ItemRevision  $itemRevision

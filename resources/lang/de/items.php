@@ -17,6 +17,8 @@ return [
     'unpublished' => 'Unveröffentlichte Datensätze',
     'new' => 'Neuer Datensatz',
     'edit' => 'Datensatz bearbeiten',
+    'delete' => 'Datensatz löschen',
+    'confirm_delete' => 'Möchten Sie diese Datensatz wirklich löschen?',
     'created' => 'Datensatz wurde angelegt.',
     'updated' => 'Datensatz wurde bearbeitet.',
     'deleted' => 'Datensatz wurde gelöscht.',

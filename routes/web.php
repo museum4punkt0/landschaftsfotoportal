@@ -40,12 +40,13 @@ Route::get('gallery', 'ItemController@gallery')->name('item.gallery');
 Route::get('timeline', 'ItemController@timeline')->name('item.timeline');
 Route::get('map', 'ItemController@map')->name('item.map');
 Route::delete('item/{item}/draft', 'ItemController@destroyDraft')->name('item.destroy.draft');
-Route::resource('/item', 'ItemController')->except(['index', 'destroy'])->names([
+Route::resource('/item', 'ItemController')->except(['index'])->names([
     'create' => 'item.create.own',
     'store' => 'item.store.own',
     'show' => 'item.show.public',
     'edit' => 'item.edit.own',
-    'update' => 'item.update.own'
+    'update' => 'item.update.own',
+    'destroy' => 'item.destroy.own'
 ]);
 
 Route::get('map/all', 'AjaxMapController@all')->name('map.all');

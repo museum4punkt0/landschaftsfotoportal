@@ -32,7 +32,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                @foreach($items as $item)
+                @foreach($items->sortByDesc('updated_at') as $item)
                     <tr>
                         <td>
                             {{$item->item_id}}

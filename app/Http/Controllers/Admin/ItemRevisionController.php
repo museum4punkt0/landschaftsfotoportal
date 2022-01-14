@@ -34,6 +34,7 @@ class ItemRevisionController extends Controller
     public function index()
     {
         $items = ItemRevision::where('revision', '<', 0)
+                            ->whereHas('item')
                             ->distinct('item_fk')
                             ->orderBy('item_fk', 'asc')
                             ->orderBy('updated_at', 'desc')
