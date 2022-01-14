@@ -487,7 +487,7 @@
                 <div class="form-group">
                     @include('includes.column_label')
                     
-                    <input type="hidden" name="fields[{{ $cm->column->column_id }}][dummy]" value="0" />
+                    <input type="hidden" name="fields[{{ $cm->column->column_id }}][filename]" value="0" />
                     <input
                         type="file"
                         id="fieldsInput-{{ $cm->column->column_id }}"

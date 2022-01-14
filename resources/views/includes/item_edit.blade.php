@@ -580,7 +580,8 @@
                         @endif
                         </div>
                         <div class="col">
-                            <input type="hidden" name="fields[{{ $cm->column->column_id }}][dummy]" value=0 />
+                            <input type="hidden" name="fields[{{ $cm->column->column_id }}][filename]" value="{{
+                                $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}" />
                             <input
                                 type="file"
                                 id="fieldsInput-{{ $cm->column->column_id }}"

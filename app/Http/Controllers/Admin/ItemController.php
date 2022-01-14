@@ -529,6 +529,10 @@ class ItemController extends Controller
                 case '_html_':
                     $detail->value_string = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', "", $value);
                     break;
+                case '_image_':
+                    $valid = Image::checkFileExists(config('media.full_dir') . $value['filename']);
+                    $detail->value_string = $valid ? $value['filename'] : null;
+                    break;
             }
             $detail->save();
         }
