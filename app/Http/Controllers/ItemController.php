@@ -123,8 +123,6 @@ class ItemController extends Controller
             'created_by' => $request->user()->id,
             'updated_by' => $request->user()->id,
         ];
-        
-        $moderated = true;
         $item = Item::create($item_data);
         
         // Save the details for all columns that belong to the item
@@ -227,7 +225,7 @@ class ItemController extends Controller
         
         // Copy this updated item to revisions archive
         if (config('ui.revisions')) {
-            $item->createRevisionWithDetails($moderated);
+            $item->createRevisionWithDetails(Auth::user()->isModerated());
         }
 
         return redirect()->route('item.show.own')
@@ -478,7 +476,8 @@ class ItemController extends Controller
      */
     public function edit(Item $item)
     {
-        $moderated = true;
+        // Check for moderation: changes must be approved by an user with appropriate permissions
+        $moderated = Auth::user()->isModerated();
         if (config('ui.revisions') && $moderated) {
             $revision = $item->moderatedRevisionAvailable();
             // Check if a draft revision is available
@@ -564,8 +563,9 @@ class ItemController extends Controller
         #dd($validation_rules);
         
         $request->validate($validation_rules);
-        
-        $moderated = true;
+
+        // Check for moderation: changes must be approved by an user with appropriate permissions
+        $moderated = Auth::user()->isModerated();
         if (config('ui.revisions') && $moderated) {
             $revision = $item->moderatedRevisionAvailable();
             // Check if a draft revision is available

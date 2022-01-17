@@ -56,6 +56,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
     
     /**
+     * Checks if the user's edits are beeing moderated.
+     */
+    public function isModerated()
+    {
+        return $this->group->config['is-moderated'] ?? false;
+    }
+    
+    /**
      * Checks if the user is allowed to access.
      */
     public function hasAccess(array $permissions)
