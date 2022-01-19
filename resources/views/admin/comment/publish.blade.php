@@ -18,8 +18,8 @@
         @if (true || Auth::check())
             <div class="card-header">@lang('comments.unpublished')</div>
             <div class="card-body">
-                <table class="table mt-4">
                 <a href="{{route('comment.publish')}}" class="btn btn-primary">@lang('common.publish_all')</a>
+                <table class="table mt-4">
                 <thead>
                     <tr>
                         <th colspan="1">@lang('common.id')</th>
@@ -80,6 +80,7 @@
                                 {{ csrf_field() }}
                                 <button class="btn btn-primary" type="submit">@lang('common.edit')</button>
                             </form>
+                            <form action="{{route('comment.destroy', $comment)}}" method="POST">
                                 {{ csrf_field() }}
                                 @method('DELETE')
                                 <button class="btn btn-danger" type="submit">@lang('common.delete')</button>
