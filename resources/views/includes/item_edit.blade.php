@@ -718,7 +718,7 @@
             @if($item->revision < 0)
                 <button type="button" class="btn btn-danger" data-toggle="modal"
                     data-target="#confirmDeleteModal"
-                    data-href="{{ route('revision.destroy', $item) }}"
+                    data-href="{{ route('revision.destroy.draft', $item) }}"
                     data-message="@lang('revisions.confirm_delete')"
                     data-title="@lang('revisions.delete_draft')"
                     title="@lang('revisions.delete_draft')"

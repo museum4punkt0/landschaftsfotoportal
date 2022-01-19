@@ -7,9 +7,11 @@ use App\ColumnMapping;
 use App\Detail;
 use App\Element;
 use App\ItemRevision;
+use App\Notifications\ItemRejected;
 use App\Utils\Localization;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 
 class ItemRevisionController extends Controller
 {
@@ -195,6 +197,9 @@ class ItemRevisionController extends Controller
         $this->authorize('deleteDraft', $revision);
 
         $revision->item->deleteAllDrafts();
+
+        // Notify the editor of the given revision
+        Notification::send($revision->editor, new ItemRejected($revision));
 
         return redirect()->route('revision.index')
                          ->with('success', __('revisions.deleted'));

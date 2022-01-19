@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Item;
 use App\ItemRevision;
 use App\Taxon;
+use App\User;
 use App\DateRange;
 use App\Detail;
 use App\Column;
@@ -13,11 +14,13 @@ use App\Selectlist;
 use App\Element;
 use App\Value;
 use App\Http\Controllers\Controller;
+use App\Notifications\ItemPublished;
 use App\Utils\Localization;
 use App\Utils\Image;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Redirect;
 
@@ -583,6 +586,11 @@ class ItemController extends Controller
                 // Get creator of revision from session (and delete value from session)
                 $revision_editor = $request->session()->pull('delete_revisions_of_user');
                 $item->deleteAllDrafts($revision_editor);
+
+                // Notify the owner of the item if item was published
+                if ($item->public == 1) {
+                    Notification::send(User::find($revision_editor), new ItemPublished($item));
+                }
 
                 return redirect()->route('revision.index')->with('success', __('items.updated'));
             }

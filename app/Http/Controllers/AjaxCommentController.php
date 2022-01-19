@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Comment;
 use App\Item;
+use App\User;
 use App\Http\Controllers\Controller;
+use App\Notifications\CommentAdded;
 use Illuminate\Http\Request;
-use Redirect;
+use Illuminate\Support\Facades\Notification;
 
 class AjaxCommentController extends Controller
 {
@@ -42,7 +44,10 @@ class AjaxCommentController extends Controller
             'created_by' => $request->user()->id,
             'updated_by' => $request->user()->id,
         ];
-        Comment::create($data);
+        $comment = Comment::create($data);
+
+        // Notify all users with moderation privileges
+        Notification::send(User::moderators()->get(), new CommentAdded($comment));
         
         return response()->json(['success' => __('comments.created')]);
     }

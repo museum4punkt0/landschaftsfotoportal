@@ -12,6 +12,9 @@ use App\DateRange;
 use App\Selectlist;
 use App\Element;
 use App\Taxon;
+use App\User;
+use App\Notifications\ItemAdded;
+use App\Notifications\ItemUpdated;
 use App\Utils\Image;
 use App\Utils\Localization;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,6 +22,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use Redirect;
 use Debugbar;
@@ -226,6 +230,14 @@ class ItemController extends Controller
         // Copy this updated item to revisions archive
         if (config('ui.revisions')) {
             $item->createRevisionWithDetails(Auth::user()->isModerated());
+
+            // Notify all users with moderation privileges
+            if (Auth::user()->isModerated()) {
+                Notification::send(User::moderators()->get(), new ItemAdded($item));
+            }
+        }
+        else {
+            Notification::send(User::moderators()->get(), new ItemAdded($item));
         }
 
         return redirect()->route('item.show.own')
@@ -680,9 +692,18 @@ class ItemController extends Controller
             }
         }
 
-        if (config('ui.revisions') && !$moderated) {
-            // Copy this updated item to revisions archive
-            $item->createRevisionWithDetails(false);
+        if (config('ui.revisions')) {
+            if ($moderated) {
+                // Notify all users with moderation privileges
+                Notification::send(User::moderators()->get(), new ItemUpdated($item));
+            }
+            else {
+                // Copy this updated item to revisions archive
+                $item->createRevisionWithDetails(false);
+            }
+        }
+        else {
+            Notification::send(User::moderators()->get(), new ItemUpdated($item));
         }
 
         return redirect()->route('item.show.own')
