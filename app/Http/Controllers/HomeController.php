@@ -36,14 +36,22 @@ class HomeController extends Controller
         
         // Get some statistics for admin dashboard
         if (Gate::allows('show-admin')) {
-            // Number of moderated items
-            $moderated = ItemRevision::where('revision', '<', 0)->distinct('item_fk')->count();
+            if (config('ui.revisions')) {
+                // Number of deleted items
+                $deleted = ItemRevision::doesntHave('item')->distinct('item_fk')->count();
+                // Number of moderated items
+                $moderated = ItemRevision::where('revision', '<', 0)->distinct('item_fk')->count();
+            }
+            else {
+                $deleted = null;
+                $moderated = null;
+            }
             // Number of unpublished items
             $items = Item::where('public', 0)->count();
             // Number of unpublished comments
             $comments = Comment::where('public', 0)->count();
             
-            return view('admin.home', compact('user', 'moderated', 'items', 'comments'));
+            return view('admin.home', compact('user', 'deleted', 'moderated', 'items', 'comments'));
         }
         // User dashboard
         else {

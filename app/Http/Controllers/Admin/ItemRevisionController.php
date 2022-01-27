@@ -206,6 +206,24 @@ class ItemRevisionController extends Controller
     }
 
     /**
+     * Display a listing of revisions belonging to deleted items.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function deleted()
+    {
+        $this->authorize('viewDeleted');
+
+        $items = ItemRevision::doesntHave('item')
+                            ->distinct('item_fk')
+                            ->orderBy('item_fk', 'asc')
+                            ->orderBy('updated_at', 'desc')
+                            ->paginate(10);
+
+        return view('admin.revision.deleted', compact('items'));
+    }
+
+    /**
      * Check for missing details and add them to database.
      *
      * @param  \App\ItemRevision  $item

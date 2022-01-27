@@ -119,6 +119,17 @@ class ItemRevisionPolicy
     }
 
     /**
+     * Determine whether the user can view deleted models.
+     *
+     * @param  \App\User  $user
+     * @return mixed
+     */
+    public function viewDeleted(User $user)
+    {
+        return $user->hasAccess(['viewDeleted-revision']);
+    }
+
+    /**
      * Determine whether the user can delete drafts of the model.
      *
      * @param  \App\User  $user

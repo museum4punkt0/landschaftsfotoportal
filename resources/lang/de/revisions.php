@@ -17,6 +17,7 @@ return [
     'history' => 'Verlauf',
     'draft' => 'Entwurf',
     'moderated' => 'Zu moderierende Entwürfe für Datensätze',
+    'soft_deleted' => 'Gelöschte Datensätze',
     'edit' => 'Datensatz-Version bearbeiten',
     'delete' => 'Datensatz-Version löschen',
     'delete_draft' => 'Datensatz-Entwurf löschen',
