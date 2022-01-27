@@ -1,5 +1,20 @@
                 <!-- Icons for user interaction -->
                 <div>
+                    @can('show-admin')
+                        <span class="fa-stack fa-2x">
+                            <a href="{{ route('item.edit', $item->item_id) }}" title="@lang('common.edit')">
+                                <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                <i class="fas {{ Config::get('ui.icon_edit') }} fa-stack-1x fa-inverse"></i>
+                            </a>
+                        </span>
+                    @elsecan('update', $item)
+                        <span class="fa-stack fa-2x">
+                            <a href="{{ route('item.edit.own', $item->item_id) }}" title="@lang('common.edit')">
+                                <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                <i class="fas {{ Config::get('ui.icon_edit') }} fa-stack-1x fa-inverse"></i>
+                            </a>
+                        </span>
+                    @endcan
                     <span class="fa-stack fa-2x">
                     @guest
                         <a href="#" data-toggle="modal" data-target="#downloadModal" data-href="{{ route('item.download', $item->item_id) }}" title="@lang('common.download')">
