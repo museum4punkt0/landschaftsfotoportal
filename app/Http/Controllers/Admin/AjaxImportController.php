@@ -364,6 +364,10 @@ class AjaxImportController extends Controller
                     $item->updateLatLon($location);
                 }
             }
+            // Copy this created item to revisions archive
+            if (config('ui.revisions')) {
+                $item->createRevisionWithDetails();
+            }
         }
         // Reset last line number increment
         $number--;
