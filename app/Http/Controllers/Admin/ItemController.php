@@ -272,12 +272,12 @@ class ItemController extends Controller
                             $file->storeAs($path, $name, 'public');
                             $detail_data['value_string'] = $name;
 
+                            // Create resized images
+                            Image::processImageResizing($path, $name);
+
                             // Store image dimensions in database
                             Image::storeImageDimensions($item, $path, $name, $column_id);
                             Image::storeImageSize($item, $path, $name, $column_id);
-
-                            // Create resized images
-                            Image::processImageResizing($path, $name);
                         }
                         break;
                 }
@@ -570,12 +570,12 @@ class ItemController extends Controller
                             $file->storeAs($path, $name, 'public');
                             $detail->value_string = $name;
 
+                            // Create resized images
+                            Image::processImageResizing($path, $name);
+
                             // Store image dimensions in database
                             Image::storeImageDimensions($item, $path, $name, $column_id);
                             Image::storeImageSize($item, $path, $name, $column_id);
-
-                            // Create resized images
-                            Image::processImageResizing($path, $name);
                         }
                         break;
                 }
