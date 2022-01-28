@@ -344,7 +344,7 @@ class ItemController extends Controller
         // Copy title string for all items if doesn't exist yet
         foreach ($items as $item) {
             if (!$item->title) {
-                $item->title = $item->getTitleColumn();
+                $item->title = substr($item->getTitleColumn(), 0, 255);
                 $item->save();
                 $count++;
             }
