@@ -8,6 +8,7 @@
 @endunless
 
 @include('includes.modal_confirm_delete')
+@include('includes.modal_image_large')
 
 <div class="container">
 @if ($errors->any())
@@ -660,9 +661,13 @@
                                 $details->firstWhere('column_fk', $cm->column->column_id)->value_string))
                                 {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}
                                 <br/>
+                                <a href="#" data-toggle="modal" data-target="#imageLargeModal"
+                                    data-img-source="{{ asset('storage/'. Config::get('media.medium_dir') .
+                                    $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}">
                                 <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
                                     $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
                                 />
+                                </a>
                             @else
                                 @lang('columns.image_not_available')
                             @endif

@@ -3,6 +3,7 @@
 @section('content')
 
 @include('includes.modal_confirm_delete')
+@include('includes.modal_image_large')
 
 <div class="container">
     <h2>@lang('revisions.list')</h2>

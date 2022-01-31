@@ -278,13 +278,15 @@
                                     }}&description={{ rawurlencode($cm->column->translation->attributes
                                         ->firstWhere('name', 'name_'.app()->getLocale())->pivot->value)
                                     }}">
+                            @else
+                                <a href="#" data-toggle="modal" data-target="#imageLargeModal"
+                                    data-img-source="{{ asset('storage/'. Config::get('media.medium_dir') .
+                                    $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}">
                             @endif
                             <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
                                 $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
                             />
-                            @if($cm->getConfigValue('image_link') == 'zoomify')
                                 </a>
-                            @endif
                             </span>
                         @else
                             @lang('columns.image_not_available')
