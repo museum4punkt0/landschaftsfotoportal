@@ -788,8 +788,8 @@
                 @if($cm->getConfigValue('map') == 'inline')
                     <div id="map" class="map"></div>
                     <script type="text/javascript">
-                        var lon = {{ floatval(optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col')))->value_float) }};
-                        var lat = {{ floatval(optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col')))->value_float) }};
+                        var lon = {{ floatval(old('fields.'. $cm->getConfigValue('map_lon_col'), optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col')))->value_float)) }};
+                        var lat = {{ floatval(old('fields.'. $cm->getConfigValue('map_lat_col'), optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col')))->value_float)) }};
                         var zoom = {{ $cm->getConfigValue('map_zoom') }};
                         // Init and display the map
                         osm_map.display(lon, lat, zoom);
