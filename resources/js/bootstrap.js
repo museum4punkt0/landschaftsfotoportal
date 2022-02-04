@@ -65,3 +65,10 @@ import 'summernote/dist/summernote-bs4';
 
 import osm_map from './map.js';
 window.osm_map = osm_map;
+
+/**
+ * Diff tools for item revisions
+ */
+
+import itemDiff from './diff.js';
+window.itemDiff = itemDiff;

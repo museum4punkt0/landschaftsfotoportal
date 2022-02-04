@@ -102979,6 +102979,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var summernote_dist_summernote_bs4__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! summernote/dist/summernote-bs4 */ "./node_modules/summernote/dist/summernote-bs4.js");
 /* harmony import */ var summernote_dist_summernote_bs4__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(summernote_dist_summernote_bs4__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _map_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map.js */ "./resources/js/map.js");
+/* harmony import */ var _diff_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./diff.js */ "./resources/js/diff.js");
 window._ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 /**
  * We'll load jQuery and the Bootstrap jQuery plugin which provides support
@@ -103039,6 +103040,203 @@ __webpack_require__(/*! jquery.easing */ "./node_modules/jquery.easing/jquery.ea
 
 
 window.osm_map = _map_js__WEBPACK_IMPORTED_MODULE_3__["default"];
+/**
+ * Diff tools for item revisions
+ */
+
+
+window.itemDiff = _diff_js__WEBPACK_IMPORTED_MODULE_4__["default"];
+
+/***/ }),
+
+/***/ "./resources/js/diff.js":
+/*!******************************!*\
+  !*** ./resources/js/diff.js ***!
+  \******************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+var itemDiff = {
+  fields: false,
+  currentRevision: null,
+  historicRevision: null,
+  init: function init(current, historic) {
+    console.log('current: ' + current + ' / historic: ' + historic);
+    this.currentRevision = current;
+
+    if (historic) {
+      this.historicRevision = historic;
+    } else {
+      this.historicRevision = this.getMostRecentNonDraftRevision();
+    }
+
+    console.log('current: ' + this.currentRevision + ' / historic: ' + this.historicRevision);
+    this.selectComparedRevision();
+    this.fillHistorySelectText();
+    this.resetHighlighting();
+    this.highlightCurrentRevisions(this.currentRevision);
+    this.highlightHistoricRevisions(this.historicRevision);
+    this.startDiff();
+  },
+  getMostRecentNonDraftRevision: function getMostRecentNonDraftRevision() {
+    var selector = '#comparedRevisionSelect option';
+    var revs = $(selector).map(function (index, option) {
+      return parseInt(option.value);
+    }).sort(function (a, b) {
+      return b - a;
+    });
+    return revs[0];
+  },
+  selectComparedRevision: function selectComparedRevision() {
+    var selector = '#comparedRevisionSelect option[value="' + this.historicRevision + '"]';
+    $(selector).prop("selected", "true");
+  },
+  fillHistorySelectText: function fillHistorySelectText() {
+    var selector = '.revision-detail-select option';
+    $(selector).each(function () {
+      var optionText = $(this).data('content') + $(this).data('meta');
+      $($(this)).text(optionText);
+    });
+  },
+  resetHighlighting: function resetHighlighting() {
+    var selector = '.revision-detail-select option';
+    $(selector).each(function () {
+      $($(this)).css("background-color", "");
+      $($(this)).prop("selected", "false");
+    });
+  },
+  highlightCurrentRevisions: function highlightCurrentRevisions(revision) {
+    var selector = '.revision-detail-select option[value="' + revision + '"]';
+    $(selector).each(function () {
+      $($(this)).css("background-color", "#ecf6f9");
+      $($(this)).prop("selected", "true");
+    });
+  },
+  highlightHistoricRevisions: function highlightHistoricRevisions(revision) {
+    var selector = '.revision-detail-select option[value="' + revision + '"]';
+    $(selector).each(function () {
+      $($(this)).css("background-color", "#cce7ff");
+    });
+  },
+  startDiff: function startDiff() {
+    var t = this; // define variable in this Scope
+
+    var selector = '[name^="fields"][type!="hidden"],[name="title"],[name="public"]';
+    $(selector).each(function () {
+      var hc = t.getHistoricContent($(this).data('column'), t.historicRevision);
+      var cc = t.getcurrentContent($(this).data('column'), $(this).data('type'));
+      var selector2 = this;
+
+      switch ($(this).data('type')) {
+        case "boolean":
+          selector2 = '[name^="fields"] + label';
+          break;
+
+        case "daterange":
+          selector2 = '#fieldsInput-' + $(this).data('column');
+          selector2 += ',#startDate-' + $(this).data('column');
+          selector2 += ',#endDate-' + $(this).data('column');
+          break;
+      }
+
+      if (t.isEqual(cc, hc)) {
+        $(selector2).css("background-color", "#99ff99");
+      } else {
+        $(selector2).css("background-color", "#ffff99");
+      }
+    });
+  },
+  getcurrentContent: function getcurrentContent(column, type) {
+    // This is just a default selector, may be overwritten in switch block!
+    var selector = '#fieldsInput-' + column;
+    var content = "";
+
+    switch (type) {
+      case "title":
+        selector = 'input[name="title"]';
+        content = $(selector).val().trim();
+        break;
+
+      case "public":
+        selector = 'select[name="public"] :selected';
+        content = $(selector).val();
+        break;
+
+      case "list":
+        selector += ' :selected';
+
+        if ($(selector).val() == '') {
+          content = '';
+        } else {
+          content = $(selector).text().trim();
+        } //console.log(content);
+
+
+        break;
+
+      case "multi_list":
+        selector += ' :selected';
+
+        if ($(selector).val() == '') {
+          content = '';
+        } else {
+          $(selector).each(function () {
+            content += $(this).text().trim() + '; ';
+          });
+          content = content.replace(/\s/g, '');
+        } //console.log(content);
+
+
+        break;
+
+      case "boolean":
+        content = $(selector).prop('checked') ? 1 : 0;
+        break;
+
+      case "int":
+      case "float":
+      case "textarea":
+      case "string":
+      case "date":
+        content = $(selector).val().trim();
+        break;
+
+      case "daterange":
+        content = $(selector + '-start').val() + '-' + $(selector + '-end').val(); //console.log(content);
+
+        break;
+
+      case "image":
+        selector = '#fieldsInput-' + column + '-filename';
+        content = $(selector).val();
+        break;
+    } //console.log('col curr ' + column + ': ' + content);
+
+
+    return content;
+  },
+  getHistoricContent: function getHistoricContent(column, revision) {
+    var selector = '.revision-detail-select[data-column="' + column + '"] option[value="' + revision + '"]';
+    var content = $(selector).data('content');
+
+    if (content) {
+      content = content.replace(/\s/g, '');
+    } //console.log('col hist ' + column + ': ' + content);
+
+
+    return content;
+  },
+  isEqual: function isEqual(current, historic) {
+    if (current == historic) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = (itemDiff);
 
 /***/ }),
 
