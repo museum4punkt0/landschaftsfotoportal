@@ -36,8 +36,8 @@
                                                 {{ $drev->value_date }}
                                                 @break
                                             @case('daterange')
-                                                {{ $drev->value_daterange->from()->format('Y-m-d') }} - 
-                                                {{ $drev->value_daterange->to()->format('Y-m-d') }}
+                                                {{ optional($drev->value_daterange->from())->format('Y-m-d') }} - 
+                                                {{ optional($drev->value_daterange->to())->format('Y-m-d') }}
                                                 @break
                                         @endswitch
                                     " data-meta="
