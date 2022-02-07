@@ -105,6 +105,18 @@ return [
     
     /*
     |--------------------------------------------------------------------------
+    | Max. length of caption on gallery items
+    |--------------------------------------------------------------------------
+    |
+    | How many characters is the maximum length of a caption displayed on a
+    | gallery image.
+    |
+    */
+    
+    'galery_caption_length' => 160,
+    
+    /*
+    |--------------------------------------------------------------------------
     | Number of items to be imported per batch
     |--------------------------------------------------------------------------
     |

@@ -23,7 +23,8 @@
                             <div class="portfolio-hover">
                                 <div class="portfolio-hover-content text-center">
                                     <i class="portfolio-caption-heading">
-                                    {{ $item->details->firstWhere('column_fk', 23)->value_string }}
+                                    {{ Str::limit($item->details->firstWhere('column_fk', 23)->value_string,
+                                        config('ui.galery_caption_length'), ' (...)') }}
                                     </i>
                                 </div>
                             </div>
