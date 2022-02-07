@@ -378,6 +378,12 @@ class ItemController extends Controller
     {
         $this->authorize('publish', $item);
 
+        // Prevent one-click publishing if revisions are enabled
+        if (config('ui.revisions')) {
+            return redirect()->route('revision.index')
+                ->with('warning', __('items.publish_not_available'));
+        }
+
         // Check for single item or batch
         if ($item->item_id) {
             $items = [Item::find($item->item_id)];

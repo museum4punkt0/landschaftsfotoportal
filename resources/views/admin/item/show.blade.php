@@ -13,10 +13,12 @@
         <a href="{{route('item.edit', $item->item_id)}}" class="btn btn-primary">
         @lang('common.edit')
         </a>
-        @unless($item->public)
-            <a href="{{route('item.publish', $item->item_id)}}" class="btn btn-primary">
-            @lang('common.publish')
-            </a>
+        @unless(config('ui.revisions'))
+            @unless($item->public)
+                <a href="{{route('item.publish', $item->item_id)}}" class="btn btn-primary">
+                @lang('common.publish')
+                </a>
+            @endunless
         @endunless
     </div>
 

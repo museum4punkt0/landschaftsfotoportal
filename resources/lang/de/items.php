@@ -36,6 +36,7 @@ return [
     'remove_orphans' => 'Details bereinigen',
     'orphans_removed' => ':count verwaiste Details wurden bereinigt.',
     'published' => ':count Datensätze wurden veröffentlicht.',
+    'publish_not_available' => 'Sie können Datensätze nicht direkt veröffentlichen. Nutzen Sie stattdessen die Moderations-Werkzeuge.',
     'editing_draft' => 'Sie bearbeiten einen noch nicht veröffentlichten Entwurf.',
 
     'added_missing_detail' => 'Fehlendes Detail gespeichert.',

@@ -19,7 +19,9 @@
             <div class="card-header">@lang('items.unpublished')</div>
             <div class="card-body">
                 <a href="{{route('item.new')}}" class="btn btn-primary">@lang('items.new')</a>
-                <a href="{{route('item.publish')}}" class="btn btn-primary">@lang('common.publish_all')</a>
+                @unless(config('ui.revisions'))
+                    <a href="{{route('item.publish')}}" class="btn btn-primary">@lang('common.publish_all')</a>
+                @endunless
                 
                 <div class="table-responsive">
                 <table class="table mt-4">
@@ -68,9 +70,11 @@
                             {{$item->editor->name}}, {{$item->updated_at}}
                         </td>
                         <td>
+                        @unless(config('ui.revisions'))
                             <a href="{{route('item.publish', $item->item_id)}}" class="btn btn-primary">
                             @lang('common.publish')
                             </a>
+                        @endunless
                         </td>
                         <td>
                             <form action="{{route('item.show', $item->item_id)}}" method="GET">
