@@ -1,5 +1,4 @@
 var itemDiff = {
-    fields: false,
     currentRevision: null,
     historicRevision: null,
 
@@ -68,7 +67,7 @@ var itemDiff = {
         var t = this; // define variable in this Scope
         var selector = '[name^="fields"][type!="hidden"],[name="title"],[name="public"]';
         $(selector).each(function () {
-            var hc = t.getHistoricContent($(this).data('column'), t.historicRevision);
+            var hc = t.getHistoricContent($(this).data('column'), $(this).data('type'), t.historicRevision);
             var cc = t.getcurrentContent($(this).data('column'), $(this).data('type'));
             var selector2 = this;
 
@@ -151,11 +150,19 @@ var itemDiff = {
         return content;
     },
 
-    getHistoricContent: function (column, revision) {
+    getHistoricContent: function (column, type, revision) {
         var selector = '.revision-detail-select[data-column="' + column + '"] option[value="' + revision + '"]';
         var content = $(selector).data('content');
+        // TODO: get rid of these silly white spaces from form_history_detail.blade.php
         if (content) {
-            content = content.replace(/\s/g, '');
+            switch (type) {
+                case "multi_list":
+                case "daterange":
+                    content = content.replace(/\s/g, '');
+                    break;
+                default:
+                    content = content.trim();
+            }
         }
         //console.log('col hist ' + column + ': ' + content);
         return content;

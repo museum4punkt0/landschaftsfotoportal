@@ -103059,7 +103059,6 @@ window.itemDiff = _diff_js__WEBPACK_IMPORTED_MODULE_4__["default"];
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 var itemDiff = {
-  fields: false,
   currentRevision: null,
   historicRevision: null,
   init: function init(current, historic) {
@@ -103125,7 +103124,7 @@ var itemDiff = {
 
     var selector = '[name^="fields"][type!="hidden"],[name="title"],[name="public"]';
     $(selector).each(function () {
-      var hc = t.getHistoricContent($(this).data('column'), t.historicRevision);
+      var hc = t.getHistoricContent($(this).data('column'), $(this).data('type'), t.historicRevision);
       var cc = t.getcurrentContent($(this).data('column'), $(this).data('type'));
       var selector2 = this;
 
@@ -103217,12 +103216,20 @@ var itemDiff = {
 
     return content;
   },
-  getHistoricContent: function getHistoricContent(column, revision) {
+  getHistoricContent: function getHistoricContent(column, type, revision) {
     var selector = '.revision-detail-select[data-column="' + column + '"] option[value="' + revision + '"]';
-    var content = $(selector).data('content');
+    var content = $(selector).data('content'); // TODO: get rid of these silly white spaces from form_history_detail.blade.php
 
     if (content) {
-      content = content.replace(/\s/g, '');
+      switch (type) {
+        case "multi_list":
+        case "daterange":
+          content = content.replace(/\s/g, '');
+          break;
+
+        default:
+          content = content.trim();
+      }
     } //console.log('col hist ' + column + ': ' + content);
 
 
