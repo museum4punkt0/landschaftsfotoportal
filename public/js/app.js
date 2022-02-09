@@ -103069,14 +103069,15 @@ var itemDiff = {
       this.historicRevision = historic;
     } else {
       this.historicRevision = this.getMostRecentNonDraftRevision();
-    }
+    } //console.log('current: ' + this.currentRevision + ' / historic: ' + this.historicRevision);
 
-    console.log('current: ' + this.currentRevision + ' / historic: ' + this.historicRevision);
+
     this.selectComparedRevision();
     this.fillHistorySelectText();
     this.resetHighlighting();
     this.highlightCurrentRevisions(this.currentRevision);
     this.highlightHistoricRevisions(this.historicRevision);
+    this.addMapMarker();
     this.startDiff();
   },
   getMostRecentNonDraftRevision: function getMostRecentNonDraftRevision() {
@@ -103118,6 +103119,18 @@ var itemDiff = {
     $(selector).each(function () {
       $($(this)).css("background-color", "#cce7ff");
     });
+  },
+  addMapMarker: function addMapMarker() {
+    var columnLat = $('input.location_lat').data('column');
+    var columnLon = $('input.location_lon').data('column');
+    var imagePath = $('#map').data('image-path');
+    var lat = this.getHistoricContent(columnLat, '', this.historicRevision);
+    var lon = this.getHistoricContent(columnLon, '', this.historicRevision); //console.log(lat + '/' + lon);
+    // Remove old marker if it exists
+
+    osm_map.removeMarker('historicMarker');
+    osm_map.addMarker(lon, lat, imagePath + 'dot.svg', '#cce7ff', 'historicMarker');
+    osm_map.moveMapToFeatureExtent();
   },
   startDiff: function startDiff() {
     var t = this; // define variable in this Scope
@@ -103325,10 +103338,15 @@ var osm_map = {
   updateSize: function updateSize() {
     this.map.updateSize();
   },
-  addMarker: function addMarker(lon, lat, icon, color) {
+  addMarker: function addMarker(lon, lat, icon, color, id) {
+    if (typeof id === 'undefined') {
+      id = 'defaultMarker';
+    }
+
     var marker = new ol__WEBPACK_IMPORTED_MODULE_0__["Feature"]({
       geometry: new ol_geom_Point__WEBPACK_IMPORTED_MODULE_8__["default"](Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]))
     });
+    marker.setId(id);
     marker.setStyle(new ol_style__WEBPACK_IMPORTED_MODULE_6__["Style"]({
       image: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Icon"]({
         color: color,
@@ -103342,9 +103360,34 @@ var osm_map = {
   updatePosition: function updatePosition(lon, lat, zoom) {
     this.map.getView().setCenter(Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]));
   },
-  moveMarker: function moveMarker(lon, lat) {
+  moveMapToFeatureExtent: function moveMapToFeatureExtent() {
+    var padding = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 50;
+    var maxZoom = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 17;
+    var extent = this.vectorLayer.getSource().getExtent(); //console.log(osm_map.transformExtent(this.vectorLayer.getSource().getExtent(extent)));
+
+    this.map.getView().fit(extent, {
+      padding: [padding, padding, padding, padding],
+      maxZoom: maxZoom
+    });
+  },
+  moveMarker: function moveMarker(lon, lat, id) {
+    if (typeof id === 'undefined') {
+      id = 'defaultMarker';
+    }
+
     var coordinates = Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]);
-    this.vectorLayer.getSource().getFeatures()[0].getGeometry().setCoordinates(coordinates);
+    this.vectorLayer.getSource().getFeatureById(id).getGeometry().setCoordinates(coordinates);
+  },
+  removeMarker: function removeMarker(id) {
+    if (typeof id === 'undefined') {
+      id = 'defaultMarker';
+    }
+
+    var feature = this.vectorLayer.getSource().getFeatureById(id);
+
+    if (feature) {
+      this.vectorLayer.getSource().removeFeature(feature);
+    }
   },
   transformCoordinate: function transformCoordinate(coordinate) {
     return Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["transform"])(coordinate, 'EPSG:3857', 'EPSG:4326');

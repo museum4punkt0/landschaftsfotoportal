@@ -11,13 +11,14 @@ var itemDiff = {
         else {
             this.historicRevision = this.getMostRecentNonDraftRevision();
         }
-        console.log('current: ' + this.currentRevision + ' / historic: ' + this.historicRevision);
+        //console.log('current: ' + this.currentRevision + ' / historic: ' + this.historicRevision);
 
         this.selectComparedRevision();
         this.fillHistorySelectText();
         this.resetHighlighting();
         this.highlightCurrentRevisions(this.currentRevision);
         this.highlightHistoricRevisions(this.historicRevision);
+        this.addMapMarker();
         this.startDiff();
     },
 
@@ -61,6 +62,19 @@ var itemDiff = {
         $(selector).each(function () {
             $($(this)).css("background-color", "#cce7ff");
         });
+    },
+
+    addMapMarker: function () {
+        var columnLat = $('input.location_lat').data('column');
+        var columnLon = $('input.location_lon').data('column');
+        var imagePath = $('#map').data('image-path');
+        var lat = this.getHistoricContent(columnLat, '', this.historicRevision);
+        var lon = this.getHistoricContent(columnLon, '', this.historicRevision);
+        //console.log(lat + '/' + lon);
+        // Remove old marker if it exists
+        osm_map.removeMarker('historicMarker');
+        osm_map.addMarker(lon, lat, imagePath + 'dot.svg', '#cce7ff', 'historicMarker');
+        osm_map.moveMapToFeatureExtent();
     },
 
     startDiff: function () {

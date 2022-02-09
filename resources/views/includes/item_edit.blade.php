@@ -808,14 +808,15 @@
                     @endif
                 @endif
                 @if($cm->getConfigValue('map') == 'inline')
-                    <div id="map" class="map"></div>
+                    <div id="map" class="map" data-image-path="{{ asset('storage/images/') }}/">
+                    </div>
                     <script type="text/javascript">
                         var lon = {{ floatval(optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col')))->value_float) }};
                         var lat = {{ floatval(optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col')))->value_float) }};
                         var zoom = {{ $cm->getConfigValue('map_zoom') }};
                         // Init and display the map
                         osm_map.display(lon, lat, zoom);
-                        osm_map.addMarker(lon, lat, '{{ asset("storage/images/dot.svg") }}');
+                        osm_map.addMarker(lon, lat, '{{ asset("storage/images/dot.svg") }}', '#4a90d9');
                         
                         //osm_map.updateSize();
                     </script>

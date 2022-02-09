@@ -60,11 +60,15 @@ var osm_map = {
         this.map.updateSize();
     },
     
-    addMarker: function (lon, lat, icon, color) {
+    addMarker: function (lon, lat, icon, color, id) {
+        if (typeof id === 'undefined') {
+            id = 'defaultMarker';
+        }
         var marker = new Feature({
-            geometry: new Point(fromLonLat([lon, lat]))
+            geometry: new Point(fromLonLat([lon, lat])),
         });
         
+        marker.setId(id);
         marker.setStyle(
             new Style({
                 image: new Icon({
@@ -82,9 +86,31 @@ var osm_map = {
         this.map.getView().setCenter(fromLonLat([lon, lat]));
     },
     
-    moveMarker: function (lon, lat) {
+    moveMapToFeatureExtent: function (padding = 50, maxZoom = 17) {
+        var extent = this.vectorLayer.getSource().getExtent();
+        //console.log(osm_map.transformExtent(this.vectorLayer.getSource().getExtent(extent)));
+        this.map.getView().fit(extent, {
+            padding: [padding, padding, padding, padding],
+            maxZoom: maxZoom,
+        });
+    },
+    
+    moveMarker: function (lon, lat, id) {
+        if (typeof id === 'undefined') {
+            id = 'defaultMarker';
+        }
         var coordinates = fromLonLat([lon, lat]);
-        this.vectorLayer.getSource().getFeatures()[0].getGeometry().setCoordinates(coordinates);
+        this.vectorLayer.getSource().getFeatureById(id).getGeometry().setCoordinates(coordinates);
+    },
+    
+    removeMarker: function (id) {
+        if (typeof id === 'undefined') {
+            id = 'defaultMarker';
+        }
+        var feature = this.vectorLayer.getSource().getFeatureById(id);
+        if (feature) {
+            this.vectorLayer.getSource().removeFeature(feature);
+        }
     },
     
     transformCoordinate: function (coordinate) {
