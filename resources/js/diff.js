@@ -80,6 +80,14 @@ var itemDiff = {
                     selector2 += ',#startDate-' + $(this).data('column');
                     selector2 += ',#endDate-' + $(this).data('column');
                     break;
+                case "image":
+                    // Change image and link for compared revision
+                    $('#comparedRevisionImageFilename-' + $(this).data('column')).text(hc);
+                    var link = $('#comparedRevisionImageLink-' + $(this).data('column'));
+                    var image = $('#comparedRevisionImage-' + $(this).data('column'));
+                    $('#comparedRevisionImageLink-' + $(this).data('column')).data('img-source', link.data('path') + hc);
+                    $('#comparedRevisionImage-' + $(this).data('column')).attr('src', image.data('path') + hc);
+                    break;
             }
             if (t.isEqual(cc, hc)) {
                 $(selector2).css("background-color", "#99ff99");

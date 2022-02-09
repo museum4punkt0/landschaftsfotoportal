@@ -671,6 +671,28 @@
                             @else
                                 @lang('columns.image_not_available')
                             @endif
+
+                            {{-- 2nd image for compared revision --}}
+                            @if(isset($options['edit.revision']))
+                            </div>
+                            <div class="col">
+                                <span id="comparedRevisionImageFilename-{{ $cm->column->column_id }}">
+                                    {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}
+                                </span>
+                                <br/>
+                                <a href="#" data-toggle="modal" data-target="#imageLargeModal"
+                                    id="comparedRevisionImageLink-{{ $cm->column->column_id }}"
+                                    data-img-source="{{ asset('storage/'. Config::get('media.medium_dir') .
+                                    $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
+                                    data-path="{{ asset('storage/'. Config::get('media.medium_dir')) }}/"
+                                >
+                                <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
+                                    $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
+                                    id="comparedRevisionImage-{{ $cm->column->column_id }}"
+                                    data-path="{{ asset('storage/'. Config::get('media.preview_dir')) }}/"
+                                />
+                                </a>
+                            @endif
                         @endif
                         </div>
                         <div class="col">
