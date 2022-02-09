@@ -103216,7 +103216,7 @@ var itemDiff = {
         content = $(selector).prop('checked') ? 1 : 0;
         break;
 
-      case "int":
+      case "integer":
       case "float":
       case "textarea":
       case "string":
