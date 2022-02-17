@@ -39,6 +39,7 @@ return [
     'publish_not_available' => 'Sie können Datensätze nicht direkt veröffentlichen. Nutzen Sie stattdessen die Moderations-Werkzeuge.',
     'editing_draft' => 'Sie bearbeiten einen noch nicht veröffentlichten Entwurf.',
 
+    'removed_after_deleting_drafts' => 'Datensatz gelöscht, nachdem alle Entwürfe entfernt wurden.',
     'added_missing_detail' => 'Fehlendes Detail gespeichert.',
     'image_preview' => 'Bild-Vorschau',
     'image_dimensions' => 'Bildgröße',

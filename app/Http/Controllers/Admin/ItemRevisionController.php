@@ -198,6 +198,20 @@ class ItemRevisionController extends Controller
 
         $revision->item->deleteAllDrafts();
 
+        // Check for other revisions of the item owning this revision
+        if ($revision->item->revisions->count() == 0) {
+            // No other revisions found, that means: the deleted was the only one
+            Log::info(__('items.removed_after_deleting_drafts'), [
+                'item' => $revision->item_fk,
+            ]);
+            // Let's delete the remaining orphaned stuff
+            // TODO: move this to the model, affects (User)ItemController, too!
+            $revision->item->carts()->delete();
+            $revision->item->comments()->delete();
+            $revision->item->details()->delete();
+            $revision->item->delete();
+        }
+
         // Notify the editor of the given revision
         Notification::send($revision->editor, new ItemRejected($revision));
 

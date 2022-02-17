@@ -746,6 +746,20 @@ class ItemController extends Controller
 
         if (config('ui.revisions')) {
             $item->deleteAllDrafts(Auth::user()->id);
+
+            // Check for other revisions of the item owning this revision
+            if ($revision->item->revisions->count() == 0) {
+                // No other revisions found, that means: the deleted was the only one
+                Log::info(__('items.removed_after_deleting_drafts'), [
+                    'item' => $revision->item_fk,
+                ]);
+                // Let's delete the remaining orphaned stuff
+                // TODO: move this to the model, affects ItemRevisionController, too!
+                $revision->item->carts()->delete();
+                $revision->item->comments()->delete();
+                $revision->item->details()->delete();
+                $revision->item->delete();
+            }
         }
 
         return redirect()->route('item.show.own')
