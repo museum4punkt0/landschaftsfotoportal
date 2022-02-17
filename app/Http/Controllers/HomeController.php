@@ -40,7 +40,8 @@ class HomeController extends Controller
                 // Number of deleted items
                 $deleted = ItemRevision::doesntHave('item')->distinct('item_fk')->count();
                 // Number of moderated items
-                $moderated = ItemRevision::where('revision', '<', 0)->distinct('item_fk')->count();
+                $moderated = ItemRevision::where('revision', '<', 0)
+                                        ->whereHas('item')->distinct('item_fk')->count();
             }
             else {
                 $deleted = null;
