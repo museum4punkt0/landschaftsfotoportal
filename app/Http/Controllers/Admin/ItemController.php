@@ -19,6 +19,7 @@ use App\Utils\Localization;
 use App\Utils\Image;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
@@ -628,6 +629,26 @@ class ItemController extends Controller
 
         return Redirect::to('admin/item')
                         ->with('success', __('items.deleted'));
+    }
+
+    /**
+     * Remove orphaned items which have no revisions.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function removeOrphans()
+    {
+        Gate::authorize('show-admin');
+
+        if (config('ui.revisions')) {
+            $items = Item::doesntHave('revisions')
+                    ->orderBy('item_id', 'asc');
+            //dd($items->get());
+            $count = $items->delete();
+        }
+
+        return redirect()->route('item.index')
+            ->with('success', __('items.orphans_removed', ['count' => $count]));
     }
 
     /**

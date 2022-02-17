@@ -93,6 +93,7 @@ Route::get('admin/item/titles', 'Admin\ItemController@titles')->name('item.title
 Route::get('admin/item/unpublished', 'Admin\ItemController@list_unpublished')->name('item.unpublished');
 Route::get('admin/item/publish/{item?}', 'Admin\ItemController@publish')->name('item.publish');
 Route::get('admin/item/autocomplete', 'Admin\ItemController@autocomplete')->name('item.autocomplete');
+Route::get('admin/item/orphans', 'Admin\ItemController@removeOrphans')->name('item.orphans');
 Route::resource('admin/item', 'Admin\ItemController');
 Route::get('admin/comment/unpublished', 'Admin\CommentController@list_unpublished')->name('comment.unpublished');
 Route::get('admin/comment/publish/{comment?}', 'Admin\CommentController@publish')->name('comment.publish');
