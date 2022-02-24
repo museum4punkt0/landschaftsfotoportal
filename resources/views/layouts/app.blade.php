@@ -46,7 +46,8 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav mr-auto">
-                        @auth
+                    @auth
+                        @can('show-admin')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('item.index') }}">{{ __('items.header') }}</a>
                             </li>
@@ -100,7 +101,8 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('user.index') }}">{{ __('users.header') }}</a>
                             </li>
-                        @endauth
+                        @endcan
+                    @endauth
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
                                     {{ __('common.language') }} <span class="caret"></span>

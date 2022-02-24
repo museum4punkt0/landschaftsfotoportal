@@ -72,7 +72,7 @@ class Image
         if (Image::checkFileExists($image_path . $filename)) {
         
             // Get original dimensions of image
-            list($width_orig, $height_orig) = getimagesize(
+            list($width_orig, $height_orig) = Image::getImageSizeExif(
                 Storage::disk('public')->path($image_path . $filename)
             );
             Log::debug(__('items.image_dimensions'), ['width' => $width_orig, 'height' => $height_orig]);
@@ -116,7 +116,7 @@ class Image
         if (Image::checkFileExists($image_path . $filename)) {
             
             // Get original dimensions of image
-            list($width_orig, $height_orig) = getimagesize(
+            list($width_orig, $height_orig) = Image::getImageSizeExif(
                 Storage::disk('public')->path($image_path . $filename)
             );
             
@@ -167,7 +167,7 @@ class Image
             $height_thumb = $height_orig * $ratio;
             
             // Load original image and scale it to new size
-            $original = imagecreatefromjpeg(Storage::disk('public')->path($src_path . $filename));
+            $original = Image::createFromJpegExif(Storage::disk('public')->path($src_path . $filename));
             $scaled = imagescale($original, $width_thumb, $height_thumb, IMG_SINC);
             
             // Store thumbnail to disk
@@ -175,5 +175,55 @@ class Image
             
             Log::info(__('items.resized_image_created') . $dest_path . $filename);
         }
+    }
+
+    /**
+     * Create an image from given image file, respecting the orientation set in EXIF.
+     *
+     * @param  string $filename
+     * @return object
+     */
+    private static function createFromJpegExif($filename)
+    {
+        $img = imagecreatefromjpeg($filename);
+        $exif = exif_read_data($filename);
+
+        if ($img && $exif && isset($exif['Orientation'])) {
+            $ort = $exif['Orientation'];
+
+            if ($ort == 6 || $ort == 5)
+                $img = imagerotate($img, 270, null);
+            if ($ort == 3 || $ort == 4)
+                $img = imagerotate($img, 180, null);
+            if ($ort == 8 || $ort == 7)
+                $img = imagerotate($img, 90, null);
+
+            if ($ort == 5 || $ort == 4 || $ort == 7) {
+                imageflip($img, IMG_FLIP_HORIZONTAL);
+                Log::debug(__('items.image_flipped') . $filename);
+            }
+        }
+        return $img;
+    }
+
+    /**
+     * Get the size of an image from given image file, respecting the orientation set in EXIF.
+     *
+     * @param  string $filename
+     * @return array
+     */
+    private static function getImageSizeExif($filename)
+    {
+        $exif = exif_read_data($filename);
+        $size = getimagesize($filename);
+
+        if ($exif && isset($exif['Orientation'])) {
+            $ort = $exif['Orientation'];
+
+            if ($ort == 6 || $ort == 5 || $ort == 8 || $ort == 7) {
+                [$size[0], $size[1]] = [$size[1], $size[0]];
+            }
+        }
+        return $size;
     }
 }
