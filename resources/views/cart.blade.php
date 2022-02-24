@@ -38,7 +38,7 @@
                                 </span>
                                 <span class="fa-stack fa-2x">
                                     <a href="#" data-toggle="modal" data-target="#cartRemoveModal" data-href="{{ route('cart.remove', $item->cart_id) }}" title="@lang('cart.remove')">
-                                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                        <i class="fas fa-circle fa-stack-2x text-danger"></i>
                                         <i class="fas {{ Config::get('ui.icon_cart_remove') }} fa-stack-1x fa-inverse"></i>
                                     </a>
                                 </span>

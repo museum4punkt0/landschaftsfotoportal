@@ -16,12 +16,8 @@
 <div class="container">
     <div class="card">
         @if (true || Auth::check())
-            <div class="card-header">@lang('items.unpublished')</div>
+            <div class="card-header">@lang('revisions.moderated')</div>
             <div class="card-body">
-                <a href="{{route('item.new')}}" class="btn btn-primary">@lang('items.new')</a>
-                @unless(config('ui.revisions'))
-                    <a href="{{route('item.publish')}}" class="btn btn-primary">@lang('common.publish_all')</a>
-                @endunless
                 
                 <div class="table-responsive">
                 <table class="table mt-4">
@@ -36,14 +32,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                @foreach($items as $item)
+                @foreach($items->sortByDesc('updated_at') as $item)
                     <tr>
                         <td>
                             {{$item->item_id}}
                         </td>
                         <td>
                             <div class="container">
-                            <a href="{{route('item.show.public', $item->item_id)}}#details">
+                            <a href="{{route('item.show.public', $item->item_fk)}}#details">
                             @if($item->details->firstWhere('column_fk', 13))
                                 <img class="img-fluid thumbnail-table"
                                     src="{{ asset('storage/'. Config::get('media.preview_dir') .
@@ -55,7 +51,7 @@
                             </div>
                         </td>
                         <td>
-                            <a href="{{route('item.show.public', $item->item_id)}}"
+                            <a href="{{route('item.show.public', $item->item_fk)}}"
                                 title="@lang('items.show_frontend')">
                                 {{$item->title}}
                             </a>
@@ -67,28 +63,23 @@
                             Typ-ID {{$item->item_type_fk}}
                         </td>
                         <td>
-                            {{$item->editor->name}}, {{$item->updated_at}}
+                            {{$item->editor->name}}, @lang('revisions.revision'):
+                            @if($item->revision < 0)@lang('revisions.draft')@endif{{$item->revision}},
+                            {{$item->updated_at}}
                         </td>
                         <td>
-                        @unless(config('ui.revisions'))
-                            <a href="{{route('item.publish', $item->item_id)}}" class="btn btn-primary">
-                            @lang('common.publish')
-                            </a>
-                        @endunless
-                        </td>
-                        <td>
-                            <form action="{{route('item.show', $item->item_id)}}" method="GET">
+                            <form action="{{route('revision.show', $item->item_id)}}" method="GET">
                                 <button class="btn btn-primary" type="submit">@lang('common.show')</button>
                             </form>
                         </td>
                         <td>
-                            <form action="{{route('item.edit', $item)}}" method="GET">
+                            <form action="{{route('revision.edit', $item)}}" method="GET">
                                 {{ csrf_field() }}
                                 <button class="btn btn-primary" type="submit">@lang('common.edit')</button>
                             </form>
                         </td>
                         <td>
-                            <form action="{{route('item.destroy', $item)}}" method="POST">
+                            <form action="{{route('revision.destroy.draft', $item)}}" method="POST">
                                 {{ csrf_field() }}
                                 @method('DELETE')
                                 <button class="btn btn-danger" type="submit">@lang('common.delete')</button>

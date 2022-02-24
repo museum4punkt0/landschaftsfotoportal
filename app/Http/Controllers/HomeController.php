@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Comment;
 use App\Item;
+use App\ItemRevision;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Auth;
@@ -35,12 +36,23 @@ class HomeController extends Controller
         
         // Get some statistics for admin dashboard
         if (Gate::allows('show-admin')) {
+            if (config('ui.revisions')) {
+                // Number of deleted items
+                $deleted = ItemRevision::doesntHave('item')->distinct('item_fk')->count();
+                // Number of moderated items
+                $moderated = ItemRevision::where('revision', '<', 0)
+                                        ->whereHas('item')->distinct('item_fk')->count();
+            }
+            else {
+                $deleted = null;
+                $moderated = null;
+            }
             // Number of unpublished items
             $items = Item::where('public', 0)->count();
-            // Number of unpublished items
+            // Number of unpublished comments
             $comments = Comment::where('public', 0)->count();
             
-            return view('admin.home', compact('user', 'items', 'comments'));
+            return view('admin.home', compact('user', 'deleted', 'moderated', 'items', 'comments'));
         }
         // User dashboard
         else {

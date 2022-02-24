@@ -21,7 +21,6 @@ class Group extends Model
      * @var array
      */
     protected $fillable = [
-        'description',
     ];
     
     /**
@@ -31,6 +30,7 @@ class Group extends Model
      */
     protected $casts = [
         'permissions' => 'array',
+        'config' => 'array',
     ];
     
     

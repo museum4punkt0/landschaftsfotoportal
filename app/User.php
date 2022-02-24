@@ -48,11 +48,33 @@ class User extends Authenticatable implements MustVerifyEmail
     
     
     /**
+     * Scope a query to only include users who have moderation privileges.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeModerators($query)
+    {
+        return $query->whereHas('group', function ($query) {
+            $query->where('config->is_moderator', true);
+        });
+    }
+
+
+    /**
      * Checks if the user belongs to the group.
      */
     public function inGroup(string $group)
     {
         return $this->group->name == $group;
+    }
+    
+    /**
+     * Checks if the user's edits are beeing moderated.
+     */
+    public function isModerated()
+    {
+        return $this->group->config['is-moderated'] ?? false;
     }
     
     /**

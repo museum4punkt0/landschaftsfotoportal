@@ -39,12 +39,14 @@ Route::get('download/{item}', 'ItemController@download')->name('item.download');
 Route::get('gallery', 'ItemController@gallery')->name('item.gallery');
 Route::get('timeline', 'ItemController@timeline')->name('item.timeline');
 Route::get('map', 'ItemController@map')->name('item.map');
-Route::resource('/item', 'ItemController')->except(['index', 'destroy'])->names([
+Route::delete('item/{item}/draft', 'ItemController@destroyDraft')->name('item.destroy.draft');
+Route::resource('/item', 'ItemController')->except(['index'])->names([
     'create' => 'item.create.own',
     'store' => 'item.store.own',
     'show' => 'item.show.public',
     'edit' => 'item.edit.own',
-    'update' => 'item.update.own'
+    'update' => 'item.update.own',
+    'destroy' => 'item.destroy.own'
 ]);
 
 Route::get('map/all', 'AjaxMapController@all')->name('map.all');
@@ -91,10 +93,14 @@ Route::get('admin/item/titles', 'Admin\ItemController@titles')->name('item.title
 Route::get('admin/item/unpublished', 'Admin\ItemController@list_unpublished')->name('item.unpublished');
 Route::get('admin/item/publish/{item?}', 'Admin\ItemController@publish')->name('item.publish');
 Route::get('admin/item/autocomplete', 'Admin\ItemController@autocomplete')->name('item.autocomplete');
+Route::get('admin/item/orphans', 'Admin\ItemController@removeOrphans')->name('item.orphans');
 Route::resource('admin/item', 'Admin\ItemController');
 Route::get('admin/comment/unpublished', 'Admin\CommentController@list_unpublished')->name('comment.unpublished');
 Route::get('admin/comment/publish/{comment?}', 'Admin\CommentController@publish')->name('comment.publish');
 Route::resource('admin/item.comment', 'Admin\CommentController')->shallow();
+Route::get('admin/revision/deleted', 'Admin\ItemRevisionController@deleted')->name('revision.deleted');
+Route::delete('admin/revision/{revision}/draft', 'Admin\ItemRevisionController@destroyDraft')->name('revision.destroy.draft');
+Route::resource('admin/revision', 'Admin\ItemRevisionController');
 Route::get('admin/taxon/autocomplete', 'Admin\TaxonController@autocomplete')->name('taxon.autocomplete');
 Route::resource('admin/taxon', 'Admin\TaxonController');
 Route::resource('admin/user', 'Admin\UserController');

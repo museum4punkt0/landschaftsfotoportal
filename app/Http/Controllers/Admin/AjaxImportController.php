@@ -225,16 +225,16 @@ class AjaxImportController extends Controller
                             if ($cell) {
                                 // Store image dimensions to database
                                 Image::storeImageDimensions(
+                                    $item,
                                     config('media.full_dir'),
                                     $cell,
-                                    $item->item_id,
                                     $selected_attr[$colnr]
                                 );
                                 // Store image size to database
                                 Image::storeImageSize(
+                                    $item,
                                     config('media.full_dir'),
                                     $cell,
-                                    $item->item_id,
                                     $selected_attr[$colnr]
                                 );
                                 // Create resized images
@@ -363,6 +363,10 @@ class AjaxImportController extends Controller
                     // Update item with lat and lon from location
                     $item->updateLatLon($location);
                 }
+            }
+            // Copy this created item to revisions archive
+            if (config('ui.revisions')) {
+                $item->createRevisionWithDetails();
             }
         }
         // Reset last line number increment

@@ -173,7 +173,7 @@ class Column extends Model
             case '_image_':
                 return ['', [
                     'file' => 'image|mimes:jpeg|max:' . config('media.image_max_size', 2048),
-                    'dummy' => 'integer',
+                    'filename' => 'string',
                 ]];
             default:
                 return [''];

@@ -54,4 +54,13 @@ return [
     'my_cart_subheading' => 'Stöbern Sie in Ihrer persönlichen Sammlung.',
     'my_comments_heading' => 'Meine Kommentare',
     'my_comments_subheading' => 'Hier können Sie Ihre Kommentare bearbeiten, löschen und den Bearbeitungstatus sehen.',
+
+    'notif_greeting' => 'Hallo :name,',
+    'notif_thanks' => 'Wir danken Ihnen für Ihre Mitarbeit!',
+    'notif_subject_comment_published' => 'Ihr Kommentar wurde gesichtet',
+    'notif_subject_item_published' => 'Ihr Foto-Datensatz wurde veröffentlicht',
+    'notif_subject_item_rejected' => 'Ihr Foto-Datensatz wurde abgelehnt',
+    'notif_comment_published' => 'Ihr Kommentar wurde vom Redaktionsteam gesichtet und für die Aktualisierung des Foto-Datensatzes verwendet',
+    'notif_item_published' => 'Ihr Foto-Datensatz wurde vom Redaktionsteam gesichtet und veröffentlicht.',
+    'notif_item_rejected' => 'Ihr Foto-Datensatz wurde vom Redaktionsteam leider abgelehnt und verworfen.',
 ];

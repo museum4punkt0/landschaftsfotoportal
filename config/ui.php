@@ -34,7 +34,7 @@ return [
     */
     
     'icon_cart_add' => 'fa-bookmark',
-    'icon_cart_remove' => 'fa-trash',
+    'icon_cart_remove' => 'fa-bookmark',
     'icon_comment' => 'fa-comment',
     'icon_upload' => 'fa-upload',
     'icon_download' => 'fa-download',
@@ -44,6 +44,7 @@ return [
     'icon_description' => 'fa-info',
     'icon_items_own' => 'fa-images',
     'icon_email_address' => 'fa-at',
+    'icon_show' => 'fa-tv',
     'icon_edit' => 'fa-pencil-alt',
     'icon_delete' => 'fa-trash',
 
@@ -153,5 +154,16 @@ return [
     */
     
     'upload_terms_auth' => true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Enable revisions (versions) for items
+    |--------------------------------------------------------------------------
+    |
+    | Whenever an item is created or updated a revision is saved to database.
+    |
+    */
+
+    'revisions' => true,
 
 ];

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Detail;
+use App\DetailRevision;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class DetailController extends Controller
 {
@@ -104,7 +106,13 @@ class DetailController extends Controller
      */
     public function removeOrphans()
     {
+        // TODO: move this to app/Utils/Admin-whatever because this controller is quite useless
+        Gate::authorize('show-admin');
+
         $count = Detail::doesntHave('item')->delete();
+        if (config('ui.revisions')) {
+            $count += DetailRevision::doesntHave('item')->delete();
+        }
         
         return redirect()->route('item.index')
             ->with('success', __('items.orphans_removed', ['count' => $count]));

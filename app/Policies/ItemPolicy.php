@@ -123,6 +123,26 @@ class ItemPolicy
     }
 
     /**
+     * Determine whether the user can delete drafts of the model.
+     *
+     * @param  \App\User  $user
+     * @param  \App\Item  $item
+     * @return mixed
+     */
+    public function deleteDraft(User $user, Item $item)
+    {
+        // Caution!
+        // revision->creator is the original creator of the item
+        // revision->editor is the creator of this revision (means: editor of the item)
+        if ($user->id === $item->editor->id) {
+            return true;
+        }
+        else {
+            return $user->hasAccess(['deleteDraft-item']);
+        }
+    }
+
+    /**
      * Determine whether the user can update titles of the model.
      *
      * @param  \App\User  $user

@@ -45,13 +45,24 @@
                                     </a>
                                 </span>
                                 <span class="fa-stack fa-2x">
+                                    <a href="#" data-toggle="modal" data-target="#confirmDeleteModal"
+                                        data-href="{{ route('item.destroy.own', $item->item_id) }}"
+                                        data-message="@lang('items.confirm_delete')"
+                                        data-title="@lang('items.delete')"
+                                        title="@lang('common.delete')"
+                                    >
+                                        <i class="fas fa-circle fa-stack-2x text-danger"></i>
+                                        <i class="fas {{ Config::get('ui.icon_delete') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                                <span class="fa-stack fa-2x">
                                 @if(!$item->carts->firstWhere('created_by', Auth::id()))
                                     <a href="#" class="cartAddBtn" data-href="{{ route('cart.add', $item->item_id) }}" title="@lang('cart.add')">
                                         <i class="fas fa-circle fa-stack-2x text-primary"></i>
                                         <i class="fas {{ Config::get('ui.icon_cart_add') }} fa-stack-1x fa-inverse"></i>
                                 @else
                                     <a href="#" data-toggle="modal" data-target="#cartRemoveModal" data-href="{{ route('cart.remove', $item->carts->firstWhere('created_by', Auth::id())->cart_id) }}" title="@lang('cart.remove')">
-                                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                        <i class="fas fa-circle fa-stack-2x text-danger"></i>
                                         <i class="fas {{ Config::get('ui.icon_cart_remove') }} fa-stack-1x fa-inverse"></i>
                                 @endif
                                     </a>
@@ -91,5 +102,6 @@
     @include('includes.modal_alert')
     @include('includes.modal_cart_remove')
     @include('includes.modal_comment_add')
+    @include('includes.modal_confirm_delete')
     
 @endsection

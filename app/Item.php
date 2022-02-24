@@ -34,6 +34,16 @@ class Item extends Model
     ];
     
     /**
+     * Accessor to get the item's Id.
+     *
+     * @return void
+     */
+    public function getOriginalItemIdAttribute()
+    {
+        return $this->item_id;
+    }
+
+    /**
      * Get the element that owns the item.
      */
     public function item_type()
@@ -99,6 +109,14 @@ class Item extends Model
     }
     
     /**
+     * Get the revisions of the item.
+     */
+    public final function revisions()
+    {
+        return $this->hasMany('App\ItemRevision', 'item_fk', 'item_id');
+    }
+    
+    /**
      * Scope a query to only include items of a given user.
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
@@ -154,6 +172,91 @@ class Item extends Model
     }
     
     
+    /**
+     * Create a new revision of this item including all details.
+     *
+     * @param  bool  $draft
+     * @param  bool  $migrate
+     * @return \App\ItemRevision
+     */
+    public final function createRevisionWithDetails($draft = false, $migrate = false)
+    {
+        $revision = $this->createRevision($draft, $migrate);
+
+        foreach ($this->details as $detail) {
+            $detail->createRevision($revision);
+        }
+
+        return $revision;
+    }
+
+    /**
+     * Create a new revision of this item without any details.
+     *
+     * @param  bool  $draft
+     * @param  bool  $migrate
+     * @return \App\ItemRevision
+     */
+    public final function createRevision($draft = false, $migrate = false)
+    {
+        $revision = new ItemRevision([
+            'revision' => $this->getLatestRevisionNumber($draft) + ($draft ? -1 : 1),
+            'parent_fk' => $this->parent_fk,
+            'item_type_fk' => $this->item_type_fk,
+            'taxon_fk' => $this->taxon_fk,
+            'title' => $this->title,
+            'public' => $this->public,
+            'created_by' => $this->created_by,
+            'updated_by' => $migrate ? $this->updated_by : auth()->user()->id,
+        ]);
+
+        return $this->revisions()->save($revision);
+    }
+
+    /**
+     * Delete all draft revisions of this item.
+     *
+     * @param  mixed  $owner
+     * @return void
+     */
+    public final function deleteAllDrafts($owner = null)
+    {
+        if ($owner) {
+            $drafts = $this->revisions()->draft()->owner($owner)->get();
+        }
+        // No owner given: get drafts of all owners
+        else {
+            $drafts = $this->revisions()->draft()->get();
+        }
+
+        foreach ($drafts as $draft) {
+            $draft->deleteRevisionWithDetails();
+        }
+    }
+
+    public final function moderatedRevisionAvailable() {
+        return $this->getLatestRevisionNumber(true);
+    }
+
+    /**
+     * Get the latest revision number of this item.
+     *
+     * @param  bool  $draft
+     * @return integer
+     */
+    public function getLatestRevisionNumber($draft = false)
+    {
+        $latest = $this->revisions()->where('revision', ($draft ? '<' : '>'), 0)
+            ->orderBy('revision', $draft ? 'asc' : 'desc')
+            ->first();
+        if ($latest) {
+            return $latest->revision;
+        }
+        else {
+            return 0;
+        }
+    }
+
     /**
      * Get the id of the column containing a title or name string representing this item.
      */

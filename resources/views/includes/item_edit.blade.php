@@ -7,28 +7,77 @@
     ])
 @endunless
 
+@include('includes.modal_confirm_delete')
+@include('includes.modal_image_large')
+
 <div class="container">
 @if ($errors->any())
     <div class="alert alert-danger">
         @lang('common.form_validation_error')
     </div>
 @endif
+@if (session('info'))
+    <div class="alert alert-info">
+        {{ session('info') }}
+    </div>
+@endif
 
 <h2>@lang('items.edit')</h2>
+@if(isset($options['edit.revision']))
+    <div class="form-group">
+        <label for="comparedRevisionSelect">@lang('revisions.history')</label>
+        <select
+            id="comparedRevisionSelect"
+            name="revisions"
+            aria-describedby="compareSelectHelpBlock"
+            class="form-control"
+            data-current="{{ $item->revision }}"
+            size=1
+        >
+        @foreach($item->item->revisions->sortByDesc('updated_at') as $rev)
+            <option value="{{ $rev->revision }}">
+                {{ $rev->updated_at }}, @lang('revisions.revision'): 
+                @if($rev->revision < 0)@lang('revisions.draft')@endif{{ $rev->revision }},
+                {{ $rev->editor->name }}
+            </option>
+        @endforeach
+        </select>
+        <small id="compareSelectHelpBlock" class="form-text text-muted">
+            @lang('revisions.compare_select_help')
+        </small>
+    </div>
+    <div class="text-muted">@lang('revisions.compare_help')</div>
+    <hr>
+    <!-- Handle diffs of item revisions -->
+    <script type="text/javascript">
+        // Triggered when document is ready
+        $(document).ready(function () {
+            itemDiff.init({{ $item->revision }});
+        });
+        // Triggered when revision select has changed
+        $('#comparedRevisionSelect').change(function () {
+            itemDiff.init({{ $item->revision }}, $('#comparedRevisionSelect option:selected').val());
+        });
+    </script>
+@endif
 
-<form id="itemEditForm" action="{{ route($options['route'], $item->item_id) }}" method="POST" enctype="multipart/form-data">
+<form id="itemEditForm" action="{{ route($options['route'], $item->original_item_id) }}" method="POST" enctype="multipart/form-data">
     
 @if($options['edit.meta'])
     <div class="form-group">
         <label for="titleInput">@lang('items.menu_title')</label>
         <input type="text" id="titleInput" name="title" class="form-control"
+            data-column="-101" data-type="title"
             value="{{old('title', $item->title)}}" maxlength="255" autofocus
         >
         <span class="text-danger">{{ $errors->first('title') }}</span>
+        @includeWhen(isset($options['edit.revision']), 'includes.form_history_meta', [
+            'data_type' => 'title', 'column_id' => -101
+        ])
     </div>
     <div class="form-group">
         <label for="publicSelect">@lang('common.published')</label>
-        <select id="publicSelect" name="public" class="form-control" size=1>
+        <select id="publicSelect" name="public" class="form-control" data-column="-102" data-type="public" size=1>
             <option value="1"
                 @if(old('public', $item->public) == 1) selected @endif>
                 @lang('common.yes')
@@ -39,6 +88,9 @@
             </option>
         </select>
         <span class="text-danger">{{ $errors->first('public') }}</span>
+        @includeWhen(isset($options['edit.revision']), 'includes.form_history_meta', [
+            'data_type' => 'public', 'column_id' => -102
+        ])
     </div>
     {{-- Input with autocomplete for parent item, despite the name of the include --}}
     @include('includes.form_taxon_autocomplete', [
@@ -51,6 +103,9 @@
         'null_label' => __('common.none'),
         'taxon_name' => old('parent_name', optional($item->parent)->title ?? __('common.none')),
         'taxon_id' => old('parent', $item->parent_fk),
+    ])
+    @includeWhen(isset($options['edit.revision']), 'includes.form_history_meta', [
+        'data_type' => 'parent', 'column_id' => -103
     ])
     <div class="form-group">
         <label for="taxonNameInput">@lang('taxon.list')</label>
@@ -83,6 +138,8 @@
                         name="fields[{{ $cm->column->column_id }}]"
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                        data-column="{{ $cm->column->column_id }}"
+                        data-type="list"
                         size=1
                         @if($loop->first && !$options['edit.meta']) autofocus @endif
                     >
@@ -105,6 +162,9 @@
                     
                     @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', [
+                        'data_type' => 'list', 'column_id' => $cm->column->column_id
+                    ])
                 </div>
                 @break
             
@@ -119,6 +179,8 @@
                         name="fields[{{ $cm->column->column_id }}][]"
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                        data-column="{{ $cm->column->column_id }}"
+                        data-type="multi_list"
                         size=5
                         multiple
                         @if($loop->first && !$options['edit.meta']) autofocus @endif
@@ -151,6 +213,9 @@
                     
                     @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', [
+                        'data_type' => 'multi_list', 'column_id' => $cm->column->column_id
+                    ])
                 </div>
                 @break
             
@@ -165,6 +230,8 @@
                             name="fields[{{ $cm->column->column_id }}]"
                             aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                             class="form-check-input @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                            data-column="{{ $cm->column->column_id }}"
+                            data-type="boolean"
                             value=1
                             @if(old('fields.'. $cm->column->column_id, 
                             optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int)) checked @endif
@@ -175,6 +242,9 @@
                     
                     @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', [
+                        'data_type' => 'int', 'column_id' => $cm->column->column_id
+                    ])
                 </div>
                 @break
             
@@ -191,6 +261,8 @@
                         name="fields[{{ $cm->column->column_id }}]"
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control {{ $cm->getConfigValue('data_subtype') }} @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                        data-column="{{ $cm->column->column_id }}"
+                        data-type="integer"
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
                         value="{{ old('fields.'. $cm->column->column_id, 
                         optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int) }}"
@@ -200,6 +272,9 @@
                     
                     @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', [
+                        'data_type' => 'int', 'column_id' => $cm->column->column_id
+                    ])
                 </div>
                 @break
             
@@ -214,6 +289,8 @@
                         name="fields[{{ $cm->column->column_id }}]"
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control {{ $cm->getConfigValue('data_subtype') }} @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                        data-column="{{ $cm->column->column_id }}"
+                        data-type="float"
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
                         value="{{ old('fields.'. $cm->column->column_id, 
                         optional($details->firstWhere('column_fk', $cm->column->column_id))->value_float) }}"
@@ -223,6 +300,9 @@
                     
                     @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', [
+                        'data_type' => 'float', 'column_id' => $cm->column->column_id
+                    ])
                 </div>
                 @break
             
@@ -245,6 +325,8 @@
                             name="fields[{{ $cm->column->column_id }}]"
                             aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                             class="form-control {{ $cm->getConfigValue('data_subtype') }} @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                            data-column="{{ $cm->column->column_id }}"
+                            data-type="textarea"
                             placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
                             rows="{{$cm->getConfigValue('textarea')}}"
                             @if($loop->first && !$options['edit.meta']) autofocus @endif
@@ -259,6 +341,8 @@
                             name="fields[{{ $cm->column->column_id }}]"
                             aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                             class="form-control {{ $cm->getConfigValue('data_subtype') }}@if($cm->getConfigValue('search') == 'address') autocomplete @endif @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                            data-column="{{ $cm->column->column_id }}"
+                            data-type="string"
                             placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}" 
                             value="{{ old('fields.'. $cm->column->column_id, 
                             optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string) }}"
@@ -274,6 +358,9 @@
                     
                     @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', [
+                        'data_type' => 'string', 'column_id' => $cm->column->column_id
+                    ])
                 </div>
                 @break
             
@@ -287,6 +374,8 @@
                         name="fields[{{ $cm->column->column_id }}]"
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control summernote @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                        data-column="{{ $cm->column->column_id }}"
+                        data-type="string"
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
                         rows=5
                         @if($loop->first && !$options['edit.meta']) autofocus @endif
@@ -297,6 +386,9 @@
                     
                     @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', [
+                        'data_type' => 'string', 'column_id' => $cm->column->column_id
+                    ])
                 </div>
                 <script type="text/javascript">
                     $(document).ready(function() {
@@ -319,6 +411,8 @@
                         name="fields[{{ $cm->column->column_id }}]"
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                        data-column="{{ $cm->column->column_id }}"
+                        data-type="string"
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
                         value="{{ old('fields.'. $cm->column->column_id, 
                         optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string) }}"
@@ -327,6 +421,9 @@
                     
                     @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', [
+                        'data_type' => 'string', 'column_id' => $cm->column->column_id
+                    ])
                 </div>
                 @break
             
@@ -341,6 +438,8 @@
                         name="fields[{{ $cm->column->column_id }}]"
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                        data-column="{{ $cm->column->column_id }}"
+                        data-type="date"
                         value="{{ old('fields.'. $cm->column->column_id, 
                         optional($details->firstWhere('column_fk', $cm->column->column_id))->value_date) }}"
                         @if($loop->first && !$options['edit.meta']) autofocus @endif
@@ -348,6 +447,9 @@
                     
                     @include('includes.form_input_help')
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', [
+                        'data_type' => 'date', 'column_id' => $cm->column->column_id
+                    ])
                 </div>
                 @break
             
@@ -398,11 +500,15 @@
                             aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                             class="form-control @if($errors->has('fields.'.$cm->column->column_id.'.start')) is-invalid @endif"
                             data-column="{{ $cm->column->column_id }}"
+                            data-type="daterange"
                             value="{{ old('fields.'. $cm->column->column_id .'.start', 
                             optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from())->toDateString()) }}"
                         />
                         @include('includes.form_input_help')
                         <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id .'.start') }}</span>
+                        @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', [
+                            'data_type' => 'daterange', 'column_id' => $cm->column->column_id
+                        ])
                     </div>
                     <!-- Form fields for the date (period of time) -->
                     @if(old('date_type') == 'period' || !old('date_type') && $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from() != $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to())
@@ -424,6 +530,9 @@
                         ])
                         @include('includes.form_input_help')
                         <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id .'.start') }}</span>
+                        @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', [
+                            'data_type' => 'daterange', 'column_id' => $cm->column->column_id
+                        ])
                         <br/>
                         <input
                             type="button"
@@ -435,6 +544,7 @@
                     <!-- Hidden form fields for time range passed to laravel controller -->
                     <input
                         type="hidden"
+                        id="fieldsInput-{{ $cm->column->column_id }}-start"
                         name="fields[{{ $cm->column->column_id }}][start]"
                         class="form-control date-period-start" 
                         data-column="{{ $cm->column->column_id }}"
@@ -443,6 +553,7 @@
                     />
                     <input
                         type="hidden"
+                        id="fieldsInput-{{ $cm->column->column_id }}-end"
                         name="fields[{{ $cm->column->column_id }}][end]"
                         class="form-control date-period-end"
                         data-column="{{ $cm->column->column_id }}"
@@ -550,22 +661,56 @@
                                 $details->firstWhere('column_fk', $cm->column->column_id)->value_string))
                                 {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}
                                 <br/>
+                                <a href="#" data-toggle="modal" data-target="#imageLargeModal"
+                                    data-img-source="{{ asset('storage/'. Config::get('media.medium_dir') .
+                                    $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}">
                                 <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
                                     $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
                                 />
+                                </a>
                             @else
                                 @lang('columns.image_not_available')
+                            @endif
+
+                            {{-- 2nd image for compared revision --}}
+                            @if(isset($options['edit.revision']))
+                            </div>
+                            <div class="col">
+                                <span id="comparedRevisionImageFilename-{{ $cm->column->column_id }}">
+                                    {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}
+                                </span>
+                                <br/>
+                                <a href="#" data-toggle="modal" data-target="#imageLargeModal"
+                                    id="comparedRevisionImageLink-{{ $cm->column->column_id }}"
+                                    data-img-source="{{ asset('storage/'. Config::get('media.medium_dir') .
+                                    $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
+                                    data-path="{{ asset('storage/'. Config::get('media.medium_dir')) }}/"
+                                >
+                                <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
+                                    $details->firstWhere('column_fk', $cm->column->column_id)->value_string) }}"
+                                    id="comparedRevisionImage-{{ $cm->column->column_id }}"
+                                    data-path="{{ asset('storage/'. Config::get('media.preview_dir')) }}/"
+                                />
+                                </a>
                             @endif
                         @endif
                         </div>
                         <div class="col">
-                            <input type="hidden" name="fields[{{ $cm->column->column_id }}][dummy]" value=0 />
+                            <input
+                                type="hidden"
+                                id="fieldsInput-{{ $cm->column->column_id }}-filename"
+                                name="fields[{{ $cm->column->column_id }}][filename]"
+                                value="{{
+                                $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}"
+                            />
                             <input
                                 type="file"
                                 id="fieldsInput-{{ $cm->column->column_id }}"
                                 name="fields[{{ $cm->column->column_id }}][file]"
                                 aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                                 class="form-control-file @if($errors->has('fields.'.$cm->column->column_id.'.file')) is-invalid @endif"
+                                data-column="{{ $cm->column->column_id }}"
+                                data-type="image"
                                 accept=".jpg, .jpeg"
                                 @if($loop->first && !$options['edit.meta']) autofocus @endif
                             />
@@ -574,6 +719,9 @@
                         </div>
                     </div>
                     <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id .'.file') }}</span>
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', [
+                        'data_type' => 'string', 'column_id' => $cm->column->column_id
+                    ])
                 </div>
 
                 <script type="text/javascript">
@@ -605,12 +753,17 @@
                                 name="fields[{{ $cm->column->column_id }}]"
                                 aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                                 class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                                data-column="{{ $cm->column->column_id }}"
+                                data-type="string"
                                 placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
                                 value="{{ old('fields.'. $cm->column->column_id, 
                                 optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string) }}"
                                 @if($loop->first && !$options['edit.meta']) autofocus @endif
                             />
                             <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                            @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', [
+                                'data_type' => 'string', 'column_id' => $cm->column->column_id
+                            ])
                             
                             <iframe width="100%" height="670px" scrolling="no" marginheight="0" marginwidth="0" frameborder="0"
                                 src="{{ old('fields.'. $cm->column->column_id, 
@@ -631,12 +784,17 @@
                                 name="fields[{{ $cm->column->column_id }}]"
                                 aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                                 class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                                data-column="{{ $cm->column->column_id }}"
+                                data-type="string"
                                 placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
                                 value="{{ old('fields.'. $cm->column->column_id,
                                     optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string) }}"
                                 @if($loop->first && !$options['edit.meta']) autofocus @endif
                             />
                             <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id) }}</span>
+                            @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', [
+                                'data_type' => 'string', 'column_id' => $cm->column->column_id
+                            ])
                             
                             <iframe width="100%" height="670px" scrolling="no" marginheight="0" marginwidth="0" frameborder="0"
                                 src="{{ Config::get('media.mapservice_url') }}artid={{ old('fields.'. $cm->column->column_id, 
@@ -650,14 +808,15 @@
                     @endif
                 @endif
                 @if($cm->getConfigValue('map') == 'inline')
-                    <div id="map" class="map"></div>
+                    <div id="map" class="map" data-image-path="{{ asset('storage/images/') }}/">
+                    </div>
                     <script type="text/javascript">
                         var lon = {{ floatval(optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col')))->value_float) }};
                         var lat = {{ floatval(optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col')))->value_float) }};
                         var zoom = {{ $cm->getConfigValue('map_zoom') }};
                         // Init and display the map
                         osm_map.display(lon, lat, zoom);
-                        osm_map.addMarker(lon, lat, '{{ asset("storage/images/dot.svg") }}');
+                        osm_map.addMarker(lon, lat, '{{ asset("storage/images/dot.svg") }}', '#4a90d9');
                         
                         //osm_map.updateSize();
                     </script>
@@ -685,9 +844,42 @@
     <div class="form-group">
     {{-- Check if we are using a backend route --}}
     @if($options['edit.meta'] || !config('ui.upload_terms_auth'))
-        <button type="submit" class="btn btn-primary">@lang('common.save')</button>
+        <button type="submit" aria-describedby="saveRevisionBtnHelpBlock" class="btn btn-primary">
+            @lang('common.save')
+        </button>
+        @if(Config::get('ui.revisions'))
+            {{-- Show button for deleting this draft revision --}}
+            @if($item->revision < 0)
+                <button type="button" class="btn btn-danger" data-toggle="modal"
+                    data-target="#confirmDeleteModal"
+                    data-href="{{ route('revision.destroy.draft', $item) }}"
+                    data-message="@lang('revisions.confirm_delete')"
+                    data-title="@lang('revisions.delete_draft')"
+                    title="@lang('revisions.delete_draft')"
+                >
+                    @lang('revisions.delete_draft')
+                </button>
+                <small id="saveRevisionBtnHelpBlock" class="form-text text-muted">@lang('revisions.save_delete_drafts_help')</small>
+            @else
+                <small id="saveRevisionBtnHelpBlock" class="form-text text-muted">@lang('revisions.save_revision_help')</small>
+            @endif
+        @endif
     @else
         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#uploadModal" data-form-id="itemEditForm">@lang('common.save')</button>
+        @if(Config::get('ui.revisions'))
+            @if($item->revision < 0)
+                {{-- Show button for deleting this draft revision --}}
+                <button type="button" class="btn btn-danger" data-toggle="modal"
+                    data-target="#confirmDeleteModal"
+                    data-href="{{ route('item.destroy.draft', $item->original_item_id) }}"
+                    data-message="@lang('revisions.confirm_delete')"
+                    data-title="@lang('revisions.delete_draft')"
+                    title="@lang('revisions.delete_draft')"
+                >
+                    @lang('revisions.delete_draft')
+                </button>
+            @endif
+        @endif
         @include('includes.modal_upload')
     @endif
     </div>
