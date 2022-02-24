@@ -312,7 +312,10 @@ class ItemController extends Controller
         $details = Detail::where('item_fk', $item->item_id)->get();
 
         // Load all revisions of the item
-        $revisions = $item->revisions()->latest()->get();
+        $revisions = null;
+        if (config('ui.revisions')) {
+            $revisions = $item->revisions()->latest()->get();
+        }
 
         // Only columns associated with this item's taxon or its descendants
         $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk);
