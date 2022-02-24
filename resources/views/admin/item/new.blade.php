@@ -8,8 +8,8 @@
 <form action="{{ route('item.create') }}" method="GET">
     
     <div class="form-group">
-        <span>@lang('colmaps.item_type')</span>
-        <select name="item_type" class="form-control" size=1 >
+        <label for="itemTypeSelect">@lang('colmaps.item_type')</label>
+        <select id="itemTypeSelect" name="item_type" class="form-control" size=1 autofocus>
             @foreach($item_types as $type)
                 <option value="{{$type->element_id}}"
                     @if(old('item_type') == $type->element_id) selected @endif>
@@ -23,24 +23,16 @@
         </select>
         <span class="text-danger">{{ $errors->first('item_type') }}</span>
     </div>
-    <div class="form-group">
-        <span>@lang('taxon.list')</span>
-        <select name="taxon" class="form-control" size=1 >
-            <option value="">@lang('common.none')</option>
-            @foreach($taxa as $taxon)
-                @unless($taxon->valid_name)
-                    <option value="{{$taxon->taxon_id}}"
-                        @if(old('taxon') == $taxon->taxon_id) selected @endif>
-                        @for ($i = 0; $i < $taxon->depth; $i++)
-                            |___
-                        @endfor
-                        {{$taxon->taxon_name}} {{$taxon->taxon_author}} ({{$taxon->native_name}})
-                    </option>
-                @endunless
-            @endforeach
-        </select>
-        <span class="text-danger">{{ $errors->first('taxon') }}</span>
-    </div>
+    @include('includes.form_taxon_autocomplete', [
+        'search_url' => route('taxon.autocomplete', ['valid' => true]),
+        'div_class' => 'form-group',
+        'name' => 'taxon',
+        'input_placeholder' => '',
+        'input_label' => __('taxon.list'),
+        'null_label' => __('common.none'),
+        'taxon_name' => old('taxon_name', __('common.none')),
+        'taxon_id' => old('taxon'),
+    ])
     
     <div class="form-group">
         <button type="submit" class="btn btn-primary">@lang('common.next')</button>

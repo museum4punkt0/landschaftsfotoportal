@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Comment;
 use App\Item;
+use App\ItemRevision;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Auth;
 use Session;
 use Redirect;
+use Route;
 
 class HomeController extends Controller
 {
@@ -34,12 +36,23 @@ class HomeController extends Controller
         
         // Get some statistics for admin dashboard
         if (Gate::allows('show-admin')) {
+            if (config('ui.revisions')) {
+                // Number of deleted items
+                $deleted = ItemRevision::doesntHave('item')->distinct('item_fk')->count();
+                // Number of moderated items
+                $moderated = ItemRevision::where('revision', '<', 0)
+                                        ->whereHas('item')->distinct('item_fk')->count();
+            }
+            else {
+                $deleted = null;
+                $moderated = null;
+            }
             // Number of unpublished items
             $items = Item::where('public', 0)->count();
-            // Number of unpublished items
+            // Number of unpublished comments
             $comments = Comment::where('public', 0)->count();
             
-            return view('admin.home', compact('user', 'items', 'comments'));
+            return view('admin.home', compact('user', 'deleted', 'moderated', 'items', 'comments'));
         }
         // User dashboard
         else {
@@ -54,8 +67,14 @@ class HomeController extends Controller
      */
     public function frontend()
     {
-        // Get the item which holds the content of the home page
-        $item = Item::where('title', config('menu.home_item_title', 'Home'))->first();
+        // Get the item which holds the content of the requested page
+        $item = Item::where('title', 'ILIKE', '%'.Route::currentRouteName().'%')->first();
+
+        // Fallback to home page
+        if (!$item) {
+            // Get the item which holds the content of the home page
+            $item = Item::where('title', config('menu.home_item_title', 'Home'))->first();
+        }
         
         // Check if item exists, otherwise redirect to search page
         if ($item) {

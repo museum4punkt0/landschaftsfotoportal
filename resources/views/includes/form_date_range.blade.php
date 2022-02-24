@@ -6,7 +6,7 @@
 {{-- If params are not set, default values from config/ui.php are used. Please see comments there! --}}
 {{-- At last, if config values are not set, sane default values are used, see code below. --}}
 <fieldset>
-    <div class="form-row">
+    <div id="startDate-{{ $cm->column->column_id }}" class="form-row">
         <legend class="col-form-label col-1">@lang('common.date_period_start')</legend>
         <div class="form-group col-1">
             <label for="startDay-{{ $cm->column->column_id }}">@lang('common.day')</label>
@@ -44,7 +44,7 @@
     </div>
 </fieldset>
 <fieldset>
-    <div class="form-row">
+    <div id="endDate-{{ $cm->column->column_id }}" class="form-row">
         <legend class="col-form-label col-1">@lang('common.date_period_end')</legend>
         <div class="form-group col-1">
             <label for="endDay-{{ $cm->column->column_id }}">@lang('common.day')</label>

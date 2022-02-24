@@ -8,8 +8,8 @@
 <form action="{{ route('element.update', $element->element_id) }}" method="POST">
     
     <div class="form-group">
-        <span>@lang('lists.parent')</span>
-        <select name="parent_fk" class="form-control" size=1 >
+        <label for="valueInput">@lang('lists.parent')</label>
+        <select id="valueInput" name="parent_fk" class="form-control" size=1 autofocus>
             <option value="" @if(old('parent_fk', $element->parent_fk) == 0) selected @endif>
                 @lang('common.root')
             </option>

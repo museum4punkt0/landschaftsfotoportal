@@ -29,6 +29,8 @@
                         'input_placeholder' => __('search.search'),
                     ])
                 </div>
+                
+                <div class="table-responsive">
                 <table class="table mt-4">
                 <thead>
                     <tr>
@@ -90,6 +92,7 @@
                     </tr>
                 </tbody>
                 </table>
+                </div>
             </div>
         @else
             <div class="card-body">

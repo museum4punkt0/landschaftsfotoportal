@@ -4,17 +4,15 @@ namespace App\Http\Controllers\Admin;
 
 use App\Column;
 use App\ColumnMapping;
-use App\DateRange;
 use App\Detail;
 use App\Element;
 use App\Item;
+use App\Location;
 use App\Selectlist;
-use App\Value;
-use App\Taxon;
-use App\Utils\Image;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
 use Validator;
@@ -40,6 +38,8 @@ class ImportItemsController extends Controller
      */
     public function index()
     {
+        $this->authorize('import-items');
+
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
@@ -54,6 +54,8 @@ class ImportItemsController extends Controller
      */
     public function save(Request $request)
     {
+        $this->authorize('import-items');
+
         // Validate file size and extension
         $request->validate([
             'fileUpload' => 'required|mimes:csv,txt|max:4096',
@@ -91,6 +93,12 @@ class ImportItemsController extends Controller
      */
     public function preview(Request $request)
     {
+        $this->authorize('import-items');
+
+        // Get selected attributes from cookie
+        $selected_attr = json_decode($request->cookie('import_'. $request->item_type), true);
+        $geocoder_attr = json_decode($request->cookie('import_geocoder_'. $request->item_type), true);
+        
         // Get CSV file path from session and
         $csv_file = $request->session()->get('csv_file');
         // Get original CSV file name from session
@@ -104,7 +112,10 @@ class ImportItemsController extends Controller
         $csv_data = array_slice($data, 0, 5);
         
         // Load column mapping for selected item_type from database
-        $colmaps = ColumnMapping::where('item_type_fk', $request->item_type)->get();
+        $colmaps = ColumnMapping::where('item_type_fk', $request->item_type)
+            ->with('column')
+            ->orderBy('column_order')
+            ->get();
         
         // Check for defined columns for this item_type, otherwise redirect back with error message
         if ($colmaps->isEmpty()) {
@@ -118,7 +129,7 @@ class ImportItemsController extends Controller
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
-        return view('admin.import.itemscontent', compact('file_name', 'csv_data', 'colmaps', 'items', 'item_types'));
+        return view('admin.import.itemscontent', compact('file_name', 'csv_data', 'colmaps', 'items', 'item_types', 'selected_attr', 'geocoder_attr'));
     }
     
     /**
@@ -129,6 +140,8 @@ class ImportItemsController extends Controller
      */
     public function process(Request $request)
     {
+        $this->authorize('import-items');
+
         // Validate the form inputs
         $validator = Validator::make($request->all(), [
             'fields' => [
@@ -164,7 +177,7 @@ class ImportItemsController extends Controller
                         ->withErrors($validator)
                         ->withInput();
         }
-                
+        
         // Get CSV file path from session and read file into array $data
         $csv_file = $request->session()->get('csv_file');
         $separator = $request->session()->get('column_separator');
@@ -173,196 +186,43 @@ class ImportItemsController extends Controller
             return str_getcsv($d, $separator);
         }, file($csv_file));
         
+        // Count the number of items in CSV file
+        $total_items = count($data);
+        if ($request->has('header')) {
+            $total_items--;
+        }
+        
         Log::channel('import')->info(__('import.read_csv', ['file' => $csv_file]));
         
         $selected_attr = $request->input('fields.*');
+        // Save to cookie for future usage after session has expired
+        $cookie_content = json_encode($selected_attr, JSON_FORCE_OBJECT);
+        Cookie::queue(Cookie::forever('import_'. $request->input('item_type'), $cookie_content));
+        
+        $geocoder_attr = $request->input('geocoder');
+        // Save to cookie for future usage after session has expired
+        $cookie_content = json_encode($geocoder_attr, JSON_FORCE_OBJECT);
+        Cookie::queue(Cookie::forever('import_geocoder_'. $request->input('item_type'), $cookie_content));
+        
         $warning_status_msg = null;
-        #$messageBag = new MessageBag;
         
-        // Process each line of given CSV file
-        foreach ($data as $number => $line) {
-            // Skip first row if containing table headers
-            if ($number == 0 && $request->has('header')) {
-                continue;
-            }
-            $taxon_fk = null;
-            // Check if a taxon is associated to item to be imported
-            if (array_search('-3', $selected_attr)) {
-                // Try to match taxon for given full scientific name
-                $taxon = Taxon::where('full_name', $line[array_search('-3', $selected_attr)])->first();
-                if (empty($taxon)) {
-                    // Taxon not found: skip this one and set warning message
-                    $warning_status_msg .= " ". __('import.taxon_not_found', ['full_name' => $line[array_search('-3', $selected_attr)]]);
-                    $request->session()->flash('warning', $warning_status_msg);
-                    // TODO: use messageBag for arrays
-                    #$messageBag->add('warning', $warning_status_msg);
-                    continue;
-                } else {
-                    $taxon_fk = $taxon->taxon_id;
-                    // Check for already existing items (depending on taxon)
-                    $existing_item = Item::where([
-                        ['taxon_fk', $taxon_fk],
-                        ['item_type_fk', $request->input('item_type')],
-                    ])->first();
-                    if (!empty($existing_item) && $request->has('unique_taxa')) {
-                        $warning_status_msg .= " ". __('import.taxon_exists', ['full_name' => $line[array_search('-3', $selected_attr)]]);
-                        $request->session()->flash('warning', $warning_status_msg);
-                        // TODO: use messageBag for arrays
-                        continue;
-                    }
-                }
-            }
-            // All checks have been passed, let's create the item
-            $item_data = [
-                'parent_fk' => $request->input('parent'),
-                'item_type_fk' => $request->input('item_type'),
-                'taxon_fk' => $taxon_fk,
-                'created_by' => $request->user()->id,
-                'updated_by' => $request->user()->id,
-            ];
-            $item = Item::create($item_data);
-            Log::channel('import')->info(__('import.item_imported', ['id' => $item->item_id]), [
-                'line' => $number,
-            ]);
-            
-            // Process each column (= table cell)
-            foreach ($line as $colnr => $cell) {
-                // Check for column's attribute chosen by user
-                if ($selected_attr[$colnr] > 0) {
-                    $detail_elements = null;
-                    
-                    $detail_data = [
-                        'item_fk' => $item->item_id,
-                        'column_fk' => $selected_attr[$colnr],
-                    ];
-                    $data_type = Column::find($selected_attr[$colnr])->getDataType();
-                    switch ($data_type) {
-                        case '_list_':
-                            // Get element's ID for given value, independent of language
-                            $attr = $selected_attr[$colnr];
-                            $value = Value::whereHas('element', function ($query) use ($attr) {
-                                $query->where('list_fk', Column::find($attr)->list_fk);
-                            })
-                            ->where('value', $cell)
-                            ->first();
-                            // TODO: don't import and add warning if value doesn't exist in list
-                            $detail_data['element_fk'] = $value ? $value->element_fk : null;
-                            if (!$value) {
-                                Log::channel('import')->warning(__('import.element_mismatch', ['element' => $element]), [
-                                    'list' => Column::find($attr)->list_fk,
-                                    'item' => $item->item_id,
-                                    'line' => $number,
-                                ]);
-                            }
-                            break;
-                        case '_multi_list_':
-                            foreach (explode($request->session()->get('element_separator'), $cell) as $element) {
-                                // Strip whitespaces from beginning and end
-                                $element = trim($element);
-                                
-                                // Get element's ID for given value, independent of language
-                                $attr = $selected_attr[$colnr];
-                                $value = Value::whereHas('element', function ($query) use ($attr) {
-                                    $query->where('list_fk', Column::find($attr)->list_fk);
-                                })
-                                ->where('value', $element)
-                                ->first();
-                                // TODO: don't import and add warning if value doesn't exist in list
-                                if ($value) {
-                                    $detail_elements[] = $value->element_fk;
-                                } else {
-                                    Log::channel('import')->warning(__('import.element_mismatch', ['element' => $element]), [
-                                        'list' => Column::find($attr)->list_fk,
-                                        'item' => $item->item_id,
-                                        'line' => $number,
-                                    ]);
-                                }
-                            }
-                            break;
-                        case '_boolean_':
-                        case '_integer_':
-                        case '_image_ppi_':
-                            $detail_data['value_int'] = $cell == '' ? null : intval($cell);
-                            break;
-                        case '_float_':
-                            $detail_data['value_float'] = $cell == '' ? null : floatval(strtr($cell, ',', '.'));
-                            break;
-                        case '_date_':
-                            $detail_data['value_date'] = $cell ? $cell : null;
-                            break;
-                        case '_date_range_':
-                            $dates = explode(',', $cell);
-                            // Convert a single date into a date range
-                            if (count($dates) == 1) {
-                                $dates[1] = $dates[0];
-                            }
-                            $detail_data['value_daterange'] = new DateRange($dates[0], $dates[1]);
-                            break;
-                        case '_image_':
-                            // Store image dimensions in database
-                            Image::storeImageDimensions(
-                                config('media.full_dir'),
-                                $cell,
-                                $item->item_id,
-                                $selected_attr[$colnr]
-                            );
-                            Image::storeImageSize(
-                                config('media.full_dir'),
-                                $cell,
-                                $item->item_id,
-                                $selected_attr[$colnr]
-                            );
-                            // Create resized images
-                            Image::processImageResizing(config('media.full_dir'), $cell);
-                            // no break, but fall through
-                        case '_string_':
-                        case '_title_':
-                        case '_image_title_':
-                        case '_image_copyright_':
-                        case '_html_':
-                        case '_url_':
-                        case '_map_':
-                            $detail_data['value_string'] = $cell;
-                            break;
-                    }
-                    $detail = Detail::create($detail_data);
-                    
-                    // Save chosen elements for drop-down lists with multiple selections
-                    if ($detail_elements) {
-                        $detail->elements()->attach($detail_elements);
-                    }
-                }
-                
-                // Set parent fkey of item if individually choosen per item
-                $pit = $request->input('parent_item_type');
-                // Try to match parent item using a detail
-                if ($selected_attr[$colnr] == -1) {
-                    // Try to match taxon for given full scientific name
-                    $parent_item = Item::whereHas('details', function (Builder $query) use ($cell, $pit) {
-                        $query->where('value_string', $cell);
-                    })->where('item_type_fk', $pit)->first();
-                    if (!empty($parent_item)) {
-                        $item->parent_fk = $parent_item->item_id;
-                        $item->save();
-                    }
-                }
-                // Try to match parent item using a taxon's full scientific name
-                if ($selected_attr[$colnr] == -2) {
-                    // Try to match taxon for given full scientific name
-                    $parent_item = Item::whereHas('taxon', function (Builder $query) use ($cell, $pit) {
-                        $query->where('full_name', $cell);
-                    })->where('item_type_fk', $pit)->first();
-                    if (!empty($parent_item)) {
-                        $item->parent_fk = $parent_item->item_id;
-                        $item->save();
-                    }
-                }
-            }
-        }
-        Log::channel('import')->info(__('import.done'));
+        // Save selected attributes to session
+        $request->session()->put('selected_attr', $selected_attr);
+        $request->session()->put('geocoder_attr', $geocoder_attr);
         
-        return Redirect::to('admin/item')
-            ->with('success', __('import.done'));
+        // Save total number of items in CSV to session
+        $request->session()->put('total_items', $total_items);
+        
+        // Reset input from all checkboxes because it wont be updated for un-checked ones
+        $request->session()->forget(['header', 'geocoder_enable', 'geocoder_interactive']);
+        
+        // Save all request input data to session
+        session($request->except(['_token', 'fields', 'geocoder']));
+        
+        // Get original CSV file name from session
+        $file_name = $request->session()->get('file_name');
+        
+        return view('admin.import.itemsprocess', compact('file_name', 'data', 'total_items'));
     }
     
     /**
@@ -372,6 +232,8 @@ class ImportItemsController extends Controller
      */
     public function fix_ext()
     {
+        $this->authorize('import-items');
+
         $details = Detail::where('column_fk', 63)->get();
         
         $count = 0;

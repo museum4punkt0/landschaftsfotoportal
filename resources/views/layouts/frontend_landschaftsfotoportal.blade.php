@@ -34,17 +34,20 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top" id="mainNav">
         <div class="container">
-            <a class="navbar-brand js-scroll-trigger" href="#page-top"><img src="{{ asset('storage/images/logos/sgn_logo.png') }}" width=160 alt="Senckenberg" /></a>
+            <a class="navbar-brand js-scroll-trigger" href="#page-top" title="@lang('common.top')">
+                <img id="sgnLogo" src="{{ asset('storage/images/logos/sgn_logo.svg') }}" width=160 alt="Senckenberg" />
+            </a>
             <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
                 Menu
                 <i class="fas fa-bars ml-1"></i>
             </button>
             <div class="collapse navbar-collapse" id="navbarResponsive">
                 <ul class="navbar-nav text-uppercase ml-auto">
-                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.gallery') }}#portfolio">Portal</a></li>
+                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.gallery') }}">@lang('common.home')</a></li>
+                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('über') }}">@lang('common.about')</a></li>
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('search.index') }}">@lang('search.header')</a></li>
-                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.timeline') }}#timeline">Zeitstrahl</a></li>
-                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.map') }}">Karte</a></li>
+                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.timeline') }}">@lang('landschaftsfotoportal.timeline')</a></li>
+                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.map') }}">@lang('landschaftsfotoportal.map')</a></li>
                     @guest
                         <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('login') }}">@lang('Login') </a></li>
                     @else
@@ -67,43 +70,68 @@
     <!-- Masthead -->
     <header class="masthead">
         <div class="container">
-            <div class="masthead-subheading">Willkommen!</div>
+            <div class="masthead-subheading">@lang('landschaftsfotoportal.slogan')</div>
             <div class="masthead-heading text-uppercase">Landschafts&shy;fotoportal</div>
-            <a class="btn btn-primary btn-xl text-uppercase js-scroll-trigger" href="#services">Wissen Sie mehr?</a>
+            <a class="btn btn-primary btn-xl text-uppercase js-scroll-trigger" href="{{ route('über') }}">@lang('landschaftsfotoportal.join')</a>
         </div>
     </header>
     
-    <!-- Services -->
-    <section class="page-section" id="services">
+    <!-- Mission statement -->
+    <section class="page-section" id="mission">
         <div class="container">
+            <h3 class="section-subheading text-center text-muted">
+                @lang('landschaftsfotoportal.mission_statement')
+            </h3>
             <div class="row text-center">
                 <div class="col-md-4">
-                    <span class="fa-stack fa-4x">
-                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                        <i class="fas fa-upload fa-stack-1x fa-inverse"></i>
-                    </span>
-                    <h4 class="my-3">Upload</h4>
-                    <p class="text-muted">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minima maxime quam architecto quo inventore harum ex magni, dicta impedit.</p>
+                @guest
+                    <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('landschaftsfotoportal.upload')">
+                @else
+                    <a href="{{ route('item.show.own') }}">
+                @endguest
+                        <span class="fa-stack fa-4x btn-hover">
+                            <i class="fas fa-circle fa-stack-2x"></i>
+                            <i class="fas {{ Config::get('ui.icon_upload') }} fa-stack-1x fa-inverse"></i>
+                        </span>
+                    </a>
+                    <h4 class="my-3">@lang('landschaftsfotoportal.upload')</h4>
+                    <p class="text-muted">@lang('landschaftsfotoportal.upload_teaser')</p>
                 </div>
                 <div class="col-md-4">
-                    <span class="fa-stack fa-4x">
-                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                        <i class="fas fa-images fa-stack-1x fa-inverse"></i>
-                    </span>
+                @guest
+                    <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('cart.my_own')">
+                @else
+                    <a href="{{ route('cart.index') }}">
+                @endguest
+                        <span class="fa-stack fa-4x btn-hover">
+                            <i class="fas fa-circle fa-stack-2x"></i>
+                            <i class="fas {{ Config::get('ui.icon_cart_add') }} fa-stack-1x fa-inverse"></i>
+                        </span>
+                    </a>
                     <h4 class="my-3">@lang('cart.my_own')</h4>
-                    <p class="text-muted">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minima maxime quam architecto quo inventore harum ex magni, dicta impedit.</p>
+                    <p class="text-muted">@lang('landschaftsfotoportal.cart_teaser')</p>
                 </div>
                 <div class="col-md-4">
-                    <span class="fa-stack fa-4x">
-                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                        <i class="fas fa-map fa-stack-1x fa-inverse"></i>
-                    </span>
-                    <h4 class="my-3">Karte</h4>
-                    <p class="text-muted">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Minima maxime quam architecto quo inventore harum ex magni, dicta impedit.</p>
+                @guest
+                    <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('comments.my_own')">
+                @else
+                    <a href="{{ route('comment.index') }}">
+                @endguest
+                        <span class="fa-stack fa-4x btn-hover">
+                            <i class="fas fa-circle fa-stack-2x"></i>
+                            <i class="fas {{ Config::get('ui.icon_comment') }} fa-stack-1x fa-inverse"></i>
+                        </span>
+                    </a>
+                    <h4 class="my-3">@lang('comments.my_own')</h4>
+                    <p class="text-muted">@lang('landschaftsfotoportal.comment_teaser')</p>
                 </div>
             </div>
         </div>
     </section>
+@else
+    <!-- Masthead -->
+    <header class="masthead masthead-mini">
+    </header>
 @endif
     
     <!-- Include the content section, e.g. gallery, timeline, image details -->
@@ -111,17 +139,17 @@
     
 @if (Route::currentRouteName() == 'item.gallery')
     <!-- Partner Logos -->
-    <div class="py-5 bg-light">
+    <div class="py-5 bg-white">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-md-4 col-sm-6 my-3">
-                    <a href="https://www.senckenberg.de/" target="_blank"><img class="img-fluid d-block mx-auto" src="{{ asset('storage/images/logos/sgn_logo.png') }}" alt="" /></a>
+                <div class="col-md-4 col-sm-12 my-3">
+                    <a href="https://www.bundesregierung.de/breg-de/suche/kultur-fuer-alle-1543646"><img class="img-fluid d-block mx-auto" src="{{ asset('storage/images/logos/bkm_logo.png') }}" alt="" /></a>
                 </div>
-                <div class="col-md-4 col-sm-6 my-3">
+                <div class="col-md-4 col-sm-12 my-3">
                     <a href="https://www.museum4punkt0.de/teilprojekt/forschung-in-museen-erklaeren-verstehen-mitmachen/"><img class="img-fluid d-block mx-auto" src="{{ asset('storage/images/logos/museum4punkt0_logo.png') }}" alt="" /></a>
                 </div>
-                <div class="col-md-4 col-sm-6 my-3">
-                    <a href="https://www.bundesregierung.de/breg-de/suche/kultur-fuer-alle-1543646"><img class="img-fluid d-block mx-auto" src="{{ asset('storage/images/logos/bkm_logo.png') }}" alt="" /></a>
+                <div class="col-md-4 col-sm-12 my-3">
+                    <a href="https://www.senckenberg.de/" target="_blank"><img class="img-fluid d-block mx-auto mt-5" src="{{ asset('storage/images/logos/sgn_logo.png') }}" alt="" /></a>
                 </div>
             </div>
         </div>
@@ -132,15 +160,16 @@
     <footer class="footer py-4">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-lg-4 text-lg-left">© Senckenberg 2020</div>
+                <div class="col-lg-4 text-lg-left">© Senckenberg</div>
                 <div class="col-lg-4 my-3 my-lg-0">
-                    <a class="btn btn-dark btn-social mx-2" href="#!"><i class="fab fa-twitter"></i></a>
-                    <a class="btn btn-dark btn-social mx-2" href="#!"><i class="fab fa-facebook-f"></i></a>
+                    <a class="btn btn-dark btn-social mx-2" target="_blank" href="https://www.facebook.com/SenckenbergGoerlitz"><i class="fab fa-facebook-f"></i></a>
+                    <a class="btn btn-dark btn-social mx-2" target="_blank" href="https://www.instagram.com/senckenbergworld"><i class="fab fa-instagram"></i></a>
+                    <a class="btn btn-dark btn-social mx-2" target="_blank" href="https://twitter.com/Senckenberg"><i class="fab fa-twitter"></i></a>
                 </div>
                 <div class="col-lg-4 text-lg-right">
-                    <a class="mr-3" href="#!">Impressum</a>
-                    <a class="mr-3" href="#!">Kontakt</a>
-                    <a href="#!">Danksagung</a>
+                    <a class="mr-3" href="{{ route('impressum') }}">@lang('common.legal')</a>
+                    <a class="mr-3" href="{{ route('datenschutz') }}">@lang('common.privacy')</a>
+                    <a href="{{ route('danksagung') }}">@lang('common.credits')</a>
                 </div>
             </div>
         </div>

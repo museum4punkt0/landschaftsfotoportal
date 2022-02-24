@@ -22,26 +22,35 @@ Auth::routes(['verify' => true]);
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/frontend', 'HomeController@frontend')->name('frontend');
+Route::get('/impressum', 'HomeController@frontend')->name('impressum');
+Route::get('/privacy', 'HomeController@frontend')->name('datenschutz');
+Route::get('/credits', 'HomeController@frontend')->name('danksagung');
+Route::get('/about', 'HomeController@frontend')->name('über');
 Route::get('/locale/{locale}', 'HomeController@locale')->name('locale');
 Route::get('/search', 'SearchController@index')->name('search.index');
 
 Route::get('/email/change', 'Auth\ChangeEmailController@change')->name('email.change');
 Route::post('/email/store', 'Auth\ChangeEmailController@store')->name('email.store');
 
+Route::get('sipnr/{sipnr}', 'BfnController@redirectSipnr')->name('bfn.sipnr');
+
 Route::get('item/show/own', 'ItemController@own')->name('item.show.own');
 Route::get('download/{item}', 'ItemController@download')->name('item.download');
 Route::get('gallery', 'ItemController@gallery')->name('item.gallery');
 Route::get('timeline', 'ItemController@timeline')->name('item.timeline');
 Route::get('map', 'ItemController@map')->name('item.map');
-Route::resource('/item', 'ItemController')->except(['index', 'destroy'])->names([
+Route::delete('item/{item}/draft', 'ItemController@destroyDraft')->name('item.destroy.draft');
+Route::resource('/item', 'ItemController')->except(['index'])->names([
     'create' => 'item.create.own',
     'store' => 'item.store.own',
     'show' => 'item.show.public',
     'edit' => 'item.edit.own',
-    'update' => 'item.update.own'
+    'update' => 'item.update.own',
+    'destroy' => 'item.destroy.own'
 ]);
 
 Route::get('map/all', 'AjaxMapController@all')->name('map.all');
+Route::get('map/search', 'AjaxMapController@searchResults')->name('map.search');
 Route::post('comment/{item}/store', 'AjaxCommentController@store')->name('comment.store');
 Route::post('comment/{comment}/update', 'AjaxCommentController@update')->name('ajax.comment.update');
 Route::post('comment/{comment}/destroy', 'AjaxCommentController@destroy')->name('ajax.comment.destroy');
@@ -65,6 +74,8 @@ Route::post('/admin/import/items/save', 'Admin\ImportItemsController@save')->nam
 Route::get('/admin/import/items/preview', 'Admin\ImportItemsController@preview')->name('import.items.preview');
 Route::post('/admin/import/items/process', 'Admin\ImportItemsController@process')->name('import.items.process');
 Route::get('/admin/import/items/fix_ext', 'Admin\ImportItemsController@fix_ext')->name('import.items.fix_ext');
+Route::get('admin/import/items/line', 'Admin\AjaxImportController@importLine')->name('ajax.import.line');
+Route::get('admin/import/items/latlon', 'Admin\AjaxImportController@importLatLon')->name('ajax.import.latlon');
 
 Route::get('admin/colmap/map/{item_type?}', 'Admin\ColumnMappingController@map')->name('colmap.map');
 Route::post('admin/colmap/map/store', 'Admin\ColumnMappingController@map_store')->name('colmap.map.store');
@@ -74,23 +85,34 @@ Route::get('admin/colmap/autocomplete', 'Admin\ColumnMappingController@autocompl
 Route::resource('admin/colmap', 'Admin\ColumnMappingController');
 Route::get('admin/column/autocomplete', 'Admin\ColumnController@autocomplete')->name('column.autocomplete');
 Route::resource('admin/column', 'Admin\ColumnController');
+Route::get('admin/detail/orphans', 'Admin\DetailController@removeOrphans')->name('detail.orphans');
 Route::resource('admin/detail', 'Admin\DetailController');
 
 Route::get('admin/item/new', 'Admin\ItemController@new')->name('item.new');
 Route::get('admin/item/titles', 'Admin\ItemController@titles')->name('item.titles');
 Route::get('admin/item/unpublished', 'Admin\ItemController@list_unpublished')->name('item.unpublished');
 Route::get('admin/item/publish/{item?}', 'Admin\ItemController@publish')->name('item.publish');
+Route::get('admin/item/autocomplete', 'Admin\ItemController@autocomplete')->name('item.autocomplete');
+Route::get('admin/item/orphans', 'Admin\ItemController@removeOrphans')->name('item.orphans');
 Route::resource('admin/item', 'Admin\ItemController');
 Route::get('admin/comment/unpublished', 'Admin\CommentController@list_unpublished')->name('comment.unpublished');
 Route::get('admin/comment/publish/{comment?}', 'Admin\CommentController@publish')->name('comment.publish');
 Route::resource('admin/item.comment', 'Admin\CommentController')->shallow();
+Route::get('admin/revision/deleted', 'Admin\ItemRevisionController@deleted')->name('revision.deleted');
+Route::delete('admin/revision/{revision}/draft', 'Admin\ItemRevisionController@destroyDraft')->name('revision.destroy.draft');
+Route::resource('admin/revision', 'Admin\ItemRevisionController');
 Route::get('admin/taxon/autocomplete', 'Admin\TaxonController@autocomplete')->name('taxon.autocomplete');
 Route::resource('admin/taxon', 'Admin\TaxonController');
 Route::resource('admin/user', 'Admin\UserController');
 
 Route::get('admin/lists/list/{id}/element/autocomplete', 'Admin\Lists\ElementController@autocomplete')->name('element.autocomplete');
+Route::get('admin/lists/list/{id}/element/create_batch',
+'Admin\Lists\ElementController@createBatch')->name('element.create_batch');
+Route::post('admin/lists/list/{id}/element/store_batch',
+'Admin\Lists\ElementController@storeBatch')->name('list.element.store_batch');
 Route::resource('admin/lists/list.element', 'Admin\Lists\ElementController')->shallow();
 Route::resource('admin/lists/element.value', 'Admin\Lists\ValueController')->shallow();
+
 
 Route::get('admin/lists/list/internal', 'Admin\Lists\ListController@internal')->name('list.internal');
 Route::get('admin/lists/list/{id}/tree', 'Admin\Lists\ListController@tree')->name('list.tree');

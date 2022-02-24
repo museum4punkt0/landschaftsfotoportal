@@ -8,9 +8,14 @@ class DateRangeCast implements CastsAttributes
 {
     public function get($model, $key, $value, $attributes)
     {
-        preg_match('/([\[\(]{1})(.*)\,(.*)([\]\)]{1})/', $attributes['value_daterange'], $matches);
+        if (isset($attributes['value_daterange'])) {
+            preg_match('/([\[\(]{1})(.*)\,(.*)([\]\)]{1})/', $attributes['value_daterange'], $matches);
 
-        return new \App\DateRange($matches[2], $matches[3], $matches[1], $matches[4]);
+            return new \App\DateRange($matches[2] ?? null, $matches[3] ?? null, $matches[1] ?? null, $matches[4] ?? null);
+        }
+        else {
+            return new \App\DateRange(null, null);
+        }
     }
 
     public function set($model, $key, $value, $attributes)

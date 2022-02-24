@@ -19,7 +19,11 @@
             <div class="card-header">@lang('items.unpublished')</div>
             <div class="card-body">
                 <a href="{{route('item.new')}}" class="btn btn-primary">@lang('items.new')</a>
-                <a href="{{route('item.publish')}}" class="btn btn-primary">@lang('common.publish_all')</a>
+                @unless(config('ui.revisions'))
+                    <a href="{{route('item.publish')}}" class="btn btn-primary">@lang('common.publish_all')</a>
+                @endunless
+                
+                <div class="table-responsive">
                 <table class="table mt-4">
                 <thead>
                     <tr>
@@ -38,11 +42,14 @@
                             {{$item->item_id}}
                         </td>
                         <td>
-                            <div class="portfolio-item">
-                            <a class="portfolio-link d-flex justify-content-center" href="{{route('item.show.public', $item->item_id)}}#details">
+                            <div class="container">
+                            <a href="{{route('item.show.public', $item->item_id)}}#details">
                             @if($item->details->firstWhere('column_fk', 13))
-                                <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                    $item->details->firstWhere('column_fk', 13)->value_string) }}" height=100 alt="" title="{{ $item->details->firstWhere('column_fk', 23)->value_string }}"/>
+                                <img class="img-fluid thumbnail-table"
+                                    src="{{ asset('storage/'. Config::get('media.preview_dir') .
+                                    $item->details->firstWhere('column_fk', 13)->value_string) }}"
+                                    alt=""
+                                    title="{{ $item->details->firstWhere('column_fk', 23)->value_string }}"/>
                             @endif
                             </a>
                             </div>
@@ -63,9 +70,11 @@
                             {{$item->editor->name}}, {{$item->updated_at}}
                         </td>
                         <td>
+                        @unless(config('ui.revisions'))
                             <a href="{{route('item.publish', $item->item_id)}}" class="btn btn-primary">
                             @lang('common.publish')
                             </a>
+                        @endunless
                         </td>
                         <td>
                             <form action="{{route('item.show', $item->item_id)}}" method="GET">
@@ -89,6 +98,7 @@
                 @endforeach
                 </tbody>
                 </table>
+                </div>
             </div>
         @else
             <div class="card-body">

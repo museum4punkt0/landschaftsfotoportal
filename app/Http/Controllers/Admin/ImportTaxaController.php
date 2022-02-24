@@ -28,6 +28,8 @@ class ImportTaxaController extends Controller
      */
     public function index()
     {
+        $this->authorize('import-taxa');
+
         return view('admin.import.taxaupload');
     }
  
@@ -39,6 +41,8 @@ class ImportTaxaController extends Controller
      */
     public function save(Request $request)
     {
+        $this->authorize('import-taxa');
+
         // Validate file size and extension
         $request->validate([
             'fileUpload' => 'required|mimes:csv,txt|max:4096',
@@ -75,6 +79,8 @@ class ImportTaxaController extends Controller
      */
     public function preview(Request $request)
     {
+        $this->authorize('import-taxa');
+
         // Get CSV file path from session
         $csv_file = $request->session()->get('csv_file');
         // Get original CSV file name from session
@@ -98,6 +104,8 @@ class ImportTaxaController extends Controller
      */
     public function process(Request $request)
     {
+        $this->authorize('import-taxa');
+
         // Validate the form inputs
         $validator = Validator::make($request->all(), [
             'fields' => [
@@ -184,6 +192,9 @@ class ImportTaxaController extends Controller
             
             // Process each column (= table cell)
             foreach ($line as $colnr => $cell) {
+                // Strip whitespaces from beginning and end
+                $cell = trim($cell);
+                
                 switch ($selected_attr[$colnr]) {
                     // Save primary key (=ID) of the recent element to temporary tree
                     case 'bfn_namnr':

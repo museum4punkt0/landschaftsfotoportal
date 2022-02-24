@@ -29,7 +29,7 @@
                 <form action="{{ route('colmap.sort', $item_type) }}" method="GET">
                     <div class="form-row">
                         <div class="form-group col-md-8">
-                            <select name="item_type" id="item_type_select" class="form-control" size=1 >
+                            <select id="itemTypeSelect" name="item_type" class="form-control" size=1 autofocus>
                                 @foreach($item_types as $type)
                                     <option value="{{$type->element_id}}"
                                         @if(old('item_type', $item_type) == $type->element_id) selected @endif>
@@ -49,7 +49,7 @@
                 
                 <div class="form-row">
                     <div class="form-group col-md-12">
-                        <ul class="sort_menu list-group">
+                        <ul class="sort-list list-group">
                             @foreach ($columns_mapped as $column)
                             <li class="list-group-item" data-id="{{$column->colmap_id}}">
                                 <span class="handle"></span>
@@ -102,11 +102,11 @@
 </div>
 
 <script type="text/javascript">
-    var elem = document.getElementById("item_type_select");
-    elem.addEventListener("change", ItemTypeChanged);
+    var elem = document.getElementById("itemTypeSelect");
+    elem.addEventListener("change", itemTypeChanged);
 
-    function ItemTypeChanged() {
-        var item_type = document.getElementById("item_type_select").options[document.getElementById("item_type_select").selectedIndex].value;
+    function itemTypeChanged() {
+        var item_type = document.getElementById("itemTypeSelect").options[document.getElementById("itemTypeSelect").selectedIndex].value;
         window.location.href = "{{ route('colmap.sort') }}/" + item_type;
     }
     
@@ -124,7 +124,7 @@
             })
         }
 
-        var target = $('.sort_menu');
+        var target = $('.sort-list');
         target.sortable({
             handle: '.handle',
             placeholder: 'highlight',

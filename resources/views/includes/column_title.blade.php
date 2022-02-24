@@ -3,7 +3,7 @@
 @unless($cm->getConfigValue('show_title') == 'hide')
     <div class="col-sm-3">
         @unless($cm->getConfigValue('show_title'))
-            <div class="font-weight-normal">
+            <div class="column-title">
                 {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }}
             </div>
         @endunless

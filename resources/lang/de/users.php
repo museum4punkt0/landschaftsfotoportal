@@ -24,7 +24,7 @@ return [
     'email' => 'Email',
     'verified' => 'verifiziert',
     'dashboard' => 'Dashboard',
-    'profile' => 'Mein Bereich',
+    'profile' => 'Mein Profil',
     
     'group_registered' => 'registriert',
     'group_author' => 'Autor',

@@ -18,8 +18,8 @@
         @if (true || Auth::check())
             <div class="card-header">@lang('comments.unpublished')</div>
             <div class="card-body">
-                <table class="table mt-4">
                 <a href="{{route('comment.publish')}}" class="btn btn-primary">@lang('common.publish_all')</a>
+                <table class="table mt-4">
                 <thead>
                     <tr>
                         <th colspan="1">@lang('common.id')</th>
@@ -38,10 +38,13 @@
                             {{$comment->comment_id}}
                         </td>
                         <td>
-                            <div class="portfolio-item">
-                            <a class="portfolio-link d-flex justify-content-center" href="{{route('item.show.public', $comment->item->item_id)}}#details">
-                                <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                    $comment->item->details->firstWhere('column_fk', 13)->value_string) }}" height=100 alt="" title="{{ $comment->item->details->firstWhere('column_fk', 23)->value_string }}"/>
+                            <div class="container">
+                            <a href="{{route('item.show.public', $comment->item->item_id)}}#details">
+                                <img class="img-fluid thumbnail-table"
+                                    src="{{ asset('storage/'. Config::get('media.preview_dir') .
+                                    $comment->item->details->firstWhere('column_fk', 13)->value_string) }}"
+                                    alt=""
+                                    title="{{ $comment->item->details->firstWhere('column_fk', 23)->value_string }}"/>
                             </a>
                             </div>
                         </td>
@@ -77,6 +80,7 @@
                                 {{ csrf_field() }}
                                 <button class="btn btn-primary" type="submit">@lang('common.edit')</button>
                             </form>
+                            <form action="{{route('comment.destroy', $comment)}}" method="POST">
                                 {{ csrf_field() }}
                                 @method('DELETE')
                                 <button class="btn btn-danger" type="submit">@lang('common.delete')</button>

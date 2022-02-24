@@ -13,6 +13,7 @@ use App\Taxon;
 use App\Utils\Localization;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Debugbar;
 
 class SearchController extends Controller
 {
@@ -91,25 +92,57 @@ class SearchController extends Controller
         $search_details = null;
         $items_details = collect([]);
         
-        // Make sure there is at least one dropdown available
+        // Make sure there is at least one dropdown selected or text input filled
         if ($request->input('fields')) {
             // Get only selected columns to search within
             $search_columns = array_filter($request->input('fields'), function ($val) {
-                return $val > 0;
+                // Arrays are used for min/max values, e.g. with lat/lon input fields
+                if (is_array($val)) {
+                    return array_sum($val);
+                }
+                // Select input fields contain 0 if not selected by user
+                else {
+                    return $val != 0;
+                }
             });
-            // Prepare the search query using selected columns
+            Debugbar::debug($search_columns);
+            
+            // Prepare the search query WHERE clause using selected columns
             foreach ($search_columns as $col => $val) {
                 switch (Column::find($col)->getDataType()) {
                     case '_list_':
                         $search_details[] = [['column_fk', $col], ['element_fk', intval($val)]];
                     break;
+                    case '_float_':
+                        $min_max = null;
+                        // Handle unset min/max input fields
+                        if (!is_null($val['min'])) {
+                            $min_max[] = ['column_fk', $col];
+                            $min_max[] = ['value_float', '>=', floatval(strtr($val['min'], ',', '.'))];
+                        }
+                        if (!is_null($val['max'])) {
+                            $min_max[] = ['column_fk', $col];
+                            $min_max[] = ['value_float', '<=', floatval(strtr($val['max'], ',', '.'))];
+                        }
+                        $search_details[] = $min_max;
+                    break;
                     case '_date_range_':
-                        $daterange = '['. date('Y-m-d', mktime(0, 0, 0, 1, 1, intval($val))) .','.
-                            date('Y-m-d', mktime(0, 0, 0, 1, 1, intval($val) + 10)) .')';
-                        $search_details[] = [['column_fk', $col], ['value_daterange', '&&', $daterange]];
+                        // Valid decade
+                        if ($val > 0) {
+                            $daterange = '['. date('Y-m-d', mktime(0, 0, 0, 1, 1, intval($val))) .','.
+                                date('Y-m-d', mktime(0, 0, 0, 1, 1, intval($val) + 10)) .')';
+                            $search_details[] = [['column_fk', $col], ['value_daterange', '&&', $daterange]];
+                        }
+                        // Unknown date (date range not set)
+                        else {
+                            $search_details[] = [['column_fk', $col], ['value_daterange', null]];
+                        }
                     break;
                 }
             }
+            Debugbar::debug($search_details);
+            
+            // Details search (except for full text)
             if ($search_details) {
                 $details = Detail::where(function ($query) use ($search_details) {
                     foreach ($search_details as $n => $s) {
@@ -142,9 +175,10 @@ class SearchController extends Controller
                 })
                 ->with('item')
                 ->get();
+            
             $items_full_text = $details->map(function ($row) {
                 return $row->item;
-            });
+            })->unique();
         }
         
         // Intersect all results on items
@@ -153,7 +187,21 @@ class SearchController extends Controller
         }
         // Concat all results on items
         else {
-            $items = $items_details->concat($items_full_text);
+            // Simple concatenating isn't sufficient because we need an eloquent collection for modelKeys()
+            if ($items_details->count()) {
+                $items = $items_details->concat($items_full_text);
+            }
+            else {
+                $items = $items_full_text->concat($items_details);
+            }
+        }
+        
+        // Save primary keys of all found items to session
+        if ($items->count()) {
+            $request->session()->put('search_results', $items->modelKeys());
+        }
+        else {
+            $request->session()->forget('search_results');
         }
         
         // Taxon search: full name or native name
@@ -169,7 +217,29 @@ class SearchController extends Controller
         }
         
         $search_terms = $request->input();
+
+        // Get all HTTP query parameters except for lat/lon
+        $column_ids['lon'] = optional(Column::ofDataType('_float_')
+                                            ->ofItemType('_image_')
+                                            ->ofSubType('location_lon')
+                                            ->first())
+                                            ->column_id;
+        $column_ids['lat'] = optional(Column::ofDataType('_float_')
+                                            ->ofItemType('_image_')
+                                            ->ofSubType('location_lat')
+                                            ->first())
+                                            ->column_id;
+        $request_query = $request->except([
+            'fields.' . $column_ids['lon'],
+            'fields.' . $column_ids['lat'],
+            'source',
+        ]);
+        Debugbar::debug($request_query);
+        
+        // Prepare the query string to be passed to the map controller
+        $query_str = http_build_query($request_query);
+
         return view('search.form', compact('menu_root', 'search_terms', 'lists', 'dateranges',
-            'colmap', 'translations', 'taxa', 'items'));
+            'colmap', 'translations', 'taxa', 'items', 'query_str'));
     }
 }

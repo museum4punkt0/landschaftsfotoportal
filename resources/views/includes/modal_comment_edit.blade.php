@@ -10,8 +10,9 @@
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <span>@lang('comments.message')</span>
-                    <textarea name="message" class="form-control" rows=3>{{old('message')}}</textarea>
+                    <label for="messageTextarea">@lang('comments.message')</label>
+                    <textarea id="messageTextarea" name="message" class="form-control"
+                        maxlength="4095" rows=3>{{ old('message') }}</textarea>
                     <input type="hidden" id="url" value="" />
                     <span class="text-danger">{{ $errors->first('message') }}</span>
                 </div>
@@ -33,6 +34,7 @@
         var url = $(event.relatedTarget).data('href');
         $('.modal-body #url').val(url);
         $('textarea[name=message]').val($(event.relatedTarget).data('message'));
+        $('#messageTextarea').focus();
     });
     
     $.ajaxSetup({

@@ -17,6 +17,9 @@ class TaxonController extends Controller
     public function __construct()
     {
         $this->middleware('verified');
+
+        // Use app\Policies\TaxonPolicy for authorizing ressource controller
+        $this->authorizeResource(Taxon::class, 'taxon');
     }
 
     /**
@@ -24,11 +27,69 @@ class TaxonController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $taxa = Taxon::tree()->depthFirst()->paginate(10);
-        
-        return view('admin.taxon.list', compact('taxa'));
+        $aFilter = [
+            'taxon_id' => $request->input('taxon_id'),
+            'taxon_name' => $request->input('taxon_name'),
+            'native_name' => $request->input('native_name'),
+            'valid_name' => $request->input('valid_name'),
+            'rank_abbr' => $request->input('rank_abbr'),
+            'gsl_id' => $request->input('gsl_id'),
+            'bfn_namnr' => $request->input('bfn_namnr'),
+            'bfn_sipnr' => $request->input('bfn_sipnr'),
+        ];
+//        dd($aFilter);
+        $orderby = $request->input('orderby', 'taxon_id');
+        $limit = $request->input('limit', 10);
+        $sort = $request->input('sort', 'desc');
+
+        $aWhere = [];
+        if (!is_null($aFilter['taxon_id'])) {
+            $aWhere[] = ['taxon_id', '=', $aFilter['taxon_id']];
+        }
+        if (!is_null($aFilter['taxon_name'])) {
+            $aWhere[] = ['taxon_name', 'ilike', '%' . $aFilter['taxon_name'] . '%'];
+        }
+        if (!is_null($aFilter['native_name'])) {
+            $aWhere[] = ['native_name', 'ilike', '%' . $aFilter['native_name'] . '%'];
+        }
+        if (!is_null($aFilter['valid_name'])) {
+            if($aFilter['valid_name'] == -1){
+                $aWhere[] = ['valid_name', '!=', null];
+            }else{
+                $aWhere[] = ['valid_name', '=', null];
+            }
+        }
+        if (!is_null($aFilter['rank_abbr'])) {
+            $aWhere[] = ['rank_abbr', 'ilike', '%' . $aFilter['rank_abbr'] . '%'];
+        }
+        if (!is_null($aFilter['gsl_id'])) {
+            $aWhere[] = ['gsl_id', 'ilike', '%' . $aFilter['gsl_id']. '%'];
+        }
+        if (!is_null($aFilter['bfn_namnr'])) {
+            $aWhere[] = ['bfn_namnr', 'ilike', '%' . $aFilter['bfn_namnr']. '%'];
+        }
+        if (!is_null($aFilter['bfn_sipnr'])) {
+            $aWhere[] = ['bfn_sipnr', 'ilike', '%' . $aFilter['bfn_sipnr']. '%'];
+        }
+
+        if (count($aWhere) > 0) {
+            $taxa = Taxon::orderBy($orderby, $sort)
+                    ->orWhere($aWhere)
+                    ->paginate($limit)
+                    ->withQueryString();
+        }
+        elseif( !is_null($request->input('sort')) ){
+            $taxa = Taxon::orderBy($orderby, $sort)
+                    ->paginate($limit)
+                    ->withQueryString();
+        }
+        else {
+             $taxa = Taxon::tree()->depthFirst()->paginate($limit);
+        }
+//        dd($taxa);
+        return view('admin.taxon.list', compact('taxa', 'aFilter'));
     }
 
     /**
@@ -38,9 +99,7 @@ class TaxonController extends Controller
      */
     public function create()
     {
-        $taxa = Taxon::tree()->depthFirst()->get();
-        
-        return view('admin.taxon.create', compact('taxa'));
+        return view('admin.taxon.create');
     }
 
     /**
@@ -53,14 +112,14 @@ class TaxonController extends Controller
     {
         $request->validate([
             'parent' => 'nullable|integer',
-            'taxon_name' => 'required|string',
-            'taxon_author' => 'nullable|string',
-            'taxon_suppl' => 'nullable|string',
-            'full_name' => 'required|string',
-            'native_name' => 'nullable|string',
+            'taxon_name' => 'required|string|max:255',
+            'taxon_author' => 'nullable|string|max:255',
+            'taxon_suppl' => 'nullable|string|max:255',
+            'full_name' => 'required|string|max:255',
+            'native_name' => 'nullable|string|max:255',
             'valid_name' => 'nullable|integer',
             'rank' => 'nullable|integer',
-            'rank_abbr' => 'nullable|string',
+            'rank_abbr' => 'nullable|string|max:255',
             'gsl_id' => 'nullable|integer',
             'bfn_namnr' => 'nullable|integer',
             'bfn_sipnr' => 'nullable|integer',
@@ -105,12 +164,7 @@ class TaxonController extends Controller
      */
     public function edit(Taxon $taxon)
     {
-        $taxa = Taxon::tree()->depthFirst()->get();
-        
-        // Remove all descendants to avoid circular dependencies
-        $taxa = $taxa->diff($taxon->descendantsAndSelf()->get());
-        
-        return view('admin.taxon.edit', compact('taxon', 'taxa'));
+        return view('admin.taxon.edit', compact('taxon'));
     }
 
     /**
@@ -123,15 +177,23 @@ class TaxonController extends Controller
     public function update(Request $request, Taxon $taxon)
     {
         $request->validate([
-            'parent' => 'nullable|integer',
-            'taxon_name' => 'required|string',
-            'taxon_author' => 'nullable|string',
-            'taxon_suppl' => 'nullable|string',
-            'full_name' => 'required|string',
-            'native_name' => 'nullable|string',
+            //'parent' => 'nullable|integer',
+            'parent' =>
+                // Check for circular dependency (parent must not be its own descendant)
+                function ($attribute, $value, $fail) use ($taxon, $request) {
+                    // Check for missing attributes, at least one (column) must be selected
+                    if ($taxon->descendantsAndSelf()->get()->contains($request->input('parent'))) {
+                        $fail(__('taxon.circular_parent'));
+                    }
+                },
+            'taxon_name' => 'required|string|max:255',
+            'taxon_author' => 'nullable|string|max:255',
+            'taxon_suppl' => 'nullable|string|max:255',
+            'full_name' => 'required|string|max:255',
+            'native_name' => 'nullable|string|max:255',
             'valid_name' => 'nullable|integer',
             'rank' => 'nullable|integer',
-            'rank_abbr' => 'nullable|string',
+            'rank_abbr' => 'nullable|string|max:255',
             'gsl_id' => 'nullable|integer',
             'bfn_namnr' => 'nullable|integer',
             'bfn_sipnr' => 'nullable|integer',
@@ -187,9 +249,16 @@ class TaxonController extends Controller
      */
     public function autocomplete(Request $request)
     {
+        $search = $request->query('search');
+
         $results = Taxon::select('taxon_id', 'full_name', 'native_name')
-            ->where('full_name', 'ILIKE', "%{$request->search}%")
-            ->orWhere('native_name', 'ILIKE', "%{$request->search}%")
+            ->when($request->query('valid', false), function ($query) {
+                return $query->whereNull('valid_name');
+            })
+            ->where(function ($query) use ($search) {
+                $query->where('full_name', 'ILIKE', "%{$search}%")
+                    ->orWhere('native_name', 'ILIKE', "%{$search}%");
+            })
             ->orderBy('full_name')
             ->limit(config('ui.autocomplete_results', 5))
             ->get();

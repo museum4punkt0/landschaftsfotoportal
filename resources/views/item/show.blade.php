@@ -32,77 +32,37 @@
 
 @section('content')
 
-{{-- Quick hack for LFP mock-up --}}
-@if(Config::get('ui.frontend_layout') == 'landschaftsfotoportal')
-
-    <!-- Image details -->
-    <section class="page-section" id="details">
-        <div class="container">
-            <div class="text-center">
-                <h2 class="section-heading text-uppercase">Bilddetails</h2>
-                <h3 class="section-subheading text-muted">Lorem ipsum dolor sit amet consectetur.</h3>
-                <a href="{{ asset('storage/'. Config::get('media.full_dir') .
-                    $item->details->firstWhere('column_fk', 13)->value_string) }}">
-                <img class="img-fluid" src="{{ asset('storage/'. Config::get('media.medium_dir') .
-                    $item->details->firstWhere('column_fk', 13)->value_string) }}" alt="" />
-                </a>
-            </div>
-            <div class="card">
-                <div class="card-body">
-                <div>
-                    <!-- Icons for user interaction -->
-                    <span class="fa-stack fa-2x">
-                    @guest
-                        <a href="#" data-toggle="modal" data-target="#downloadModal" data-href="{{ route('item.download', $item->item_id) }}" title="@lang('common.download')">
-                    @else
-                        <a href="{{ route('item.download', $item->item_id) }}" title="@lang('common.download')">
-                    @endguest
-                            <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                            <i class="fas {{ Config::get('ui.icon_download') }} fa-stack-1x fa-inverse"></i>
-                        </a>
-                    </span>
-                    <span class="fa-stack fa-2x">
-                    @guest
-                        <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('cart.add')">
-                            <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                            <i class="fas {{ Config::get('ui.icon_cart_add') }} fa-stack-1x fa-inverse"></i>
-                    @else
-                        @if(!$item->carts->firstWhere('created_by', Auth::id()))
-                            <a href="#" class="cartAddBtn" data-href="{{ route('cart.add', $item->item_id) }}" title="@lang('cart.add')">
-                                <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                                <i class="fas {{ Config::get('ui.icon_cart_add') }} fa-stack-1x fa-inverse"></i>
-                        @else
-                            <a href="#" data-toggle="modal" data-target="#cartRemoveModal" data-href="{{ route('cart.remove', $item->carts->firstWhere('created_by', Auth::id())->cart_id) }}" title="@lang('cart.remove')">
-                                <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                                <i class="fas {{ Config::get('ui.icon_cart_remove') }} fa-stack-1x fa-inverse"></i>
-                        @endif
-                    @endguest
-                        </a>
-                    </span>
-                    <span class="fa-stack fa-2x">
-                    @guest
-                        <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('comments.new')">
-                    @else
-                        <a href="#" data-toggle="modal" data-target="#commentModal" data-href="{{ route('comment.store', $item->item_id) }}" title="@lang('comments.new')">
-                    @endguest
-                            <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                            <i class="fas {{ Config::get('ui.icon_comment') }} fa-stack-1x fa-inverse"></i>
-                        </a>
-                    </span>
-                </div>
-@endif
-
+    @if($item->item_type->attributes->firstWhere('name', 'code')->pivot->value != '_static_')
+        <!-- Image details -->
+        @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
+            'section_id' => 'details',
+            'section_heading' => __(config('ui.frontend_layout') . '.details_heading'),
+            'section_subheading' => __(config('ui.frontend_layout') . '.details_subheading'),
+            'options' => ['image_medium' => true],
+        ])
+        
+        <!-- Icons for user interaction -->
+        @includeIf('includes.' . Config::get('ui.frontend_layout') . '.item_buttons')
+    @else
+        <!-- Display only the heading from database item -->
+        @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
+            'section_id' => 'details',
+            'section_heading' => $item->title,
+            'section_subheading' => '',
+        ])
+    @endif
+    
 @foreach($colmap->groupBy('column_group_fk') as $cg)
     
     @unless($cg->first()->column_group->getConfigValue('hide_heading'))
         <div class="mt-4 mb-0">
         @if($cg->first()->column_group->getConfigValue('show_collapsed'))
-            <a class="font-weight-bold" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="true" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
+            <a class="column-content" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="true" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
                 {{ $cg->first()->column_group->attributes
                 ->firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}
             </a>
         @else
-            <a class="font-weight-bold" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="false" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
+            <a class="column-content" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="false" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
                 {{ $cg->first()->column_group->attributes
                 ->firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}
             </a>
@@ -129,7 +89,7 @@
             {{-- Data_type of form field is taxon --}}
             @case('_taxon_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     @if($cm->getConfigValue('taxon_show') == 'full_name')
                         {{ $item->taxon->full_name }}
                     @endif
@@ -142,8 +102,12 @@
                         @endforeach
                     @endif
                     @if($cm->getConfigValue('taxon_parent'))
-                        {{ $item->taxon->getAncestorWhereRank($cm->getConfigValue('taxon_parent'))->taxon_name }}
-                        ({{ $item->taxon->getAncestorWhereRank($cm->getConfigValue('taxon_parent'))->native_name }})
+                        @if($item->taxon->getAncestorWhereRank($cm->getConfigValue('taxon_parent')))
+                            {{ $item->taxon->getAncestorWhereRank($cm->getConfigValue('taxon_parent'))->taxon_name }}
+                            ({{ $item->taxon->getAncestorWhereRank($cm->getConfigValue('taxon_parent'))->native_name }})
+                        @else
+                            @lang('common.not_applicable')
+                        @endif
                     @endif
                 </div>
                 @break
@@ -152,7 +116,7 @@
             @case('_list_')
                 {{-- dd($lists->firstWhere('list_id', $cm->column->list_fk)->elements) --}}
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                 @if($details->firstWhere('column_fk', $cm->column->column_id))
                     @if($details->firstWhere('column_fk', $cm->column->column_id)->element)
                     {{ $details->firstWhere('column_fk', $cm->column->column_id)->element->attributes->
@@ -161,7 +125,11 @@
                         @lang('common.not_chosen')
                     @endif
                 @else
-                    <span>detail column {{$cm->column->column_id}} for list not found</span>
+                    @can('show-admin')
+                        <span class="text-danger">
+                            @lang('items.no_detail_for_column', ['column' => $cm->column->column_id])
+                        </span>
+                    @endcan
                 @endif
                 </div>
                 @break
@@ -169,20 +137,22 @@
             {{-- Data_type of form field is list with multiple elements --}}
             @case('_multi_list_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
+                @if($details->firstWhere('column_fk', $cm->column->column_id))
                     <ul class="list-unstyled">
                     @foreach($details->firstWhere('column_fk', $cm->column->column_id)->elements()->get() as $element)
                         <li>{{ $element->attributes->
                             firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}</li>
                     @endforeach
                     </ul>
+                @endif
                 </div>
                 @break
             
             {{-- Data_type of form field is boolean --}}
             @case('_boolean_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int ? __('common.yes') : __('common.no') }}
                 </div>
                 @break
@@ -192,7 +162,7 @@
             {{-- Data_type of form field is image pixel per inch --}}
             @case('_image_ppi_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     {{-- TODO: move scaling to controller or model --}}
                     @if($cm->getConfigValue('scale_factor'))
                         {{ round(optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int * $cm->getConfigValue('scale_factor'), $cm->getConfigValue('precision')) }}
@@ -205,7 +175,7 @@
             {{-- Data_type of form field is float --}}
             @case('_float_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_float }}
                 </div>
                 @break
@@ -217,7 +187,7 @@
             {{-- Data_type of form field is image copyright --}}
             @case('_image_copyright_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string }}
                 </div>
                 @break
@@ -225,7 +195,7 @@
             {{-- Data_type of form field is html --}}
             @case('_html_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content column-content-html">
                     {!! optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string !!}
                 </div>
                 @break
@@ -233,7 +203,7 @@
             {{-- Data_type of form field is URL --}}
             @case('_url_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string }}
                 </div>
                 @break
@@ -241,7 +211,7 @@
             {{-- Data_type of form field is date --}}
             @case('_date_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_date }}
                 </div>
                 @break
@@ -249,19 +219,20 @@
             {{-- Data_type of form field is date range --}}
             @case('_date_range_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
+                @if($details->firstWhere('column_fk', $cm->column->column_id))
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from())->toDateString() }}
                     @if($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from() != $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to())
                         - {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to()->toDateString() }}
                     @endif
-                        
+                @endif
                 </div>
                 @break
             
             {{-- Data_type of form field is image --}}
             @case('_image_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                     @if($cm->getConfigValue('image_show') == 'gallery')
                         <div class="container">
                             <div class="row">
@@ -390,12 +361,16 @@
                                 @lang('columns.image_not_available')
                             @endif
                         @else
-                            <span>detail column {{$cm->column->column_id}} for image preview not found</span>
+                            @can('show-admin')
+                                <span class="text-danger">
+                                    @lang('items.no_detail_for_column', ['column' => $cm->column->column_id])
+                                </span>
+                            @endcan
                         @endif
                     @endif
                     
                     @if($cm->getConfigValue('image_show') == 'filename')
-                        {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}
+                        {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string }}
                     @endif
                 </div>
                 @break
@@ -403,7 +378,7 @@
             {{-- Data_type of form field is map --}}
             @case('_map_')
                 @include('includes.column_title')
-                <div class="col font-weight-bold">
+                <div class="col column-content">
                 @if($cm->getConfigValue('map') == 'iframe')
                     @if($details->firstWhere('column_fk', $cm->column->column_id))
                         @if($cm->getConfigValue('map_iframe') == 'url')
@@ -420,19 +395,50 @@
                         <p>@lang('items.no_iframe')</p>
                         </iframe>
                     @else
-                        <span>detail column {{$cm->column->column_id}} for map not found</span>
+                        @can('show-admin')
+                            <span class="text-danger">
+                                @lang('items.no_detail_for_column', ['column' => $cm->column->column_id])
+                            </span>
+                        @endcan
                     @endif
                 @endif
                 @if($cm->getConfigValue('map') == 'inline')
-                    <div id="map" class="map"></div>
+                    <div id="map" class="map"><div id="popup"></div></div>
                     <script type="text/javascript">
                         var lon = {{ optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col')))->value_float ?? 0 }};
                         var lat = {{ optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col')))->value_float ?? 0 }};
                         var zoom = {{ $cm->getConfigValue('map_zoom') }};
+                        var coordinatesAvailabe = true;
+
+                        if (!lon && !lat) {
+                            lon = {{ Config::get('geo.map_lon', 14.986) }};
+                            lat = {{ Config::get('geo.map_lat', 51.15) }};
+                            coordinatesAvailabe = false;
+                        }
                         
                         {{-- Init and display the map --}}
                         osm_map.display(lon, lat, zoom);
-                        osm_map.addMarker(lon, lat, '{{ asset("storage/images/dot.svg") }}');
+                        if (coordinatesAvailabe) {
+                            osm_map.addMarker(lon, lat, '{{ asset("storage/images/dot.svg") }}');
+                        }
+                        else {
+                            var coordinates = osm_map.map.getView().getCenter();
+                            osm_map.popup.setPosition(coordinates);
+                            var content = '<b>@lang("items.no_position_for_map")</b>';
+                            $('#popup').popover({
+                                placement: 'bottom',
+                                html: true,
+                                title: '',
+                                content: content,
+                            });
+                            $('#popup').popover('show');
+                            
+                            // Move popover after moving the map
+                            osm_map.map.on('moveend', function (evt) {
+                                var coordinates = osm_map.map.getView().getCenter();
+                                osm_map.popup.setPosition(coordinates);
+                            });
+                        }
                         
                         {{-- Resize the map after un-collapsing the container --}}
                         $('#collapseCG{{ $cm->column_group_fk }}').on('shown.bs.collapse', function () {
@@ -450,19 +456,12 @@
     
 @endforeach
 
-{{-- Quick hack for LFP mock-up --}}
-@if(Config::get('ui.frontend_layout') == 'landschaftsfotoportal')
-                </div>
-            </div>
-        </div>
-    </section>
+    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_footer')
     
     @include('includes.modal_login_request')
     @include('includes.modal_download')
     @include('includes.modal_alert')
     @include('includes.modal_cart_remove')
     @include('includes.modal_comment_add')
-    
-@endif
 
 @endsection

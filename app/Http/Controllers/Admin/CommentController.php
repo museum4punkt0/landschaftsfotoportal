@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Comment;
 use App\Item;
 use App\Http\Controllers\Controller;
+use App\Notifications\CommentPublished;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 use Redirect;
 
 class CommentController extends Controller
@@ -18,6 +20,9 @@ class CommentController extends Controller
     public function __construct()
     {
         $this->middleware('verified');
+
+        // Use app\Policies\CommentPolicy for authorizing ressource controller
+        $this->authorizeResource(Comment::class, 'comment');
     }
 
     /**
@@ -57,7 +62,7 @@ class CommentController extends Controller
     public function store(Request $request, $item_id)
     {
         $request->validate([
-            'message' => 'required|string',
+            'message' => 'required|string|max:4095',
             'public' => 'required|integer',
         ]);
         
@@ -92,7 +97,7 @@ class CommentController extends Controller
      */
     public function list_unpublished()
     {
-        //$this->authorize('unpublished', Comment::class);
+        $this->authorize('publish', Comment::class);
         
         $comments = Comment::where('public', '<', 1)->with('item')->latest('updated_at')->paginate(10);
         
@@ -107,7 +112,7 @@ class CommentController extends Controller
      */
     public function publish(Comment $comment)
     {
-        //$this->authorize('publish', $comment);
+        $this->authorize('publish', $comment);
         
         // Check for single comment or batch
         if ($comment->comment_id) {
@@ -122,6 +127,8 @@ class CommentController extends Controller
             $comment->public = 1;
             $comment->save();
             $count++;
+            // Notify the owner of the comment
+            Notification::send($comment->creator, new CommentPublished($comment));
         }
         
         return Redirect::to('admin/comment/unpublished')
@@ -149,7 +156,7 @@ class CommentController extends Controller
     public function update(Request $request, Comment $comment)
     {
         $request->validate([
-            'message' => 'required|string',
+            'message' => 'required|string|max:4095',
             'public' => 'required|integer',
         ]);
         
@@ -158,7 +165,13 @@ class CommentController extends Controller
         $comment->updated_by = $request->user()->id;
         $comment->save();
         
-        return Redirect::to('admin/item/'.$comment->item_fk.'/comment')
+        // Notify the owner of the comment if comment was published
+        if ($comment->public == 1) {
+            Notification::send($comment->creator, new CommentPublished($comment));
+        }
+
+        // Note: route to comments belonging to same item: 'admin/item/'.$comment->item_fk.'/comment'
+        return Redirect::to('admin/comment/unpublished')
             ->with('success', __('comments.updated'));
     }
 

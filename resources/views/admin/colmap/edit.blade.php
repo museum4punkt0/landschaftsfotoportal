@@ -10,8 +10,8 @@
 <form action="{{ route('colmap.update', $colmap->colmap_id) }}" method="POST">
     
     <div class="form-group">
-        <span>@lang('colmaps.item_type')</span>
-        <select name="item_type" class="form-control" size=1 disabled>
+        <label for="itemTypeSelect">@lang('colmaps.item_type')</label>
+        <select id="itemTypeSelect" name="item_type" class="form-control" size=1 disabled>
             @foreach($item_types as $type)
                 <option value="{{$type->element_id}}"
                     @if(old('item_type', $colmap->item_type_fk) == $type->element_id) selected @endif >
@@ -25,27 +25,19 @@
         </select>
         <span class="text-danger">{{ $errors->first('item_type') }}</span>
     </div>
+    @include('includes.form_taxon_autocomplete', [
+        'search_url' => route('taxon.autocomplete', ['valid' => true]),
+        'div_class' => 'form-group',
+        'name' => 'taxon',
+        'input_placeholder' => '',
+        'input_label' => __('taxon.list'),
+        'null_label' => __('common.all'),
+        'taxon_name' => old('taxon_name', optional($colmap->taxon)->full_name ?? __('common.all')),
+        'taxon_id' => old('taxon', $colmap->taxon_fk),
+    ])
     <div class="form-group">
-        <span>@lang('taxon.list')</span>
-        <select name="taxon" class="form-control" size=1 >
-            <option value="">@lang('common.all')</option>
-            @foreach($taxa as $taxon)
-                @unless($taxon->valid_name)
-                    <option value="{{$taxon->taxon_id}}"
-                        @if(old('taxon', $colmap->taxon_fk) == $taxon->taxon_id) selected @endif>
-                        @for ($i = 0; $i < $taxon->depth; $i++)
-                            |___
-                        @endfor
-                        {{$taxon->taxon_name}} {{$taxon->taxon_author}} ({{$taxon->native_name}})
-                    </option>
-                @endunless
-            @endforeach
-        </select>
-        <span class="text-danger">{{ $errors->first('taxon') }}</span>
-    </div>
-    <div class="form-group">
-        <span>@lang('columns.column_group')</span>
-        <select name="column_group" class="form-control" size=1 >
+        <label for="columnGroupSelect">@lang('columns.column_group')</label>
+        <select id="columnGroupSelect" name="column_group" class="form-control" size=1 autofocus>
             @foreach($column_groups as $group)
                 <option value="{{$group->element_fk}}"
                     @if(old('column_group', $colmap->column_group_fk) == $group->element_fk) selected @endif>
@@ -56,8 +48,8 @@
         <span class="text-danger">{{ $errors->first('column_group') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('columns.list')</span>
-        <select name="column" class="form-control" size=1 disabled>
+        <label for="columnSelect">@lang('columns.list')</label>
+        <select id="columnSelect" name="column" class="form-control" size=1 disabled>
             @foreach($columns as $column)
                 <option value="{{$column->column_id}}"
                     @if(old('column', $colmap->column_fk) == $column->column_id) selected @endif >
@@ -74,15 +66,15 @@
         <span class="text-danger">{{ $errors->first('column') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('common.ordering')</span>
-        <input type="text" name="column_order" class="form-control" 
+        <label for="columnOrderInput">@lang('common.ordering')</label>
+        <input type="text" id="columnOrderInput" name="column_order" class="form-control" 
             value="{{ old('column_order', $colmap->column_order) }}"
         />
         <span class="text-danger">{{ $errors->first('column_order') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('common.published')</span>
-        <select name="public" class="form-control" size=1 >
+        <label for="publicSelect">@lang('common.published')</label>
+        <select id="publicSelect" name="public" class="form-control" size=1 >
             <option value="1"
                 @if(old('public', $colmap->public) == 1) selected @endif>
                 @lang('common.yes')
@@ -95,8 +87,8 @@
         <span class="text-danger">{{ $errors->first('public') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('colmaps.config')</span>
-        <input type="text" name="config" class="form-control" 
+        <label for="configInput">@lang('colmaps.config')</label>
+        <input type="text" id="configInput" name="config" class="form-control" 
             value="{{ old('config', $colmap->config) }}"
         />
         <span class="text-danger">{{ $errors->first('config') }}</span>

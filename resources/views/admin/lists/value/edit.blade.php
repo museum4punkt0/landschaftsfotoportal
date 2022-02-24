@@ -8,13 +8,15 @@
 <form action="{{ route('value.update', $value->value_id) }}" method="POST">
     
     <div class="form-group">
-        <span>@lang('values.value')</span>
-        <input type="text" name="value" class="form-control" value="{{$value->value}}" />
+        <label for="valueInput">@lang('values.value')</label>
+        <input type="text" id="valueInput" name="value" class="form-control"
+            value="{{$value->value}}" maxlength="4095" autofocus
+        >
         <span class="text-danger">{{ $errors->first('value') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('lists.attribute')</span>
-        <select name="attribute" class="form-control" size=1 >
+        <label for="attributeSelect">@lang('lists.attribute')</label>
+        <select id="attributeSelect" name="attribute" class="form-control" size=1>
         @foreach($attributes as $attribute)
             <option value="{{$attribute->attribute_id}}"
                 @if(old('attribute', $value->attribute_fk) == $attribute->attribute_id) selected @endif >

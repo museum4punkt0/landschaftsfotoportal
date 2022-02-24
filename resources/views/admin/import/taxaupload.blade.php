@@ -39,12 +39,17 @@
                 <form action="{{ route('import.taxa.save') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="form-group">
-                        <input type="file" class="form-control-file" name="fileUpload">
-                        <small class="form-text text-muted">@lang('import.file_hint')</small>
+                        <label for="fileInput">@lang('import.file')</label>
+                        <input type="file" id="fileInput" name="fileUpload"
+                            aria-describedby="fileInputHelpBlock" class="form-control-file" autofocus
+                        >
+                        <small id="fileInputHelpBlock" class="form-text text-muted">
+                            @lang('import.file_hint')
+                        </small>
                     </div>
                     <div class="form-group">
-                        <label for="column_separator">@lang('import.column_separator')</label>
-                        <select name="column_separator" id="column_separator" class="form-control" size=1 >
+                        <label for="columnSeparatorSelect">@lang('import.column_separator')</label>
+                        <select id="columnSeparatorSelect" name="column_separator" class="form-control" size=1>
                             <option value=";" selected>;</option>
                             <option value=",">,</option>
                             <option value="|">|</option>

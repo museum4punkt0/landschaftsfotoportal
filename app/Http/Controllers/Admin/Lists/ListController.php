@@ -21,6 +21,9 @@ class ListController extends Controller
     public function __construct()
     {
         $this->middleware('verified');
+
+        // Use app\Policies\ListPolicy for authorizing ressource controller
+        $this->authorizeResource(Selectlist::class, 'list');
     }
 
     /**
@@ -28,11 +31,45 @@ class ListController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $data['lists'] = Selectlist::where('internal', false)->orderBy('name')->paginate(10);
+        $aFilter = [
+            'list_id' => $request->input('list_id'),
+            'name' => $request->input('name'),
+            'description' => $request->input('description'),
+            'hierarchical' => $request->input('hierarchical'),
+        ];
         
-        return view('admin.lists.list.list', $data);
+        $orderby = $request->input('orderby', 'name');
+        $limit = $request->input('limit', 10);
+        $sort = $request->input('sort', 'desc');
+        
+        $aWhere = [];
+        if (!is_null($aFilter['list_id'])) {
+            $aWhere[] = ['list_id', '=', $aFilter['list_id']];
+        }
+        if (!is_null($aFilter['name'])) {
+            $aWhere[] = ['name', 'ilike', '%' . $aFilter['name'] . '%'];
+        }
+        if (!is_null($aFilter['description'])) {
+            $aWhere[] = ['description', 'ilike', '%' . $aFilter['description'] . '%'];
+        }
+        if (!is_null($aFilter['hierarchical'])) {
+            $aWhere[] = ['hierarchical', '=', $aFilter['hierarchical']];
+        }
+
+        if (count($aWhere) > 0) {
+            $lists = Selectlist::orderBy($orderby, $sort)
+                    ->orWhere($aWhere)
+                    ->where('internal', false)
+                    ->paginate($limit)
+                    ->withQueryString(); //append the get parameters
+        }
+        else {
+              $lists = Selectlist::where('internal', false)->orderBy($orderby, $sort)->paginate($limit)->withQueryString();
+        }
+       
+        return view('admin.lists.list.list', compact('lists', 'aFilter'));
     }
 
     /**
@@ -40,9 +77,44 @@ class ListController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function internal()
+    public function internal(Request $request)
     {
-        $data['lists'] = Selectlist::where('internal', true)->orderBy('name')->paginate(10);
+        $this->authorize('internal', Selectlist::class);
+
+        $data['aFilter'] = [
+            'list_id' => $request->input('list_id'),
+            'name' => $request->input('name'),
+            'description' => $request->input('description'),
+            'hierarchical' => $request->input('hierarchical'),
+        ];
+        
+        $orderby = $request->input('sort', 'name');
+        $limit = $request->input('limit', 10);
+        
+        $aWhere = [];
+        if (!is_null($data['aFilter']['list_id'])) {
+            $aWhere[] = ['list_id', '=', $data['aFilter']['list_id']];
+        }
+        if (!is_null($data['aFilter']['name'])) {
+            $aWhere[] = ['name', 'ilike', '%' . $data['aFilter']['name'] . '%'];
+        }
+        if (!is_null($data['aFilter']['description'])) {
+            $aWhere[] = ['description', 'ilike', '%' . $data['aFilter']['description'] . '%'];
+        }
+        if (!is_null($data['aFilter']['hierarchical'])) {
+            $aWhere[] = ['hierarchical', '=', $data['aFilter']['hierarchical']];
+        }
+
+        if (count($aWhere) > 0) {
+            $data['lists'] = Selectlist::orderBy($orderby, 'desc')
+                    ->orWhere($aWhere)
+                    ->where('internal', true)
+                    ->paginate($limit)
+                    ->withQueryString(); //append the get parameters
+        }
+        else {
+              $data['lists'] = Selectlist::where('internal', true)->orderBy('name')->paginate($limit)->withQueryString();
+        }
         
         return view('admin.lists.list.list', $data);
     }
@@ -66,8 +138,8 @@ class ListController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
-            'description' => 'required',
+            'name' => 'required|string|max:255',
+            'description' => 'required|string|max:255',
             'hierarchical' => 'boolean',
             'internal' => 'boolean',
         ]);
@@ -104,6 +176,8 @@ class ListController extends Controller
      */
     public function tree($id)
     {
+        $this->authorize('tree', Selectlist::find($id));
+
         $data['list'] = Selectlist::find($id);
         
         $constraint = function (Builder $query) use ($id) {
@@ -123,6 +197,8 @@ class ListController extends Controller
      */
     public function export($id)
     {
+        $this->authorize('export', Selectlist::find($id));
+
         $data['list'] = Selectlist::find($id);
         $data['attributes'] = Attribute::orderBy('attribute_id')->get();
         
@@ -186,8 +262,8 @@ class ListController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'required',
-            'description' => 'required',
+            'name' => 'required|string|max:255',
+            'description' => 'required|string|max:255',
             'hierarchical' => 'boolean',
             'internal' => 'boolean',
         ]);

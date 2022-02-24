@@ -23,6 +23,9 @@ class ColumnController extends Controller
     public function __construct()
     {
         $this->middleware('verified');
+
+        // Use app\Policies\ColumnPolicy for authorizing ressource controller
+        $this->authorizeResource(Column::class, 'column');
     }
 
     /**
@@ -30,11 +33,56 @@ class ColumnController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $columns = Column::orderBy('description')->paginate(10);
+        $aFilter = [
+            'column_id' => $request->input('column_id'),
+            'description' => $request->input('description'),
+            'name' => $request->input('name'),
+            'data_type_fk' => $request->input('data_type_fk'),
+            'list_fk' => $request->input('list_fk'),
+        ];
         
-        return view('admin.column.list', compact('columns'));
+        $orderby = $request->input('orderby', 'description');
+        $limit = $request->input('limit', 10);
+        $sort = $request->input('sort', 'desc');
+        
+        $aWhere = [];
+        if (!is_null($aFilter['column_id'])) {
+            $aWhere[] = ['column_id', '=', $aFilter['column_id']];
+        }
+        if (!is_null($aFilter['description'])) {
+            $aWhere[] = ['description', 'ilike', '%' . $aFilter['description'] . '%'];
+        }
+        if (!is_null($aFilter['list_fk'])) {
+            $aWhere[] = ['list_fk', '=', $aFilter['list_fk'] ];
+        }
+        if (!is_null($aFilter['data_type_fk'])) {
+            $aWhere[] = ['data_type_fk', '=', $aFilter['data_type_fk'] ];
+        }
+
+
+//        if (!is_null($aFilter['name'])) {
+//            $aWhere[] = ['name', 'ilike', '%' . $aFilter['name'] . '%'];
+//        }
+
+        if (count($aWhere) > 0) {
+            $columns = Column::orderBy($orderby, $sort)
+                    ->orWhere($aWhere)
+                    ->paginate($limit)
+                    ->withQueryString(); //append the get parameters
+        }
+        else {
+            $columns = Column::orderBy($orderby, $sort)->paginate($limit)->withQueryString();
+        }
+        
+        //data for the filter-selects
+        $lists = Selectlist::where('internal', false)->orderBy('name')->get();
+        $lang = app()->getLocale();
+        $data_types = Localization::getDataTypes($lang);
+//        dd($data_types);
+        
+        return view('admin.column.list', compact('columns', 'aFilter', 'data_types', 'lists'));
     }
 
     /**

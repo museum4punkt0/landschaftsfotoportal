@@ -14,6 +14,7 @@ use Auth;
 
 class ElementController extends Controller
 {
+
     /**
      * Instantiate a new controller instance.
      *
@@ -22,6 +23,9 @@ class ElementController extends Controller
     public function __construct()
     {
         $this->middleware('verified');
+
+        // Use app\Policies\ElementPolicy for authorizing ressource controller
+        $this->authorizeResource(Element::class, 'element');
     }
 
     /**
@@ -48,8 +52,28 @@ class ElementController extends Controller
         };
         $data['elements'] = Element::treeOf($constraint)->depthFirst()->get();
         $data['attributes'] = Attribute::all();
-        
+
         return view('admin.lists.element.create', $data);
+    }
+    
+    /**
+     * Show the form for creating a new resource.
+     *
+     * @param  int  $list_id  ID of the list owning this element
+     * @return \Illuminate\Http\Response
+     */
+    public function createBatch($list_id)
+    {
+        $data['list'] = Selectlist::find($list_id);
+        $data['attributes'] = Attribute::orderBy('attribute_id')->get();
+
+        $aAttr = [];
+        foreach ($data['attributes'] AS $att) {
+            $aAttr[] = $att->name;
+        }
+        $data['example_value'] = implode('|', $aAttr);
+
+        return view('admin.lists.element.create-batch', $data);
     }
 
     /**
@@ -62,27 +86,72 @@ class ElementController extends Controller
     public function store(Request $request, $list_id)
     {
         $request->validate([
-            'value' => 'required',
-            'attribute' => 'required',
+            'value' => 'required|string|max:4095',
+            'attribute' => 'required|integer',
             'parent_fk' => 'nullable|integer',
         ]);
-        
+
         $element_data = [
             'parent_fk' => $request->input('parent_fk'),
             'list_fk' => $list_id,
             'value_summary' => '',
         ];
         $element = Element::create($element_data);
-        
+
         $value_data = [
             'element_fk' => $element->element_id,
             'attribute_fk' => $request->input('attribute'),
             'value' => $request->input('value'),
         ];
         Value::create($value_data);
-        
-        return Redirect::to('admin/lists/list/'.$list_id)
-            ->with('success', __('elements.created'));
+
+        return Redirect::to('admin/lists/list/' . $list_id)
+                        ->with('success', __('elements.created'));
+    }
+    
+
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $list_id  ID of the list owning this element
+     * @return \Illuminate\Http\Response
+     */
+    public function storeBatch(Request $request, $list_id)
+    {
+        $request->validate([
+            'multivalues' => 'required|string',
+        ]);
+
+        $aValues = explode("\n", $request->input('multivalues'));
+
+        $aAttributes = Attribute::orderBy('attribute_id')->get();
+
+        foreach ($aValues as $sValue) {
+            $aValuesByAttributes = explode('|', $sValue);
+            $j = 0;
+            $element_data = [
+                'parent_fk' => null,
+                'list_fk' => $list_id,
+                'value_summary' => '',
+            ];
+            $element = Element::create($element_data);
+
+            foreach ($aAttributes as $sAttribute) {
+                if (isset($aValuesByAttributes[$j]) && !empty(trim($aValuesByAttributes[$j]))) {
+                    $value_data = [
+                        'element_fk' => $element->element_id,
+                        'attribute_fk' => $sAttribute->attribute_id,
+                        'value' => trim($aValuesByAttributes[$j]),
+                    ];
+                    Value::create($value_data);
+                }
+                $j++;
+            }
+        }
+      
+        return Redirect::to('admin/lists/list/' . $request->input('list_id'))
+                        ->with('success', __('elements.created'));
     }
 
     /**
@@ -95,7 +164,7 @@ class ElementController extends Controller
     {
         $data['element'] = $element;
         $data['list'] = $element->list;
-        
+
         return view('admin.lists.element.show', $data);
     }
 
@@ -113,10 +182,10 @@ class ElementController extends Controller
             $query->where('parent_fk', null)->where('list_fk', $list_id);
         };
         $data['elements'] = Element::treeOf($constraint)->depthFirst()->get();
-        
+
         // Remove all descendants to avoid circular dependencies
         $data['elements'] = $data['elements']->diff($element->descendantsAndSelf()->get());
-        
+
         return view('admin.lists.element.edit', $data);
     }
 
@@ -133,12 +202,12 @@ class ElementController extends Controller
         $request->validate([
             'parent_fk' => 'required|integer',
         ]);
-         
+
         $element->parent_fk = $request->input('parent_fk');
         $element->save();
         
-        return Redirect::to('admin/lists/list/'.$element->list_fk)
-            ->with('success', __('elements.updated'));
+        return Redirect::to('admin/lists/list/' . $element->list_fk)
+                        ->with('success', __('elements.updated'));
     }
 
     /**
@@ -151,12 +220,12 @@ class ElementController extends Controller
     {
         // Delete all values owned by this element
         Value::where('element_fk', $element->element_id)->delete();
-        $success_status_msg =  __('elements.orphans_deleted');
-        
+        $success_status_msg = __('elements.orphans_deleted');
+
         // Delete the element itself
         $element->delete();
-        $success_status_msg .= " ". __('elements.deleted');
-        
+        $success_status_msg .= " " . __('elements.deleted');
+
         // Fix hierarchy of elements if necessary
         if ($element->list->hierarchical) {
             // Check for existing descendants
@@ -164,13 +233,13 @@ class ElementController extends Controller
                 // Fix parent ID on descendant element
                 $descendant->parent_fk = $element->parent_fk;
                 $descendant->save();
-                $success_status_msg .= " ".
-                    __('elements.hierarchy_fixed', ['id'=>$descendant->element_id]);
+                $success_status_msg .= " " .
+                        __('elements.hierarchy_fixed', ['id' => $descendant->element_id]);
             }
         }
-        
-        return Redirect::to('admin/lists/list/'.$element->list_fk)
-            ->with('success', $success_status_msg);
+
+        return Redirect::to('admin/lists/list/' . $element->list_fk)
+                        ->with('success', $success_status_msg);
     }
 
     /**
@@ -184,13 +253,13 @@ class ElementController extends Controller
     {
         $term = $request->search;
         $results = Element::with('values')
-            ->where('list_fk', $list_id)
-            ->whereHas('values', function ($query) use ($term) {
-                $query->where('value', 'ILIKE', "%{$term}%");
-            })
-            ->limit(config('ui.autocomplete_results', 5))
-            ->get();
-        
+                ->where('list_fk', $list_id)
+                ->whereHas('values', function ($query) use ($term) {
+                    $query->where('value', 'ILIKE', "%{$term}%");
+                })
+                ->limit(config('ui.autocomplete_results', 5))
+                ->get();
+
         $response = array();
         foreach ($results as $result) {
             foreach ($result->values as $value) {
@@ -201,7 +270,8 @@ class ElementController extends Controller
                 );
             }
         }
-        
+
         return response()->json($response);
     }
+
 }

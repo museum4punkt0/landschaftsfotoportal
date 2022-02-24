@@ -77,11 +77,68 @@ class Column extends Model
     }
     
     /**
+     * Scope a query to only include columns with a given data type.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  mixed  $type
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOfDataType($query, $type)
+    {
+        return $query->whereHas('data_type', function ($query) use ($type) {
+            $query->whereHas('values', function ($query) use ($type) {
+                $query->where('value', $type);
+            });
+        });
+    }
+    
+    /**
+     * Scope a query to only include columns with a given data subtype.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  mixed  $type
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOfSubType($query, $type)
+    {
+        return $query->whereHas('column_mapping', function ($query) use ($type) {
+            $query->where('config', 'ILIKE', "%{$type}%");
+        });
+    }
+    
+    /**
+     * Scope a query to only include columns with a given item type.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  mixed  $type
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeOfItemType($query, $type)
+    {
+        return $query->whereHas('column_mapping', function ($query) use ($type) {
+            $query->whereHas('item_type', function ($query) use ($type) {
+                $query->whereHas('values', function ($query) use ($type) {
+                    $query->where('value', $type);
+                });
+            });
+        });
+    }
+    
+    
+    /**
      * Get the data type of the column.
      */
     public function getDataType()
     {
         return $this->data_type->attributes()->firstWhere('name', 'code')->pivot->value;
+    }
+    
+    /**
+     * Get the data subtype of the column.
+     */
+    public function getDataSubType()
+    {
+        return $this->column_mapping()->first()->getConfigValue('data_subtype');
     }
     
     /**
@@ -95,7 +152,7 @@ class Column extends Model
             case '_date_range_':
                 return ['array', ['*' => 'date']];
             case '_multi_list_':
-                return ['array', ['*' => 'integer']];
+                return ['array|min:2', ['*' => 'integer']];
             case '_list_':
             case '_integer_':
                 return ['integer'];
@@ -114,7 +171,10 @@ class Column extends Model
             case '_url_':
                 return ['url'];
             case '_image_':
-                return ['', ['file' => 'image|mimes:jpeg|max:8192', 'dummy' => 'integer']];
+                return ['', [
+                    'file' => 'image|mimes:jpeg|max:' . config('media.image_max_size', 2048),
+                    'filename' => 'string',
+                ]];
             default:
                 return [''];
         }

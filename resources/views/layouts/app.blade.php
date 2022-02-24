@@ -20,10 +20,15 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     
     <!-- Custom styles for this template -->
+    <!-- TODO: move to /ressources/sass/backend.css CSS file-->
     <style>
       .map {
         height: 500px;
         width: 100%;
+      }
+      .thumbnail-table {
+        max-width: 150px;
+        max-height: 100px;
       }
     </style>
 </head>
@@ -41,7 +46,8 @@
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav mr-auto">
-                        @auth
+                    @auth
+                        @can('show-admin')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('item.index') }}">{{ __('items.header') }}</a>
                             </li>
@@ -64,6 +70,9 @@
                                     </a>
                                     <a class="dropdown-item" href="{{ route('item.titles') }}">
                                         {{ __('items.add_titles') }}
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('detail.orphans') }}">
+                                        {{ __('items.remove_orphans') }}
                                     </a>
                                 </div>
                             </li>
@@ -92,7 +101,8 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('user.index') }}">{{ __('users.header') }}</a>
                             </li>
-                        @endauth
+                        @endcan
+                    @endauth
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
                                     {{ __('common.language') }} <span class="caret"></span>
@@ -127,7 +137,7 @@
 
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                                     <a class="dropdown-item" href="{{ route('home') }}">
-                                        {{ __('users.dashboard') }}
+                                        {{ __('users.profile') }}
                                     </a>
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();

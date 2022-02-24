@@ -16,10 +16,64 @@ class AjaxMapController extends Controller
     public function all()
     {
         $items = Item::where('public', 1)->where('item_type_fk', 39)
+            // Exclude items without latitude/longitude
+            ->whereHas('details', function ($query) {
+                $query->where('column_fk', 24)
+                      ->whereNotNull('value_float');
+            })
+            ->whereHas('details', function ($query) {
+                $query->where('column_fk', 25)
+                      ->whereNotNull('value_float');
+            })
             ->with('details')
             ->get();
         
         // Create feature array for GeoJSON
+        $features = $this->createPointFeaturesFromItems($items);
+        
+        // ...and put all those in a GeoJSON feature collection
+        $geojson = $this->createFeatureCollection($features);
+        
+        return response()->json($geojson);
+    }
+
+    /**
+     * Get search result items with coordinates from storage.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function searchResults()
+    {
+        // Make sure there are any search results 
+        if (session('search_results')) {
+            // Get the items (which were saved by search controller to session)
+            $items = Item::where('public', 1)->where('item_type_fk', 39)
+                ->whereIn('item_id', session('search_results'))
+                ->with('details')
+                ->get();
+            
+            // Create feature array for GeoJSON
+            $features = $this->createPointFeaturesFromItems($items);
+        }
+        else {
+            $features = false;
+        }
+        
+        // ...and put all those in a GeoJSON feature collection
+        $geojson = $this->createFeatureCollection($features);
+        
+        return response()->json($geojson);
+    }
+
+    /**
+     * Create an array of OpenLayers point features from given items
+     *
+     * @param  \Illuminate\Database\Eloquent\Collection  $items
+     * @return array
+     */
+    private function createPointFeaturesFromItems($items) {
+        $features = false;
+        
         foreach ($items as $item) {
             // Check for missing lat/lon details
             if ($item->details->firstWhere('column_fk', 25) && $item->details->firstWhere('column_fk', 24)) {
@@ -41,21 +95,20 @@ class AjaxMapController extends Controller
                     ],
                 ];
             }
-            else {
-                /* for debugging
-                $features[] = [
-                    'type' => 'MISSING',
-                    'id' => $item->item_id,
-                ];
-                */
-            }
         }
-        // ...and put all those in a GeoJSON feature collection
-        $geojson = [
+        return $features;
+    }
+
+    /**
+     * Create an OpenLayers feature collection from given features
+     *
+     * @param  array  $features
+     * @return array
+     */
+    private function createFeatureCollection($features) {
+        return [
             'type' => 'FeatureCollection',
             'features' => $features,
         ];
-        
-        return response()->json($geojson);
     }
 }

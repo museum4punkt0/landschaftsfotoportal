@@ -4,7 +4,7 @@
 <!-- Admin dashboard -->
 <div class="container">
     <div class="card">
-        <div class="card-header">@lang('users.dashboard')</div>
+        <div class="card-header">@lang('users.profile')</div>
 
         <div class="card-body">
             @if (session('status'))
@@ -49,6 +49,24 @@
             
             <!-- Statistics -->
             <div class="container">
+            @if(config('ui.revisions'))
+                <div class="row py-1">
+                    <div class="col">
+                        @lang('revisions.soft_deleted'): {{ $deleted }}
+                    </div>
+                    <div class="col">
+                        <a href="{{route('revision.deleted')}}" class="btn btn-primary">@lang('common.show')</a>
+                    </div>
+                </div>
+                <div class="row py-1">
+                    <div class="col">
+                        @lang('revisions.moderated'): {{ $moderated }}
+                    </div>
+                    <div class="col">
+                        <a href="{{route('revision.index')}}" class="btn btn-primary">@lang('common.show')</a>
+                    </div>
+                </div>
+            @endif
                 <div class="row py-1">
                     <div class="col">
                         @lang('items.unpublished'): {{ $items }}

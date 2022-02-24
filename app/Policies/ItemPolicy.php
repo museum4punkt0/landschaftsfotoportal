@@ -22,7 +22,7 @@ class ItemPolicy
             return true;
         }
     }
-        
+
     /**
      * Determine whether the user can view any models.
      *
@@ -41,9 +41,16 @@ class ItemPolicy
      * @param  \App\Item  $item
      * @return mixed
      */
-    public function view(User $user, Item $item)
+    public function view(User $user = null, Item $item)
     {
-        return $user->hasAccess(['view-item']);
+        // WARNING: Guest users are allowed to view by default!
+        if (is_null($user)) {
+            return true;
+        }
+        // Following rule does only apply on authentificated user!
+        else {
+            return $user->hasAccess(['view-item']);
+        }
     }
 
     /**
@@ -66,7 +73,12 @@ class ItemPolicy
      */
     public function update(User $user, Item $item)
     {
-        return $user->hasAccess(['update-item']);
+        if ($user->id === $item->creator->id) {
+            return true;
+        }
+        else {
+            return $user->hasAccess(['update-item']);
+        }
     }
 
     /**
@@ -78,7 +90,12 @@ class ItemPolicy
      */
     public function delete(User $user, Item $item)
     {
-        return $user->hasAccess(['delete-item']);
+        if ($user->id === $item->creator->id) {
+            return true;
+        }
+        else {
+            return $user->hasAccess(['delete-item']);
+        }
     }
 
     /**
@@ -106,14 +123,23 @@ class ItemPolicy
     }
 
     /**
-     * Determine whether the user can create models.
+     * Determine whether the user can delete drafts of the model.
      *
      * @param  \App\User  $user
+     * @param  \App\Item  $item
      * @return mixed
      */
-    public function new(User $user)
+    public function deleteDraft(User $user, Item $item)
     {
-        return $user->hasAccess(['create-item']);
+        // Caution!
+        // revision->creator is the original creator of the item
+        // revision->editor is the creator of this revision (means: editor of the item)
+        if ($user->id === $item->editor->id) {
+            return true;
+        }
+        else {
+            return $user->hasAccess(['deleteDraft-item']);
+        }
     }
 
     /**
@@ -128,26 +154,38 @@ class ItemPolicy
     }
 
     /**
-     * Determine whether the user can show unpublished models.
-     *
-     * @param  \App\User  $user
-     * @param  \App\Item  $item
-     * @return mixed
-     */
-    public function unpublished(User $user)
-    {
-        return $user->hasAccess(['publish-item']);
-    }
-
-    /**
      * Determine whether the user can publish the model.
      *
      * @param  \App\User  $user
      * @param  \App\Item  $item
      * @return mixed
      */
-    public function publish(User $user, Item $item)
+    public function publish(User $user, Item $item = null)
     {
         return $user->hasAccess(['publish-item']);
     }
+
+    /**
+     * Determine whether the user can show own models.
+     *
+     * @param  \App\User  $user
+     * @return mixed
+     */
+    public function viewOwn(User $user)
+    {
+        return $user->hasAccess(['viewOwn-item']);
+    }
+
+    /**
+     * Determine whether the user can download models.
+     *
+     * @param  \App\User  $user
+     * @param  \App\Item  $item
+     * @return mixed
+     */
+    public function download(User $user, Item $item)
+    {
+        return $user->hasAccess(['download-item']);
+    }
+
 }

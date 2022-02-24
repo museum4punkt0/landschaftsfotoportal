@@ -18,7 +18,10 @@ class AttributeController extends Controller
     public function __construct()
     {
         $this->middleware('verified');
-    }
+    
+        // Use app\Policies\AttributePolicy for authorizing ressource controller
+        $this->authorizeResource(Attribute::class, 'attribute');
+}
 
     /**
      * Display a listing of the resource.
@@ -51,7 +54,7 @@ class AttributeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required',
+            'name' => 'required|string|max:255',
         ]);
         
         Attribute::create($request->all());
@@ -94,7 +97,7 @@ class AttributeController extends Controller
     public function update(Request $request, Attribute $attribute)
     {
         $request->validate([
-            'name' => 'required',
+            'name' => 'required|string|max:255',
         ]);
         
         $attribute->name = $request->input('name');

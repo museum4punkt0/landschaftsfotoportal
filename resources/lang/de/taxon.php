@@ -35,4 +35,7 @@ return [
     'gsl_id' => 'GermanSL SPECIES_NR',
     'bfn_namnr' => 'BfN NAMNR',
     'bfn_sipnr' => 'BfN SIPNR',
+    
+    'autocomplete_help' => 'Geben Sie den Anfang des wissenschaftl. oder umgangssprachl. Namens ein. Leer lassen, falls nicht zutreffend.',
+    'circular_parent' => 'Das Elternelement kann kein Kindelement dieses Taxons sein.',
 ];

@@ -12,28 +12,34 @@
 <form action="{{ route('list.update', $list->list_id) }}" method="POST">
 
     <div class="form-group">
-        <span>@lang('common.name')</span>
-        <input type="text" name="name" class="form-control" value="{{ old('name', $list->name) }}" />
+        <label for="nameInput">@lang('common.name')</label>
+        <input type="text" id="nameInput" name="name" class="form-control"
+            value="{{ old('name', $list->name) }}" maxlength="255" autofocus
+        >
         <span class="text-danger">{{ $errors->first('name') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('common.description')</span>
-        <input type="text" name="description" class="form-control" value="{{ old('description', $list->description) }}" />
+        <label for="descriptionInput">@lang('common.description')</label>
+        <input type="text" id="descriptionInput" name="description" class="form-control"
+            value="{{ old('description', $list->description) }}" maxlength="255"
+        >
         <span class="text-danger">{{ $errors->first('description') }}</span>
     </div>
     <div class="form-group">
         <div class="form-check">
-            <input type="checkbox" name="hierarchical" class="form-check-input" value=1 
-                @if(old('hierarchical', $list->hierarchical)) checked @endif />
-            <span>@lang('lists.hierarchical')</span>
+            <input type="checkbox" id="hierarchicalCheckbox" name="hierarchical" class="form-check-input"
+                value=1 @if(old('hierarchical', $list->hierarchical)) checked @endif
+            >
+            <label for="hierarchicalCheckbox">@lang('lists.hierarchical')</label>
             <span class="text-danger">{{ $errors->first('hierarchical') }}</span>
         </div>
     </div>
     <div class="form-group">
         <div class="form-check">
-            <input type="checkbox" name="internal" class="form-check-input" value=1 
-                @if(old('internal', $list->internal)) checked @endif />
-            <span>@lang('lists.internal_list')</span>
+            <input type="checkbox" id="internalCheckbox" name="internal" class="form-check-input"
+                value=1 @if(old('internal', $list->internal)) checked @endif
+            >
+            <label for="internalCheckbox">@lang('lists.internal_list')</label>
             <span class="text-danger">{{ $errors->first('internal') }}</span>
         </div>
     </div>

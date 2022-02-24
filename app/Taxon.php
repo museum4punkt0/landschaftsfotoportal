@@ -45,6 +45,14 @@ class Taxon extends Model
     ];
     
     /**
+     * Get the valid taxon of the taxon.
+     */
+    public function valid_taxon()
+    {
+        return $this->belongsTo('App\Taxon', 'valid_name', 'taxon_id');
+    }
+    
+    /**
      * Get the items of the taxon.
      */
     public function items()
@@ -57,7 +65,7 @@ class Taxon extends Model
      */
     public function column_mapping()
     {
-        return $this->hasMany('App\ColumnMapping', 'column_fk', 'column_id');
+        return $this->hasMany('App\ColumnMapping', 'taxon_fk', 'taxon_id');
     }
     
     /**

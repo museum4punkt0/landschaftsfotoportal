@@ -95,11 +95,13 @@ class UserController extends Controller
             'name' => [
                 'required',
                 'string',
+                'max:255',
                 Rule::unique('users')->ignore($user),
             ],
             'email' => [
                 'required',
                 'email:rfc',
+                'max:255',
                 Rule::unique('users')->ignore($user),
             ],
             'group' => 'required|integer',

@@ -2,8 +2,9 @@
 
 namespace App\Utils;
 
-use App\Detail;
+use App\Item;
 use App\Column;
+use App\ItemRevision;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
@@ -27,18 +28,19 @@ class Image
     /**
      * Store size (bytes) of a given image file.
      *
+     * @param  \App\Item $item
      * @param  string $image_path
      * @param  string $filename
-     * @param  integer $item_id
      * @param  integer $fcolumn_id
      * @return void
      */
-    public static function storeImageSize($image_path, $filename, $item_id, $column_id)
+    public static function storeImageSize(Item $item, $image_path, $filename, $column_id)
     {
         if (Image::checkFileExists($image_path . $filename)) {
         
             // Get size (bytes) of image
             $size = Storage::disk('public')->size($image_path . $filename);
+            Log::debug(__('items.image_size'), ['size' => $size]);
             
             // Get the colmap holding the config for columns containing image dimensions
             $cm = Column::find($column_id)->column_mapping()->first();
@@ -46,9 +48,10 @@ class Image
             // Find the column holding the image height
             $size_column = $cm->getConfigValue('image_size_col');
             if ($size_column) {
-                Detail::where('item_fk', $item_id)
-                ->where('column_fk', $size_column)
-                ->update(['value_int' => $size]);
+                $item->details()->updateOrCreate(
+                    ['column_fk' => $size_column],
+                    ['value_int' => $size]
+                );
             } else {
                 Log::warning(__('items.no_column_for_image_size'), ['colmap' => $cm->colmap_id]);
             }
@@ -58,20 +61,21 @@ class Image
     /**
      * Store width and height of a given image file.
      *
+     * @param  \App\Item $item
      * @param  string $image_path
      * @param  string $filename
-     * @param  integer $item_id
      * @param  integer $fcolumn_id
      * @return void
      */
-    public static function storeImageDimensions($image_path, $filename, $item_id, $column_id)
+    public static function storeImageDimensions(Item $item, $image_path, $filename, $column_id)
     {
         if (Image::checkFileExists($image_path . $filename)) {
         
             // Get original dimensions of image
-            list($width_orig, $height_orig) = getimagesize(
+            list($width_orig, $height_orig) = Image::getImageSizeExif(
                 Storage::disk('public')->path($image_path . $filename)
             );
+            Log::debug(__('items.image_dimensions'), ['width' => $width_orig, 'height' => $height_orig]);
             
             // Get the colmap holding the config for columns containing image dimensions
             $cm = Column::find($column_id)->column_mapping()->first();
@@ -79,9 +83,10 @@ class Image
             // Find the column holding the image width
             $width_column = $cm->getConfigValue('image_width_col');
             if ($width_column) {
-                Detail::where('item_fk', $item_id)
-                ->where('column_fk', $width_column)
-                ->update(['value_int' => $width_orig]);
+                $item->details()->updateOrCreate(
+                    ['column_fk' => $width_column],
+                    ['value_int' => $width_orig]
+                );
             } else {
                 Log::warning(__('items.no_column_for_image_width'), ['colmap' => $cm->colmap_id]);
             }
@@ -89,9 +94,10 @@ class Image
             // Find the column holding the image height
             $height_column = $cm->getConfigValue('image_height_col');
             if ($height_column) {
-                Detail::where('item_fk', $item_id)
-                ->where('column_fk', $height_column)
-                ->update(['value_int' => $height_orig]);
+                $item->details()->updateOrCreate(
+                    ['column_fk' => $height_column],
+                    ['value_int' => $height_orig]
+                );
             } else {
                 Log::warning(__('items.no_column_for_image_height'), ['colmap' => $cm->colmap_id]);
             }
@@ -110,7 +116,7 @@ class Image
         if (Image::checkFileExists($image_path . $filename)) {
             
             // Get original dimensions of image
-            list($width_orig, $height_orig) = getimagesize(
+            list($width_orig, $height_orig) = Image::getImageSizeExif(
                 Storage::disk('public')->path($image_path . $filename)
             );
             
@@ -161,13 +167,63 @@ class Image
             $height_thumb = $height_orig * $ratio;
             
             // Load original image and scale it to new size
-            $original = imagecreatefromjpeg(Storage::disk('public')->path($src_path . $filename));
-            $scaled = imagescale($original, $width_thumb, $height_thumb, IMG_BICUBIC_FIXED);
+            $original = Image::createFromJpegExif(Storage::disk('public')->path($src_path . $filename));
+            $scaled = imagescale($original, $width_thumb, $height_thumb, IMG_SINC);
             
             // Store thumbnail to disk
-            imagejpeg($scaled, Storage::disk('public')->path($dest_path) . $filename);
+            imagejpeg($scaled, Storage::disk('public')->path($dest_path) . $filename, 85);
             
             Log::info(__('items.resized_image_created') . $dest_path . $filename);
         }
+    }
+
+    /**
+     * Create an image from given image file, respecting the orientation set in EXIF.
+     *
+     * @param  string $filename
+     * @return object
+     */
+    private static function createFromJpegExif($filename)
+    {
+        $img = imagecreatefromjpeg($filename);
+        $exif = exif_read_data($filename);
+
+        if ($img && $exif && isset($exif['Orientation'])) {
+            $ort = $exif['Orientation'];
+
+            if ($ort == 6 || $ort == 5)
+                $img = imagerotate($img, 270, null);
+            if ($ort == 3 || $ort == 4)
+                $img = imagerotate($img, 180, null);
+            if ($ort == 8 || $ort == 7)
+                $img = imagerotate($img, 90, null);
+
+            if ($ort == 5 || $ort == 4 || $ort == 7) {
+                imageflip($img, IMG_FLIP_HORIZONTAL);
+                Log::debug(__('items.image_flipped') . $filename);
+            }
+        }
+        return $img;
+    }
+
+    /**
+     * Get the size of an image from given image file, respecting the orientation set in EXIF.
+     *
+     * @param  string $filename
+     * @return array
+     */
+    private static function getImageSizeExif($filename)
+    {
+        $exif = exif_read_data($filename);
+        $size = getimagesize($filename);
+
+        if ($exif && isset($exif['Orientation'])) {
+            $ort = $exif['Orientation'];
+
+            if ($ort == 6 || $ort == 5 || $ort == 8 || $ort == 7) {
+                [$size[0], $size[1]] = [$size[1], $size[0]];
+            }
+        }
+        return $size;
     }
 }

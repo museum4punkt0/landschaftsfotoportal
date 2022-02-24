@@ -8,13 +8,15 @@
 <form action="{{ route('list.element.store', $list->list_id) }}" method="POST">
     
     <div class="form-group">
-        <span>@lang('values.value')</span>
-        <input type="text" name="value" class="form-control" value="{{old('value')}}" />
+        <label for="valueInput">@lang('values.value')</label>
+        <input type="text" id="valueInput" name="value" class="form-control"
+            value="{{old('value')}}" maxlength="4095" autofocus
+        >
         <span class="text-danger">{{ $errors->first('value') }}</span>
     </div>
     <div class="form-group">
-        <span>@lang('lists.attribute')</span>
-        <select name="attribute" class="form-control" size=1 >
+        <label for="attributeSelect">@lang('lists.attribute')</label>
+        <select id="attributeSelect" name="attribute" class="form-control" size=1>
         @foreach($attributes as $attribute)
             <option value="{{$attribute->attribute_id}}"
             @if(old('attribute') == $attribute->attribute_id) selected @endif >
@@ -26,8 +28,8 @@
     </div>
     @if($list->hierarchical)
         <div class="form-group">
-            <span>@lang('lists.parent')</span>
-            <select name="parent_fk" class="form-control" size=1 >
+            <label for="parentSelect">@lang('lists.parent')</label>
+            <select id="parentSelect" name="parent_fk" class="form-control" size=1>
                 <option value="">@lang('common.root')</option>
                 @foreach($elements as $element)
                     <option value="{{$element->values[0]->element_fk}}"

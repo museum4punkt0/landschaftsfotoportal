@@ -102979,6 +102979,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var summernote_dist_summernote_bs4__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! summernote/dist/summernote-bs4 */ "./node_modules/summernote/dist/summernote-bs4.js");
 /* harmony import */ var summernote_dist_summernote_bs4__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(summernote_dist_summernote_bs4__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _map_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map.js */ "./resources/js/map.js");
+/* harmony import */ var _diff_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./diff.js */ "./resources/js/diff.js");
 window._ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 /**
  * We'll load jQuery and the Bootstrap jQuery plugin which provides support
@@ -103039,6 +103040,232 @@ __webpack_require__(/*! jquery.easing */ "./node_modules/jquery.easing/jquery.ea
 
 
 window.osm_map = _map_js__WEBPACK_IMPORTED_MODULE_3__["default"];
+/**
+ * Diff tools for item revisions
+ */
+
+
+window.itemDiff = _diff_js__WEBPACK_IMPORTED_MODULE_4__["default"];
+
+/***/ }),
+
+/***/ "./resources/js/diff.js":
+/*!******************************!*\
+  !*** ./resources/js/diff.js ***!
+  \******************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+var itemDiff = {
+  currentRevision: null,
+  historicRevision: null,
+  init: function init(current, historic) {
+    console.log('current: ' + current + ' / historic: ' + historic);
+    this.currentRevision = current;
+
+    if (historic) {
+      this.historicRevision = historic;
+    } else {
+      this.historicRevision = this.getMostRecentNonDraftRevision();
+    } //console.log('current: ' + this.currentRevision + ' / historic: ' + this.historicRevision);
+
+
+    this.selectComparedRevision();
+    this.fillHistorySelectText();
+    this.resetHighlighting();
+    this.highlightCurrentRevisions(this.currentRevision);
+    this.highlightHistoricRevisions(this.historicRevision);
+    this.addMapMarker();
+    this.startDiff();
+  },
+  getMostRecentNonDraftRevision: function getMostRecentNonDraftRevision() {
+    var selector = '#comparedRevisionSelect option';
+    var revs = $(selector).map(function (index, option) {
+      return parseInt(option.value);
+    }).sort(function (a, b) {
+      return b - a;
+    });
+    return revs[0];
+  },
+  selectComparedRevision: function selectComparedRevision() {
+    var selector = '#comparedRevisionSelect option[value="' + this.historicRevision + '"]';
+    $(selector).prop("selected", "true");
+  },
+  fillHistorySelectText: function fillHistorySelectText() {
+    var selector = '.revision-detail-select option';
+    $(selector).each(function () {
+      var optionText = $(this).data('content') + $(this).data('meta');
+      $($(this)).text(optionText);
+    });
+  },
+  resetHighlighting: function resetHighlighting() {
+    var selector = '.revision-detail-select option';
+    $(selector).each(function () {
+      $($(this)).css("background-color", "");
+      $($(this)).prop("selected", "false");
+    });
+  },
+  highlightCurrentRevisions: function highlightCurrentRevisions(revision) {
+    var selector = '.revision-detail-select option[value="' + revision + '"]';
+    $(selector).each(function () {
+      $($(this)).css("background-color", "#ecf6f9");
+      $($(this)).prop("selected", "true");
+    });
+  },
+  highlightHistoricRevisions: function highlightHistoricRevisions(revision) {
+    var selector = '.revision-detail-select option[value="' + revision + '"]';
+    $(selector).each(function () {
+      $($(this)).css("background-color", "#cce7ff");
+    });
+  },
+  addMapMarker: function addMapMarker() {
+    var columnLat = $('input.location_lat').data('column');
+    var columnLon = $('input.location_lon').data('column');
+    var imagePath = $('#map').data('image-path');
+    var lat = this.getHistoricContent(columnLat, '', this.historicRevision);
+    var lon = this.getHistoricContent(columnLon, '', this.historicRevision); //console.log(lat + '/' + lon);
+    // Remove old marker if it exists
+
+    osm_map.removeMarker('historicMarker');
+    osm_map.addMarker(lon, lat, imagePath + 'dot.svg', '#cce7ff', 'historicMarker');
+    osm_map.moveMapToFeatureExtent();
+  },
+  startDiff: function startDiff() {
+    var t = this; // define variable in this Scope
+
+    var selector = '[name^="fields"][type!="hidden"],[name="title"],[name="public"]';
+    $(selector).each(function () {
+      var hc = t.getHistoricContent($(this).data('column'), $(this).data('type'), t.historicRevision);
+      var cc = t.getcurrentContent($(this).data('column'), $(this).data('type'));
+      var selector2 = this;
+
+      switch ($(this).data('type')) {
+        case "boolean":
+          selector2 = '[name^="fields"] + label';
+          break;
+
+        case "daterange":
+          selector2 = '#fieldsInput-' + $(this).data('column');
+          selector2 += ',#startDate-' + $(this).data('column');
+          selector2 += ',#endDate-' + $(this).data('column');
+          break;
+
+        case "image":
+          // Change image and link for compared revision
+          $('#comparedRevisionImageFilename-' + $(this).data('column')).text(hc);
+          var link = $('#comparedRevisionImageLink-' + $(this).data('column'));
+          var image = $('#comparedRevisionImage-' + $(this).data('column'));
+          $('#comparedRevisionImageLink-' + $(this).data('column')).data('img-source', link.data('path') + hc);
+          $('#comparedRevisionImage-' + $(this).data('column')).attr('src', image.data('path') + hc);
+          break;
+      }
+
+      if (t.isEqual(cc, hc)) {
+        $(selector2).css("background-color", "#99ff99");
+      } else {
+        $(selector2).css("background-color", "#ffff99");
+      }
+    });
+  },
+  getcurrentContent: function getcurrentContent(column, type) {
+    // This is just a default selector, may be overwritten in switch block!
+    var selector = '#fieldsInput-' + column;
+    var content = "";
+
+    switch (type) {
+      case "title":
+        selector = 'input[name="title"]';
+        content = $(selector).val().trim();
+        break;
+
+      case "public":
+        selector = 'select[name="public"] :selected';
+        content = $(selector).val();
+        break;
+
+      case "list":
+        selector += ' :selected';
+
+        if ($(selector).val() == '') {
+          content = '';
+        } else {
+          content = $(selector).text().trim();
+        } //console.log(content);
+
+
+        break;
+
+      case "multi_list":
+        selector += ' :selected';
+
+        if ($(selector).val() == '') {
+          content = '';
+        } else {
+          $(selector).each(function () {
+            content += $(this).text().trim() + '; ';
+          });
+          content = content.replace(/\s/g, '');
+        } //console.log(content);
+
+
+        break;
+
+      case "boolean":
+        content = $(selector).prop('checked') ? 1 : 0;
+        break;
+
+      case "integer":
+      case "float":
+      case "textarea":
+      case "string":
+      case "date":
+        content = $(selector).val().trim();
+        break;
+
+      case "daterange":
+        content = $(selector + '-start').val() + '-' + $(selector + '-end').val(); //console.log(content);
+
+        break;
+
+      case "image":
+        selector = '#fieldsInput-' + column + '-filename';
+        content = $(selector).val();
+        break;
+    } //console.log('col curr ' + column + ': ' + content);
+
+
+    return content;
+  },
+  getHistoricContent: function getHistoricContent(column, type, revision) {
+    var selector = '.revision-detail-select[data-column="' + column + '"] option[value="' + revision + '"]';
+    var content = $(selector).data('content'); // TODO: get rid of these silly white spaces from form_history_detail.blade.php
+
+    if (content) {
+      switch (type) {
+        case "multi_list":
+        case "daterange":
+          content = content.replace(/\s/g, '');
+          break;
+
+        default:
+          content = content.trim();
+      }
+    } //console.log('col hist ' + column + ': ' + content);
+
+
+    return content;
+  },
+  isEqual: function isEqual(current, historic) {
+    if (current == historic) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = (itemDiff);
 
 /***/ }),
 
@@ -103058,9 +103285,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var ol_source_Cluster__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ol/source/Cluster */ "./node_modules/ol/source/Cluster.js");
 /* harmony import */ var ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ol/format/GeoJSON */ "./node_modules/ol/format/GeoJSON.js");
 /* harmony import */ var ol_style__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ol/style */ "./node_modules/ol/style.js");
-/* harmony import */ var ol_geom_Point__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ol/geom/Point */ "./node_modules/ol/geom/Point.js");
-/* harmony import */ var ol_source_OSM__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ol/source/OSM */ "./node_modules/ol/source/OSM.js");
-/* harmony import */ var ol_proj__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ol/proj */ "./node_modules/ol/proj.js");
+/* harmony import */ var ol_extent__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ol/extent */ "./node_modules/ol/extent.js");
+/* harmony import */ var ol_geom_Point__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ol/geom/Point */ "./node_modules/ol/geom/Point.js");
+/* harmony import */ var ol_source_OSM__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ol/source/OSM */ "./node_modules/ol/source/OSM.js");
+/* harmony import */ var ol_proj__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ol/proj */ "./node_modules/ol/proj.js");
+
 
 
 
@@ -103079,16 +103308,18 @@ var osm_map = {
       features: false
     })
   }),
+  geoJsonLayer: false,
   display: function display(lon, lat, zoom) {
-    var position = Object(ol_proj__WEBPACK_IMPORTED_MODULE_9__["fromLonLat"])([lon, lat]);
+    var position = Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]);
     var view = new ol__WEBPACK_IMPORTED_MODULE_0__["View"]({
       center: position,
-      zoom: zoom
+      zoom: zoom,
+      maxZoom: 19
     });
     this.map = new ol__WEBPACK_IMPORTED_MODULE_0__["Map"]({
       target: 'map',
       layers: [new ol_layer_Tile__WEBPACK_IMPORTED_MODULE_1__["default"]({
-        source: new ol_source_OSM__WEBPACK_IMPORTED_MODULE_8__["default"]()
+        source: new ol_source_OSM__WEBPACK_IMPORTED_MODULE_9__["default"]()
       }), this.vectorLayer],
       view: view
     });
@@ -103107,10 +103338,15 @@ var osm_map = {
   updateSize: function updateSize() {
     this.map.updateSize();
   },
-  addMarker: function addMarker(lon, lat, icon, color) {
+  addMarker: function addMarker(lon, lat, icon, color, id) {
+    if (typeof id === 'undefined') {
+      id = 'defaultMarker';
+    }
+
     var marker = new ol__WEBPACK_IMPORTED_MODULE_0__["Feature"]({
-      geometry: new ol_geom_Point__WEBPACK_IMPORTED_MODULE_7__["default"](Object(ol_proj__WEBPACK_IMPORTED_MODULE_9__["fromLonLat"])([lon, lat]))
+      geometry: new ol_geom_Point__WEBPACK_IMPORTED_MODULE_8__["default"](Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]))
     });
+    marker.setId(id);
     marker.setStyle(new ol_style__WEBPACK_IMPORTED_MODULE_6__["Style"]({
       image: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Icon"]({
         color: color,
@@ -103122,18 +103358,46 @@ var osm_map = {
     this.vectorLayer.getSource().addFeature(marker);
   },
   updatePosition: function updatePosition(lon, lat, zoom) {
-    this.map.getView().setCenter(Object(ol_proj__WEBPACK_IMPORTED_MODULE_9__["fromLonLat"])([lon, lat]));
+    this.map.getView().setCenter(Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]));
   },
-  moveMarker: function moveMarker(lon, lat) {
-    var coordinates = Object(ol_proj__WEBPACK_IMPORTED_MODULE_9__["fromLonLat"])([lon, lat]);
-    this.vectorLayer.getSource().getFeatures()[0].getGeometry().setCoordinates(coordinates);
+  moveMapToFeatureExtent: function moveMapToFeatureExtent() {
+    var padding = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 50;
+    var maxZoom = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 17;
+    var extent = this.vectorLayer.getSource().getExtent(); //console.log(osm_map.transformExtent(this.vectorLayer.getSource().getExtent(extent)));
+
+    this.map.getView().fit(extent, {
+      padding: [padding, padding, padding, padding],
+      maxZoom: maxZoom
+    });
+  },
+  moveMarker: function moveMarker(lon, lat, id) {
+    if (typeof id === 'undefined') {
+      id = 'defaultMarker';
+    }
+
+    var coordinates = Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]);
+    this.vectorLayer.getSource().getFeatureById(id).getGeometry().setCoordinates(coordinates);
+  },
+  removeMarker: function removeMarker(id) {
+    if (typeof id === 'undefined') {
+      id = 'defaultMarker';
+    }
+
+    var feature = this.vectorLayer.getSource().getFeatureById(id);
+
+    if (feature) {
+      this.vectorLayer.getSource().removeFeature(feature);
+    }
   },
   transformCoordinate: function transformCoordinate(coordinate) {
-    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_9__["transform"])(coordinate, 'EPSG:3857', 'EPSG:4326');
+    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["transform"])(coordinate, 'EPSG:3857', 'EPSG:4326');
+  },
+  transformExtent: function transformExtent(extent) {
+    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
   },
   addGeoJsonLayer: function addGeoJsonLayer(url) {
     var styleCache = {};
-    var geoJsonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
+    this.geoJsonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
       source: new ol_source_Cluster__WEBPACK_IMPORTED_MODULE_4__["default"]({
         distance: 30,
         source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
@@ -103170,7 +103434,40 @@ var osm_map = {
         return style;
       }
     });
-    this.map.addLayer(geoJsonLayer);
+    this.map.addLayer(this.geoJsonLayer);
+  },
+  isCluster: function isCluster(feature) {
+    console.log(feature);
+
+    if (!feature || !feature.get('features')) {
+      return false;
+    }
+
+    return feature.get('features').length > 1;
+  },
+  getExtendOfFeatures: function getExtendOfFeatures(features) {
+    if (this.isCluster(features)) {
+      // is a cluster, so loop through all the underlying features
+      var clusteredFeatures = features.get('features');
+      var extent = clusteredFeatures[0].getGeometry().getExtent().slice(0);
+
+      for (var i = 0; i < clusteredFeatures.length; i++) {
+        ol_extent__WEBPACK_IMPORTED_MODULE_7__["extend"](extent, clusteredFeatures[i].getGeometry().getExtent());
+      }
+    } else {
+      // not a cluster
+      var extent = features.getGeometry().getExtent().slice(0);
+    }
+
+    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
+  },
+  getBoundsOfView: function getBoundsOfView() {
+    var extent = this.map.getView().calculateExtent(this.map.getSize());
+    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
+  },
+  wrapLon: function wrapLon(value) {
+    var worlds = Math.floor((value + 180) / 360);
+    return value - worlds * 360;
   }
 };
 /* harmony default export */ __webpack_exports__["default"] = (osm_map);

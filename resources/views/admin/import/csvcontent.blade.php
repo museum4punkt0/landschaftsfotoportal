@@ -24,16 +24,16 @@
                     <tr>
                     @foreach ($csv_data[0] as $key => $value)
                         <td>
-                            <select name="fields[{{ $key }}]" style="width: 8em;">
+                            <select name="fields[{{ $key }}]" style="width: 8em;" @if($loop->first) autofocus @endif >
                                 <option value="0">@lang('common.ignore')</option>
                                 @if($list->hierarchical)
                                     <option value="-1"
                                         @if(old('fields.'.$key) == -1) selected @endif>
-                                        @lang('import.element_id')
+                                        * @lang('common.relation'): @lang('import.element_id')
                                     </option>
                                     <option value="-2"
                                         @if(old('fields.'.$key) == -2) selected @endif>
-                                        @lang('import.parent_id')
+                                        * @lang('common.relation'): @lang('import.parent_id')
                                     </option>
                                 @endif
                                 @foreach ($attributes as $attr)
@@ -67,8 +67,12 @@
                 </div>
 
                 <div class="form-group">
-                    <input type="checkbox" name="header" class="checkbox" value=1 @if(old('header')) checked @endif />
-                    <span>@lang('import.contains_header')</span>
+                    <div class="form-check">
+                        <input type="checkbox" id="headerCheckbox" name="header"
+                            class="form-check-input" value=1 @if(old('header')) checked @endif
+                        >
+                        <label for="headerCheckbox" class="form-check-label">@lang('import.contains_header')</label>
+                    </div>
                 </div>
 
                 <div class="form-group">
