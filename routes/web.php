@@ -51,6 +51,9 @@ Route::resource('/item', 'ItemController')->except(['index'])->names([
 
 Route::get('map/all', 'AjaxMapController@all')->name('map.all');
 Route::get('map/search', 'AjaxMapController@searchResults')->name('map.search');
+Route::get('map/config/', 'AjaxMapController@getConfig')->name('map.config');
+Route::get('map/points/', 'AjaxMapController@getPointFeaturesForItem')->name('map.points');
+Route::get('map/polygons/', 'AjaxMapController@getPolygonFeaturesForItem')->name('map.polygons');
 Route::post('comment/{item}/store', 'AjaxCommentController@store')->name('comment.store');
 Route::post('comment/{comment}/update', 'AjaxCommentController@update')->name('ajax.comment.update');
 Route::post('comment/{comment}/destroy', 'AjaxCommentController@destroy')->name('ajax.comment.destroy');

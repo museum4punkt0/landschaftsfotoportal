@@ -103302,6 +103302,8 @@ __webpack_require__.r(__webpack_exports__);
 
 var osm_map = {
   map: false,
+  config: false,
+  owner: new Object(),
   popup: false,
   vectorLayer: new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
     source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
@@ -103309,6 +103311,53 @@ var osm_map = {
     })
   }),
   geoJsonLayer: false,
+  // Init
+  init: function init(colmapId, itemId, configUrl) {
+    this.owner.colmapId = colmapId;
+    this.owner.itemId = itemId;
+    this.getConfig(configUrl);
+  },
+  // Get the JSON map config via AJAX from backend
+  getConfig: function getConfig(configUrl) {
+    $.getJSON(configUrl, function (data, status) {
+      //console.log(status);
+      // Store config data to map object
+      osm_map.config = data; // Apply all config options and start creating the map
+
+      osm_map.applyConfig();
+    });
+  },
+  // Apply all config options and add vector layers accordingly
+  applyConfig: function applyConfig() {
+    // Draw the map
+    osm_map.display(this.config.map_lon || 0, this.config.map_lat || 0, this.config.map_zoom || 19); // Add vector layer with polygons
+
+    if (this.config.api_polygons) {
+      this.getPolygonLayers(this.config.api_polygons + '&item=' + this.owner.itemId);
+    } // Add vector layer with points
+
+
+    if (this.config.api_points) {
+      this.addVectorLayer(this.config.api_points + '&item=' + this.owner.itemId, this.config.marker_icon, this.config.marker_color, this.config.marker_scale); // Display error message if no points with valid lat/lon available
+
+      console.log(osm_map.geoJsonLayer.getSource());
+
+      if (this.geoJsonLayer.getSource().getFeatures().length == 'foo') {
+        $('#mapError').css('display', 'block');
+      }
+    } // No lat/lon was given in map config, so we zoom to vector layer extent
+
+
+    if (!this.config.map_lon || !this.config.map_lat) {
+      //console.log('no lon/lat in config: zoom to extent');
+      // Fires but does not give an extent:
+      //this.geoJsonLayer.getSource().on('featuresloadend', function () {
+      this.map.once('rendercomplete', function () {
+        //console.log(osm_map.geoJsonLayer.getSource().getState());
+        osm_map.moveMapToLayerSourceExtent(osm_map.geoJsonLayer, 50, osm_map.config.map.zoom);
+      });
+    }
+  },
   display: function display(lon, lat, zoom) {
     var position = Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]);
     var view = new ol__WEBPACK_IMPORTED_MODULE_0__["View"]({
@@ -103360,6 +103409,20 @@ var osm_map = {
   updatePosition: function updatePosition(lon, lat, zoom) {
     this.map.getView().setCenter(Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]));
   },
+  // Move and zoom the map view to extent of a given layer's source
+  moveMapToLayerSourceExtent: function moveMapToLayerSourceExtent(layer) {
+    var padding = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 50;
+    var maxZoom = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 17;
+    var extent = layer.getSource().getExtent(); //console.log(osm_map.transformExtent(extent));
+
+    if (!ol_extent__WEBPACK_IMPORTED_MODULE_7__["isEmpty"](extent)) {
+      osm_map.map.getView().fit(extent, {
+        padding: [padding, padding, padding, padding],
+        maxZoom: maxZoom
+      });
+    }
+  },
+  // TODO: check if this is beeing used, otherwise remove
   moveMapToFeatureExtent: function moveMapToFeatureExtent() {
     var padding = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 50;
     var maxZoom = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 17;
@@ -103395,6 +103458,89 @@ var osm_map = {
   transformExtent: function transformExtent(extent) {
     return Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
   },
+  // Get all vector layers with polygon features from GeoJSON file
+  getPolygonLayers: function getPolygonLayers(url) {
+    //console.log('get polygon layers');
+    $.getJSON(url, function (data, status) {
+      var polygonLayers = data; //console.log(polygonLayers);
+
+      polygonLayers.forEach(function (l, i) {
+        osm_map.addPolygonLayer(l.polygon_file, l.polygon_color);
+      });
+    });
+  },
+  // Add a vector layer with polygon features from GeoJSON file
+  addPolygonLayer: function addPolygonLayer(url, color) {
+    var _style = new ol_style__WEBPACK_IMPORTED_MODULE_6__["Style"]({
+      fill: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Fill"]({
+        color: '#eeeeee'
+      }),
+      stroke: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Stroke"]({
+        color: '#0000003f',
+        width: 2
+      })
+    });
+
+    var polygonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
+      source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
+        projection: 'EPSG:3857',
+        url: url,
+        format: new ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_5__["default"]()
+      }),
+      zIndex: 20,
+      style: function style(feature) {
+        _style.getFill().setColor(color || '#ffffff');
+
+        return _style;
+      }
+    });
+    this.map.addLayer(polygonLayer);
+  },
+  // Add a vector layer with point features from GeoJSON file
+  addVectorLayer: function addVectorLayer(url, icon, color) {
+    var scale = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 1.0;
+    var label = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
+    var styleCache = {};
+    this.geoJsonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
+      source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
+        projection: 'EPSG:3857',
+        url: url,
+        format: new ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_5__["default"]()
+      }),
+      zIndex: 40,
+      style: function style(feature) {
+        var size = feature.length;
+        var style = styleCache[size];
+
+        if (!style) {
+          style = new ol_style__WEBPACK_IMPORTED_MODULE_6__["Style"]({
+            image: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Icon"]({
+              color: color,
+              crossOrigin: 'anonymous',
+              src: icon,
+              scale: scale
+            }),
+            text: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Text"]({
+              text: feature.get('name'),
+              font: '12px Calibri,sans-serif',
+              offsetY: 20,
+              padding: [2, 2, 2, 2],
+              backgroundFill: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Fill"]({
+                color: '#fff'
+              }),
+              fill: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Fill"]({
+                color: '#000'
+              })
+            })
+          });
+        }
+
+        return style;
+      }
+    });
+    this.map.addLayer(this.geoJsonLayer);
+  },
+  // Add a vector layer with clustered point features from GeoJSON file
   addGeoJsonLayer: function addGeoJsonLayer(url) {
     var styleCache = {};
     this.geoJsonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
@@ -103492,8 +103638,8 @@ var osm_map = {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /var/www/html/fotoportal/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /var/www/html/fotoportal/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! /var/www/html/fwp-dev/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /var/www/html/fwp-dev/resources/sass/app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

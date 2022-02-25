@@ -403,8 +403,22 @@
                     @endif
                 @endif
                 @if($cm->getConfigValue('map') == 'inline')
-                    <div id="map" class="map"><div id="popup"></div></div>
+                    <div id="map" class="map"
+                        data-colmap="{{ $cm->colmap_id }}"
+                        data-item="{{ $item->item_id }}"
+                        data-map-config="{{ route('map.config', ['colmap' => $cm->colmap_id]) }}"
+                    >
+                        <div id="popup"></div>
+                        <div id="mapError" style="display:none;"><b>@lang("items.no_position_for_map")</b></div>
+                    </div>
                     <script type="text/javascript">
+                        $(document).ready(function () {
+                            var colmapId = $('#map').data('colmap');
+                            var itemId = $('#map').data('item');
+                            var mapConfig = $('#map').data('map-config');
+                            osm_map.init(colmapId, itemId, mapConfig);
+                        });
+                        /*
                         var lon = {{ optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col')))->value_float ?? 0 }};
                         var lat = {{ optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col')))->value_float ?? 0 }};
                         var zoom = {{ $cm->getConfigValue('map_zoom') }};
@@ -439,7 +453,7 @@
                                 osm_map.popup.setPosition(coordinates);
                             });
                         }
-                        
+                        */
                         {{-- Resize the map after un-collapsing the container --}}
                         $('#collapseCG{{ $cm->column_group_fk }}').on('shown.bs.collapse', function () {
                             osm_map.updateSize();
