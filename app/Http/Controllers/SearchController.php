@@ -211,6 +211,10 @@ class SearchController extends Controller
         if ($search_taxa) {
             $taxa = Taxon::where('full_name', 'ILIKE', "%{$search_taxa}%")
                 ->orWhere('native_name', 'ILIKE', "%{$search_taxa}%")
+                // TODO: this should be more flexible; allow configuration of multiple/different item_types
+                ->whereHas('items', function (Builder $query) {
+                    $query->where('item_type_fk', '<>', 188);
+                })
                 ->with('items')
                 ->orderBy('full_name')
                 ->get();

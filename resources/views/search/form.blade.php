@@ -199,10 +199,14 @@
                                 </a>
                             @endauth
                             &nbsp;
-                            <span class="badge badge-secondary">{{ count($taxon->items )}}</span>
-                            @if(count($taxon->items))
+                            <span class="badge badge-secondary">{{ count($taxon->items->where('item_type_fk', '<>', 188)) }}</span>
+                            @if(count($taxon->items->where('item_type_fk', '<>', 188)))
                                 <ul class="list-group">
-                                @foreach($taxon->items->sortBy('item_type_fk')->sortBy('title') as $item)
+                                @foreach($taxon->items
+                                    ->where('item_type_fk', '<>', 188)
+                                    ->sortBy('item_type_fk')
+                                    ->sortBy('title')
+                                as $item)
                                     <li class="list-group-item">
                                         <a href="{{ route('item.show.public', [$item->item_id]) }}">
                                             {{ $item->title }}
