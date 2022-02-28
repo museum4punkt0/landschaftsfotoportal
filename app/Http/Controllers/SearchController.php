@@ -84,6 +84,9 @@ class SearchController extends Controller
         
         // Get current UI language
         $lang = app()->getLocale();
+
+        // Get item types with localized names
+        $item_types = Localization::getItemTypes($lang);
         
         // Get localized names of columns
         $translations = Localization::getTranslations($lang, 'name');
@@ -244,6 +247,6 @@ class SearchController extends Controller
         $query_str = http_build_query($request_query);
 
         return view('search.form', compact('menu_root', 'search_terms', 'lists', 'dateranges',
-            'colmap', 'translations', 'taxa', 'items', 'query_str'));
+            'colmap', 'translations', 'item_types', 'taxa', 'items', 'query_str'));
     }
 }
