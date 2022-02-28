@@ -19,9 +19,13 @@
                 @endif
                 </a>
                 
-                @if($loop->depth <= count($path) && $path[$loop->depth - 1] == $it->item_id && count($it->children))
+                @if($loop->depth <= count($path) && $path[$loop->depth - 1] == $it->item_id
+                    && count($it->children->where('item_type_fk', '<>', 188)))
                     <ul>
-                        @include('includes.item_submenu', ['sub' => $it->children, 'path' => $path])
+                        @include('includes.item_submenu', [
+                                'sub' => $it->children->where('item_type_fk', '<>', 188),
+                                'path' => $path
+                        ])
                     </ul>
                 @endif
             </li>
