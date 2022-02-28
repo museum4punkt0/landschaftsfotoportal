@@ -336,19 +336,30 @@ class ItemController extends Controller
     /**
      * Fill title column of items table from details table.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function titles()
+    public function titles(Request $request)
     {
         $this->authorize('titles', Item::class);
 
-        $items = Item::orderBy('item_id')->get();
+        $query = Item::orderBy('item_id');
+        if ($request->item_type) {
+            $query = $query->where('item_type_fk', intval($request->item_type));
+        }
+        if (!$request->update) {
+            $query = $query->whereNull('title');
+        }
+        $items = $query->get();
+        #dd($items);
 
         $count = 0;
+        $from_taxon = intval($request->taxon_schema) ? true : false;
         // Copy title string for all items if doesn't exist yet
         foreach ($items as $item) {
-            if (!$item->title) {
-                $item->title = substr($item->getTitleColumn(), 0, 255);
+            if ($request->update || !$item->title) {
+                $item->title = substr(
+                    $item->getTitleColumn($from_taxon, intval($request->taxon_schema)), 0, 255);
                 $item->save();
                 $count++;
             }

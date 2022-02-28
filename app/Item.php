@@ -288,9 +288,10 @@ class Item extends Model
      * The column storing that string is set in the JSON config that belongs to the item_type.
      *
      * @param  bool  $fromTaxon
+     * @param  int  $taxon_schema
      * @return string
      */
-    public function getTitleColumn($fromTaxon = false)
+    public function getTitleColumn($fromTaxon = false, $taxonSchema = 1)
     {
         $title = __('items.no_title_column');
         
@@ -304,7 +305,16 @@ class Item extends Model
         // Try to fetch a taxon name instead if a taxon is linked with this item
         else {
             if ($this->taxon_fk) {
-                $title = $this->taxon->full_name;
+                // Different naming schemas
+                switch ($taxonSchema) {
+                    case 2:
+                        $title = $this->taxon->taxon_name;
+                        break;
+                    case 1:
+                    default:
+                        $title = $this->taxon->full_name;
+                        break;
+                }
             }
         }
         
