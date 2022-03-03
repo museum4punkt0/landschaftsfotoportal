@@ -163,24 +163,26 @@
             <div class="col-lg-10" id="searchResults">
                 
                 <!-- Search results for details -->
-                @isset($items)
+                @if($items->count())
                     @includeIf('includes.' . Config::get('ui.frontend_layout') . '.item_search_results')
-                @endisset
+                @endif
                 
                 <!-- Search results for taxa -->
-                @isset($taxa)
+                @if($taxa->count())
                     <ul class="list-group">
                     @foreach($taxa as $taxon)
                         <li class="list-group-item">
                             @auth
-                                <a href="{{ route('taxon.edit', [$taxon->taxon_id]) }}" target="_blank">
+                                <a href="{{ route('taxon.edit', $taxon) }}" target="_blank">
                             @endauth
                                     {{ $taxon->full_name }}
                             @auth
                                 </a>
                             @endauth
                             &nbsp;
-                            <span class="badge badge-secondary">{{ count($taxon->items->where('item_type_fk', '<>', 188)) }}</span>
+                            <span class="badge badge-secondary">
+                                {{ count($taxon->items->where('item_type_fk', '<>', 188)) }} Belege
+                            </span>
                             @if(count($taxon->items->where('item_type_fk', '<>', 188)))
                                 <ul class="list-group">
                                 @foreach($taxon->items
@@ -199,7 +201,7 @@
                         </li>
                     @endforeach
                     </ul>
-                @endisset
+                @endif
                 
                 @if(env('APP_DEBUG'))
                     [Rendering time: {{ round(microtime(true) - LARAVEL_START, 3) }} seconds]

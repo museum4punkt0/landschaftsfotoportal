@@ -81,6 +81,7 @@ return [
     'reset' => 'Zurücksetzen',
     'rowsperpage' => 'Einträge pro Seite:',
     'top' => 'Nach oben',
+    'info' => 'Info',
     'meta_data' => 'Metadaten',
     'permalink' => 'Permalink',
     'created' => 'erstellt',
