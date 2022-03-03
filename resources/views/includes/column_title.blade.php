@@ -4,7 +4,7 @@
     <div class="col-sm-3">
         @unless($cm->getConfigValue('show_title'))
             <div class="column-title">
-                {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }}
+                {{ optional($translations->firstWhere('element_fk', $cm->column->translation_fk))->value }}
             </div>
         @endunless
     </div>

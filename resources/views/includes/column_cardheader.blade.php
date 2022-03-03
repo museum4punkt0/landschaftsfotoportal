@@ -7,7 +7,7 @@
                                 title=" @lang('common.unpublished') "></i>
                         @endif
                         
-                        {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }}
+                        {{ optional($translations->firstWhere('element_fk', $cm->column->translation_fk))->value }}
                         ({{ $cm->column->description }})
                     </h5>
                 </div>

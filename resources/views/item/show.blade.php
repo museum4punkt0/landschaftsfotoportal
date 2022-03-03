@@ -62,13 +62,13 @@
         <div class="mt-4 mb-0">
         @if($cg->first()->column_group->getConfigValue('show_collapsed'))
             <a class="column-content" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="true" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
-                {{ $cg->first()->column_group->attributes
-                ->firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}
+                {{ optional(optional($cg->first()->column_group->attributes
+                ->firstWhere('name', 'name_'.app()->getLocale()))->pivot)->value }}
             </a>
         @else
             <a class="column-content" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="false" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
-                {{ $cg->first()->column_group->attributes
-                ->firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}
+                {{ optional(optional($cg->first()->column_group->attributes
+                ->firstWhere('name', 'name_'.app()->getLocale()))->pivot)->value }}
             </a>
         @endif
         </div>
