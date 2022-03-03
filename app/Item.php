@@ -307,6 +307,9 @@ class Item extends Model
             if ($this->taxon_fk) {
                 // Different naming schemas
                 switch ($taxonSchema) {
+                    case 3:
+                        $title = $this->taxon->taxon_name . ' ' . $this->taxon->taxon_suppl;
+                        break;
                     case 2:
                         $title = $this->taxon->taxon_name;
                         break;
