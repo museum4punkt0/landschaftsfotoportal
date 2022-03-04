@@ -37,20 +37,25 @@
         }
       }
       .map {
-        height: 500px;
+        height: 550px;
         width: 100%;
       }
     </style>
 </head>
 <body>
     <!-- Top Navbar -->
-    <nav class="navbar navbar-dark sticky-top flex-md-nowrap p-0 shadow">
-        <a class="navbar-brand col-md-3 col-lg-2 mr-0 p-0" href="{{ url('/') }}">
-            <img src="{{ asset('storage/images/logos/taxa_banner_klein.jpg') }}" />
+    <nav class="navbar navbar-light sticky-top flex-nowrap p-0">
+        <a class="navbar-brand col-4 col-md-3 col-lg-2 mr-0 p-0" href="{{ url('/') }}">
+            <img class="site-logo mx-auto d-block" src="{{ asset('storage/images/bestikri/logos/bestikri_logo.png') }}" />
         </a>
         <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
+
+        <div class="w-100 px-md-4">
+            <span class="site-heading">Bestimmungs&shy;kritische Taxa</span><br>
+            <span class="site-subheading">zur Flora von Deutschland</span>
+        </div>
         
         <ul class="navbar-nav px-3">
             <!-- Authentication Links -->
@@ -89,29 +94,21 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar Menu -->
-            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-              <div class="sidebar-sticky pt-3">
-                <ul class="nav flex-column">
-                    
-                @section('sidebar_menu_items')
-                @show
-                
-                </ul>
+            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="p-md-3">
+                    <div class="sidebar-sticky pt-3">
+                        <ul class="nav flex-column">
 
-              </div>
-              <!-- Logo Area -->
-              <div class="sidebar-footer pt-3">
-                  <a href="https://www.senckenberg.de/" target="_blank">
-                  <img src="{{ asset('storage/images/logos/sgn_logo.png') }}" width=170 vspace=10 />
-                  </a>
-                  <a href="https://www.herbarium.uni-jena.de/" target="_blank">
-                  <img src="{{ asset('storage/images/logos/hausknecht_logo.png') }}" width=170 vspace=10 />
-                  </a>
-              </div>
+                            @section('sidebar_menu_items')
+                            @show
+
+                        </ul>
+                    </div>
+                </div>
             </nav>
             
             <!-- Content Area -->
-            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pl-md-0 pr-md-3">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <!-- Language Dropdown -->
@@ -129,9 +126,34 @@
                         </div>
                     </div>
                 </div>
-                
+
+                <div class="main-content p-3">
                 @yield('content')
-                
+                </div>
+
+                <!-- Footer Area with Logos and Links -->
+                <div class="pt-3">
+                    <div class="footer p-3">
+                        <div class="row">
+                            <div class="col-6 col-md-4 col-lg-2 align-self-center">
+                                <a href="https://www.senckenberg.de/" target="_blank">
+                                    <img class="img-fluid" src="{{ asset('storage/images/bestikri/logos/sgn_logo.png') }}" />
+                                </a>
+                            </div>
+                            <div class="col-6 col-md-4 col-lg-2 align-self-center">
+                                <a href="https://www.herbarium.uni-jena.de/" target="_blank">
+                                    <img class="img-fluid" src="{{ asset('storage/images/bestikri/logos/hausknecht_logo.png') }}" />
+                                </a>
+                            </div>
+                            <div class="col-6 col-md-4 col-lg-2 align-self-center">
+                                Finanziert von
+                                <a href="https://www.dfg.de/" target="_blank">
+                                    <img class="img-fluid" src="{{ asset('storage/images/bestikri/logos/dfg_logo.png') }}" />
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </main>
         
         </div>
