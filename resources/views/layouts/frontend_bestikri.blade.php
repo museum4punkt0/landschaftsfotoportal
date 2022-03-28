@@ -51,44 +51,12 @@
         <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-
-        <div class="w-100 px-md-4">
+        <div class="col-6 col-md-8 px-0">
             <span class="site-heading">Bestimmungs&shy;kritische Taxa</span><br>
             <span class="site-subheading">zur Flora von Deutschland</span>
         </div>
-        
-        <ul class="navbar-nav px-3">
-            <!-- Authentication Links -->
-            @guest
-                <li class="nav-item text-nowrap">
-                    <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
-                </li>
-                @if (Route::has('register'))
-                    <li class="nav-item text-nowrap">
-                        <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
-                    </li>
-                @endif
-            @else
-                <li class="nav-item dropdown text-nowrap">
-                    <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                        {{ Auth::user()->name }} <span class="caret"></span>
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="{{ route('home') }}">
-                            {{ __('users.dashboard') }}
-                        </a>
-                        <a class="dropdown-item" href="{{ route('logout') }}"
-                           onclick="event.preventDefault();
-                                         document.getElementById('logout-form').submit();">
-                            {{ __('Logout') }}
-                        </a>
-                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                            @csrf
-                        </form>
-                    </div>
-                </li>
-            @endguest
-        </ul>
+        <div class="col-2 col-md-1 col-lg-2">
+        </div>
     </nav>
     
     <div class="container-fluid">
@@ -136,6 +104,40 @@
                     <div class="footer p-3">
                         <div class="row">
                             <div class="col-6 col-md-4 col-lg-2 align-self-center">
+                                <!-- Authentication Links -->
+                                <ul class="navbar-nav px-3">
+                                @guest
+                                    <li class="nav-item text-nowrap">
+                                        <a class="nav-link" href="{{ route('login') }}">{{ __('users.internal_login') }}</a>
+                                    </li>
+                                    @if (Route::has('register'))
+                                        <li class="nav-item text-nowrap">
+                                            <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
+                                        </li>
+                                    @endif
+                                @else
+                                    <li class="nav-item dropdown text-nowrap">
+                                        <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
+                                            {{ Auth::user()->name }} <span class="caret"></span>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                                            <a class="dropdown-item" href="{{ route('home') }}">
+                                                {{ __('users.dashboard') }}
+                                            </a>
+                                            <a class="dropdown-item" href="{{ route('logout') }}"
+                                               onclick="event.preventDefault();
+                                                             document.getElementById('logout-form').submit();">
+                                                {{ __('Logout') }}
+                                            </a>
+                                            <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                                @csrf
+                                            </form>
+                                        </div>
+                                    </li>
+                                @endguest
+                                </ul>
+                            </div>
+                            <div class="col-6 col-md-4 col-lg-2 align-self-center">
                                 <a href="https://www.senckenberg.de/" target="_blank">
                                     <img class="img-fluid" src="{{ asset('storage/images/bestikri/logos/sgn_logo.png') }}" />
                                 </a>
@@ -146,7 +148,6 @@
                                 </a>
                             </div>
                             <div class="col-6 col-md-4 col-lg-2 align-self-center">
-                                Finanziert von
                                 <a href="https://www.dfg.de/" target="_blank">
                                     <img class="img-fluid" src="{{ asset('storage/images/bestikri/logos/dfg_logo.png') }}" />
                                 </a>

@@ -25,6 +25,7 @@ return [
     'verified' => 'verifiziert',
     'dashboard' => 'Dashboard',
     'profile' => 'Mein Profil',
+    'internal_login' => 'Interner Login',
     
     'group_registered' => 'registriert',
     'group_author' => 'Autor',
