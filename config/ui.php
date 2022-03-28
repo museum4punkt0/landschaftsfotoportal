@@ -178,4 +178,14 @@ return [
 
     'revisions' => true,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Enable registration for users
+    |--------------------------------------------------------------------------
+    |
+    | Allows users to register for an account.
+    |
+    */
+
+    'user_registration' => (bool) env('USER_REGISTRATION', false),
 ];
