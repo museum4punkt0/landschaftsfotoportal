@@ -59,31 +59,32 @@
 @foreach($colmap->groupBy('column_group_fk') as $cg)
     
     @unless($cg->first()->column_group->getConfigValue('hide_heading'))
-        <div class="mt-4 mb-0">
+        <div class="column-group-title pt-2 mt-2 mb-0">
         @if($cg->first()->column_group->getConfigValue('show_collapsed'))
-            <a class="column-content" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="true" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
+            <a data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="true" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
+                <i class="fa" aria-hidden="true"></i>
                 {{ optional(optional($cg->first()->column_group->attributes
                 ->firstWhere('name', 'name_'.app()->getLocale()))->pivot)->value }}
             </a>
         @else
-            <a class="column-content" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="false" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
+            <a data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="false" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}" class="collapsed">
+                <i class="fa" aria-hidden="true"></i>
                 {{ optional(optional($cg->first()->column_group->attributes
                 ->firstWhere('name', 'name_'.app()->getLocale()))->pivot)->value }}
             </a>
         @endif
         </div>
-        <hr class="my-0">
     @endif
     
     @foreach($cg as $cm)
         
         @if($cg->first()->column_group->getConfigValue('hide_heading'))
-            <div class="container-fluid">
+            <div class="container-fluid px-0">
         @else
             @if($cg->first()->column_group->getConfigValue('show_collapsed'))
-                <div class="container-fluid collapse show" id="collapseCG{{ $cm->column_group_fk }}">
+                <div class="container-fluid collapse show px-0" id="collapseCG{{ $cm->column_group_fk }}">
             @else
-                <div class="container-fluid collapse" id="collapseCG{{ $cm->column_group_fk }}">
+                <div class="container-fluid collapse px-0" id="collapseCG{{ $cm->column_group_fk }}">
             @endif
         @endif
         

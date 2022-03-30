@@ -5,7 +5,7 @@
 */
 
 body {
-  font-size: .875rem;
+  font-size: 1.0rem;
   background-color: #f2f2f2;
 }
 
@@ -147,6 +147,25 @@ body {
 
 .main-content {
   background-color: #ffffff;
+}
+
+[data-toggle="collapse"] .fa:before {  
+  content: "\f077";
+}
+
+[data-toggle="collapse"].collapsed .fa:before {
+  content: "\f078";
+}
+.column-group-title {
+  font-size: 1.2rem;
+  font-weight: bold;
+  border-top: 1px solid rgba(0, 0, 0, 0.5);
+}
+.column-title {
+  font-weight: bold;
+}
+.column-content {
+  font-weight: normal;
 }
 
 .footer {
