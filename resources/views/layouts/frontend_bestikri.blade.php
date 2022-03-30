@@ -77,7 +77,19 @@
             
             <!-- Content Area -->
             <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pl-md-0 pr-md-3">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-3">
+                    <!-- Search input -->
+                    <form class="form-inline" action="{{ route('search.index') }}#searchResults" method="GET">
+                        <input
+                            class="form-control mr-sm-2"
+                            type="text"
+                            name="full_text"
+                            placeholder="@lang('search.full_text')"
+                            aria-label="@lang('search.full_text')"
+                        />
+                        <button class="btn btn-sm btn-outline-primary d-none d-md-block my-2 my-sm-0" type="submit">@lang('search.search')</button>
+                    </form>
+
                     <div class="btn-toolbar mb-2 mb-md-0">
                         <!-- Language Dropdown -->
                         <div class="nav-item dropdown">
