@@ -45,24 +45,24 @@
 <body>
     <!-- Top Navbar -->
     <nav class="navbar navbar-light sticky-top flex-nowrap p-0">
-        <a class="navbar-brand col-4 col-md-3 col-lg-2 mr-0 p-0" href="{{ url('/') }}">
+        <a class="navbar-brand col-3 col-lg-3 mr-0 p-0" href="{{ url('/') }}">
             <img class="site-logo mx-auto d-block" src="{{ asset('storage/images/bestikri/logos/bestikri_logo.png') }}" />
         </a>
-        <button class="navbar-toggler position-absolute d-md-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler position-absolute d-lg-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="col-6 col-md-8 px-0">
+        <div class="col-7 col-lg-8 px-0">
             <span class="site-heading">Bestimmungs&shy;kritische Taxa</span><br>
             <span class="site-subheading">zur Flora von Deutschland</span>
         </div>
-        <div class="col-2 col-md-1 col-lg-2">
+        <div class="col-2 col-lg-1">
         </div>
     </nav>
     
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar Menu -->
-            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+            <nav id="sidebarMenu" class="col-lg-3 d-lg-block sidebar collapse">
                 <div class="p-md-3">
                     <div class="sidebar-sticky pt-3">
                         <ul class="nav flex-column">
@@ -76,7 +76,7 @@
             </nav>
             
             <!-- Content Area -->
-            <main role="main" class="col-md-9 ml-sm-auto col-lg-10 pl-md-0 pr-md-3">
+            <main role="main" class="col-lg-9 ml-sm-auto pl-lg-0 pr-lg-3">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-3">
                     <!-- Search input -->
                     <form class="form-inline" action="{{ route('search.index') }}#searchResults" method="GET">
