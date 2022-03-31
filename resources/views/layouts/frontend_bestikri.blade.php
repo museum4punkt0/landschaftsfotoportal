@@ -45,8 +45,11 @@
 <body>
     <!-- Top Navbar -->
     <nav class="navbar navbar-light sticky-top flex-nowrap p-0">
-        <a class="navbar-brand col-3 col-lg-3 mr-0 p-0" href="{{ url('/') }}">
-            <img class="site-logo mx-auto d-block" src="{{ asset('storage/images/bestikri/logos/bestikri_logo.png') }}" />
+        <a class="navbar-brand col-3 mr-0 p-0" href="{{ url('/') }}">
+            <img class="site-logo mx-auto d-none d-md-block"
+                src="{{ asset('storage/images/bestikri/logos/bestikri_logo.png') }}" />
+            <img class="site-logo mx-auto d-block d-md-none"
+                src="{{ asset('storage/images/bestikri/logos/bestikri_logo_klein.png') }}" />
         </a>
         <button class="navbar-toggler position-absolute d-lg-none collapsed" type="button" data-toggle="collapse" data-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
