@@ -106,13 +106,14 @@ body {
 }
 .navbar .site-heading {
   color: #825b51;
-  font-size: 2.0rem;
+  line-height: 1.875rem;
+  font-size: 1.875rem;
   font-weight: bold;
   text-transform: uppercase;
 }
 .navbar .site-subheading {
   color: #000000;
-  font-size: 1.5rem;
+  font-size: 1.875rem;
   font-weight: normal;
 }
 
@@ -121,10 +122,11 @@ body {
     height: 100px;
   }
   .navbar .site-heading {
+    line-height: 1.2rem;
     font-size: 1.2rem;
   }
   .navbar .site-subheading {
-    font-size: 1.0rem;
+    font-size: 1.2rem;
   }
   .navbar .site-logo {
     height: 80px;
