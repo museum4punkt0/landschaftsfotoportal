@@ -118,7 +118,7 @@
                 <div class="pt-3">
                     <div class="footer p-3">
                         <div class="row">
-                            <div class="col-6 col-md-4 col-lg-2 align-self-center">
+                            <div class="col-6 col-md-4 col-lg-3 col-xl-2 align-self-center">
                                 <!-- Authentication Links -->
                                 <ul class="navbar-nav px-3">
                                 @guest
@@ -152,17 +152,17 @@
                                 @endguest
                                 </ul>
                             </div>
-                            <div class="col-6 col-md-4 col-lg-2 align-self-center">
+                            <div class="col-6 col-md-4 col-lg-3 col-xl-2 align-self-center">
                                 <a href="https://www.senckenberg.de/" target="_blank">
                                     <img class="img-fluid" src="{{ asset('storage/images/bestikri/logos/sgn_logo.png') }}" />
                                 </a>
                             </div>
-                            <div class="col-6 col-md-4 col-lg-2 align-self-center">
+                            <div class="col-6 col-md-4 col-lg-3 col-xl-2 align-self-center">
                                 <a href="https://www.herbarium.uni-jena.de/" target="_blank">
                                     <img class="img-fluid" src="{{ asset('storage/images/bestikri/logos/hausknecht_logo.png') }}" />
                                 </a>
                             </div>
-                            <div class="col-6 col-md-4 col-lg-2 align-self-center">
+                            <div class="col-6 col-md-4 col-lg-3 col-xl-2 align-self-center">
                                 <a href="https://www.dfg.de/" target="_blank">
                                     <img class="img-fluid" src="{{ asset('storage/images/bestikri/logos/dfg_logo.png') }}" />
                                 </a>
