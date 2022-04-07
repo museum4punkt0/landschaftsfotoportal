@@ -240,12 +240,12 @@
                 <div class="col column-content">
                     @if($cm->getConfigValue('image_show') == 'gallery')
                         <div class="container-fluid">
-                            <div class="row">
+                            <div class="row align-items-end">
                             @foreach($items->where('parent_fk', $item->item_id)->sortBy('title') as $specimen)
                                 @foreach($items->where('parent_fk', $specimen->item_id) as $it)
                                     {{-- Show specimen thumbnails only, no images of details --}}
                                     @if(strpos($it->getDetailWhereDataType('_image_title_'), 'Gesamtansicht') !== false)
-                                    <div class="col-auto">
+                                    <div class="col-auto py-2">
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
                                             <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{
                                                 Config::get('media.zoomify_zif_image_path')
@@ -268,14 +268,17 @@
                                             />
                                         @else
                                             <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $it->getDetailWhereDataType('_image_') }}"
-                                            width={{ Config::get('media.preview_width') }}
+                                                width={{ Config::get('media.preview_width') }}
+                                                title="{{ $it->getDetailWhereDataType('_image_title_') }}"
                                             />
                                         @endif
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
                                             </a>
                                         @endif
-                                        <br/><a href="{{ route('item.show.public', $specimen->item_id) }}">
-                                        {{ explode('_', pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME))[0] }}</a>
+                                        <br/>
+                                        <a href="{{ route('item.show.public', $specimen->item_id) }}"
+                                            title="{{ $specimen->title }}">
+                                        {{ Str::limit(explode('_', pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME))[0], 12) }}</a>
                                     </div>
                                     @endif
                                 @endforeach
@@ -285,10 +288,10 @@
                     @endif
                     
                     @if($cm->getConfigValue('image_show') == 'specimen')
-                        <div class="container">
-                            <div class="row">
+                        <div class="container-fluid">
+                            <div class="row align-items-end">
                                 @foreach($items->where('parent_fk', $item->item_id)->sortBy('title') as $it)
-                                    <div class="col-auto">
+                                    <div class="col-auto py-2">
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
                                             {{-- Bestikri images have different pathes and types --}}
                                             @if(strpos($it->getDetailWhereDataType('_image_title_'), 'Gesamtansicht') === false)
@@ -321,19 +324,20 @@
                                             $it->getDetailWhereDataType('_image_')))
                                             <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
                                                 $it->getDetailWhereDataType('_image_')) }}"
-                                                width={{ Config::get('media.preview_width') }}
+                                                height={{ Config::get('media.preview_height') }}
                                                 title="{{ $it->getDetailWhereDataType('_image_title_') }}"
                                             />
                                         @else
                                             <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $it->getDetailWhereDataType('_image_') }}"
-                                            width={{ Config::get('media.preview_width') }}
+                                                height={{ Config::get('media.preview_height') }}
+                                                title="{{ $it->getDetailWhereDataType('_image_title_') }}"
                                             />
                                         @endif
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
                                             </a>
                                         @endif
                                         <br/>
-                                        {{ explode('_', pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME))[0] }}
+                                        {{ $it->getDetailWhereDataType('_image_title_') }}
                                     </div>
                                 @endforeach
                             </div>
