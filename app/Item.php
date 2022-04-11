@@ -307,17 +307,17 @@ class Item extends Model
             if ($this->taxon_fk) {
                 // Different naming schemas
                 switch ($taxonSchema) {
-                    // Example: C. subsphaerica Gand., s. l.
+                    // Example: C. subsphaerica Gand. s. l.
                     case 5:
                         $name = $this->taxon->full_name;
                         $title = substr_replace($name, '.  ', 1, strpos($name, ' '));
                         break;
-                    // Example: C. subsphaerica, s. l.
+                    // Example: C. subsphaerica s. l.
                     case 4:
                         $name = $this->taxon->taxon_name;
                         $title = substr_replace($name, '.  ', 1, strpos($name, ' '));
                         if ($this->taxon->taxon_suppl) {
-                            $title .= ', ' . $this->taxon->taxon_suppl;
+                            $title .= ' ' . $this->taxon->taxon_suppl;
                         }
                         break;
                     // Example: Crataegus subsphaerica s. l.
@@ -329,7 +329,7 @@ class Item extends Model
                         $title = $this->taxon->taxon_name;
                         break;
                     case 1:
-                    // Example: Crataegus subsphaerica Gand., s. l.
+                    // Example: Crataegus subsphaerica Gand. s. l.
                     default:
                         $title = $this->taxon->full_name;
                         break;
