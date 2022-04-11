@@ -3,34 +3,12 @@
 @section('sidebar_menu_items')
     @parent
     
-    @foreach($menu_root as $it)
-        @if($it->public == 1)
-            <li class="nav-item">
-                @if($it->item_id == $item->item_id)
-                    <a class="nav-link active" href="{{ $it->item_id }}">
-                @else
-                    <a class="nav-link" href="{{ $it->item_id }}">
-                @endif
-                {{ $it->title }}
-                
-                {{-- Screen readers can mention the currently active menu item --}}
-                @if($it->item_id == $item->item_id)
-                    <span class="sr-only">(current)</span>
-                @endif
-                </a>
-                
-                @if($loop->depth <= count($path) && $path[$loop->depth - 1] == $it->item_id
-                    && count($it->children->where('item_type_fk', '<>', 188)))
-                    <ul>
-                        @include('includes.item_submenu', [
-                                'sub' => $it->children->where('item_type_fk', '<>', 188),
-                                'path' => $path
-                        ])
-                    </ul>
-                @endif
-            </li>
-        @endif
-    @endforeach
+    @include('includes.item_submenu', [
+        'sub' => $menu_root,
+        'path' => $path,
+        'order' => config('menu.sidebar_item_order', []),
+        'exclude' => config('menu.sidebar_exclude_item_type', []),
+    ])
     
 @endsection
 
