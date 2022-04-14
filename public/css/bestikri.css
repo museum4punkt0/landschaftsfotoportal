@@ -57,11 +57,26 @@ body {
   padding-left: 1.5rem;
 }
 
+.sidebar [data-toggle="collapse"] .fa:before {  
+  content: "\f063";
+}
+
+.sidebar [data-toggle="collapse"].collapsed .fa:before {
+  content: "\f061";
+}
+
+.sidebar .nav-item-row {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+.sidebar .nav-collapse-icon.active {
+  color: #0063b4;
+}
+
 .sidebar .nav-link {
   font-weight: 600;
   color: #000;
   padding: 0.1rem 1rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.125);
 }
 
 .sidebar .nav-link .feather {
@@ -151,11 +166,10 @@ body {
   background-color: #ffffff;
 }
 
-[data-toggle="collapse"] .fa:before {  
+.column-group-title [data-toggle="collapse"] .fa:before {  
   content: "\f077";
 }
-
-[data-toggle="collapse"].collapsed .fa:before {
+.column-group-title [data-toggle="collapse"].collapsed .fa:before {
   content: "\f078";
 }
 .column-group-title {
