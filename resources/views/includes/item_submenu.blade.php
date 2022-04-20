@@ -3,9 +3,11 @@
         <li class="nav-item">
             <div class="nav-item-row d-flex">
             @if($loop->depth <= count($path) && $path[$loop->depth - 1] == $child->item_id)
-                <a class="nav-link active mr-auto" href="{{ route('item.show.public', $child) }}">
+                <a class="nav-link active mr-auto" href="{{ route('item.show.public', $child) }}"
+                    data-item-id="{{ $child->item_id }}">
             @else
-                <a class="nav-link mr-auto" href="{{ route('item.show.public', $child) }}">
+                <a class="nav-link mr-auto" href="{{ route('item.show.public', $child) }}"
+                    data-item-id="{{ $child->item_id }}">
             @endif
 
             {{ $child->title }}
@@ -21,9 +23,10 @@
                     class="nav-collapse-icon active"
                     aria-expanded="true"
                 @else
-                    class="collapsed"
+                    class="nav-collapse-icon collapsed"
                     aria-expanded="false"
                 @endif
+                data-item-id="{{ $child->item_id }}"
                 data-toggle="collapse"
                 role="button"
                 aria-controls="collapseMI{{ $child->item_id }}"

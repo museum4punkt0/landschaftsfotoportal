@@ -102980,6 +102980,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var summernote_dist_summernote_bs4__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(summernote_dist_summernote_bs4__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _map_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map.js */ "./resources/js/map.js");
 /* harmony import */ var _diff_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./diff.js */ "./resources/js/diff.js");
+/* harmony import */ var _menu_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./menu.js */ "./resources/js/menu.js");
 window._ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 /**
  * We'll load jQuery and the Bootstrap jQuery plugin which provides support
@@ -103046,6 +103047,12 @@ window.osm_map = _map_js__WEBPACK_IMPORTED_MODULE_3__["default"];
 
 
 window.itemDiff = _diff_js__WEBPACK_IMPORTED_MODULE_4__["default"];
+/**
+ * Sidebar menu
+ */
+
+
+window.menu = _menu_js__WEBPACK_IMPORTED_MODULE_5__["default"];
 
 /***/ }),
 
@@ -103617,6 +103624,43 @@ var osm_map = {
   }
 };
 /* harmony default export */ __webpack_exports__["default"] = (osm_map);
+
+/***/ }),
+
+/***/ "./resources/js/menu.js":
+/*!******************************!*\
+  !*** ./resources/js/menu.js ***!
+  \******************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+var menu = {
+  init: function init() {
+    $('.sidebar .collapse').on('hide.bs.collapse', function () {//console.log(this);
+      //console.log($(this).attr('id'));
+      //$(this).removeClass("active");
+    });
+    $('.nav-collapse-icon').on('click', function () {
+      console.log(this);
+      var itemLink = $('.nav-link[data-item-id=' + $(this).data('item-id') + ']');
+      var state = $(this).hasClass('active');
+      console.log('icon' + $(this).data('item-id') + state);
+
+      if (state) {
+        itemLink.removeClass("active");
+        $(this).removeClass("active");
+        $(this).addClass("collapsed");
+      } else {
+        $(this).removeClass("collapsed");
+        $(this).addClass("active");
+        itemLink.addClass("active");
+      }
+    });
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = (menu);
 
 /***/ }),
 

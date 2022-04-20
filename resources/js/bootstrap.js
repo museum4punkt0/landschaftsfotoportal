@@ -72,3 +72,10 @@ window.osm_map = osm_map;
 
 import itemDiff from './diff.js';
 window.itemDiff = itemDiff;
+
+/**
+ * Sidebar menu
+ */
+
+import menu from './menu.js';
+window.menu = menu;
