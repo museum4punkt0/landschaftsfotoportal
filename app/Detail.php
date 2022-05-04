@@ -34,8 +34,15 @@ class Detail extends Model
         'value_string',
     ];
     
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
     protected $casts = [
         'value_daterange' => DateRangeCast::class,
+        'value_float' => 'float',
+        'value_int' => 'integer',
     ];
     
     /**
