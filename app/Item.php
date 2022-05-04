@@ -144,6 +144,14 @@ class Item extends Model
         });
     }
 
+    /**
+     * Get the item type of the item.
+     */
+    public function getItemType()
+    {
+        return $this->item_type->attributes()->firstWhere('name', 'code')->pivot->value;
+    }
+
     
     use \Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
     

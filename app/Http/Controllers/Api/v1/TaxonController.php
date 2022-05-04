@@ -33,11 +33,11 @@ class TaxonController extends Controller
             return response()->json(['error' => 'taxon not found'], 404);
         }
 
-        // Get specimen items for given taxa
+        // Get items of specific item type for given taxa
         $items = collect([]);
         foreach ($taxa as $taxon) {
             $items = $items->concat(
-                Item::ofItemType('_specimen_')
+                Item::ofItemType(config('api.items.item_type'))
                     ->with('taxon')
                     ->where('taxon_fk', $taxon->taxon_id)
                     ->where('public', 1)
@@ -50,7 +50,7 @@ class TaxonController extends Controller
         foreach ($items as $item) {
             $data[] = [
                 'id' => $item->item_id,
-                'basisOfRecord' => 'PRESERVED_SPECIMEN',
+                'basisOfRecord' => config('api.items.basis_of_record'),
                 'scientific_name' => $item->taxon->full_name,
                 'modified' => $item->updated_at,
                 'reference' => route('api.item.show.specimen', $item),
