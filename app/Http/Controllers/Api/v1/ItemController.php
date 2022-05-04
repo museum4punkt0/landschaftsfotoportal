@@ -72,6 +72,22 @@ class ItemController extends Controller
             }
         }
 
+        // Data of images belonging to the item
+        $images = Item::ofItemType('_image_')
+                    ->where('parent_fk', $id)
+                    ->where('public', 1)
+                    ->get();
+
+        foreach ($images as $image) {
+            $media[] = [
+                'title' => $image->getDetailWhereDataType('_image_title_'),
+                'copyright' => $image->getDetailWhereDataType('_image_copyright_'),
+                'thumbnail' => asset('storage/' . config('media.preview_dir') .
+                            $image->getDetailWhereDataType('_image_')),
+            ];
+        }
+        $data['media'] = $media;
+
         return response()->json(['data' => $data]);
     }
 }
