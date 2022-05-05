@@ -167,6 +167,25 @@
                                     <img class="img-fluid" src="{{ asset('storage/images/bestikri/logos/dfg_logo.png') }}" />
                                 </a>
                             </div>
+                            <div class="col-6 col-md-4 col-lg-2 align-self-center">
+                                <a href="https://www.bmuv.de/" target="_blank">
+                                @if(app()->getLocale() == 'de')
+                                    <img class="img-fluid" src="{{ asset('storage/images/bestikri/logos/BMUV_2021_de.gif') }}" />
+                                @else
+                                    <img class="img-fluid" src="{{ asset('storage/images/bestikri/logos/BMUV_2021_en.gif') }}" />
+                                @endif
+                                </a>
+                            </div>
+                            <div class="col-6 col-md-4 col-lg-2 align-self-center">
+                                Aktualisiert in einem Förderprojekt des
+                                <a href="https://www.bfn.de/" target="_blank">
+                                @if(app()->getLocale() == 'de')
+                                    <img class="img-fluid" src="{{ asset('storage/images/bestikri/logos/BfN_2022_de.gif') }}" />
+                                @else
+                                    <img class="img-fluid" src="{{ asset('storage/images/bestikri/logos/BfN_2022_en.gif') }}" />
+                                @endif
+                                </a>
+                            </div>
                         </div>
                     </div>
                 </div>
