@@ -100,8 +100,7 @@ class ColumnMapping extends Model
                     });
             })
             ->with('column')
-            ->orderBy('column_order')
-            ->get();
+            ->orderBy('column_order');
     }
     
     

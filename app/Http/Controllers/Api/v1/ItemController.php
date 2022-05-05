@@ -36,9 +36,10 @@ class ItemController extends Controller
             return response()->json(['error' => 'invalid ID'], 400);
         }
 
-        // TODO: fix scopeForItem should NOT have a ->get() method!
+        // Get all columns having an API attribute set
         $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk)
-            ->whereNotNull('api_attribute');
+                ->whereNotNull('api_attribute')
+                ->get();
 
         // "meta" data of the item
         $data['id'] = $item->item_id;
