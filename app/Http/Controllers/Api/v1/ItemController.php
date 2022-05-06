@@ -85,10 +85,45 @@ class ItemController extends Controller
                 'copyright' => $image->getDetailWhereDataType('_image_copyright_'),
                 'thumbnail' => asset('storage/' . config('media.preview_dir') .
                             $image->getDetailWhereDataType('_image_')),
+                'zoomify' => $this->prepareZoomifyUrl($item, $image),
             ];
         }
         $data['media'] = $media;
 
         return response()->json(['data' => $data]);
+    }
+
+    /**
+     * Prepare URL to Zoomify image viewer.
+     *
+     * @param  Item  $item
+     * @param  Item  $image
+     * @return String
+     */
+    private function prepareZoomifyUrl(Item $item, Item $image)
+    {
+        if (strpos($image->getDetailWhereDataType('_image_title_'), 'Gesamtansicht') === false) {
+            $url = config('media.zoomify_url') . "&image=" .
+                config('media.zoomify_jpg_image_path') .
+                pathinfo($image->getDetailWhereDataType('_image_'), PATHINFO_FILENAME) . ".jpg" .
+                "&caption=" . rawurlencode($item->taxon->full_name . "; Barcode: " .
+                    explode('_', pathinfo($image->getDetailWhereDataType('_image_'), PATHINFO_FILENAME))[0]) .
+                "&description=" . rawurlencode($image->getDetailWhereDataType('_image_title_')) .
+                "&copyright=" . rawurlencode($image->getDetailWhereDataType('_image_copyright_')) .
+                "&params=zMeasureVisible%3D1%26zUnits%3Dmm%26zPixelsPerUnit%3D" .
+                $image->getDetailWhereDataType('_image_ppi_') / 25.4;
+        }
+        else {
+            $url = config('media.zoomify_url') . "&image=" .
+                config('media.zoomify_zif_image_path') .
+                pathinfo($image->getDetailWhereDataType('_image_'), PATHINFO_FILENAME) . ".zif" .
+                "&caption=" . rawurlencode($item->taxon->full_name . "; Barcode: " .
+                    explode('_', pathinfo($image->getDetailWhereDataType('_image_'), PATHINFO_FILENAME))[0]) .
+                "&description=" . rawurlencode($image->getDetailWhereDataType('_image_title_')) .
+                "&copyright=" . rawurlencode($image->getDetailWhereDataType('_image_copyright_')) .
+                "&params=zMeasureVisible%3D1%26zUnits%3Dmm%26zPixelsPerUnit%3D" .
+                $image->getDetailWhereDataType('_image_ppi_') / 25.4;
+        }
+        return $url;
     }
 }
