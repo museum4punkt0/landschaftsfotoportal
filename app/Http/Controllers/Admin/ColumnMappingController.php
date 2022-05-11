@@ -133,7 +133,7 @@ class ColumnMappingController extends Controller
             'taxon' => 'nullable|integer',
             'public' => 'required|integer',
             'api_attribute' => 'nullable|string|max:255',
-            'config' => 'nullable|string',
+            'config' => 'nullable|string|max:4095',
         ]);
         
         $data = [
@@ -371,7 +371,7 @@ class ColumnMappingController extends Controller
             'column_order' => 'required|integer',
             'public' => 'required|integer',
             'api_attribute' => 'nullable|string|max:255',
-            'config' => 'nullable|string',
+            'config' => 'nullable|string|max:4095',
         ]);
         
         //$colmap->column_fk = $request->input('column');

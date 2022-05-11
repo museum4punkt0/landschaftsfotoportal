@@ -136,7 +136,7 @@ class ColumnController extends Controller
             ],
             'data_type' => 'required|integer',
             'translation' => 'required|integer',
-            'description' => 'required|string',
+            'description' => 'required|string|max:255',
             'new_translation' => 'exclude_unless:translation,-1|required|string',
             'lang' => 'required|integer',
         ]);
@@ -234,7 +234,7 @@ class ColumnController extends Controller
             ],
             'data_type' => 'required|integer',
             'translation' => 'required|integer',
-            'description' => 'required|string',
+            'description' => 'required|string|max:255',
         ]);
         
         $column->list_fk = $this->getListIdFromFormRequest($request);

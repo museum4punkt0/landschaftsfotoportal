@@ -96,7 +96,7 @@
     <div class="form-group">
         <label for="configInput">@lang('colmaps.config')</label>
         <input type="text" id="configInput" name="config" class="form-control" 
-            value="{{ old('config', $colmap->config) }}"
+            value="{{ old('config', $colmap->config) }}" maxlength="4095"
         />
         <span class="text-danger">{{ $errors->first('config') }}</span>
     </div>
