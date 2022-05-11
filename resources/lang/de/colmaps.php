@@ -21,6 +21,7 @@ return [
     'deleted' => 'Feld-Zuordnung wurde gelöscht.',
     
     'config' => 'Konfiguration (JSON-Format)',
+    'api_attribute' => 'Attribute-Name bei Ausgabe über die API',
     'item_type' => 'Datensatztyp',
     'sort_for' => 'Sortierung von Anzeigefeldern für: ',
     'sort_hint' => 'Die Sortierung der Anzeigefelder kann mittels Drag&Drop vorgenommen werden.',

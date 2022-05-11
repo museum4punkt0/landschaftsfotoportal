@@ -35,6 +35,7 @@ class ColumnMapping extends Model
         'column_group_fk',
         'taxon_fk',
         'column_order',
+        'api_attribute',
         'config',
         'public',
     ];
