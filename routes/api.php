@@ -22,3 +22,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::get('v1/taxon/fwTaxonId/{taxon}/items', 'Api\v1\TaxonController@listItemsByFwTaxon');
 Route::get('v1/specimen/{item}', 'Api\v1\ItemController@showSpecimen')->name('api.item.show.specimen');
+Route::get('v1/image/random', 'Api\v1\ItemController@showRandomImage')->name('api.item.show.random_image');

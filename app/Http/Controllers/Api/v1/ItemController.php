@@ -94,6 +94,39 @@ class ItemController extends Controller
     }
 
     /**
+     * Get a single random image item.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function showRandomImage()
+    {
+        $item = Item::ofItemType('_image_')
+                    ->with('details')
+                    ->where('public', 1)
+                    ->inRandomOrder()
+                    ->first();
+
+        $city = optional($item->details()->firstWhere('column_fk', 22))->value_string;
+        $state = optional($item->details()->firstWhere('column_fk', 20))->value_string;
+        $country = optional($item->details()->firstWhere('column_fk', 19))->value_string;
+        $country = $country ? $country . ", " : "";
+        $state = $state ? $state . ", " : "";
+
+        $data = [
+            'description' => optional($item->details()->firstWhere('column_fk', 23))->value_string,
+            'author' => optional($item->details()->firstWhere('column_fk', 5))->value_string,
+            'location' => $country . $state . $city,
+            'license' => 'CC BY-SA 4.0',
+            'extra' => $city ? '' : __(config('ui.frontend_layout') . '.api_missing_location'),
+            'tags' => __(config('ui.frontend_layout') . '.api_hashtags'),
+            'image' => asset('storage/'. config('media.medium_dir') . $item->getDetailWhereDataType('_image_')),
+            'reference' => route('item.show.public', $item),
+        ];
+
+        return response()->json(['data' => $data]);
+    }
+
+    /**
      * Prepare URL to Zoomify image viewer.
      *
      * @param  Item  $item
