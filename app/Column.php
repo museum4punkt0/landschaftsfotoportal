@@ -127,8 +127,22 @@ class Column extends Model
     
     /**
      * Get the data type of the column.
+     *
+     * @return String
      */
     public function getDataType()
+    {
+        return $this->data_type_name;
+    }
+
+    /**
+     * Get the data type' name of the column.
+     *
+     * Warning: This must be used for auto filling the column model only!
+     *
+     * @return String
+     */
+    public function getDataTypeName()
     {
         return $this->data_type->attributes()->firstWhere('name', 'code')->pivot->value;
     }

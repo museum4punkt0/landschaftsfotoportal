@@ -167,7 +167,9 @@ class ColumnController extends Controller
             $data['translation_fk'] = $element->element_id;
         }
         
-        Column::create($data);
+        $column = Column::create($data);
+        $column->data_type_name = $column->getDataTypeName();
+        $column->save();
         
         return Redirect::to('admin/column')
             ->with('success', __('columns.created'));
@@ -241,6 +243,7 @@ class ColumnController extends Controller
         $column->data_type_fk = $request->input('data_type');
         $column->translation_fk = $request->input('translation');
         $column->description = $request->input('description');
+        $column->data_type_name = $column->getDataTypeName();
         $column->save();
         
         return Redirect::to('admin/column')
