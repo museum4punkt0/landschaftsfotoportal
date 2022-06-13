@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\ColumnMapping;
 use App\Detail;
 use App\Item;
+use App\ModuleInstance;
 use Auth;
+use Debugger;
 
 class ItemController extends Controller
 {
@@ -28,6 +30,12 @@ class ItemController extends Controller
      */
     public function showSpecimen($id)
     {
+        // Load module containing column's configuration and naming
+        $image_module = ModuleInstance::firstWhere('name', 'image');
+        if (!$image_module) {
+            return response()->json(['error' => 'image module not found'], 404);
+        }
+
         $item = Item::find($id);
         if (!$item) {
             return response()->json(['error' => 'specimen not found'], 404);
@@ -50,6 +58,7 @@ class ItemController extends Controller
         $data['reference'] = route('item.show.public', $item);
 
         // Data from the details belonging to the item
+        Debugger::startProfiling('processing-colmaps');
         foreach ($colmap as $cm) {
             $detail = Detail::with('column')
                 ->where('item_fk', $item->item_id)
@@ -60,11 +69,9 @@ class ItemController extends Controller
                 // Details are stored in different columns within database table
                 switch ($detail->column->getDataType()) {
                     case '_integer_':
-                        //$data[$cm->api_attribute] = var_dump($detail->value_int);
                         $data[$cm->api_attribute] = $detail->value_int;
                         break;
                     case '_float_':
-                        //$data[$cm->api_attribute] = var_dump($detail->value_float);
                         $data[$cm->api_attribute] = $detail->value_float;
                         break;
                     default:
@@ -72,22 +79,37 @@ class ItemController extends Controller
                 }
             }
         }
+        Debugger::stopProfiling('processing-colmaps');
 
         // Data of images belonging to the item
         $images = Item::ofItemType('_image_')
+                    ->with('details')
                     ->where('parent_fk', $id)
                     ->where('public', 1)
                     ->get();
 
+        // Prepare meta data of all media/image items
+        Debugger::startProfiling('get-details-by-name');
         foreach ($images as $image) {
+            $media_meta['filename'] = optional($image->details->firstWhere('column_fk', $image_module->config['columns']['filename'] ?? null))->value_string;
+            $media_meta['copyright'] = optional($image->details->firstWhere('column_fk', $image_module->config['columns']['copyright'] ?? null))->value_string;
+            $media_meta['title'] = optional($image->details->firstWhere('column_fk', $image_module->config['columns']['title'] ?? null))->value_string;
+            $media_meta['ppi'] = optional($image->details->firstWhere('column_fk', $image_module->config['columns']['ppi'] ?? null))->value_int;
+            /*
+            $media_meta['filename'] = $image->getDetailByName('filename', $image_module);
+            $media_meta['copyright'] = $image->getDetailByName('copyright', $image_module);
+            $media_meta['title'] = $image->getDetailByName('title', $image_module);
+            $media_meta['ppi'] = $image->getDetailByName('ppi', $image_module);
+            */
             $media[] = [
-                'title' => $image->getDetailWhereDataType('_image_title_'),
-                'copyright' => $image->getDetailWhereDataType('_image_copyright_'),
+                'title' => $media_meta['title'],
+                'copyright' => $media_meta['copyright'],
                 'thumbnail' => asset('storage/' . config('media.preview_dir') .
-                            $image->getDetailWhereDataType('_image_')),
-                'zoomify' => $this->prepareZoomifyUrl($item, $image),
+                    $media_meta['filename']),
+                'zoomify' => $this->prepareZoomifyUrl($item, $media_meta),
             ];
         }
+        Debugger::stopProfiling('get-details-by-name');
         $data['media'] = $media;
 
         return response()->json(['data' => $data]);
@@ -100,28 +122,38 @@ class ItemController extends Controller
      */
     public function showRandomImage()
     {
+        // Load module containing column's configuration and naming
+        $image_module = ModuleInstance::firstWhere('name', 'image');
+        if (!$image_module) {
+            return response()->json(['error' => 'image module not found'], 404);
+        }
+
         $item = Item::ofItemType('_image_')
                     ->with('details')
                     ->where('public', 1)
                     ->inRandomOrder()
                     ->first();
 
-        $city = optional($item->details()->firstWhere('column_fk', 22))->value_string;
-        $state = optional($item->details()->firstWhere('column_fk', 20))->value_string;
-        $country = optional($item->details()->firstWhere('column_fk', 19))->value_string;
+        Debugger::startProfiling('get-details-by-name');
+
+        $city = $item->getDetailByName('city', $image_module);
+        $state = $item->getDetailByName('state', $image_module);
+        $country = $item->getDetailByName('country', $image_module);
         $country = $country ? $country . ", " : "";
         $state = $state ? $state . ", " : "";
 
         $data = [
-            'description' => optional($item->details()->firstWhere('column_fk', 23))->value_string,
-            'author' => optional($item->details()->firstWhere('column_fk', 5))->value_string,
+            'description' => $item->getDetailByName('description', $image_module),
+            'author' => $item->getDetailByName('author', $image_module),
             'location' => $country . $state . $city,
             'license' => 'CC BY-SA 4.0',
             'extra' => $city ? '' : __(config('ui.frontend_layout') . '.api_missing_location'),
             'tags' => __(config('ui.frontend_layout') . '.api_hashtags'),
-            'image' => asset('storage/'. config('media.medium_dir') . $item->getDetailWhereDataType('_image_')),
+            'image' => asset('storage/'. config('media.medium_dir') . $item->getDetailByName('filename', $image_module)),
             'reference' => route('item.show.public', $item),
         ];
+
+        Debugger::stopProfiling('get-details-by-name');
 
         return response()->json(['data' => $data]);
     }
@@ -131,31 +163,32 @@ class ItemController extends Controller
      *
      * @param  Item  $item
      * @param  Item  $image
+     * @param  ModuleInstance  $module
      * @return String
      */
-    private function prepareZoomifyUrl(Item $item, Item $image)
+    private function prepareZoomifyUrl(Item $item, $meta)
     {
-        if (strpos($image->getDetailWhereDataType('_image_title_'), 'Gesamtansicht') === false) {
+        if (strpos($meta['title'], 'Gesamtansicht') === false) {
             $url = config('media.zoomify_url') . "&image=" .
                 config('media.zoomify_jpg_image_path') .
-                pathinfo($image->getDetailWhereDataType('_image_'), PATHINFO_FILENAME) . ".jpg" .
+                pathinfo($meta['filename'], PATHINFO_FILENAME) . ".jpg" .
                 "&caption=" . rawurlencode($item->taxon->full_name . "; Barcode: " .
-                    explode('_', pathinfo($image->getDetailWhereDataType('_image_'), PATHINFO_FILENAME))[0]) .
-                "&description=" . rawurlencode($image->getDetailWhereDataType('_image_title_')) .
-                "&copyright=" . rawurlencode($image->getDetailWhereDataType('_image_copyright_')) .
+                    explode('_', pathinfo($meta['filename'], PATHINFO_FILENAME))[0]) .
+                "&description=" . rawurlencode($meta['title']) .
+                "&copyright=" . rawurlencode($meta['copyright']) .
                 "&params=zMeasureVisible%3D1%26zUnits%3Dmm%26zPixelsPerUnit%3D" .
-                $image->getDetailWhereDataType('_image_ppi_') / 25.4;
+                $meta['ppi'] / 25.4;
         }
         else {
             $url = config('media.zoomify_url') . "&image=" .
                 config('media.zoomify_zif_image_path') .
-                pathinfo($image->getDetailWhereDataType('_image_'), PATHINFO_FILENAME) . ".zif" .
+                pathinfo($meta['filename'], PATHINFO_FILENAME) . ".zif" .
                 "&caption=" . rawurlencode($item->taxon->full_name . "; Barcode: " .
-                    explode('_', pathinfo($image->getDetailWhereDataType('_image_'), PATHINFO_FILENAME))[0]) .
-                "&description=" . rawurlencode($image->getDetailWhereDataType('_image_title_')) .
-                "&copyright=" . rawurlencode($image->getDetailWhereDataType('_image_copyright_')) .
+                    explode('_', pathinfo($meta['filename'], PATHINFO_FILENAME))[0]) .
+                "&description=" . rawurlencode($meta['title']) .
+                "&copyright=" . rawurlencode($meta['copyright']) .
                 "&params=zMeasureVisible%3D1%26zUnits%3Dmm%26zPixelsPerUnit%3D" .
-                $image->getDetailWhereDataType('_image_ppi_') / 25.4;
+                $meta['ppi'] / 25.4;
         }
         return $url;
     }
