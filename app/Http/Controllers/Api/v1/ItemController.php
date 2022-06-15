@@ -59,11 +59,12 @@ class ItemController extends Controller
 
         // Data from the details belonging to the item
         Debugger::startProfiling('processing-colmaps');
+        $details = Detail::with('column')
+            ->where('item_fk', $item->item_id)
+            ->get();
+
         foreach ($colmap as $cm) {
-            $detail = Detail::with('column')
-                ->where('item_fk', $item->item_id)
-                ->where('column_fk', $cm->column_fk)
-                ->first();
+            $detail = $details->firstWhere('column_fk', $cm->column_fk);
 
             if ($detail) {
                 // Details are stored in different columns within database table
@@ -95,12 +96,7 @@ class ItemController extends Controller
             $media_meta['copyright'] = optional($image->details->firstWhere('column_fk', $image_module->config['columns']['copyright'] ?? null))->value_string;
             $media_meta['title'] = optional($image->details->firstWhere('column_fk', $image_module->config['columns']['title'] ?? null))->value_string;
             $media_meta['ppi'] = optional($image->details->firstWhere('column_fk', $image_module->config['columns']['ppi'] ?? null))->value_int;
-            /*
-            $media_meta['filename'] = $image->getDetailByName('filename', $image_module);
-            $media_meta['copyright'] = $image->getDetailByName('copyright', $image_module);
-            $media_meta['title'] = $image->getDetailByName('title', $image_module);
-            $media_meta['ppi'] = $image->getDetailByName('ppi', $image_module);
-            */
+
             $media[] = [
                 'title' => $media_meta['title'],
                 'copyright' => $media_meta['copyright'],
