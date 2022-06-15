@@ -27,6 +27,47 @@ class ItemController extends Controller
      *
      * @param  Integer  $id
      * @return \Illuminate\Http\Response
+     *
+     * @OA\Get(
+     *      path="/specimen/{id}",
+     *      tags={"specimen"},
+     *      summary="Find specimen by ID",
+     *      description="Returns a single specimen",
+     *      @OA\Parameter(
+     *          name="id",
+     *          description="ID of specimen",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *          @OA\JsonContent(
+     *              type="object",
+     *              required={"data"},
+     *              @OA\Property(
+     *                  property="data",
+     *                  type="array",
+     *                  @OA\Items(
+     *                      ref="#/components/schemas/Specimen"
+     *                  ),
+     *              ),
+     *          ),
+     *      ),
+     *      @OA\Response(
+     *          response=400,
+     *          description="Invalid ID supplied"
+     *      ),
+     *      @OA\Response(
+     *          response=404,
+     *          description="Specimen not found"
+     *      )
+     * )
+     *
+     * Note: OA Schema is defined in app/Http/Resources/Specimen.php
      */
     public function showSpecimen($id)
     {

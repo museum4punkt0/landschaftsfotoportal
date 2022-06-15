@@ -24,6 +24,43 @@ class TaxonController extends Controller
      *
      * @param  Integer  $sipnr
      * @return \Illuminate\Http\Response
+     *
+     * @OA\Get(
+     *      path="/taxon/fwTaxonId/{id}/items",
+     *      tags={"taxon"},
+     *      summary="Finds items by taxon",
+     *      description="Returns a list of available items for a given taxon",
+     *      @OA\Parameter(
+     *          name="id",
+     *          description="FloraWeb taxon ID (former SIPNR)",
+     *          required=true,
+     *          in="path",
+     *          @OA\Schema(
+     *              type="integer"
+     *          )
+     *      ),
+     *      @OA\Response(
+     *          response=200,
+     *          description="Successful operation",
+     *          @OA\JsonContent(
+     *              type="object",
+     *              required={"data"},
+     *              @OA\Property(
+     *                  property="data",
+     *                  type="array",
+     *                  @OA\Items(
+     *                      ref="#/components/schemas/Item"
+     *                  ),
+     *              ),
+     *          ),
+     *      ),
+     *      @OA\Response(
+     *          response=404,
+     *          description="Taxon not found"
+     *      )
+     * )
+     *
+     * Note: OA Schema is defined in app/Http/Resources/Item.php
      */
     public function listItemsByFwTaxon(int $sipnr)
     {

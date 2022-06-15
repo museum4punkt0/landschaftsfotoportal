@@ -1,0 +1,266 @@
+openapi: 3.0.0
+info:
+  title: FWP-API
+  description: 'This is a private API for FlorawebPlus.'
+  contact:
+    email: sebastian.klemm@senckenberg.de
+  license:
+    name: AGPL-3
+    url: 'https://opensource.org/licenses/AGPL-3.0'
+  version: 0.4.2
+servers:
+  -
+    url: 'https://bestikri.senckenberg.de/api/v1'
+paths:
+  '/specimen/{id}':
+    get:
+      tags:
+        - specimen
+      summary: 'Find specimen by ID'
+      description: 'Returns a single specimen'
+      operationId: 8fd1a7a64687958efa8ef56c3ac6fe0a
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'ID of specimen'
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Specimen'
+                type: object
+        400:
+          description: 'Invalid ID supplied'
+        404:
+          description: 'Specimen not found'
+  '/taxon/fwTaxonId/{id}/items':
+    get:
+      tags:
+        - taxon
+      summary: 'Finds items by taxon'
+      description: 'Returns a list of available items for a given taxon'
+      operationId: c1a3013ddfad7b459105461ed295777f
+      parameters:
+        -
+          name: id
+          in: path
+          description: 'FloraWeb taxon ID (former SIPNR)'
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                required:
+                  - data
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Item'
+                type: object
+        404:
+          description: 'Taxon not found'
+components:
+  schemas:
+    Image:
+      title: Image
+      required:
+        - title
+        - thumbnail
+      properties:
+        title:
+          description: 'Image title'
+          type: string
+          format: string
+          maxLength: 255
+        copyright:
+          description: 'Author, licence or attribution remarks'
+          type: string
+          format: string
+          maxLength: 255
+        thumbnail:
+          description: 'URL to thumbnail image file'
+          type: string
+          format: string
+          maxLength: 1023
+        zoomify:
+          description: 'URL to zoomify image viewer'
+          type: string
+          format: string
+          maxLength: 1023
+      type: object
+    Item:
+      title: Item
+      description: 'An item could be a preserved specimen or a chromosome count belonging to the taxon.'
+      required:
+        - id
+        - basisOfRecord
+        - reference
+      properties:
+        id:
+          description: 'Internal ID of this record'
+          type: integer
+          format: int32
+          example: 1
+        basisOfRecords:
+          description: 'Type of record (item)'
+          type: string
+          enum:
+            - PRESERVED_SPECIMEN
+            - CHROMOSOME_COUNT
+        lastCrawled:
+          description: 'Timestamp (RFC3339) the external record was crawled by this API'
+          type: string
+          format: date-time
+          example: '2022-05-25 17:50:45'
+        modified:
+          description: 'Timestamp (RFC3339) the external record was modified'
+          type: string
+          format: date-time
+          example: '2022-05-25 17:50:45'
+        reference:
+          description: 'URL to external API to fetch the record of this item'
+          type: string
+          format: string
+          example: 'https://bestikri.senckenberg.de/api/v1/specimen/390'
+        link:
+          description: 'URL to the web page showing this item'
+          type: string
+          format: string
+          example: 'https://bestikri.senckenberg.de/item/390'
+      type: object
+    Specimen:
+      title: Specimen
+      required:
+        - id
+        - scientific_name
+        - modified
+      properties:
+        id:
+          description: 'Internal ID of this record'
+          type: integer
+          format: int32
+          example: 42
+        barcode:
+          description: 'Barcode of this specimen'
+          type: string
+          format: string
+          example: GLM-162215
+        scientific_name:
+          description: 'Full scientific name including authority'
+          type: string
+          format: string
+          maxLength: 255
+          example: 'Crataegus praemonticola Holub'
+        identified_by:
+          description: 'Name of the person who identified this item'
+          type: string
+          format: string
+        identification_date:
+          description: 'Date when this item was identified'
+          type: string
+          format: string
+        remarks_identification:
+          description: 'Remarks on (the history of) identification'
+          type: string
+          format: string
+        geographic_hierarchy:
+          description: 'Country and State where this item was found'
+          type: string
+          format: string
+        locality:
+          description: 'Description of the place where this item was found'
+          type: string
+          format: string
+        map_tk25:
+          description: 'Name of the ordnance survey map (de: Messtischblatt)'
+          type: string
+          format: string
+        landscape:
+          description: 'Natural regions of Germany (de: Naturraum)'
+          type: string
+          format: string
+        habitat:
+          description: Habitat
+          type: string
+          format: string
+        altitude:
+          description: 'Altitude above sea level, unit is meter (m)'
+          type: number
+          format: float
+        latitude:
+          description: Latitude
+          type: number
+          format: float
+        longitude:
+          description: Longitude
+          type: number
+          format: float
+        coordinate_reference_system:
+          description: 'The coordinate reference system (CRS) as EPSG-Code'
+          type: string
+          format: string
+          example: '4326'
+        coordinate_uncertainty:
+          description: 'Uncertainty of coordinates, unit is meter (m)'
+          type: integer
+          format: int32
+          example: 250
+        collector:
+          description: 'Name of the person who collected this item'
+          type: string
+          format: string
+        collection_date:
+          description: 'Date when the item was collected'
+          type: string
+          format: string
+        collection_number:
+          description: 'Collection number'
+          type: string
+          format: string
+        remarks_plant:
+          description: 'Remarks on the collected item'
+          type: string
+          format: string
+        remarks_object:
+          description: 'Remarks on the specimen'
+          type: string
+          format: string
+        reference:
+          description: 'URL to the web page showing this specimen'
+          type: string
+          format: string
+        media:
+          description: 'A collection of media ressources'
+          type: array
+          items:
+            $ref: '#/components/schemas/Image'
+        modified:
+          description: 'Timestamp (RFC3339) the external record was modified'
+          type: string
+          format: date-time
+          example: '2022-05-25 17:50:45'
+      type: object
+tags:
+  -
+    name: specimen
+    description: 'All about availabe specimens.'
+  -
+    name: taxon
+    description: 'All about availabe taxa.'
