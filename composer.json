@@ -21,6 +21,7 @@
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.6",
+        "darkaonline/l5-swagger": "^8.3",
         "facade/ignition": "^2.3.6",
         "friendsofphp/php-cs-fixer": "^2.16",
         "lanin/laravel-api-debugger": "^4.0",
