@@ -35,9 +35,9 @@ class Group extends Model
     
     
     /**
-     * Get the user that owns the group.
+     * Get the users belonging to the group.
      */
-    public function user()
+    public function users()
     {
         return $this->hasMany('App\User', 'group_fk', 'group_id');
     }
