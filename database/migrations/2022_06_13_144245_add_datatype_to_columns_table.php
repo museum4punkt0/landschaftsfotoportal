@@ -21,7 +21,7 @@ class AddDatatypeToColumnsTable extends Migration
 
         // Fill new column with name of data type
         foreach (Column::all() as $column) {
-            $column->data_type_name = $column->getDataType();
+            $column->data_type_name = $column->getDataTypeName();
             $column->save();
         }
     }
@@ -34,7 +34,7 @@ class AddDatatypeToColumnsTable extends Migration
     public function down()
     {
         Schema::table('columns', function (Blueprint $table) {
-            $table->dropColumn('data_type');
+            $table->dropColumn('data_type_name');
         });
     }
 }
