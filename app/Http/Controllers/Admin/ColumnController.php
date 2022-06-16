@@ -136,7 +136,7 @@ class ColumnController extends Controller
             ],
             'data_type' => 'required|integer',
             'translation' => 'required|integer',
-            'description' => 'required|string',
+            'description' => 'required|string|max:255',
             'new_translation' => 'exclude_unless:translation,-1|required|string',
             'lang' => 'required|integer',
         ]);
@@ -167,7 +167,9 @@ class ColumnController extends Controller
             $data['translation_fk'] = $element->element_id;
         }
         
-        Column::create($data);
+        $column = Column::create($data);
+        $column->data_type_name = $column->getDataTypeName();
+        $column->save();
         
         return Redirect::to('admin/column')
             ->with('success', __('columns.created'));
@@ -234,13 +236,14 @@ class ColumnController extends Controller
             ],
             'data_type' => 'required|integer',
             'translation' => 'required|integer',
-            'description' => 'required|string',
+            'description' => 'required|string|max:255',
         ]);
         
         $column->list_fk = $this->getListIdFromFormRequest($request);
         $column->data_type_fk = $request->input('data_type');
         $column->translation_fk = $request->input('translation');
         $column->description = $request->input('description');
+        $column->data_type_name = $column->getDataTypeName();
         $column->save();
         
         return Redirect::to('admin/column')

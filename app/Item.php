@@ -144,6 +144,14 @@ class Item extends Model
         });
     }
 
+    /**
+     * Get the item type of the item.
+     */
+    public function getItemType()
+    {
+        return $this->item_type->attributes()->firstWhere('name', 'code')->pivot->value;
+    }
+
     
     use \Staudenmeir\LaravelAdjacencyList\Eloquent\HasRecursiveRelationships;
     
@@ -324,6 +332,8 @@ class Item extends Model
     /**
      * Get an item's detail with given data type.
      *
+     * Warning: This function is deprecated and will be removed soon!
+     *
      * @param  string  $name
      * @return string
      */
@@ -353,6 +363,37 @@ class Item extends Model
         return $detail;
     }
     
+    /**
+     * Get an item's detail with given name from module.
+     *
+     * @param  string  $name
+     * @param  \App\ModuleInstance  $module
+     * @return string
+     */
+    public function getDetailByName($name, ModuleInstance $module)
+    {
+        $content = __('items.no_detail_with_data_type');
+
+        if ($name && isset($module->config['columns'][$name])) {
+            $detail = $this->details->firstWhere('column_fk', $module->config['columns'][$name] ?? null);
+            if ($detail) {
+                // Details can be of different data types
+                switch ($detail->column->getDataType()) {
+                    case '_float_':
+                        $content = $detail->value_float;
+                        break;
+                    case '_integer_':
+                    case '_image_ppi_':
+                        $content = $detail->value_int;
+                        break;
+                    default:
+                        $content = $detail->value_string;
+                }
+            }
+        }
+        return $content;
+    }
+
     /**
      * Update map latitude and longitude from given location.
      *

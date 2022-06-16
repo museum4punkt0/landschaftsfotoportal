@@ -84,7 +84,7 @@
         @endif
         
         <div class="row my-2">
-        @switch($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value)
+        @switch($cm->column->data_type_name)
             
             {{-- Data_type of form field is taxon --}}
             @case('_taxon_')

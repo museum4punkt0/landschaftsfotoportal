@@ -81,7 +81,7 @@ class ItemRevisionController extends Controller
         $revisions = $item->item->revisions()->latest()->get();
 
         // Only columns associated with this item's taxon or its descendants
-        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk);
+        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk)->get();
 
         // Load all list elements of lists used by this item's columns
         $lists = Element::getTrees($colmap);
@@ -108,7 +108,7 @@ class ItemRevisionController extends Controller
         $taxon = $item->taxon;
 
         // Only columns associated with this item's taxon or its descendants
-        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk);
+        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk)->get();
 
         // Check for missing details and add them
         // Should be not necessary but allows editing items with somehow incomplete data
@@ -246,7 +246,7 @@ class ItemRevisionController extends Controller
     private function addMissingDetails(ItemRevision $item)
     {
         // Only columns associated with this item's taxon or its descendants
-        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk);
+        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk)->get();
 
         // Check all columns for existing details
         foreach ($colmap as $cm) {

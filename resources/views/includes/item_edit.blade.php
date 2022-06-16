@@ -125,7 +125,7 @@
         {{-- Don't show columns which have auto generated content, e.g. image size/dimensions --}}
         @unless($cm->getConfigValue('editable') === false)
         
-        @switch($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value)
+        @switch($cm->column->data_type_name)
             
             {{-- Data_type of form field is list --}}
             @case('_list_')

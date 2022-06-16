@@ -89,7 +89,7 @@
                             @endif
 
                             <!-- Dropdown menus for select lists -->
-                            @if($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value == '_list_')
+                            @if($cm->column->data_type_name == '_list_')
                                 <div class="form-group col-6 col-lg-12 px-3 px-lg-0">
                                     <span>
                                         {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 
@@ -115,7 +115,7 @@
                             @endif
 
                             <!-- Dropdown menus for date ranges -->
-                            @if($cm->column->data_type->attributes->firstWhere('name', 'code')->pivot->value == '_date_range_')
+                            @if($cm->column->data_type_name == '_date_range_')
                                 <div class="form-group col-6 col-lg-12 px-lg-0">
                                     <span>
                                         {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }} 

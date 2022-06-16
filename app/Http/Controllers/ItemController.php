@@ -51,7 +51,9 @@ class ItemController extends Controller
     public function create(Request $request)
     {
         // Only columns associated with this item's taxon or its descendants
-        $colmap = ColumnMapping::forItem($request->item_type, $request->taxon)->where('public', 1);
+        $colmap = ColumnMapping::forItem($request->item_type, $request->taxon)
+                ->where('public', 1)
+                ->get();
         
         // Load all list elements of lists used by this item's columns
         $lists = Element::getTrees($colmap);
@@ -91,7 +93,9 @@ class ItemController extends Controller
         $item_type = $request->session()->get('item_type');
         
         // Only columns associated with this item's taxon or its descendants
-        $colmap = ColumnMapping::forItem($item_type, $request->taxon)->where('public', 1);
+        $colmap = ColumnMapping::forItem($item_type, $request->taxon)
+                ->where('public', 1)
+                ->get();
         
         // Validation rules for fields associated with this item
         $validation_rules['title'] = 'nullable|string|max:255';
@@ -276,7 +280,9 @@ class ItemController extends Controller
         $details = Detail::where('item_fk', $item->item_id)->get();
         
         // Only columns associated with this item's taxon or its descendants
-        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk)->where('public', 1);
+        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk)
+                ->where('public', 1)
+                ->get();
         
         // Load all list elements of lists used by this item's columns
         $lists = Element::getTrees($colmap);
@@ -504,7 +510,9 @@ class ItemController extends Controller
         }
 
         // Only columns associated with this item's taxon or its descendants
-        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk)->where('public', 1);
+        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk)
+                ->where('public', 1)
+                ->get();
         
         // Check for missing details and add them
         // Should be not necessary but allows editing items with somehow incomplete data
@@ -544,7 +552,9 @@ class ItemController extends Controller
     public function update(Request $request, Item $item)
     {
         // Only columns associated with this item's taxon or its descendants
-        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk)->where('public', 1);
+        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk)
+                ->where('public', 1)
+                ->get();
         
         // Validation rules for fields associated with this item
         $validation_rules['title'] = 'nullable|string|max:255';
@@ -775,7 +785,7 @@ class ItemController extends Controller
     private function addMissingDetails(Item $item)
     {
         // Only columns associated with this item's taxon or its descendants
-        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk);
+        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk)->get();
 
         // Check all columns for existing details
         foreach ($colmap as $cm) {

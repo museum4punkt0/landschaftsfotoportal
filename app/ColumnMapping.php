@@ -35,6 +35,7 @@ class ColumnMapping extends Model
         'column_group_fk',
         'taxon_fk',
         'column_order',
+        'api_attribute',
         'config',
         'public',
     ];
@@ -100,8 +101,7 @@ class ColumnMapping extends Model
                     });
             })
             ->with('column')
-            ->orderBy('column_order')
-            ->get();
+            ->orderBy('column_order');
     }
     
     

@@ -63,4 +63,7 @@ return [
     'notif_comment_published' => 'Ihr Kommentar wurde vom Redaktionsteam gesichtet und für die Aktualisierung des Foto-Datensatzes verwendet',
     'notif_item_published' => 'Ihr Foto-Datensatz wurde vom Redaktionsteam gesichtet und veröffentlicht.',
     'notif_item_rejected' => 'Ihr Foto-Datensatz wurde vom Redaktionsteam leider abgelehnt und verworfen.',
+
+    'api_missing_location' => 'Wo genau wurde dieses Foto aufgenommen? Helfen Sie mit Ihrem Wissen!',
+    'api_hashtags' => '#CitizenScience #landscape #photography',
 ];

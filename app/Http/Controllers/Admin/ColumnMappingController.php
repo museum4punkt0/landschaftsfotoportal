@@ -132,7 +132,8 @@ class ColumnMappingController extends Controller
             'item_type' => 'required|integer',
             'taxon' => 'nullable|integer',
             'public' => 'required|integer',
-            'config' => 'nullable|string',
+            'api_attribute' => 'nullable|string|max:255',
+            'config' => 'nullable|string|max:4095',
         ]);
         
         $data = [
@@ -141,6 +142,7 @@ class ColumnMappingController extends Controller
             'item_type_fk' => $request->input('item_type'),
             'taxon_fk' => $request->input('taxon'),
             'public' => $request->input('public'),
+            'api_attribute' => $request->input('api_attribute'),
             'config' => $request->input('config'),
         ];
         ColumnMapping::create($data);
@@ -368,7 +370,8 @@ class ColumnMappingController extends Controller
             'taxon' => 'nullable|integer',
             'column_order' => 'required|integer',
             'public' => 'required|integer',
-            'config' => 'nullable|string',
+            'api_attribute' => 'nullable|string|max:255',
+            'config' => 'nullable|string|max:4095',
         ]);
         
         //$colmap->column_fk = $request->input('column');
@@ -377,6 +380,7 @@ class ColumnMappingController extends Controller
         $colmap->taxon_fk = $request->input('taxon');
         $colmap->column_order = $request->input('column_order');
         $colmap->public = $request->input('public');
+        $colmap->api_attribute = $request->input('api_attribute');
         $colmap->config = $request->input('config');
         $colmap->save();
         

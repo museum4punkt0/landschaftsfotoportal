@@ -78,8 +78,17 @@
         <span class="text-danger">{{ $errors->first('public') }}</span>
     </div>
     <div class="form-group">
+        <label for="apiAttributeInput">@lang('colmaps.api_attribute')</label>
+        <input type="text" id="apiAttributeInput" name="api_attribute" class="form-control"
+            value="{{old('api_attribute')}}" maxlength="255"
+        />
+        <span class="text-danger">{{ $errors->first('api_attribute') }}</span>
+    </div>
+    <div class="form-group">
         <label for="configInput">@lang('colmaps.config')</label>
-        <input type="text" id="configInput" name="config" class="form-control" value="{{old('config')}}" />
+        <input type="text" id="configInput" name="config" class="form-control"
+            value="{{old('config')}}" maxlength="4095"
+        />
         <span class="text-danger">{{ $errors->first('config') }}</span>
     </div>
     

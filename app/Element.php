@@ -80,8 +80,7 @@ class Element extends Model
         return $query->treeOf(function ($query) use ($list_id) {
                 $query->where('parent_fk', null)->where('list_fk', $list_id);
             })
-            ->depthFirst()
-            ->get();
+            ->depthFirst();
     }
     
     
@@ -142,7 +141,7 @@ class Element extends Model
         foreach ($colmaps as $cm) {
             $list_id = $cm->column->list_fk;
             if ($list_id) {
-                $lists[$list_id] = Element::ofList($list_id);
+                $lists[$list_id] = Element::ofList($list_id)->get();
             }
         }
         return $lists;
