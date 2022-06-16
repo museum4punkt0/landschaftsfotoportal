@@ -262,36 +262,48 @@ class ItemController extends Controller
             return Redirect::to($target);
         }
         
+        Debugbar::startMeasure('get-item');
         // All items for the show blade, used for image galleries
         $items = Item::find($item->item_id)
             ->descendantsAndSelf()
             ->where('public', 1)
             ->orderBy('title')
             ->get();
+        Debugbar::stopMeasure('get-item');
         
+        Debugbar::startMeasure('prepare-menu');
         // First level items for the sidebar menu
         $menu_root = Item::whereNull('parent_fk')->where('public', 1)->orderBy('item_id')->get();
         
         // Get the menu path of the requested item
         $ancestors = Item::find($item->item_id)->ancestorsAndSelf()->orderBy('depth', 'asc')->first();
         $path = array_reverse(explode('.', $ancestors->path));
+        Debugbar::stopMeasure('prepare-menu');
         
+        Debugbar::startMeasure('get-details');
         // Details of selected item
         $details = Detail::where('item_fk', $item->item_id)->get();
+        Debugbar::stopMeasure('get-details');
         
+        Debugbar::startMeasure('get-colmaps');
         // Only columns associated with this item's taxon or its descendants
         $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk)
                 ->where('public', 1)
                 ->get();
+        Debugbar::stopMeasure('get-colmaps');
         
+        Debugbar::startMeasure('list-elements');
         // Load all list elements of lists used by this item's columns
         $lists = Element::getTrees($colmap);
+        Debugbar::stopMeasure('list-elements');
         
+        Debugbar::startMeasure('localisation');
         // Get current UI language
         $lang = app()->getLocale();
         
         // Get localized names of columns
         $translations = Localization::getTranslations($lang, 'name');
+        Debugbar::stopMeasure('localisation');
         
         return view('item.show', compact('item', 'items', 'details', 'menu_root', 'path', 'colmap', 'lists', 'translations'));
     }
