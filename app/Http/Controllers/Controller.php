@@ -10,7 +10,7 @@ use Illuminate\Routing\Controller as BaseController;
 /**
  * @OA\Info(
  *      version="0.4.2",
- *      title="FWP-API",
+ *      title=L5_SWAGGER_UI_TITLE,
  *      description="This is a private API for FlorawebPlus.",
  *      @OA\Contact(
  *          email="sebastian.klemm@senckenberg.de"

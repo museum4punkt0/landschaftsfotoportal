@@ -1,7 +1,7 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "FWP-API",
+        "title": "Bestikri-API",
         "description": "This is a private API for FlorawebPlus.",
         "contact": {
             "email": "sebastian.klemm@senckenberg.de"
