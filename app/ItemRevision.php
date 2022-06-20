@@ -31,6 +31,7 @@ class ItemRevision extends Item
         'item_type_fk',
         'taxon_fk',
         'title',
+        'page_title',
         'public',
         'created_by',
         'updated_by',

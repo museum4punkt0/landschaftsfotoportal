@@ -20,6 +20,14 @@
 
 @section('content')
 
+    @if($item->page_title)
+        @if(Config::get('ui.html_page_title'))
+            <h3>{!! $item->page_title !!}</h3>
+        @else
+            <h3>{{ $item->page_title }}</h3>
+        @endif
+    @endif
+
     @if($item->item_type->attributes->firstWhere('name', 'code')->pivot->value != '_static_')
         <!-- Image details -->
         @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [

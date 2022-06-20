@@ -103142,7 +103142,7 @@ var itemDiff = {
   startDiff: function startDiff() {
     var t = this; // define variable in this Scope
 
-    var selector = '[name^="fields"][type!="hidden"],[name="title"],[name="public"]';
+    var selector = '[name^="fields"][type!="hidden"],[name="menu_title"],[name="page_title"],[name="public"]';
     $(selector).each(function () {
       var hc = t.getHistoricContent($(this).data('column'), $(this).data('type'), t.historicRevision);
       var cc = t.getcurrentContent($(this).data('column'), $(this).data('type'));
@@ -103182,8 +103182,13 @@ var itemDiff = {
     var content = "";
 
     switch (type) {
-      case "title":
-        selector = 'input[name="title"]';
+      case "menu_title":
+        selector = 'input[name="menu_title"]';
+        content = $(selector).val().trim();
+        break;
+
+      case "page_title":
+        selector = 'input[name="page_title"]';
         content = $(selector).val().trim();
         break;
 

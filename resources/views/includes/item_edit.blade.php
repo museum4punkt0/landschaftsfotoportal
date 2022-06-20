@@ -65,14 +65,25 @@
     
 @if($options['edit.meta'])
     <div class="form-group">
-        <label for="titleInput">@lang('items.menu_title')</label>
-        <input type="text" id="titleInput" name="title" class="form-control"
-            data-column="-101" data-type="title"
-            value="{{old('title', $item->title)}}" maxlength="255" autofocus
+        <label for="menuTitleInput">@lang('items.menu_title')</label>
+        <input type="text" id="menuTitleInput" name="menu_title" class="form-control"
+            data-column="-101" data-type="menu_title"
+            value="{{old('menu_title', $item->menu_title)}}" maxlength="255" autofocus
         >
-        <span class="text-danger">{{ $errors->first('title') }}</span>
+        <span class="text-danger">{{ $errors->first('menu_title') }}</span>
         @includeWhen(isset($options['edit.revision']), 'includes.form_history_meta', [
-            'data_type' => 'title', 'column_id' => -101
+            'data_type' => 'menu_title', 'column_id' => -101
+        ])
+    </div>
+    <div class="form-group">
+        <label for="pageTitleInput">@lang('items.page_title')</label>
+        <input type="text" id="pageTitleInput" name="page_title" class="form-control"
+            data-column="-104" data-type="page_title"
+            value="{{old('page_title', $item->page_title)}}" maxlength="1024" autofocus
+        >
+        <span class="text-danger">{{ $errors->first('page_title') }}</span>
+        @includeWhen(isset($options['edit.revision']), 'includes.form_history_meta', [
+            'data_type' => 'page_title', 'column_id' => -104
         ])
     </div>
     <div class="form-group">
