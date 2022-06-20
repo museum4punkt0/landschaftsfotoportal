@@ -262,7 +262,8 @@
                                         <br/>
                                         <a href="{{ route('item.show.public', $specimen->item_id) }}"
                                             title="{{ $specimen->title }}">
-                                        {{ Str::limit(explode('_', pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME))[0], 12) }}</a>
+                                            {{ Str::limit($specimen->title, 12) }}
+                                        </a>
                                     </div>
                                     @endif
                                 @endforeach
