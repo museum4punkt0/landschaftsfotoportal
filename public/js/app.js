@@ -103636,28 +103636,114 @@ var osm_map = {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 var menu = {
-  init: function init() {
-    $('.sidebar .collapse').on('hide.bs.collapse', function () {//console.log(this);
-      //console.log($(this).attr('id'));
-      //$(this).removeClass("active");
-    });
-    $('.nav-collapse-icon').on('click', function () {
-      console.log(this);
+  element: null,
+  level: null,
+  parentId: null,
+  init: function init(ajaxChildrenUrl) {
+    // On click on arrow icon
+    $(document).on('click', '.nav-collapse-icon', function () {
+      //console.log(this);
       var itemLink = $('.nav-link[data-item-id=' + $(this).data('item-id') + ']');
-      var state = $(this).hasClass('active');
-      console.log('icon' + $(this).data('item-id') + state);
+      var state = $(this).hasClass('active'); //console.log('icon' + $(this).data('item-id') + state);
+      // Parent div element with class 'nav-item-row'
+
+      menu.element = itemLink.parent();
+      menu.level = $(this).data('level');
+      menu.parentId = $(this).data('item-id'); // Check for active state
 
       if (state) {
+        // Deactivate and hide
         itemLink.removeClass("active");
         $(this).removeClass("active");
         $(this).addClass("collapsed");
       } else {
+        // Check if submenu content is already available
+        if ($(this).parent().parent().children('ul').length) {//console.log('expanding available menu...');
+        } else {
+          // Otherwise load using AJAX request
+          var url = ajaxChildrenUrl + '?item=' + $(this).data('item-id');
+          url += '&level=' + $(this).data('level');
+          $.getJSON(url, function (data, status) {
+            //console.log(status);
+            //console.log(data);
+            menu.appendChildren(data.data);
+          });
+        } // Activate and unhide
+
+
         $(this).removeClass("collapsed");
         $(this).addClass("active");
         itemLink.addClass("active");
       }
     });
+  },
+  appendChildren: function appendChildren(items) {
+    //console.log('append children');
+    //console.log(menu.element);
+    //console.log(items);
+    var itemsHtml = []; // Prepare HTML for all the list elements
+
+    var _iterator = _createForOfIteratorHelper(items),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var i = _step.value;
+        itemsHtml.push(this.prepareMenuItem(i));
+      } // Prepare the HTML for the enclosing unordered list
+
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+
+    var listHtml = this.prepareMenuList(itemsHtml); // Append the complete HTML to the DOM
+
+    menu.element.after(listHtml);
+  },
+  prepareMenuItem: function prepareMenuItem(item) {
+    //console.log('prepare item');
+    var html = '<li class="nav-item">';
+    html += '<div class="nav-item-row d-flex">';
+    html += '<a class="nav-link mr-auto" href="' + item.route_show_public + '" data-item-id="' + item.item_id + '">';
+    html += item.title + '</a>';
+    html += '<a href="#collapseMI' + item.item_id + '" class="nav-collapse-icon collapsed"';
+    html += ' aria-expanded="false" data-item-id="' + item.item_id + '"';
+    html += ' data-level="' + menu.level + '"';
+    html += ' data-toggle="collapse" role="button"';
+    html += ' aria-controls="collapseMI' + item.item_id + '">';
+    html += '<i class="fa mr-3" aria-hidden="true"></i>';
+    html += '</a></div></li>';
+    return html;
+  },
+  prepareMenuList: function prepareMenuList(itemsHtml) {
+    //console.log('prepare list');
+    var html = '<ul class="collapse show" id="collapseMI' + menu.parentId + '">'; // Include HTML for each list element
+
+    var _iterator2 = _createForOfIteratorHelper(itemsHtml),
+        _step2;
+
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var i = _step2.value;
+        html += i;
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+
+    html += '</ul>';
+    return html;
   }
 };
 /* harmony default export */ __webpack_exports__["default"] = (menu);

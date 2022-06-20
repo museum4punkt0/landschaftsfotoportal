@@ -10,6 +10,12 @@
         'exclude' => config('menu.sidebar_exclude_item_type', []),
     ])
     
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Init the menu
+            menu.init("{{ route('menu.children') }}");
+        });
+    </script>
 @endsection
 
 @section('content')
@@ -404,8 +410,6 @@
                             var itemId = $('#map').data('item');
                             var mapConfig = $('#map').data('map-config');
                             osm_map.init(colmapId, itemId, mapConfig);
-
-                            menu.init();
                         });
                         /*
                         var lon = {{ optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col')))->value_float ?? 0 }};

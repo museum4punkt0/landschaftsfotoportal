@@ -27,6 +27,7 @@
                     aria-expanded="false"
                 @endif
                 data-item-id="{{ $child->item_id }}"
+                data-level="{{ (isset($loop) ? $loop->depth : 0) }}"
                 data-toggle="collapse"
                 role="button"
                 aria-controls="collapseMI{{ $child->item_id }}"

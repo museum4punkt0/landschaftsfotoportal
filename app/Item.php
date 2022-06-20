@@ -36,11 +36,21 @@ class Item extends Model
     /**
      * Accessor to get the item's Id.
      *
-     * @return void
+     * @return int
      */
     public function getOriginalItemIdAttribute()
     {
         return $this->item_id;
+    }
+
+    /**
+     * Accessor to get the route show the item.
+     *
+     * @return string
+     */
+    public function getRouteShowPublicAttribute()
+    {
+        return route('item.show.public', $this->item_id);
     }
 
     /**
