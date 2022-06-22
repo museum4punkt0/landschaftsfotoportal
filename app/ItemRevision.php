@@ -59,6 +59,16 @@ class ItemRevision extends Item
 
     /**
      * Get the parent of the (original) item.
+     *
+     * This is a replacement for Item::parent() from \Staudenmeir\LaravelAdjacencyList 
+     */
+    public function parent()
+    {
+        return $this->original_parent();
+    }
+
+    /**
+     * Get the parent of the (original) item.
      */
     public function original_parent()
     {
