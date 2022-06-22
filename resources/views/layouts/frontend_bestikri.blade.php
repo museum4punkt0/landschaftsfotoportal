@@ -67,7 +67,7 @@
             <!-- Sidebar Menu -->
             <nav id="sidebarMenu" class="col-lg-3 d-lg-block sidebar collapse">
                 <div class="p-md-3">
-                    <div class="sidebar-sticky pt-3">
+                    <div class="sidebar-sticky pt-3 px-3">
                         <ul class="nav flex-column">
 
                             @section('sidebar_menu_items')

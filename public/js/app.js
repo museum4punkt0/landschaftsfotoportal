@@ -103713,14 +103713,14 @@ var menu = {
     //console.log('prepare item');
     var html = '<li class="nav-item">';
     html += '<div class="nav-item-row d-flex">';
-    html += '<a class="nav-link mr-auto" href="' + item.route_show_public + '" data-item-id="' + item.item_id + '">';
+    html += '<a class="nav-link mr-auto pl-0" href="' + item.route_show_public + '" data-item-id="' + item.item_id + '">';
     html += item.title + '</a>';
     html += '<a href="#collapseMI' + item.item_id + '" class="nav-collapse-icon collapsed"';
     html += ' aria-expanded="false" data-item-id="' + item.item_id + '"';
     html += ' data-level="' + menu.level + '"';
     html += ' data-toggle="collapse" role="button"';
     html += ' aria-controls="collapseMI' + item.item_id + '">';
-    html += '<i class="fa mr-3" aria-hidden="true"></i>';
+    html += '<i class="fa mr-0" aria-hidden="true"></i>';
     html += '</a></div></li>';
     return html;
   },
