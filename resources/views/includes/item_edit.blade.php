@@ -829,7 +829,51 @@
                         osm_map.display(lon, lat, zoom);
                         osm_map.addMarker(lon, lat, '{{ asset("storage/images/dot.svg") }}', '#4a90d9');
                         
-                        //osm_map.updateSize();
+                        // Click on map to update position of marker
+                        osm_map.map.on('singleclick', function (evt) {
+                            let coord = osm_map.transformCoordinate(evt.coordinate);
+                            // Update lat/lon form fields
+                            $('input.location_lon').val(coord[0]);
+                            $('input.location_lat').val(coord[1]);
+                            // Update position of marker
+                            osm_map.moveMarker($('input.location_lon').val(), $('input.location_lat').val());
+                            
+                            // Fetch data from geocoder API
+                            $.ajax({
+                                url: '{{ Config::get("geo.reverse_geocoder_url") }}',
+                                type: 'get',
+                                dataType: 'json',
+                                data: {
+                                    format: 'json',
+                                    'accept-language': 'de',
+                                    lat: coord[1],
+                                    lon: coord[0],
+                                    key: '{{ Config::get("geo.api_key") }}',
+                                },
+                                success: function(data) {
+                                    //console.log(data);
+                                    // Update address form input fields with results from geocoder
+                                    $('input.location_country').val(data.address.country);
+                                    $('input.location_state').val(data.address.state);
+                                    $('input.location_county').val(data.address.county);
+                                    $('input.location_city').val(getTownFromAddress(data.address));
+                                    $('input.location_street').val(data.address.road);
+                                    $('input.location_postcode').val(data.address.postcode);
+                                },
+                                error:function (xhr) {
+                                    //console.log(xhr);
+                                    // In case of wrong API key, the server responds with HTTP 403, but XHR fails
+                                    // because of missing CORS headers
+                                    if (xhr.status == 0) {
+                                        error_message = '@lang("common.geocoder_api_key_error")';
+                                    }
+                                    // Render the geocoder error message
+                                    $('#alertModalLabel').text('@lang("common.laravel_error")');
+                                    $('#alertModalContent').html('<div class="alert alert-danger">' + error_message + '</div>');
+                                    $('#alertModal').modal('show');
+                                },
+                            });
+                        });
                     </script>
                 @endif
                 @include('includes.form_input_help')
@@ -993,52 +1037,6 @@
         xhr.preventDefault();
         $('input.location_city').autocomplete('enable');
         $('input.location_city').autocomplete('search');
-    });
-    
-    // Click on map to update position of marker
-    osm_map.map.on('singleclick', function (evt) {
-        let coord = osm_map.transformCoordinate(evt.coordinate);
-        // Update lat/lon form fields
-        $('input.location_lon').val(coord[0]);
-        $('input.location_lat').val(coord[1]);
-        // Update position of marker
-        osm_map.moveMarker($('input.location_lon').val(), $('input.location_lat').val());
-        
-        // Fetch data from geocoder API
-        $.ajax({
-            url: '{{ Config::get("geo.reverse_geocoder_url") }}',
-            type: 'get',
-            dataType: 'json',
-            data: {
-                format: 'json',
-                'accept-language': 'de',
-                lat: coord[1],
-                lon: coord[0],
-                key: '{{ Config::get("geo.api_key") }}',
-            },
-            success: function(data) {
-                //console.log(data);
-                // Update address form input fields with results from geocoder
-                $('input.location_country').val(data.address.country);
-                $('input.location_state').val(data.address.state);
-                $('input.location_county').val(data.address.county);
-                $('input.location_city').val(getTownFromAddress(data.address));
-                $('input.location_street').val(data.address.road);
-                $('input.location_postcode').val(data.address.postcode);
-            },
-            error:function (xhr) {
-                //console.log(xhr);
-                // In case of wrong API key, the server responds with HTTP 403, but XHR fails
-                // because of missing CORS headers
-                if (xhr.status == 0) {
-                    error_message = '@lang("common.geocoder_api_key_error")';
-                }
-                // Render the geocoder error message
-                $('#alertModalLabel').text('@lang("common.laravel_error")');
-                $('#alertModalContent').html('<div class="alert alert-danger">' + error_message + '</div>');
-                $('#alertModal').modal('show');
-            },
-        });
     });
 </script>
 

@@ -103128,6 +103128,11 @@ var itemDiff = {
     });
   },
   addMapMarker: function addMapMarker() {
+    // Check for existing map object
+    if (!osm_map.map) {
+      return false;
+    }
+
     var columnLat = $('input.location_lat').data('column');
     var columnLon = $('input.location_lon').data('column');
     var imagePath = $('#map').data('image-path');
