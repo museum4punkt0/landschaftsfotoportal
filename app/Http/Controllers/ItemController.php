@@ -11,6 +11,7 @@ use App\ColumnMapping;
 use App\DateRange;
 use App\Selectlist;
 use App\Element;
+use App\ModuleInstance;
 use App\Taxon;
 use App\User;
 use App\Notifications\ItemAdded;
@@ -262,6 +263,9 @@ class ItemController extends Controller
             return Redirect::to($target);
         }
         
+        // Load config of all modules associated with this item
+        $modules = ModuleInstance::forItem($item->item_id)->get();
+
         Debugbar::startMeasure('get-item');
         // All items for the show blade, used for image galleries
         $items = Item::find($item->item_id)
@@ -306,7 +310,8 @@ class ItemController extends Controller
         $translations = Localization::getTranslations($lang, 'name');
         Debugbar::stopMeasure('localisation');
         
-        return view('item.show', compact('item', 'items', 'details', 'menu_root', 'path', 'colmap', 'lists', 'translations'));
+        return view('item.show', compact('item', 'items', 'details', 'menu_root', 'path',
+            'colmap', 'lists', 'translations', 'modules'));
     }
 
     /**

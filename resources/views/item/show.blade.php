@@ -18,6 +18,16 @@
     </script>
 @endsection
 
+@section('content-module-right')
+    {{-- Check if module for this position exists and has proper config --}}
+    @if(isset(optional($modules->firstWhere('position', 'content-module-right'))->config['blade_name']))
+        @includeIf('includes.modules.' . $modules->firstWhere('position', 'content-module-right')->config['blade_name'],
+            ['module_name' => $modules->firstWhere('position', 'content-module-right')->name]
+        )
+    @endif
+@endsection
+
+
 @section('content')
 
     @if($item->page_title)

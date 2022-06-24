@@ -52,6 +52,8 @@ Route::resource('/item', 'ItemController')->except(['index'])->names([
     'destroy' => 'item.destroy.own'
 ]);
 
+Route::get('image/random', 'ImageController@getRandom')->name('image.random');
+
 Route::get('menu/children', 'AjaxMenuController@getChildren')->name('menu.children');
 Route::get('map/all', 'AjaxMapController@all')->name('map.all');
 Route::get('map/search', 'AjaxMapController@searchResults')->name('map.search');

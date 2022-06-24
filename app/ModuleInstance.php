@@ -43,4 +43,17 @@ class ModuleInstance extends Model
     {
         return $this->belongsTo('App\Module', 'module_fk', 'module_id');
     }
+
+    /**
+     * Scope a query to only include modules for a given item.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  mixed  $item_id
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeForItem($query, $item_id)
+    {
+        return $query->whereNull('item_fk')
+            ->orWhere('item_fk', $item_id);
+    }
 }
