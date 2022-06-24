@@ -68,7 +68,7 @@
     
 @if (Route::currentRouteName() == 'item.gallery')
     <!-- Masthead -->
-    <header class="masthead">
+    <header class="masthead d-print-none">
         <div class="container">
             <div class="masthead-subheading">@lang('landschaftsfotoportal.slogan')</div>
             <div class="masthead-heading text-uppercase">Landschafts&shy;fotoportal</div>
@@ -139,7 +139,7 @@
     
 @if (Route::currentRouteName() == 'item.gallery')
     <!-- Partner Logos -->
-    <div class="py-5 bg-white">
+    <div class="py-5 bg-white d-print-none">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-4 col-sm-12 my-3">
@@ -157,7 +157,7 @@
 @endif
     
     <!-- Footer -->
-    <footer class="footer py-4">
+    <footer class="footer py-4 d-print-none">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-4 text-lg-left">© Senckenberg</div>

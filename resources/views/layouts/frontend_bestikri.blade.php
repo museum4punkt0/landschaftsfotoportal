@@ -65,7 +65,7 @@
     <div class="container-fluid">
         <div class="row">
             <!-- Sidebar Menu -->
-            <nav id="sidebarMenu" class="col-lg-3 d-lg-block sidebar collapse">
+            <nav id="sidebarMenu" class="col-lg-3 d-lg-block d-print-none sidebar collapse">
                 <div class="p-md-3">
                     <div class="sidebar-sticky pt-3 px-3">
                         <ul class="nav flex-column">
@@ -80,7 +80,8 @@
             
             <!-- Content Area -->
             <main role="main" class="col-lg-9 ml-sm-auto pl-lg-0 pr-lg-3">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-3">
+                <!-- Toolbar -->
+                <div class="d-flex d-print-none justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-3">
                     <!-- Search input -->
                     <form class="form-inline" action="{{ route('search.index') }}#searchResults" method="GET">
                         <input
@@ -115,7 +116,7 @@
                 </div>
 
                 <!-- Footer Area with Logos and Links -->
-                <div class="pt-3">
+                <div class="d-print-none pt-3">
                     <div class="footer p-3">
                         <div class="row">
                             <div class="col-6 col-md-4 col-lg-3 col-xl-2 align-self-center">
