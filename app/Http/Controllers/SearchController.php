@@ -28,6 +28,9 @@ class SearchController extends Controller
         // First level items for the sidebar menu
         $menu_root = Item::whereNull('parent_fk')->where('public', 1)->orderBy('item_id')->get();
         
+        // Fake the menu path of the requested item
+        $path = [];
+
         // Get the item_type for '_image_' items
         // TODO: this should be more flexible; allow configuration of multiple/different item_types
         $it_list = Selectlist::where('name', '_item_type_')->first();
@@ -246,7 +249,7 @@ class SearchController extends Controller
         // Prepare the query string to be passed to the map controller
         $query_str = http_build_query($request_query);
 
-        return view('search.form', compact('menu_root', 'search_terms', 'lists', 'dateranges',
+        return view('search.form', compact('menu_root', 'path', 'search_terms', 'lists', 'dateranges',
             'colmap', 'translations', 'item_types', 'taxa', 'items', 'query_str'));
     }
 }

@@ -3,16 +3,19 @@
 @section('sidebar_menu_items')
     @parent
     
-    @foreach($menu_root as $it)
-        @if($it->public == 1)
-        <li class="nav-item">
-            <a class="nav-link" href="{{ route('item.show.public', [$it->item_id]) }}">
-                {{ $it->title }}
-            </a>
-        </li>
-        @endif
-    @endforeach
+    @include('includes.item_submenu', [
+        'sub' => $menu_root,
+        'path' => $path,
+        'order' => config('menu.sidebar_item_order', []),
+        'exclude' => config('menu.sidebar_exclude_item_type', []),
+    ])
     
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Init the menu
+            menu.init("{{ route('menu.children') }}");
+        });
+    </script>
 @endsection
 
 @section('content')

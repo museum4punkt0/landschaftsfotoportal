@@ -13,7 +13,7 @@
             {{ $child->title }}
             
             {{-- Screen readers can mention the currently active menu item --}}
-            @if($child->item_id == $item->item_id)
+            @if(($item ?? false) && $child->item_id == $item->item_id)
                 <span class="sr-only">(current)</span>
             @endif
             </a>
