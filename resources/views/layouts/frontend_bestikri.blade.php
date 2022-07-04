@@ -66,7 +66,7 @@
         <div class="row">
             <!-- Sidebar Menu -->
             <nav id="sidebarMenu" class="col-lg-3 d-lg-block d-print-none sidebar collapse">
-                <div class="p-md-3">
+                <div class="p-lg-3">
                     <div class="sidebar-sticky pt-3 px-3">
                         <ul class="nav flex-column">
 

@@ -30,8 +30,7 @@ body {
 
 @media (max-width: 767.98px) {
   .sidebar {
-    top: 5rem;
-    padding: 90px 0 0; /* Height of navbar */
+    padding: 100px 0 0; /* Height of navbar */
   }
 }
 
@@ -43,6 +42,18 @@ body {
   overflow-x: hidden;
   overflow-y: auto; /* Scrollable contents if viewport is shorter than content. */
   background-color: #ffffff;
+}
+
+@media (max-width: 767.98px) {
+  .sidebar-sticky {
+    height: calc(100vh - 100px); /* Total height - height of navbar */
+  }
+}
+
+@media (min-width: 992px) {
+  .sidebar-sticky {
+    height: calc(100vh - 150px - 30px); /* Total height - height of navbar */
+  }
 }
 
 @supports ((position: -webkit-sticky) or (position: sticky)) {
