@@ -16,7 +16,7 @@
             {{-- Screen readers can mention the currently active menu item --}}
             @if(($item ?? false) && $child->item_id == $item->item_id ||
                 url($child->getDetailWhereDataType('_redirect_')) == url()->current())
-                <span class="sr-only">(current)</span>
+                <span class="sr-only nav-item-current">(current)</span>
             @endif
             </a>
 

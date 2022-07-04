@@ -103647,7 +103647,20 @@ var menu = {
   level: null,
   parentId: null,
   init: function init(ajaxChildrenUrl) {
-    // On click on arrow icon
+    // Scroll to current menu item
+    var sideBar = $('.sidebar-sticky');
+    var parentNavItem = $('.nav-item-current').parent().parent().parent().parent().parent(); // After rendering the page on desktop screens
+
+    sideBar.animate({
+      scrollTop: parentNavItem.offset().top - sideBar.offset().top + sideBar.scrollTop()
+    }, 0); // After un-collapsing the menu on mobile screens
+
+    $('#sidebarMenu').on('shown.bs.collapse', function () {
+      sideBar.animate({
+        scrollTop: parentNavItem.offset().top - sideBar.offset().top + sideBar.scrollTop()
+      }, 500);
+    }); // On click on arrow icon
+
     $(document).on('click', '.nav-collapse-icon', function () {
       //console.log(this);
       var itemLink = $('.nav-link[data-item-id=' + $(this).data('item-id') + ']');

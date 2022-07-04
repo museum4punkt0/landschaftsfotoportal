@@ -4,6 +4,21 @@ var menu = {
     parentId: null,
 
     init: function (ajaxChildrenUrl) {
+        // Scroll to current menu item
+        let sideBar = $('.sidebar-sticky');
+        let parentNavItem = $('.nav-item-current').parent().parent().parent().parent().parent();
+        // After rendering the page on desktop screens
+        sideBar.animate({
+            scrollTop: parentNavItem.offset().top - sideBar.offset().top + sideBar.scrollTop()
+        }, 0);
+
+        // After un-collapsing the menu on mobile screens
+        $('#sidebarMenu').on('shown.bs.collapse', function () {
+            sideBar.animate({
+                scrollTop: parentNavItem.offset().top - sideBar.offset().top + sideBar.scrollTop()
+            }, 500);
+        })
+
         // On click on arrow icon
         $(document).on('click', '.nav-collapse-icon', function () {
             //console.log(this);
