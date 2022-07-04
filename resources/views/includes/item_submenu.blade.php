@@ -2,7 +2,8 @@
     @if($child->public == 1)
         <li class="nav-item">
             <div class="nav-item-row d-flex">
-            @if($loop->depth <= count($path) && $path[$loop->depth - 1] == $child->item_id)
+            @if($loop->depth <= count($path) && $path[$loop->depth - 1] == $child->item_id ||
+                url($child->getDetailWhereDataType('_redirect_')) == url()->current())
                 <a class="nav-link active mr-auto pl-0" href="{{ route('item.show.public', $child) }}"
                     data-item-id="{{ $child->item_id }}">
             @else
@@ -13,13 +14,15 @@
             {{ $child->title }}
             
             {{-- Screen readers can mention the currently active menu item --}}
-            @if(($item ?? false) && $child->item_id == $item->item_id)
+            @if(($item ?? false) && $child->item_id == $item->item_id ||
+                url($child->getDetailWhereDataType('_redirect_')) == url()->current())
                 <span class="sr-only">(current)</span>
             @endif
             </a>
 
             <a href="#collapseMI{{ $child->item_id }}"
-                @if($loop->depth <= count($path) && $path[$loop->depth - 1] == $child->item_id)
+                @if($loop->depth <= count($path) && $path[$loop->depth - 1] == $child->item_id ||
+                    url($child->getDetailWhereDataType('_redirect_')) == url()->current())
                     class="nav-collapse-icon active"
                     aria-expanded="true"
                 @else
