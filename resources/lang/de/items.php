@@ -32,6 +32,7 @@ return [
     'autocomplete_help' => 'Geben Sie den Anfang des Namens (Menü-Titel) ein. Leer lassen, falls nicht zutreffend.',
     'title' => 'Datensatzname',
     'menu_title' => 'Name des Datensatzes (im Menü angezeigt)',
+    'page_title' => 'Titel des Datensatzes (als Seitenüberschrift angezeigt)',
     'add_titles' => 'Titel übernehmen',
     'titles_added' => 'Für :count Datensätze wurde ein Titel übernommen.',
     'remove_orphans' => 'Details bereinigen',

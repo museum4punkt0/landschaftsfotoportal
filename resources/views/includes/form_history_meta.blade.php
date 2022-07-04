@@ -8,8 +8,11 @@
                         @foreach($item->item->revisions->sortByDesc('updated_at') as $irev)
                             <option value="{{ $irev->revision }}"  data-content="
                                 @switch($data_type)
-                                    @case('title')
-                                        {{ $irev->title }}
+                                    @case('menu_title')
+                                        {{ $irev->menu_title }}
+                                        @break
+                                    @case('page_title')
+                                        {{ $irev->page_title }}
                                         @break
                                     @case('public')
                                         {{ $irev->public }}

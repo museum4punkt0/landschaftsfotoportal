@@ -3,7 +3,20 @@
             <h5 class="mb-0">@lang('items.menu_title')</h5>
         </div>
         <div class="card card-body">
-            {{$item->title}}
+            {{ $item->menu_title }}
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">@lang('items.page_title')</h5>
+        </div>
+        <div class="card card-body">
+        @if(Config::get('ui.html_page_title'))
+            {!! $item->page_title !!}
+        @else
+            {{ $item->page_title }}
+        @endif
         </div>
     </div>
     

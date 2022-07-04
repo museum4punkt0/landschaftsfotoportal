@@ -29,11 +29,18 @@
     
 @if($options['edit.meta'])
     <div class="form-group">
-        <label for="titleInput">@lang('items.menu_title')</label>
-        <input type="text" id="titleInput" name="title" class="form-control"
-            value="{{old('title')}}" maxlength="255" autofocus
+        <label for="menuTitleInput">@lang('items.menu_title')</label>
+        <input type="text" id="menuTitleInput" name="menu_title" class="form-control"
+            value="{{old('menu_title')}}" maxlength="255" autofocus
         >
-        <span class="text-danger">{{ $errors->first('title') }}</span>
+        <span class="text-danger">{{ $errors->first('menu_title') }}</span>
+    </div>
+    <div class="form-group">
+        <label for="pageTitleInput">@lang('items.page_title')</label>
+        <input type="text" id="pagetitleInput" name="page_title" class="form-control"
+            value="{{old('page_title')}}" maxlength="1024" autofocus
+        >
+        <span class="text-danger">{{ $errors->first('page_title') }}</span>
     </div>
     <div class="form-group">
         <label for="publicSelect">@lang('common.published')</label>

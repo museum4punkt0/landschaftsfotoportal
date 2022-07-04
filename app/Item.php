@@ -28,6 +28,7 @@ class Item extends Model
         'item_type_fk',
         'taxon_fk',
         'title',
+        'page_title',
         'public',
         'created_by',
         'updated_by',
@@ -51,6 +52,27 @@ class Item extends Model
     public function getRouteShowPublicAttribute()
     {
         return route('item.show.public', $this->item_id);
+    }
+
+    /**
+     * Accessor to get the menu title the item.
+     *
+     * @return string
+     */
+    public function getMenuTitleAttribute()
+    {
+        return $this->title;
+    }
+
+    /**
+     * Mutator to set the menu title the item.
+     *
+     * @param  string  $value
+     * @return void
+     */
+    public function setMenuTitleAttribute($value)
+    {
+        $this->attributes['title'] = $value;
     }
 
     /**
@@ -223,6 +245,7 @@ class Item extends Model
             'item_type_fk' => $this->item_type_fk,
             'taxon_fk' => $this->taxon_fk,
             'title' => $this->title,
+            'page_title' => $this->page_title,
             'public' => $this->public,
             'created_by' => $this->created_by,
             'updated_by' => $migrate ? $this->updated_by : auth()->user()->id,

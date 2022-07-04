@@ -20,6 +20,14 @@
 
 @section('content')
 
+    @if($item->page_title)
+        @if(Config::get('ui.html_page_title'))
+            <h3>{!! $item->page_title !!}</h3>
+        @else
+            <h3>{{ $item->page_title }}</h3>
+        @endif
+    @endif
+
     @if($item->item_type->attributes->firstWhere('name', 'code')->pivot->value != '_static_')
         <!-- Image details -->
         @includeIf('includes.' . Config::get('ui.frontend_layout') . '.section_header', [
@@ -262,7 +270,8 @@
                                         <br/>
                                         <a href="{{ route('item.show.public', $specimen->item_id) }}"
                                             title="{{ $specimen->title }}">
-                                        {{ Str::limit(explode('_', pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME))[0], 12) }}</a>
+                                            {{ Str::limit($specimen->title, 12) }}
+                                        </a>
                                     </div>
                                     @endif
                                 @endforeach
