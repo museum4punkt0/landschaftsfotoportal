@@ -50,6 +50,11 @@ var menu = {
         //console.log('append children');
         //console.log(menu.element);
         //console.log(items);
+        // Load linked page if no children available
+        if (!items.length) {
+            window.location.href = menu.element.children('.nav-link').attr('href');
+        }
+
         const itemsHtml = [];
         // Prepare HTML for all the list elements
         for (let i of items) {

@@ -103688,6 +103688,11 @@ var menu = {
     //console.log('append children');
     //console.log(menu.element);
     //console.log(items);
+    // Load linked page if no children available
+    if (!items.length) {
+      window.location.href = menu.element.children('.nav-link').attr('href');
+    }
+
     var itemsHtml = []; // Prepare HTML for all the list elements
 
     var _iterator = _createForOfIteratorHelper(items),
