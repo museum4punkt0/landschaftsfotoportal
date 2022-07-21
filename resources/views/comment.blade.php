@@ -2,17 +2,7 @@
 
 @section('content')
 
-@if (session('warning'))
-    <div class="alert alert-warning">
-        {{ session('warning') }}
-    </div>
-@endif
-@if (session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
-@endif
-
+@include('includes.alert_session_div')
 @include('includes.modal_alert')
 @include('includes.modal_comment_edit')
 @include('includes.modal_comment_delete')
