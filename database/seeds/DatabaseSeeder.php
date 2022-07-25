@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             GroupSeeder::class,
             AttributeSeeder::class,
             ListSeeder::class,
+            ModuleSeeder::class,
         ]);
     }
 }
