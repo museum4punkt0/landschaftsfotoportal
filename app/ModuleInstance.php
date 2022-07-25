@@ -24,6 +24,12 @@ class ModuleInstance extends Model
      * @var array
      */
     protected $fillable = [
+        'module_fk',
+        'name',
+        'description',
+        'position',
+        'item_fk',
+        'config',
     ];
     
     /**
@@ -39,7 +45,7 @@ class ModuleInstance extends Model
     /**
      * Get the module that owns the instance.
      */
-    public function instances()
+    public function template()
     {
         return $this->belongsTo('App\Module', 'module_fk', 'module_id');
     }
