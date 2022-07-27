@@ -29,5 +29,6 @@ return [
     'item_fk' => 'Exklusiv für Datensatz-ID',
     'item_fk_help' => 'Soll das Modul nur für einen einzelnen Datensatz aktiviert werden, dann ist hier dessen ID anzugeben.',
     'options' => 'Modulspezifische Konfigurations-Optionen',
+    'not_found' => 'Das Modul ":name" existiert nicht.',
     'no_module_templates' => 'Es existieren keine Vorlagen für Module.',
 ];

@@ -19,7 +19,9 @@ class ImageController extends Controller
     {
         $image_module = ModuleInstance::firstWhere('name', $request->query('module'));
         if (!$image_module) {
-            return response()->json(['error' => 'random image module not found'], 404);
+            return response()->json(
+                ['error' => __('modules.not_found', ['name' => $request->query('module')])],
+                404);
         }
 
         // Provide a invalid path if config option doesn't exist
