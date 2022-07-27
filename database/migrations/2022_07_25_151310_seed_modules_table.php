@@ -17,6 +17,7 @@ class SeedModulesTable extends Migration
         $seeder->addRandomImage();
         $seeder->addApiRandomImage();
         $seeder->addApiSpecimenImage();
+        $seeder->addDownloadImage();
     }
 
     /**

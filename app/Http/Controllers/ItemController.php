@@ -14,6 +14,7 @@ use App\Element;
 use App\ModuleInstance;
 use App\Taxon;
 use App\User;
+use App\Exceptions\ModuleNotFoundException;
 use App\Notifications\ItemAdded;
 use App\Notifications\ItemUpdated;
 use App\Utils\Image;
@@ -348,14 +349,24 @@ class ItemController extends Controller
      */
     public function download(Item $item)
     {
-        $filename = $item->details->firstWhere('column_fk', 13)->value_string;
-        $pathToFile = 'public/'. config('media.full_dir') . $filename;
+        // Load module containing column's configuration and naming
+        $image_module = ModuleInstance::firstWhere('name', 'download-image');
+        throw_if(
+            !$image_module,
+            ModuleNotFoundException::class,
+            __('modules.not_found', ['name' => 'download-image'])
+        );
+
+        // Provide a invalid path if config option doesn't exist
+        $directory = $image_module->config['image_path'] ?? 'not_existing_directory';
+        $filename = $item->getDetailByName('filename', $image_module);
+        $path = $directory . $filename;
         
-        if (Storage::missing($pathToFile)) {
+        if (Storage::disk('public')->missing($path)) {
             abort(404);
         }
         
-        return Storage::download($pathToFile);
+        return Storage::disk('public')->download($path);
     }
 
     /**

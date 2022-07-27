@@ -14,6 +14,7 @@ class ModuleSeeder extends Seeder
         $this->addRandomImage();
         $this->addApiRandomImage();
         $this->addApiSpecimenImage();
+        $this->addDownloadImage();
     }
 
     public function addRandomImage()
@@ -184,6 +185,51 @@ class ModuleSeeder extends Seeder
                             "name": {
                                 "de": "Lizenzvermerk",
                                 "en": "Licence annotation"
+                            },
+                            "data_type": "column"
+                        }
+                    }
+                }',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+    }
+
+    public function addDownloadImage()
+    {
+        // Create module template for random image
+        DB::table('modules')->insertOrIgnore([
+            [
+                'name' => 'download-image',
+                'description' => 'link for downloading an image',
+                'config' => '{
+                    "name": {
+                        "de": "Bild-Download",
+                        "en": "Image download"
+                    },
+                    "description": {
+                        "de": "Erzeugt einen Download-Link für Bilddateien.",
+                        "en": "Creates a download link for image files."
+                    },
+                    "default_position": false,
+                    "available_options": {
+                        "image_path": {
+                            "default": "' . config('media.full_dir') . '",
+                            "data_type": "string",
+                            "name": {
+                                "de": "Pfad des Bilder-Verzeichnisses",
+                                "en": "File path to image folder"
+                            },
+                            "help": {
+                                "de": "Ordner in dem die Bilddateien liegen, relativ zum öffentlichen Medien-Ordner.",
+                                "en": "Directory containing image files, relative to public media storage path."
+                            }
+                        },
+                        "filename": {
+                            "name": {
+                                "de": "Dateiname mit Endung",
+                                "en": "File name including extension"
                             },
                             "data_type": "column"
                         }
