@@ -440,21 +440,21 @@ class ItemController extends Controller
                 date('Y-m-d', mktime(0, 0, 0, 1, 1, $decade + 10)) .')';
             
             // Get number of items per decade
-            $decades[$decade] = Detail::
-                whereHas('item', function (Builder $query) {
-                    $query->where('public', 1);
+            $decades[$decade] = Item::
+                whereHas('details', function (Builder $query) use ($daterange, $daterange_column) {
+                    $query->where('column_fk', $daterange_column)
+                    ->whereRaw("value_daterange && '$daterange'");
                 })
-                ->where('column_fk', $daterange_column)
-                ->whereRaw("value_daterange && '$daterange'")
+                ->where('public', 1)
                 ->count();
             
             // Get some random items per decade, to be shown as examples
-            $details[$decade] = Detail::with('item')
-                ->whereHas('item', function (Builder $query) {
-                    $query->where('public', 1);
+            $items[$decade] = Item::with('details')
+                ->whereHas('details', function (Builder $query) use ($daterange, $daterange_column) {
+                    $query->where('column_fk', $daterange_column)
+                    ->whereRaw("value_daterange && '$daterange'");
                 })
-                ->where('column_fk', $daterange_column)
-                ->whereRaw("value_daterange && '$daterange'")
+                ->where('public', 1)
                 ->inRandomOrder()
                 ->take(config('ui.timeline_items'))
                 ->get();
@@ -462,26 +462,26 @@ class ItemController extends Controller
         
         // For items without any date (value_daterange = null)
         // Get number of items w/o date
-        $decades[-1] = Detail::
-            whereHas('item', function (Builder $query) {
-                $query->where('public', 1);
+        $decades[-1] = Item::
+            whereHas('details', function (Builder $query) use ($daterange_column) {
+                $query->where('column_fk', $daterange_column)
+                ->where('value_daterange', null);
             })
-            ->where('column_fk', $daterange_column)
-            ->where('value_daterange', null)
+            ->where('public', 1)
             ->count();
         
         // Get some random items w/o date, to be shown as examples
-        $details[-1] = Detail::with('item')
-            ->whereHas('item', function (Builder $query) {
-                $query->where('public', 1);
+        $items[-1] = Item::with('details')
+            ->whereHas('details', function (Builder $query) use ($daterange_column) {
+                $query->where('column_fk', $daterange_column)
+                ->where('value_daterange', null);
             })
-            ->where('column_fk', $daterange_column)
-            ->where('value_daterange', null)
+            ->where('public', 1)
             ->inRandomOrder()
             ->take(config('ui.timeline_items'))
             ->get();
         
-        return view('item.timeline', compact('decades', 'details'));
+        return view('item.timeline', compact('decades', 'items'));
     }
 
     /**

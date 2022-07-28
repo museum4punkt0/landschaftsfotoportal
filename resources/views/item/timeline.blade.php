@@ -34,9 +34,9 @@
                     <div class="timeline-panel">
                         <div class="timeline-body">
                             <div class="row">
-                            @foreach($details[$decade] as $detail)
-                                <a href="{{ route('item.show.public', $detail->item->item_id) }}">
-                                    <div class="timelinethumb" style="background-image: url({{ asset('storage/'. Config::get('media.preview_dir') . $detail->item->details->firstWhere('column_fk', 13)->value_string) }});"></div>
+                            @foreach($items[$decade] as $item)
+                                <a href="{{ route('item.show.public', $item->item_id) }}">
+                                    <div class="timelinethumb" style="background-image: url({{ asset('storage/'. Config::get('media.preview_dir') . $item->details->firstWhere('column_fk', 13)->value_string) }});"></div>
                                 </a>
                             @endforeach
                             </div>
