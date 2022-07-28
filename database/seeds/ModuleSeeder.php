@@ -15,6 +15,7 @@ class ModuleSeeder extends Seeder
         $this->addApiRandomImage();
         $this->addApiSpecimenImage();
         $this->addDownloadImage();
+        $this->addTimeline();
     }
 
     public function addRandomImage()
@@ -69,7 +70,7 @@ class ModuleSeeder extends Seeder
 
     public function addApiRandomImage()
     {
-        // Create module template for random image
+        // Create module template for random image API
         DB::table('modules')->insertOrIgnore([
             [
                 'name' => 'api-random-image',
@@ -144,7 +145,7 @@ class ModuleSeeder extends Seeder
 
     public function addApiSpecimenImage()
     {
-        // Create module template for random image
+        // Create module template for specimen image
         DB::table('modules')->insertOrIgnore([
             [
                 'name' => 'api-specimen-image',
@@ -198,7 +199,7 @@ class ModuleSeeder extends Seeder
 
     public function addDownloadImage()
     {
-        // Create module template for random image
+        // Create module template for image download
         DB::table('modules')->insertOrIgnore([
             [
                 'name' => 'download-image',
@@ -230,6 +231,46 @@ class ModuleSeeder extends Seeder
                             "name": {
                                 "de": "Dateiname mit Endung",
                                 "en": "File name including extension"
+                            },
+                            "data_type": "column"
+                        }
+                    }
+                }',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+    }
+
+    public function addTimeline()
+    {
+        // Create module template for timeline
+        DB::table('modules')->insertOrIgnore([
+            [
+                'name' => 'timeline',
+                'description' => 'timeline with images',
+                'config' => '{
+                    "name": {
+                        "de": "Zeitstrahl",
+                        "en": "Timeline"
+                    },
+                    "description": {
+                        "de": "Zeitstrahl mit Bilddateien.",
+                        "en": "Timeline with image files."
+                    },
+                    "default_position": false,
+                    "available_options": {
+                        "filename": {
+                            "name": {
+                                "de": "Dateiname mit Endung",
+                                "en": "File name including extension"
+                            },
+                            "data_type": "column"
+                        },
+                        "daterange": {
+                            "name": {
+                                "de": "Datumsbereich/Zeitspanne",
+                                "en": "Daterange/period of time"
                             },
                             "data_type": "column"
                         }

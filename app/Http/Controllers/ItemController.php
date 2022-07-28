@@ -425,9 +425,16 @@ class ItemController extends Controller
      */
     public function timeline()
     {
-        // TODO: remove hard-coded daterange column
-        $daterange_column = 27;
-        
+        // Load module containing column's configuration and naming
+        $image_module = ModuleInstance::firstWhere('name', 'timeline');
+        throw_if(
+            !$image_module,
+            ModuleNotFoundException::class,
+            __('modules.not_found', ['name' => 'timeline'])
+        );
+
+        $daterange_column = $image_module->config['columns']['daterange'] ?? 0;
+
         // Get bounds for daterange
         $bounds = Detail::selectRaw("
                 EXTRACT(DECADE FROM MIN(LOWER(value_daterange)))*10 AS lower,
@@ -486,8 +493,8 @@ class ItemController extends Controller
             ->inRandomOrder()
             ->take(config('ui.timeline_items'))
             ->get();
-        
-        return view('item.timeline', compact('decades', 'items'));
+
+        return view('item.timeline', compact('decades', 'items', 'image_module'));
     }
 
     /**

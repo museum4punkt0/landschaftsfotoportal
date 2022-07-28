@@ -17,7 +17,8 @@
                     <li>
                 @endif
                 
-                    <a href="{{ route('search.index', ['fields[27]' => $decade]) }}#searchResults">
+                    <a href="{{ route('search.index',
+                        ['fields['. ($image_module->config['columns']['daterange'] ?? 0) .']' => $decade]) }}#searchResults">
                     <div class="timeline-image">
                         <h4>
                         @if($decade > 0)
@@ -36,7 +37,7 @@
                             <div class="row">
                             @foreach($items[$decade] as $item)
                                 <a href="{{ route('item.show.public', $item->item_id) }}">
-                                    <div class="timelinethumb" style="background-image: url({{ asset('storage/'. Config::get('media.preview_dir') . $item->details->firstWhere('column_fk', 13)->value_string) }});"></div>
+                                    <div class="timelinethumb" style="background-image: url({{ asset('storage/'. Config::get('media.preview_dir') . $item->details->firstWhere('column_fk', $image_module->config['columns']['filename'] ?? 0)->value_string) }});"></div>
                                 </a>
                             @endforeach
                             </div>
