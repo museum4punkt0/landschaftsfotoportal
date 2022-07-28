@@ -15,6 +15,8 @@ return [
     |--------------------------------------------------------------------------
     | Maximum levels for sidebar menu
     |--------------------------------------------------------------------------
+    |
+    | Set to '0' to completely disable the menu.
     */
     'sidebar_max_levels' => 5,
 

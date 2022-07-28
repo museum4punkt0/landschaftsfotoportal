@@ -25,9 +25,14 @@ class SearchController extends Controller
      */
     public function index(Request $request)
     {
-        // First level items for the sidebar menu
-        $menu_root = Item::whereNull('parent_fk')->where('public', 1)->orderBy('item_id')->get();
-        
+        if (config('menu.sidebar_max_levels')) {
+            // First level items for the sidebar menu
+            $menu_root = Item::whereNull('parent_fk')->where('public', 1)->orderBy('item_id')->get();
+        }
+        else {
+            $menu_root = false;
+        }
+
         // Fake the menu path of the requested item
         $path = [];
 
@@ -115,7 +120,7 @@ class SearchController extends Controller
             
             // Prepare the search query WHERE clause using selected columns
             foreach ($search_columns as $col => $val) {
-                switch (Column::find($col)->getDataType()) {
+                switch (optional(Column::find($col))->getDataType()) {
                     case '_list_':
                         $search_details[] = [['column_fk', $col], ['element_fk', intval($val)]];
                     break;

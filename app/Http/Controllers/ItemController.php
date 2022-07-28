@@ -278,12 +278,18 @@ class ItemController extends Controller
         Debugbar::stopMeasure('get-item');
         
         Debugbar::startMeasure('prepare-menu');
-        // First level items for the sidebar menu
-        $menu_root = Item::whereNull('parent_fk')->where('public', 1)->orderBy('item_id')->get();
-        
-        // Get the menu path of the requested item
-        $ancestors = Item::find($item->item_id)->ancestorsAndSelf()->orderBy('depth', 'asc')->first();
-        $path = array_reverse(explode('.', $ancestors->path));
+        if (config('menu.sidebar_max_levels')) {
+            // First level items for the sidebar menu
+            $menu_root = Item::whereNull('parent_fk')->where('public', 1)->orderBy('item_id')->get();
+            
+            // Get the menu path of the requested item
+            $ancestors = Item::find($item->item_id)->ancestorsAndSelf()->orderBy('depth', 'asc')->first();
+            $path = array_reverse(explode('.', $ancestors->path));
+        }
+        else {
+            $menu_root = false;
+            $path = false;
+        }
         Debugbar::stopMeasure('prepare-menu');
         
         Debugbar::startMeasure('get-details');
