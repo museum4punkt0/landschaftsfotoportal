@@ -496,18 +496,20 @@ class ItemController extends Controller
             ->first()->column_id;
         $column_ids['lat'] = Column::ofDataType('_float_')->ofItemType('_image_')->ofSubType('location_lat')
             ->first()->column_id;
+        $column_ids['colmap'] = Column::ofDataType('_map_')->ofItemType('_image_')->first()->column_mapping()
+            ->first()->colmap_id;
         Debugbar::debug($column_ids);
         
         // There are different URLs for AJAX requests to get the items to be displayed on the map
         if ($request->query('source') == 'search') {
             $options = [
-                'ajax_url' => route('map.search'),
+                'ajax_url' => route('map.search', ['colmap' => $column_ids['colmap']]),
                 'search_url' => route('search.index', $request->query()),
             ];
         }
         else {
             $options = [
-                'ajax_url' => route('map.all'),
+                'ajax_url' => route('map.all', ['colmap' => $column_ids['colmap']]),
                 'search_url' => route('search.index', ['source' => 'all']),
             ];
         }

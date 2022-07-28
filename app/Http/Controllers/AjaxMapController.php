@@ -14,25 +14,33 @@ class AjaxMapController extends Controller
     /**
      * Get all items with coordinates from storage.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function all()
+    public function all(Request $request)
     {
-        $items = Item::where('public', 1)->where('item_type_fk', 39)
+        $cm = ColumnMapping::find(intval($request->query('colmap')));
+        if (!$cm) {
+            $data = ['error' => 'colmap not found'];
+            return response()->json($data, 400);
+        }
+        $config = $cm->config_array;
+
+        $items = Item::where('public', 1)->where('item_type_fk', intval($cm->getConfigValue('item_type')))
             // Exclude items without latitude/longitude
-            ->whereHas('details', function ($query) {
-                $query->where('column_fk', 24)
+            ->whereHas('details', function ($query) use ($cm) {
+                $query->where('column_fk', intval($cm->getConfigValue('map_lat_col')))
                       ->whereNotNull('value_float');
             })
-            ->whereHas('details', function ($query) {
-                $query->where('column_fk', 25)
+            ->whereHas('details', function ($query) use ($cm) {
+                $query->where('column_fk', intval($cm->getConfigValue('map_lon_col')))
                       ->whereNotNull('value_float');
             })
             ->with('details')
             ->get();
         
         // Create feature array for GeoJSON
-        $features = $this->createPointFeaturesFromItems($items);
+        $features = $this->createPointFeaturesFromItems($items, $config);
         
         // ...and put all those in a GeoJSON feature collection
         $geojson = $this->createFeatureCollection($features);
@@ -43,20 +51,29 @@ class AjaxMapController extends Controller
     /**
      * Get search result items with coordinates from storage.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function searchResults()
+    public function searchResults(Request $request)
     {
+        $cm = ColumnMapping::find(intval($request->query('colmap')));
+        if (!$cm) {
+            $data = ['error' => 'colmap not found'];
+            return response()->json($data, 400);
+        }
+        $config = $cm->config_array;
+
         // Make sure there are any search results 
         if (session('search_results')) {
             // Get the items (which were saved by search controller to session)
-            $items = Item::where('public', 1)->where('item_type_fk', 39)
+            $items = Item::where('public', 1)
+                ->where('item_type_fk', intval($cm->getConfigValue('item_type')))
                 ->whereIn('item_id', session('search_results'))
                 ->with('details')
                 ->get();
             
             // Create feature array for GeoJSON
-            $features = $this->createPointFeaturesFromItems($items);
+            $features = $this->createPointFeaturesFromItems($items, $config);
         }
         else {
             $features = false;
@@ -110,7 +127,11 @@ class AjaxMapController extends Controller
      */
     public function getPolygonFeaturesForItem(Request $request)
     {
-        $cm = ColumnMapping::find($request->query('colmap'));
+        $cm = ColumnMapping::find(intval($request->query('colmap')));
+        if (!$cm) {
+            $data = ['error' => 'colmap not found'];
+            return response()->json($data, 400);
+        }
         $config = $cm->config_array;
         $polygons = [];
 
@@ -160,7 +181,11 @@ class AjaxMapController extends Controller
      */
     public function getPointFeaturesForItem(Request $request)
     {
-        $cm = ColumnMapping::find($request->query('colmap'));
+        $cm = ColumnMapping::find(intval($request->query('colmap')));
+        if (!$cm) {
+            $data = ['error' => 'colmap not found'];
+            return response()->json($data, 400);
+        }
         $config = $cm->config_array;
 
         // Point coordinates from item itself
