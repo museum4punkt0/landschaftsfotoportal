@@ -12,6 +12,7 @@ use App\Column;
 use App\ColumnMapping;
 use App\Selectlist;
 use App\Element;
+use App\ModuleInstance;
 use App\Value;
 use App\Http\Controllers\Controller;
 use App\Notifications\ItemPublished;
@@ -77,12 +78,20 @@ class ItemController extends Controller
             $items = Item::orderBy($orderby, $sort)->paginate($limit);
         }
 
+        // Load module containing column's configuration and naming
+        $image_module = ModuleInstance::firstWhere('name', 'gallery');
+        throw_if(
+            !$image_module,
+            ModuleNotFoundException::class,
+            __('modules.not_found', ['name' => 'gallery'])
+        );
+
         // Get current UI language
         $lang = app()->getLocale();
 
         $item_types = Localization::getItemTypes($lang);
         
-        return view('admin.item.list', compact('items', 'item_types', 'aFilter'));
+        return view('admin.item.list', compact('items', 'item_types', 'image_module', 'aFilter'));
     }
 
     /**
@@ -380,9 +389,17 @@ class ItemController extends Controller
     {
         $this->authorize('publish', Item::class);
 
+        // Load module containing column's configuration and naming
+        $image_module = ModuleInstance::firstWhere('name', 'gallery');
+        throw_if(
+            !$image_module,
+            ModuleNotFoundException::class,
+            __('modules.not_found', ['name' => 'gallery'])
+        );
+
         $items = Item::where('public', 0)->latest('updated_at')->paginate(10);
 
-        return view('admin.item.publish', compact('items'));
+        return view('admin.item.publish', compact('items', 'image_module'));
     }
 
     /**
