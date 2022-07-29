@@ -16,6 +16,7 @@ class ModuleSeeder extends Seeder
         $this->addApiSpecimenImage();
         $this->addDownloadImage();
         $this->addTimeline();
+        $this->addGallery();
     }
 
     public function addRandomImage()
@@ -271,6 +272,89 @@ class ModuleSeeder extends Seeder
                             "name": {
                                 "de": "Datumsbereich/Zeitspanne",
                                 "en": "Daterange/period of time"
+                            },
+                            "data_type": "column"
+                        }
+                    }
+                }',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ],
+        ]);
+    }
+
+    public function addGallery()
+    {
+        // Create module template for gallery
+        DB::table('modules')->insertOrIgnore([
+            [
+                'name' => 'gallery',
+                'description' => 'image gallery',
+                'config' => '{
+                    "name": {
+                        "de": "Bilder-Galerie",
+                        "en": "Image gallery"
+                    },
+                    "description": {
+                        "de": "Galerie mit Bilddateien.",
+                        "en": "Gallery with image files."
+                    },
+                    "default_position": false,
+                    "available_options": {
+                        "item_type": {
+                            "name": {
+                                "de": "Code des Datensatztyps (z.B. _image_)",
+                                "en": "Code of item type (e.g. _image_)"
+                            },
+                            "data_type": "string",
+                            "default": "_image_"
+                        },
+                        "heading-1": {
+                            "name": {
+                                "de": "Überschrift/Titel, Teil 1, (optional)",
+                                "en": "Heading, part 1, (optional)"
+                            },
+                            "data_type": "column"
+                        },
+                        "heading-2": {
+                            "name": {
+                                "de": "Überschrift/Titel, Teil 2, (optional)",
+                                "en": "Heading, part 2, (optional)"
+                            },
+                            "data_type": "column"
+                        },
+                        "heading-3": {
+                            "name": {
+                                "de": "Überschrift/Titel, Teil 3",
+                                "en": "Heading, part 3"
+                            },
+                            "data_type": "column"
+                        },
+                        "subheading": {
+                            "name": {
+                                "de": "Zwischenüberschrift/Untertitel",
+                                "en": "Subheading"
+                            },
+                            "data_type": "column"
+                        },
+                        "caption": {
+                            "name": {
+                                "de": "Bild-Beschreibung (Hover-Text)",
+                                "en": "Image caption (hover text)"
+                            },
+                            "data_type": "column"
+                        },
+                        "missing": {
+                            "name": {
+                                "de": "Fehlendes Detail",
+                                "en": "Missing detail"
+                            },
+                            "data_type": "column"
+                        },
+                        "filename": {
+                            "name": {
+                                "de": "Dateiname mit Endung",
+                                "en": "File name including extension"
                             },
                             "data_type": "column"
                         }

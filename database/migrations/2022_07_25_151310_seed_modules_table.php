@@ -19,6 +19,7 @@ class SeedModulesTable extends Migration
         $seeder->addApiSpecimenImage();
         $seeder->addDownloadImage();
         $seeder->addTimeline();
+        $seeder->addGallery();
     }
 
     /**

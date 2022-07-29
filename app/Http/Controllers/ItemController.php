@@ -382,15 +382,37 @@ class ItemController extends Controller
      */
     public function gallery()
     {
-        // Get the item_type for '_image_' items
-        // TODO: this should be more flexible; allow configuration of multiple/different item_types
+        // Load module containing column's configuration and naming
+        $image_module = ModuleInstance::firstWhere('name', 'gallery');
+        throw_if(
+            !$image_module,
+            ModuleNotFoundException::class,
+            __('modules.not_found', ['name' => 'gallery'])
+        );
+        $incomplete = $image_module->config['columns']['missing'] ?? 0;
+        $it = $image_module->config['item_type'] ?? '_image_';
+
+        // Get the item_type
+        // TODO: this should be more flexible; allow configuration of multiple item_types
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_type = Element::where('list_fk', $it_list->list_id)
-            ->whereHas('values', function (Builder $query) {
-                $query->where('value', '_image_');
+            ->whereHas('values', function (Builder $query) use ($it) {
+                $query->where('value', $it);
             })
-            ->first()->element_id;
-        
+            ->first();
+        if ($item_type) {
+            $item_type = $item_type->element_id;
+        }
+        else {
+            // TODO: throw exception
+            return response()->view(
+                'errors.custom', [
+                    'message' => 'item type not found',
+                    'code' => 500,
+                ],
+                500);
+        }
+
         $items['latest'] = Item::with('details')
             ->where('public', 1)
             ->where('item_type_fk', $item_type)
@@ -406,16 +428,16 @@ class ItemController extends Controller
         $items['incomplete'] = Item::with('details')
             ->where('public', 1)
             ->where('item_type_fk', $item_type)
-            ->whereHas('details', function (Builder $query) {
+            ->whereHas('details', function (Builder $query) use ($incomplete) {
                 // Details with missing location/city value
-                $query->where('column_fk', 22)
+                $query->where('column_fk', $incomplete)
                     ->where('value_string', '');
             })
             ->inRandomOrder()
             ->take(config('ui.gallery_items'))
             ->get();
         
-        return view('item.gallery', compact('items'));
+        return view('item.gallery', compact('items', 'image_module'));
     }
 
     /**
