@@ -21,12 +21,13 @@
                             <div class="portfolio-hover">
                                 <div class="portfolio-hover-content text-center">
                                     <i class="portfolio-caption-heading">
-                                    {{ Str::limit($item->item->details->firstWhere('column_fk', 23)->value_string,
+                                    {{ Str::limit(optional($item->item->details->firstWhere('column_fk',
+                                        $image_module->config['columns']['caption'] ?? 0))->value_string,
                                         config('ui.galery_caption_length'), ' (...)') }}
                                     </i>
                                 </div>
                             </div>
-                            <div class="img-preview-square" style="background-image: url('{{ str_replace(['(',')'],['\(','\)'],asset('storage/' . Config::get('media.preview_dir') . $item->item->details->firstWhere('column_fk', 13)->value_string)) }}');">&nbsp;</div>
+                            <div class="img-preview-square" style="background-image: url('{{ str_replace(['(',')'],['\(','\)'], asset('storage/' . Config::get('media.preview_dir') . $item->item->details->firstWhere('column_fk', $image_module->config['columns']['filename'] ?? 0)->value_string)) }}');">&nbsp;</div>
                         </a>
                         <div class="portfolio-caption">
                             <!-- Icons for user interaction -->
@@ -52,16 +53,16 @@
                             </div>
                             <!-- Image caption -->
                             <div class="portfolio-caption-heading">
-                            @if(!empty($item->item->details->firstWhere('column_fk', 22)->value_string))
-                                {{ $item->item->details->firstWhere('column_fk', 22)->value_string }},
+                            @if(!empty($item->item->details->firstWhere('column_fk', $image_module->config['columns']['heading-1'] ?? 0)->value_string))
+                                {{ $item->item->details->firstWhere('column_fk', $image_module->config['columns']['heading-1'] ?? 0)->value_string }},
                             @endif
-                            @if(!empty($item->item->details->firstWhere('column_fk', 20)->value_string))
-                                {{ $item->item->details->firstWhere('column_fk', 20)->value_string }},
+                            @if(!empty($item->item->details->firstWhere('column_fk', $image_module->config['columns']['heading-2'] ?? 0)->value_string))
+                                {{ $item->item->details->firstWhere('column_fk', $image_module->config['columns']['heading-2'] ?? 0)->value_string }},
                             @endif
-                                {{ $item->item->details->firstWhere('column_fk', 19)->value_string }}
+                                {{ optional($item->item->details->firstWhere('column_fk', $image_module->config['columns']['heading-3'] ?? 0))->value_string }}
                             </div>
                             <div class="portfolio-caption-subheading text-muted">
-                                {{ $item->item->details->firstWhere('column_fk', 5)->value_string }}
+                                {{ optional($item->item->details->firstWhere('column_fk', $image_module->config['columns']['subheading'] ?? 0))->value_string }}
                             </div>
                         </div>
                     </div>

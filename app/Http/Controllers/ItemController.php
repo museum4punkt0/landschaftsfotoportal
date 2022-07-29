@@ -330,21 +330,43 @@ class ItemController extends Controller
     {
         $this->authorize('viewOwn', Item::class);
 
-        // Get the item_type for '_image_' items
-        // TODO: this should be more flexible; allow configuration of multiple/different item_types
+        // Load module containing column's configuration and naming
+        $image_module = ModuleInstance::firstWhere('name', 'gallery');
+        throw_if(
+            !$image_module,
+            ModuleNotFoundException::class,
+            __('modules.not_found', ['name' => 'gallery'])
+        );
+        $it = $image_module->config['item_type'] ?? '_image_';
+
+        // Get the item_type
+        // TODO: this should be more flexible; allow configuration of multiple item_types
+        // TODO: refactor, same in gallery()
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_type = Element::where('list_fk', $it_list->list_id)
-            ->whereHas('values', function (Builder $query) {
-                $query->where('value', '_image_');
+            ->whereHas('values', function (Builder $query) use ($it) {
+                $query->where('value', $it);
             })
-            ->first()->element_id;
-        
+            ->first();
+        if ($item_type) {
+            $item_type = $item_type->element_id;
+        }
+        else {
+            // TODO: throw exception
+            return response()->view(
+                'errors.custom', [
+                    'message' => 'item type not found',
+                    'code' => 500,
+                ],
+                500);
+        }
+
         $items = Item::myOwn(Auth::user()->id)->with('details')
             ->where('item_type_fk', $item_type)
             ->latest()
             ->paginate(config('ui.cart_items'));
         
-        return view('item.own', compact('items', 'item_type'));
+        return view('item.own', compact('items', 'item_type', 'image_module'));
     }
 
     /**
