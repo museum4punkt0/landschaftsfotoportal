@@ -24,11 +24,18 @@ class ModuleNotFoundException extends Exception
      */
     public function render($request)
     {
-        return response()->view(
-            'errors.custom', [
-                'message' => $this->message,
-                'code' => 500,
-            ],
-            500);
+        if ($request->is('api/*')) {
+            return response()->json(
+                ['error' => $this->message],
+                500);
+        }
+        else {
+            return response()->view(
+                'errors.custom', [
+                    'message' => $this->message,
+                    'code' => 500,
+                ],
+                500);
+        }
     }
 }
