@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Exceptions\ModuleNotFoundException;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -61,5 +62,22 @@ class ModuleInstance extends Model
     {
         return $query->whereNull('item_fk')
             ->orWhere('item_fk', $item_id);
+    }
+
+    /**
+     * Load the module with given name.
+     *
+     * @param  string  $name
+     * @return \App\ModuleInstance
+     */
+    public static function getByName($name)
+    {
+        $module = ModuleInstance::firstWhere('name', $name);
+        throw_if(
+            !$module,
+            ModuleNotFoundException::class,
+            __('modules.not_found', ['name' => $name])
+        );
+        return $module;
     }
 }

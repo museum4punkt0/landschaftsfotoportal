@@ -331,12 +331,7 @@ class ItemController extends Controller
         $this->authorize('viewOwn', Item::class);
 
         // Load module containing column's configuration and naming
-        $image_module = ModuleInstance::firstWhere('name', 'gallery');
-        throw_if(
-            !$image_module,
-            ModuleNotFoundException::class,
-            __('modules.not_found', ['name' => 'gallery'])
-        );
+        $image_module = ModuleInstance::getByName('gallery');
         $it = $image_module->config['item_type'] ?? '_image_';
 
         // Get the item_type
@@ -378,12 +373,7 @@ class ItemController extends Controller
     public function download(Item $item)
     {
         // Load module containing column's configuration and naming
-        $image_module = ModuleInstance::firstWhere('name', 'download-image');
-        throw_if(
-            !$image_module,
-            ModuleNotFoundException::class,
-            __('modules.not_found', ['name' => 'download-image'])
-        );
+        $image_module = ModuleInstance::getByName('download-image');
 
         // Provide a invalid path if config option doesn't exist
         $directory = $image_module->config['image_path'] ?? 'not_existing_directory';
@@ -405,12 +395,7 @@ class ItemController extends Controller
     public function gallery()
     {
         // Load module containing column's configuration and naming
-        $image_module = ModuleInstance::firstWhere('name', 'gallery');
-        throw_if(
-            !$image_module,
-            ModuleNotFoundException::class,
-            __('modules.not_found', ['name' => 'gallery'])
-        );
+        $image_module = ModuleInstance::getByName('gallery');
         $incomplete = $image_module->config['columns']['missing'] ?? 0;
         $it = $image_module->config['item_type'] ?? '_image_';
 
@@ -470,13 +455,7 @@ class ItemController extends Controller
     public function timeline()
     {
         // Load module containing column's configuration and naming
-        $image_module = ModuleInstance::firstWhere('name', 'timeline');
-        throw_if(
-            !$image_module,
-            ModuleNotFoundException::class,
-            __('modules.not_found', ['name' => 'timeline'])
-        );
-
+        $image_module = ModuleInstance::getByName('timeline');
         $daterange_column = $image_module->config['columns']['daterange'] ?? 0;
 
         // Get bounds for daterange

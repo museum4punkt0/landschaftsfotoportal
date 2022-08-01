@@ -79,12 +79,7 @@ class ItemController extends Controller
         }
 
         // Load module containing column's configuration and naming
-        $image_module = ModuleInstance::firstWhere('name', 'gallery');
-        throw_if(
-            !$image_module,
-            ModuleNotFoundException::class,
-            __('modules.not_found', ['name' => 'gallery'])
-        );
+        $image_module = ModuleInstance::getByName('gallery');
 
         // Get current UI language
         $lang = app()->getLocale();
@@ -389,13 +384,7 @@ class ItemController extends Controller
     {
         $this->authorize('publish', Item::class);
 
-        // Load module containing column's configuration and naming
-        $image_module = ModuleInstance::firstWhere('name', 'gallery');
-        throw_if(
-            !$image_module,
-            ModuleNotFoundException::class,
-            __('modules.not_found', ['name' => 'gallery'])
-        );
+        $image_module = ModuleInstance::getByName('gallery');
 
         $items = Item::where('public', 0)->latest('updated_at')->paginate(10);
 

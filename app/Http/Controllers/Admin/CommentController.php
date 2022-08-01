@@ -101,12 +101,7 @@ class CommentController extends Controller
         $this->authorize('publish', Comment::class);
         
         // Load module containing column's configuration and naming
-        $image_module = ModuleInstance::firstWhere('name', 'gallery');
-        throw_if(
-            !$image_module,
-            ModuleNotFoundException::class,
-            __('modules.not_found', ['name' => 'gallery'])
-        );
+        $image_module = ModuleInstance::getByName('gallery');
 
         $comments = Comment::where('public', '<', 1)->with('item')->latest('updated_at')->paginate(10);
         

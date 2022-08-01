@@ -29,12 +29,7 @@ class CommentController extends Controller
         $this->authorize('viewOwn', Comment::class);
 
         // Load module containing column's configuration and naming
-        $image_module = ModuleInstance::firstWhere('name', 'gallery');
-        throw_if(
-            !$image_module,
-            ModuleNotFoundException::class,
-            __('modules.not_found', ['name' => 'gallery'])
-        );
+        $image_module = ModuleInstance::getByName('gallery');
 
         $comments = Comment::myOwn(Auth::user()->id)->with('item')->latest()->paginate(10);
 

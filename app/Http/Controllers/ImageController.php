@@ -17,12 +17,7 @@ class ImageController extends Controller
      */
     public function getRandom(Request $request)
     {
-        $image_module = ModuleInstance::firstWhere('name', $request->query('module'));
-        if (!$image_module) {
-            return response()->json(
-                ['error' => __('modules.not_found', ['name' => $request->query('module')])],
-                404);
-        }
+        $image_module = ModuleInstance::getByName($request->query('module'));
 
         // Provide a invalid path if config option doesn't exist
         $directory = $image_module->config['image_path'] ?? 'not_existing_directory';

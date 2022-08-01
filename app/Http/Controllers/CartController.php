@@ -29,12 +29,7 @@ class CartController extends Controller
         $this->authorize('viewOwn', Cart::class);
 
         // Load module containing column's configuration and naming
-        $image_module = ModuleInstance::firstWhere('name', 'gallery');
-        throw_if(
-            !$image_module,
-            ModuleNotFoundException::class,
-            __('modules.not_found', ['name' => 'gallery'])
-        );
+        $image_module = ModuleInstance::getByName('gallery');
 
         $cart = Cart::myOwn(Auth::user()->id)
             ->with('item')
