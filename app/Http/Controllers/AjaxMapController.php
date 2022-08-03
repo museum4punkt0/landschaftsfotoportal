@@ -8,6 +8,7 @@ use App\Value;
 use App\Item;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class AjaxMapController extends Controller
 {
@@ -127,6 +128,11 @@ class AjaxMapController extends Controller
      */
     public function getPolygonFeaturesForItem(Request $request)
     {
+        if (!Gate::allows('view', Item::find($request->query('item')))) {
+            $data = ['error' => __('Unauthorized')];
+            return response()->json($data, 403);
+        }
+
         $cm = ColumnMapping::find(intval($request->query('colmap')));
         if (!$cm) {
             $data = ['error' => 'colmap not found'];
@@ -190,21 +196,23 @@ class AjaxMapController extends Controller
 
         // Point coordinates from item itself
         if ($cm->getConfigValue('points') == 'self') {
-            $query = Item::where('item_id', $request->query('item'))->where('public', 1);
+            $query = Item::where('item_id', $request->query('item'));
         }
         // Point coordinates from item's children
         if ($cm->getConfigValue('points') == 'children') {
             $query = Item::find($request->query('item'))
-                        ->descendants()
-                        ->where('public', 1);
+                        ->descendants();
         }
         // Filter items by item_type, if set
         if ($cm->getConfigValue('item_type')) {
             $query = $query->where('item_type_fk', intval($cm->getConfigValue('item_type')));
         }
+        // Filter by public items depending on user
+        if (!Gate::allows('view', Item::find($request->query('item')))) {
+            $query = $query->where('public', 1);
+        }
 
         $items = $query->with('details')->get();
-        #dd($items);
 
         // Create feature array for GeoJSON
         $features = $this->createPointFeaturesFromItems($items, $config);
