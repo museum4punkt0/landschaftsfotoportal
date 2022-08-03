@@ -2,13 +2,9 @@
 
 @section('content')
 
-@if (session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
-@endif
-
 <div class="container">
+    @include('includes.alert_session_div')
+
     <div class="card">
         @if (true || Auth::check())
             <div class="card-header">@lang('lists.edit'): {{$list->name}} ({{$list->description}})</div>

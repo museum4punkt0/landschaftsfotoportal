@@ -2,18 +2,9 @@
 
 @section('content')
 
-@if (session('warning'))
-    <div class="alert alert-warning">
-        {{ session('warning') }}
-    </div>
-@endif
-@if (session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
-@endif
-
 <div class="container">
+    @include('includes.alert_session_div')
+
     <div class="card">
     @if (true || Auth::check())
         <div class="card-header">@lang('items.header')</div>
@@ -161,12 +152,18 @@
                             <td>
                                 <div class="container">
                                     <a href="{{route('item.show.public', $item->item_id)}}#details">
-                                    @if($item->details->firstWhere('column_fk', 13))
+                                    @if($item->details->firstWhere(
+                                        'column_fk', $image_module->config['columns']['filename'] ?? 0))
                                         <img class="img-fluid thumbnail-table"
                                             src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                            $item->details->firstWhere('column_fk', 13)->value_string) }}"
+                                                $item->details->firstWhere(
+                                                    'column_fk', $image_module->config['columns']['filename'] ?? 0
+                                                )->value_string) }}"
                                             alt=""
-                                            title="{{ $item->details->firstWhere('column_fk', 23)->value_string }}"/>
+                                            title="{{ optional($item->details->firstWhere(
+                                                'column_fk', $image_module->config['columns']['caption'] ?? 0)
+                                                )->value_string }}"
+                                        />
                                     @endif
                                     </a>
                                 </div>

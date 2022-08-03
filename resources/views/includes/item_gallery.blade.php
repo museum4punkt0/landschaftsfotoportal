@@ -12,20 +12,12 @@
                 @break($loop->iteration > $limit)
             @endisset
             
-            @if($item->details->firstWhere('column_fk', 13))
+            @if($item->details->firstWhere('column_fk', $image_module->config['columns']['filename'] ?? 0))
             <div class="col-lg-4 col-sm-6 mb-4">
                 <div class="portfolio-item @if($loop->last && $loop->odd) no-display @endif">
-                    <a class="portfolio-link d-flex justify-content-center" href="{{route('item.show.public', $item->item_id)}}#details">
-                        <div class="portfolio-hover">
-                            <div class="portfolio-hover-content text-center">
-                                <i class="portfolio-caption-heading">
-                                {{ Str::limit($item->details->firstWhere('column_fk', 23)->value_string,
-                                    config('ui.galery_caption_length'), ' (...)') }}
-                                </i>
-                            </div>
-                        </div>
-                        <div class="img-preview-square" style="background-image: url('{{ str_replace(['(',')'],['\(','\)'],asset('storage/' . Config::get('media.preview_dir') . $item->details->firstWhere('column_fk', 13)->value_string)) }}');">&nbsp;</div>
-                    </a>
+                    <!-- Image preview and link -->
+                    @include('includes.item_gallery_image', ['item' => $item])
+
                     <div class="portfolio-caption">
                         <!-- Icons for user interaction -->
                         <div class="my-2" style="font-size: 0.6rem;">
@@ -68,7 +60,7 @@
                                 <a href="#" data-toggle="modal" data-target="#commentModal" data-href="{{ route('comment.store', $item->item_id) }}" title="@lang('comments.new')">
                             @endguest
                                     <i class="fas fa-circle fa-stack-2x
-                                    @if(!empty($item->details->firstWhere('column_fk', 22)->value_string))
+                                    @if(!empty($item->details->firstWhere('column_fk', $image_module->config['columns']['missing'] ?? 0)->value_string))
                                         text-primary
                                     @else
                                         sgn-color-2
@@ -79,18 +71,8 @@
                             </span>
                         </div>
                         <!-- Image caption -->
-                        <div class="portfolio-caption-heading">
-                        @if(!empty($item->details->firstWhere('column_fk', 22)->value_string))
-                            {{ $item->details->firstWhere('column_fk', 22)->value_string }},
-                        @endif
-                        @if(!empty($item->details->firstWhere('column_fk', 20)->value_string))
-                            {{ $item->details->firstWhere('column_fk', 20)->value_string }},
-                        @endif
-                            {{ $item->details->firstWhere('column_fk', 19)->value_string }}
-                        </div>
-                        <div class="portfolio-caption-subheading text-muted">
-                            {{ $item->details->firstWhere('column_fk', 5)->value_string }}
-                        </div>
+                        @include('includes.item_gallery_image_caption', ['item' => $item])
+
                     </div>
                 </div>
             </div>

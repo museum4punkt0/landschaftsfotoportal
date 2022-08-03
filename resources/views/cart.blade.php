@@ -17,17 +17,9 @@
             @foreach($cart as $item)
                 <div class="col-lg-4 col-sm-6 mb-4">
                     <div class="portfolio-item">
-                        <a class="portfolio-link d-flex justify-content-center" href="{{route('item.show.public', $item->item->item_id)}}#details">
-                            <div class="portfolio-hover">
-                                <div class="portfolio-hover-content text-center">
-                                    <i class="portfolio-caption-heading">
-                                    {{ Str::limit($item->item->details->firstWhere('column_fk', 23)->value_string,
-                                        config('ui.galery_caption_length'), ' (...)') }}
-                                    </i>
-                                </div>
-                            </div>
-                            <div class="img-preview-square" style="background-image: url('{{ str_replace(['(',')'],['\(','\)'],asset('storage/' . Config::get('media.preview_dir') . $item->item->details->firstWhere('column_fk', 13)->value_string)) }}');">&nbsp;</div>
-                        </a>
+                        <!-- Image preview and link -->
+                        @include('includes.item_gallery_image', ['item' => $item->item])
+
                         <div class="portfolio-caption">
                             <!-- Icons for user interaction -->
                             <div class="my-2" style="font-size: 0.6rem;">
@@ -51,18 +43,8 @@
                                 </span>
                             </div>
                             <!-- Image caption -->
-                            <div class="portfolio-caption-heading">
-                            @if(!empty($item->item->details->firstWhere('column_fk', 22)->value_string))
-                                {{ $item->item->details->firstWhere('column_fk', 22)->value_string }},
-                            @endif
-                            @if(!empty($item->item->details->firstWhere('column_fk', 20)->value_string))
-                                {{ $item->item->details->firstWhere('column_fk', 20)->value_string }},
-                            @endif
-                                {{ $item->item->details->firstWhere('column_fk', 19)->value_string }}
-                            </div>
-                            <div class="portfolio-caption-subheading text-muted">
-                                {{ $item->item->details->firstWhere('column_fk', 5)->value_string }}
-                            </div>
+                            @include('includes.item_gallery_image_caption', ['item' => $item->item])
+
                         </div>
                     </div>
                 </div>

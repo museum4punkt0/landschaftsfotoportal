@@ -30,6 +30,10 @@
         max-width: 150px;
         max-height: 100px;
       }
+      .fa-btn {
+        font-size: 0.6rem;
+      }
+
     </style>
 </head>
 <body>
@@ -62,6 +66,9 @@
                                     {{ __('common.internal') }} <span class="caret"></span>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" href="{{ route('module.index') }}">
+                                        {{ __('modules.header') }}
+                                    </a>
                                     <a class="dropdown-item" href="{{ route('attribute.index') }}">
                                         {{ __('attributes.header') }}
                                     </a>

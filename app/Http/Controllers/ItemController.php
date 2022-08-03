@@ -11,8 +11,10 @@ use App\ColumnMapping;
 use App\DateRange;
 use App\Selectlist;
 use App\Element;
+use App\ModuleInstance;
 use App\Taxon;
 use App\User;
+use App\Exceptions\ModuleNotFoundException;
 use App\Notifications\ItemAdded;
 use App\Notifications\ItemUpdated;
 use App\Utils\Image;
@@ -262,6 +264,9 @@ class ItemController extends Controller
             return Redirect::to($target);
         }
         
+        // Load config of all modules associated with this item
+        $modules = ModuleInstance::forItem($item->item_id)->get();
+
         Debugbar::startMeasure('get-item');
         // All items for the show blade, used for image galleries
         $items = Item::find($item->item_id)
@@ -273,12 +278,18 @@ class ItemController extends Controller
         Debugbar::stopMeasure('get-item');
         
         Debugbar::startMeasure('prepare-menu');
-        // First level items for the sidebar menu
-        $menu_root = Item::whereNull('parent_fk')->where('public', 1)->orderBy('item_id')->get();
-        
-        // Get the menu path of the requested item
-        $ancestors = Item::find($item->item_id)->ancestorsAndSelf()->orderBy('depth', 'asc')->first();
-        $path = array_reverse(explode('.', $ancestors->path));
+        if (config('menu.sidebar_max_levels')) {
+            // First level items for the sidebar menu
+            $menu_root = Item::whereNull('parent_fk')->where('public', 1)->orderBy('item_id')->get();
+            
+            // Get the menu path of the requested item
+            $ancestors = Item::find($item->item_id)->ancestorsAndSelf()->orderBy('depth', 'asc')->first();
+            $path = array_reverse(explode('.', $ancestors->path));
+        }
+        else {
+            $menu_root = false;
+            $path = false;
+        }
         Debugbar::stopMeasure('prepare-menu');
         
         Debugbar::startMeasure('get-details');
@@ -306,7 +317,8 @@ class ItemController extends Controller
         $translations = Localization::getTranslations($lang, 'name');
         Debugbar::stopMeasure('localisation');
         
-        return view('item.show', compact('item', 'items', 'details', 'menu_root', 'path', 'colmap', 'lists', 'translations'));
+        return view('item.show', compact('item', 'items', 'details', 'menu_root', 'path',
+            'colmap', 'lists', 'translations', 'modules'));
     }
 
     /**
@@ -318,21 +330,38 @@ class ItemController extends Controller
     {
         $this->authorize('viewOwn', Item::class);
 
-        // Get the item_type for '_image_' items
-        // TODO: this should be more flexible; allow configuration of multiple/different item_types
+        // Load module containing column's configuration and naming
+        $image_module = ModuleInstance::getByName('gallery');
+        $it = $image_module->config['item_type'] ?? '_image_';
+
+        // Get the item_type
+        // TODO: this should be more flexible; allow configuration of multiple item_types
+        // TODO: refactor, same in gallery()
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_type = Element::where('list_fk', $it_list->list_id)
-            ->whereHas('values', function (Builder $query) {
-                $query->where('value', '_image_');
+            ->whereHas('values', function (Builder $query) use ($it) {
+                $query->where('value', $it);
             })
-            ->first()->element_id;
-        
+            ->first();
+        if ($item_type) {
+            $item_type = $item_type->element_id;
+        }
+        else {
+            // TODO: throw exception
+            return response()->view(
+                'errors.custom', [
+                    'message' => 'item type not found',
+                    'code' => 500,
+                ],
+                500);
+        }
+
         $items = Item::myOwn(Auth::user()->id)->with('details')
             ->where('item_type_fk', $item_type)
             ->latest()
             ->paginate(config('ui.cart_items'));
         
-        return view('item.own', compact('items', 'item_type'));
+        return view('item.own', compact('items', 'item_type', 'image_module'));
     }
 
     /**
@@ -343,14 +372,19 @@ class ItemController extends Controller
      */
     public function download(Item $item)
     {
-        $filename = $item->details->firstWhere('column_fk', 13)->value_string;
-        $pathToFile = 'public/'. config('media.full_dir') . $filename;
+        // Load module containing column's configuration and naming
+        $image_module = ModuleInstance::getByName('download-image');
+
+        // Provide a invalid path if config option doesn't exist
+        $directory = $image_module->config['image_path'] ?? 'not_existing_directory';
+        $filename = $item->getDetailByName('filename', $image_module);
+        $path = $directory . $filename;
         
-        if (Storage::missing($pathToFile)) {
+        if (Storage::disk('public')->missing($path)) {
             abort(404);
         }
         
-        return Storage::download($pathToFile);
+        return Storage::disk('public')->download($path);
     }
 
     /**
@@ -360,15 +394,32 @@ class ItemController extends Controller
      */
     public function gallery()
     {
-        // Get the item_type for '_image_' items
-        // TODO: this should be more flexible; allow configuration of multiple/different item_types
+        // Load module containing column's configuration and naming
+        $image_module = ModuleInstance::getByName('gallery');
+        $incomplete = $image_module->config['columns']['missing'] ?? 0;
+        $it = $image_module->config['item_type'] ?? '_image_';
+
+        // Get the item_type
+        // TODO: this should be more flexible; allow configuration of multiple item_types
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_type = Element::where('list_fk', $it_list->list_id)
-            ->whereHas('values', function (Builder $query) {
-                $query->where('value', '_image_');
+            ->whereHas('values', function (Builder $query) use ($it) {
+                $query->where('value', $it);
             })
-            ->first()->element_id;
-        
+            ->first();
+        if ($item_type) {
+            $item_type = $item_type->element_id;
+        }
+        else {
+            // TODO: throw exception
+            return response()->view(
+                'errors.custom', [
+                    'message' => 'item type not found',
+                    'code' => 500,
+                ],
+                500);
+        }
+
         $items['latest'] = Item::with('details')
             ->where('public', 1)
             ->where('item_type_fk', $item_type)
@@ -384,16 +435,16 @@ class ItemController extends Controller
         $items['incomplete'] = Item::with('details')
             ->where('public', 1)
             ->where('item_type_fk', $item_type)
-            ->whereHas('details', function (Builder $query) {
+            ->whereHas('details', function (Builder $query) use ($incomplete) {
                 // Details with missing location/city value
-                $query->where('column_fk', 22)
+                $query->where('column_fk', $incomplete)
                     ->where('value_string', '');
             })
             ->inRandomOrder()
             ->take(config('ui.gallery_items'))
             ->get();
         
-        return view('item.gallery', compact('items'));
+        return view('item.gallery', compact('items', 'image_module'));
     }
 
     /**
@@ -403,9 +454,10 @@ class ItemController extends Controller
      */
     public function timeline()
     {
-        // TODO: remove hard-coded daterange column
-        $daterange_column = 27;
-        
+        // Load module containing column's configuration and naming
+        $image_module = ModuleInstance::getByName('timeline');
+        $daterange_column = $image_module->config['columns']['daterange'] ?? 0;
+
         // Get bounds for daterange
         $bounds = Detail::selectRaw("
                 EXTRACT(DECADE FROM MIN(LOWER(value_daterange)))*10 AS lower,
@@ -424,21 +476,21 @@ class ItemController extends Controller
                 date('Y-m-d', mktime(0, 0, 0, 1, 1, $decade + 10)) .')';
             
             // Get number of items per decade
-            $decades[$decade] = Detail::
-                whereHas('item', function (Builder $query) {
-                    $query->where('public', 1);
+            $decades[$decade] = Item::
+                whereHas('details', function (Builder $query) use ($daterange, $daterange_column) {
+                    $query->where('column_fk', $daterange_column)
+                    ->whereRaw("value_daterange && '$daterange'");
                 })
-                ->where('column_fk', $daterange_column)
-                ->whereRaw("value_daterange && '$daterange'")
+                ->where('public', 1)
                 ->count();
             
             // Get some random items per decade, to be shown as examples
-            $details[$decade] = Detail::with('item')
-                ->whereHas('item', function (Builder $query) {
-                    $query->where('public', 1);
+            $items[$decade] = Item::with('details')
+                ->whereHas('details', function (Builder $query) use ($daterange, $daterange_column) {
+                    $query->where('column_fk', $daterange_column)
+                    ->whereRaw("value_daterange && '$daterange'");
                 })
-                ->where('column_fk', $daterange_column)
-                ->whereRaw("value_daterange && '$daterange'")
+                ->where('public', 1)
                 ->inRandomOrder()
                 ->take(config('ui.timeline_items'))
                 ->get();
@@ -446,26 +498,26 @@ class ItemController extends Controller
         
         // For items without any date (value_daterange = null)
         // Get number of items w/o date
-        $decades[-1] = Detail::
-            whereHas('item', function (Builder $query) {
-                $query->where('public', 1);
+        $decades[-1] = Item::
+            whereHas('details', function (Builder $query) use ($daterange_column) {
+                $query->where('column_fk', $daterange_column)
+                ->where('value_daterange', null);
             })
-            ->where('column_fk', $daterange_column)
-            ->where('value_daterange', null)
+            ->where('public', 1)
             ->count();
         
         // Get some random items w/o date, to be shown as examples
-        $details[-1] = Detail::with('item')
-            ->whereHas('item', function (Builder $query) {
-                $query->where('public', 1);
+        $items[-1] = Item::with('details')
+            ->whereHas('details', function (Builder $query) use ($daterange_column) {
+                $query->where('column_fk', $daterange_column)
+                ->where('value_daterange', null);
             })
-            ->where('column_fk', $daterange_column)
-            ->where('value_daterange', null)
+            ->where('public', 1)
             ->inRandomOrder()
             ->take(config('ui.timeline_items'))
             ->get();
-        
-        return view('item.timeline', compact('decades', 'details'));
+
+        return view('item.timeline', compact('decades', 'items', 'image_module'));
     }
 
     /**
@@ -480,18 +532,20 @@ class ItemController extends Controller
             ->first()->column_id;
         $column_ids['lat'] = Column::ofDataType('_float_')->ofItemType('_image_')->ofSubType('location_lat')
             ->first()->column_id;
+        $column_ids['colmap'] = Column::ofDataType('_map_')->ofItemType('_image_')->first()->column_mapping()
+            ->first()->colmap_id;
         Debugbar::debug($column_ids);
         
         // There are different URLs for AJAX requests to get the items to be displayed on the map
         if ($request->query('source') == 'search') {
             $options = [
-                'ajax_url' => route('map.search'),
+                'ajax_url' => route('map.search', ['colmap' => $column_ids['colmap']]),
                 'search_url' => route('search.index', $request->query()),
             ];
         }
         else {
             $options = [
-                'ajax_url' => route('map.all'),
+                'ajax_url' => route('map.all', ['colmap' => $column_ids['colmap']]),
                 'search_url' => route('search.index', ['source' => 'all']),
             ];
         }

@@ -72,10 +72,7 @@ class ItemController extends Controller
     public function showSpecimen($id)
     {
         // Load module containing column's configuration and naming
-        $image_module = ModuleInstance::firstWhere('name', 'image');
-        if (!$image_module) {
-            return response()->json(['error' => 'image module not found'], 404);
-        }
+        $image_module = ModuleInstance::getByName('api-specimen-image');
 
         $item = Item::find($id);
         if (!$item) {
@@ -160,10 +157,7 @@ class ItemController extends Controller
     public function showRandomImage()
     {
         // Load module containing column's configuration and naming
-        $image_module = ModuleInstance::firstWhere('name', 'image');
-        if (!$image_module) {
-            return response()->json(['error' => 'image module not found'], 404);
-        }
+        $image_module = ModuleInstance::getByName('api-random-image');
 
         $item = Item::ofItemType('_image_')
                     ->with('details')

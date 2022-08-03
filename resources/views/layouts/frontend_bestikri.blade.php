@@ -111,8 +111,15 @@
                     </div>
                 </div>
 
-                <div class="main-content p-3">
-                @yield('content')
+                <!-- Main content area -->
+                <div class="row">
+                    <div class="col">
+                        <div class="main-content p-3">
+                        @yield('content')
+                        </div>
+                    </div>
+                    <!-- Optional (image) module area -->
+                    @yield('content-module-right')
                 </div>
 
                 <!-- Footer Area with Logos and Links -->

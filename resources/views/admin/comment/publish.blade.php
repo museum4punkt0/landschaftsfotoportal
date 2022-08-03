@@ -2,18 +2,9 @@
 
 @section('content')
 
-@if (session('warning'))
-    <div class="alert alert-warning">
-        {{ session('warning') }}
-    </div>
-@endif
-@if (session('success'))
-    <div class="alert alert-success">
-        {{ session('success') }}
-    </div>
-@endif
-
 <div class="container">
+    @include('includes.alert_session_div')
+
     <div class="card">
         @if (true || Auth::check())
             <div class="card-header">@lang('comments.unpublished')</div>
@@ -40,11 +31,19 @@
                         <td>
                             <div class="container">
                             <a href="{{route('item.show.public', $comment->item->item_id)}}#details">
+                            @if($comment->item->details->firstWhere(
+                                'column_fk', $image_module->config['columns']['filename'] ?? 0))
                                 <img class="img-fluid thumbnail-table"
                                     src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                    $comment->item->details->firstWhere('column_fk', 13)->value_string) }}"
+                                        $comment->item->details->firstWhere(
+                                            'column_fk', $image_module->config['columns']['filename'] ?? 0
+                                        )->value_string) }}"
                                     alt=""
-                                    title="{{ $comment->item->details->firstWhere('column_fk', 23)->value_string }}"/>
+                                    title="{{ optional($comment->item->details->firstWhere(
+                                        'column_fk', $image_module->config['columns']['caption'] ?? 0)
+                                        )->value_string }}"
+                                />
+                            @endif
                             </a>
                             </div>
                         </td>

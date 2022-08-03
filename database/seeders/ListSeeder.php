@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Attribute;
 use App\Element;
 use App\Selectlist;

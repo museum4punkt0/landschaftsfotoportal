@@ -52,6 +52,8 @@ Route::resource('/item', 'ItemController')->except(['index'])->names([
     'destroy' => 'item.destroy.own'
 ]);
 
+Route::get('image/random', 'ImageController@getRandom')->name('image.random');
+
 Route::get('menu/children', 'AjaxMenuController@getChildren')->name('menu.children');
 Route::get('map/all', 'AjaxMapController@all')->name('map.all');
 Route::get('map/search', 'AjaxMapController@searchResults')->name('map.search');
@@ -120,9 +122,11 @@ Route::post('admin/lists/list/{id}/element/store_batch',
 Route::resource('admin/lists/list.element', 'Admin\Lists\ElementController')->shallow();
 Route::resource('admin/lists/element.value', 'Admin\Lists\ValueController')->shallow();
 
-
 Route::get('admin/lists/list/internal', 'Admin\Lists\ListController@internal')->name('list.internal');
 Route::get('admin/lists/list/{id}/tree', 'Admin\Lists\ListController@tree')->name('list.tree');
 Route::get('admin/lists/list/{id}/export', 'Admin\Lists\ListController@export')->name('list.export');
 Route::resource('admin/lists/list', 'Admin\Lists\ListController');
 Route::resource('admin/lists/attribute', 'Admin\Lists\AttributeController');
+
+Route::get('admin/module/new', 'Admin\ModuleController@new')->name('module.new');
+Route::resource('admin/module', 'Admin\ModuleController');

@@ -3,19 +3,21 @@
 @section('sidebar_menu_items')
     @parent
     
-    @include('includes.item_submenu', [
+    @includeWhen(config('menu.sidebar_max_levels'), 'includes.item_submenu', [
         'sub' => $menu_root,
         'path' => $path,
         'order' => config('menu.sidebar_item_order', []),
         'exclude' => config('menu.sidebar_exclude_item_type', []),
     ])
     
+    @if(config('menu.sidebar_max_levels'))
     <script type="text/javascript">
         $(document).ready(function () {
             // Init the menu
             menu.init("{{ route('menu.children') }}");
         });
     </script>
+    @endif
 @endsection
 
 @section('content')

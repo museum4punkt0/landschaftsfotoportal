@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Cart;
+use App\ModuleInstance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -27,11 +28,14 @@ class CartController extends Controller
     {
         $this->authorize('viewOwn', Cart::class);
 
+        // Load module containing column's configuration and naming
+        $image_module = ModuleInstance::getByName('gallery');
+
         $cart = Cart::myOwn(Auth::user()->id)
             ->with('item')
             ->latest()
             ->paginate(config('ui.cart_items'));
         
-        return view('cart', compact('cart'));
+        return view('cart', compact('cart', 'image_module'));
     }
 }

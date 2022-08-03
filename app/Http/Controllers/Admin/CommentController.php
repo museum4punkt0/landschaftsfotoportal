@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Comment;
 use App\Item;
+use App\ModuleInstance;
 use App\Http\Controllers\Controller;
 use App\Notifications\CommentPublished;
 use Illuminate\Http\Request;
@@ -99,9 +100,12 @@ class CommentController extends Controller
     {
         $this->authorize('publish', Comment::class);
         
+        // Load module containing column's configuration and naming
+        $image_module = ModuleInstance::getByName('gallery');
+
         $comments = Comment::where('public', '<', 1)->with('item')->latest('updated_at')->paginate(10);
         
-        return view('admin.comment.publish', compact('comments'));
+        return view('admin.comment.publish', compact('comments', 'image_module'));
     }
 
     /**
