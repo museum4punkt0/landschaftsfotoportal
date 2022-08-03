@@ -43,13 +43,12 @@ class ItemPolicy
      */
     public function view(User $user = null, Item $item)
     {
-        // WARNING: Guest users are allowed to view by default!
-        if (is_null($user)) {
+        // WARNING: Guest users are allowed to view public items by default!
+        if ($item->public === 1 || optional($user)->id === $item->creator->id) {
             return true;
         }
-        // Following rule does only apply on authentificated user!
         else {
-            return $user->hasAccess(['view-item']);
+            return optional($user)->hasAccess(['view-item']);
         }
     }
 
