@@ -267,6 +267,7 @@ class ItemController extends Controller
         $items = Item::find($item->item_id)
             ->descendantsAndSelf()
             ->where('public', 1)
+            //->where('item_type_fk', '<>', 188) # TODO: remove hard coded item type
             ->orderBy('title')
             ->get();
         Debugbar::stopMeasure('get-item');

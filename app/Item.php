@@ -28,6 +28,7 @@ class Item extends Model
         'item_type_fk',
         'taxon_fk',
         'title',
+        'page_title',
         'public',
         'created_by',
         'updated_by',
@@ -36,11 +37,42 @@ class Item extends Model
     /**
      * Accessor to get the item's Id.
      *
-     * @return void
+     * @return int
      */
     public function getOriginalItemIdAttribute()
     {
         return $this->item_id;
+    }
+
+    /**
+     * Accessor to get the route show the item.
+     *
+     * @return string
+     */
+    public function getRouteShowPublicAttribute()
+    {
+        return route('item.show.public', $this->item_id);
+    }
+
+    /**
+     * Accessor to get the menu title the item.
+     *
+     * @return string
+     */
+    public function getMenuTitleAttribute()
+    {
+        return $this->title;
+    }
+
+    /**
+     * Mutator to set the menu title the item.
+     *
+     * @param  string  $value
+     * @return void
+     */
+    public function setMenuTitleAttribute($value)
+    {
+        $this->attributes['title'] = $value;
     }
 
     /**
@@ -213,6 +245,7 @@ class Item extends Model
             'item_type_fk' => $this->item_type_fk,
             'taxon_fk' => $this->taxon_fk,
             'title' => $this->title,
+            'page_title' => $this->page_title,
             'public' => $this->public,
             'created_by' => $this->created_by,
             'updated_by' => $migrate ? $this->updated_by : auth()->user()->id,
@@ -288,9 +321,10 @@ class Item extends Model
      * The column storing that string is set in the JSON config that belongs to the item_type.
      *
      * @param  bool  $fromTaxon
+     * @param  int  $taxon_schema
      * @return string
      */
-    public function getTitleColumn($fromTaxon = false)
+    public function getTitleColumn($fromTaxon = false, $taxonSchema = 1)
     {
         $title = __('items.no_title_column');
         
@@ -304,7 +338,35 @@ class Item extends Model
         // Try to fetch a taxon name instead if a taxon is linked with this item
         else {
             if ($this->taxon_fk) {
-                $title = $this->taxon->full_name;
+                // Different naming schemas
+                switch ($taxonSchema) {
+                    // Example: C. subsphaerica Gand. s. l.
+                    case 5:
+                        $name = $this->taxon->full_name;
+                        $title = substr_replace($name, '.  ', 1, strpos($name, ' '));
+                        break;
+                    // Example: C. subsphaerica s. l.
+                    case 4:
+                        $name = $this->taxon->taxon_name;
+                        $title = substr_replace($name, '.  ', 1, strpos($name, ' '));
+                        if ($this->taxon->taxon_suppl) {
+                            $title .= ' ' . $this->taxon->taxon_suppl;
+                        }
+                        break;
+                    // Example: Crataegus subsphaerica s. l.
+                    case 3:
+                        $title = $this->taxon->taxon_name . ' ' . $this->taxon->taxon_suppl;
+                        break;
+                    // Example: Crataegus subsphaerica
+                    case 2:
+                        $title = $this->taxon->taxon_name;
+                        break;
+                    case 1:
+                    // Example: Crataegus subsphaerica Gand. s. l.
+                    default:
+                        $title = $this->taxon->full_name;
+                        break;
+                }
             }
         }
         

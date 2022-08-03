@@ -1,10 +1,10 @@
 {{-- Included in resources/views/item/show.blade.php --}}
 
 @unless($cm->getConfigValue('show_title') == 'hide')
-    <div class="col-sm-3">
+    <div class="col-sm-4 col-xl-3">
         @unless($cm->getConfigValue('show_title'))
             <div class="column-title">
-                {{ $translations->firstWhere('element_fk', $cm->column->translation_fk)->value }}
+                {{ optional($translations->firstWhere('element_fk', $cm->column->translation_fk))->value }}
             </div>
         @endunless
     </div>

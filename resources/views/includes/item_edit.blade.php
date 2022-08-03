@@ -65,14 +65,25 @@
     
 @if($options['edit.meta'])
     <div class="form-group">
-        <label for="titleInput">@lang('items.menu_title')</label>
-        <input type="text" id="titleInput" name="title" class="form-control"
-            data-column="-101" data-type="title"
-            value="{{old('title', $item->title)}}" maxlength="255" autofocus
+        <label for="menuTitleInput">@lang('items.menu_title')</label>
+        <input type="text" id="menuTitleInput" name="menu_title" class="form-control"
+            data-column="-101" data-type="menu_title"
+            value="{{old('menu_title', $item->menu_title)}}" maxlength="255" autofocus
         >
-        <span class="text-danger">{{ $errors->first('title') }}</span>
+        <span class="text-danger">{{ $errors->first('menu_title') }}</span>
         @includeWhen(isset($options['edit.revision']), 'includes.form_history_meta', [
-            'data_type' => 'title', 'column_id' => -101
+            'data_type' => 'menu_title', 'column_id' => -101
+        ])
+    </div>
+    <div class="form-group">
+        <label for="pageTitleInput">@lang('items.page_title')</label>
+        <input type="text" id="pageTitleInput" name="page_title" class="form-control"
+            data-column="-104" data-type="page_title"
+            value="{{old('page_title', $item->page_title)}}" maxlength="1024" autofocus
+        >
+        <span class="text-danger">{{ $errors->first('page_title') }}</span>
+        @includeWhen(isset($options['edit.revision']), 'includes.form_history_meta', [
+            'data_type' => 'page_title', 'column_id' => -104
         ])
     </div>
     <div class="form-group">
@@ -818,7 +829,51 @@
                         osm_map.display(lon, lat, zoom);
                         osm_map.addMarker(lon, lat, '{{ asset("storage/images/dot.svg") }}', '#4a90d9');
                         
-                        //osm_map.updateSize();
+                        // Click on map to update position of marker
+                        osm_map.map.on('singleclick', function (evt) {
+                            let coord = osm_map.transformCoordinate(evt.coordinate);
+                            // Update lat/lon form fields
+                            $('input.location_lon').val(coord[0]);
+                            $('input.location_lat').val(coord[1]);
+                            // Update position of marker
+                            osm_map.moveMarker($('input.location_lon').val(), $('input.location_lat').val());
+                            
+                            // Fetch data from geocoder API
+                            $.ajax({
+                                url: '{{ Config::get("geo.reverse_geocoder_url") }}',
+                                type: 'get',
+                                dataType: 'json',
+                                data: {
+                                    format: 'json',
+                                    'accept-language': 'de',
+                                    lat: coord[1],
+                                    lon: coord[0],
+                                    key: '{{ Config::get("geo.api_key") }}',
+                                },
+                                success: function(data) {
+                                    //console.log(data);
+                                    // Update address form input fields with results from geocoder
+                                    $('input.location_country').val(data.address.country);
+                                    $('input.location_state').val(data.address.state);
+                                    $('input.location_county').val(data.address.county);
+                                    $('input.location_city').val(getTownFromAddress(data.address));
+                                    $('input.location_street').val(data.address.road);
+                                    $('input.location_postcode').val(data.address.postcode);
+                                },
+                                error:function (xhr) {
+                                    //console.log(xhr);
+                                    // In case of wrong API key, the server responds with HTTP 403, but XHR fails
+                                    // because of missing CORS headers
+                                    if (xhr.status == 0) {
+                                        error_message = '@lang("common.geocoder_api_key_error")';
+                                    }
+                                    // Render the geocoder error message
+                                    $('#alertModalLabel').text('@lang("common.laravel_error")');
+                                    $('#alertModalContent').html('<div class="alert alert-danger">' + error_message + '</div>');
+                                    $('#alertModal').modal('show');
+                                },
+                            });
+                        });
                     </script>
                 @endif
                 @include('includes.form_input_help')
@@ -982,52 +1037,6 @@
         xhr.preventDefault();
         $('input.location_city').autocomplete('enable');
         $('input.location_city').autocomplete('search');
-    });
-    
-    // Click on map to update position of marker
-    osm_map.map.on('singleclick', function (evt) {
-        let coord = osm_map.transformCoordinate(evt.coordinate);
-        // Update lat/lon form fields
-        $('input.location_lon').val(coord[0]);
-        $('input.location_lat').val(coord[1]);
-        // Update position of marker
-        osm_map.moveMarker($('input.location_lon').val(), $('input.location_lat').val());
-        
-        // Fetch data from geocoder API
-        $.ajax({
-            url: '{{ Config::get("geo.reverse_geocoder_url") }}',
-            type: 'get',
-            dataType: 'json',
-            data: {
-                format: 'json',
-                'accept-language': 'de',
-                lat: coord[1],
-                lon: coord[0],
-                key: '{{ Config::get("geo.api_key") }}',
-            },
-            success: function(data) {
-                //console.log(data);
-                // Update address form input fields with results from geocoder
-                $('input.location_country').val(data.address.country);
-                $('input.location_state').val(data.address.state);
-                $('input.location_county').val(data.address.county);
-                $('input.location_city').val(getTownFromAddress(data.address));
-                $('input.location_street').val(data.address.road);
-                $('input.location_postcode').val(data.address.postcode);
-            },
-            error:function (xhr) {
-                //console.log(xhr);
-                // In case of wrong API key, the server responds with HTTP 403, but XHR fails
-                // because of missing CORS headers
-                if (xhr.status == 0) {
-                    error_message = '@lang("common.geocoder_api_key_error")';
-                }
-                // Render the geocoder error message
-                $('#alertModalLabel').text('@lang("common.laravel_error")');
-                $('#alertModalContent').html('<div class="alert alert-danger">' + error_message + '</div>');
-                $('#alertModal').modal('show');
-            },
-        });
     });
 </script>
 

@@ -176,6 +176,27 @@ return [
     |
     */
 
-    'revisions' => true,
+    'revisions' => false,
 
+    /*
+    |--------------------------------------------------------------------------
+    | Enable HTML for page titles of items
+    |--------------------------------------------------------------------------
+    |
+    | This allows HTML tags in titles of content pages for items.
+    |
+    */
+
+    'html_page_title' => false,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Enable registration for users
+    |--------------------------------------------------------------------------
+    |
+    | Allows users to register for an account.
+    |
+    */
+
+    'user_registration' => (bool) env('USER_REGISTRATION', false),
 ];

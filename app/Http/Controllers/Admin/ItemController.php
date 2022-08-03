@@ -159,7 +159,8 @@ class ItemController extends Controller
         $colmap = ColumnMapping::forItem($item_type, $request->taxon)->get();
 
         // Validation rules for fields associated with this item
-        $validation_rules['title'] = 'nullable|string|max:255';
+        $validation_rules['menu_title'] = 'nullable|string|max:255';
+        $validation_rules['page_title'] = 'nullable|string|max:1024';
         $validation_rules['parent'] = 'nullable|integer';
         $validation_rules['taxon'] = 'nullable|integer';
         $validation_rules['public'] = 'required|integer';
@@ -184,7 +185,8 @@ class ItemController extends Controller
 
         // Save new item to database
         $item_data = [
-            'title' => $request->input('title'),
+            'menu_title' => $request->input('menu_title'),
+            'page_title' => preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', "", $request->input('page_title')),
             'parent_fk' => $request->input('parent'),
             'taxon_fk' => $request->input('taxon'),
             'public' => $request->input('public'),
@@ -336,19 +338,30 @@ class ItemController extends Controller
     /**
      * Fill title column of items table from details table.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function titles()
+    public function titles(Request $request)
     {
         $this->authorize('titles', Item::class);
 
-        $items = Item::orderBy('item_id')->get();
+        $query = Item::orderBy('item_id');
+        if ($request->item_type) {
+            $query = $query->where('item_type_fk', intval($request->item_type));
+        }
+        if (!$request->update) {
+            $query = $query->whereNull('title');
+        }
+        $items = $query->get();
+        #dd($items);
 
         $count = 0;
+        $from_taxon = intval($request->taxon_schema) ? true : false;
         // Copy title string for all items if doesn't exist yet
         foreach ($items as $item) {
-            if (!$item->title) {
-                $item->title = substr($item->getTitleColumn(), 0, 255);
+            if ($request->update || !$item->title) {
+                $item->title = substr(
+                    $item->getTitleColumn($from_taxon, intval($request->taxon_schema)), 0, 255);
                 $item->save();
                 $count++;
             }
@@ -465,7 +478,8 @@ class ItemController extends Controller
         $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk)->get();
 
         // Validation rules for fields associated with this item
-        $validation_rules['title'] = 'nullable|string|max:255';
+        $validation_rules['menu_title'] = 'nullable|string|max:255';
+        $validation_rules['page_title'] = 'nullable|string|max:1024';
         $validation_rules['parent'] = 'nullable|integer';
         $validation_rules['taxon'] = 'nullable|integer';
         $validation_rules['public'] = 'required|integer';
@@ -493,7 +507,8 @@ class ItemController extends Controller
 
         $request->validate($validation_rules);
 
-        $item->title = $request->input('title');
+        $item->menu_title = $request->input('menu_title');
+        $item->page_title = preg_replace('/<script\b[^>]*>(.*?)<\/script>/is', "", $request->input('page_title'));
         $item->parent_fk = $request->input('parent');
         $item->taxon_fk = $request->input('taxon');
         $item->public = $request->input('public');

@@ -3,34 +3,30 @@
 @section('sidebar_menu_items')
     @parent
     
-    @foreach($menu_root as $it)
-        @if($it->public == 1)
-            <li class="nav-item">
-                @if($it->item_id == $item->item_id)
-                    <a class="nav-link active" href="{{ $it->item_id }}">
-                @else
-                    <a class="nav-link" href="{{ $it->item_id }}">
-                @endif
-                {{ $it->title }}
-                
-                {{-- Screen readers can mention the currently active menu item --}}
-                @if($it->item_id == $item->item_id)
-                    <span class="sr-only">(current)</span>
-                @endif
-                </a>
-                
-                @if($loop->depth <= count($path) && $path[$loop->depth - 1] == $it->item_id && count($it->children))
-                    <ul>
-                        @include('includes.item_submenu', ['sub' => $it->children, 'path' => $path])
-                    </ul>
-                @endif
-            </li>
-        @endif
-    @endforeach
+    @include('includes.item_submenu', [
+        'sub' => $menu_root,
+        'path' => $path,
+        'order' => config('menu.sidebar_item_order', []),
+        'exclude' => config('menu.sidebar_exclude_item_type', []),
+    ])
     
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Init the menu
+            menu.init("{{ route('menu.children') }}");
+        });
+    </script>
 @endsection
 
 @section('content')
+
+    @if($item->page_title)
+        @if(Config::get('ui.html_page_title'))
+            <h3>{!! $item->page_title !!}</h3>
+        @else
+            <h3>{{ $item->page_title }}</h3>
+        @endif
+    @endif
 
     @if($item->item_type->attributes->firstWhere('name', 'code')->pivot->value != '_static_')
         <!-- Image details -->
@@ -55,31 +51,32 @@
 @foreach($colmap->groupBy('column_group_fk') as $cg)
     
     @unless($cg->first()->column_group->getConfigValue('hide_heading'))
-        <div class="mt-4 mb-0">
+        <div class="column-group-title pt-2 mt-2 mb-0">
         @if($cg->first()->column_group->getConfigValue('show_collapsed'))
-            <a class="column-content" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="true" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
-                {{ $cg->first()->column_group->attributes
-                ->firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}
+            <a data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="true" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
+                <i class="fa" aria-hidden="true"></i>
+                {{ optional(optional($cg->first()->column_group->attributes
+                ->firstWhere('name', 'name_'.app()->getLocale()))->pivot)->value }}
             </a>
         @else
-            <a class="column-content" data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="false" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}">
-                {{ $cg->first()->column_group->attributes
-                ->firstWhere('name', 'name_'.app()->getLocale())->pivot->value }}
+            <a data-toggle="collapse" href="#collapseCG{{ $cg->first()->column_group_fk }}" role="button" aria-expanded="false" aria-controls="collapseCG{{ $cg->first()->column_group_fk }}" class="collapsed">
+                <i class="fa" aria-hidden="true"></i>
+                {{ optional(optional($cg->first()->column_group->attributes
+                ->firstWhere('name', 'name_'.app()->getLocale()))->pivot)->value }}
             </a>
         @endif
         </div>
-        <hr class="my-0">
     @endif
     
     @foreach($cg as $cm)
         
         @if($cg->first()->column_group->getConfigValue('hide_heading'))
-            <div class="container-fluid">
+            <div class="container-fluid px-0">
         @else
             @if($cg->first()->column_group->getConfigValue('show_collapsed'))
-                <div class="container-fluid collapse show" id="collapseCG{{ $cm->column_group_fk }}">
+                <div class="container-fluid collapse show px-0" id="collapseCG{{ $cm->column_group_fk }}">
             @else
-                <div class="container-fluid collapse" id="collapseCG{{ $cm->column_group_fk }}">
+                <div class="container-fluid collapse px-0" id="collapseCG{{ $cm->column_group_fk }}">
             @endif
         @endif
         
@@ -234,13 +231,13 @@
                 @include('includes.column_title')
                 <div class="col column-content">
                     @if($cm->getConfigValue('image_show') == 'gallery')
-                        <div class="container">
-                            <div class="row">
+                        <div class="container-fluid">
+                            <div class="row align-items-end">
                             @foreach($items->where('parent_fk', $item->item_id)->sortBy('title') as $specimen)
                                 @foreach($items->where('parent_fk', $specimen->item_id) as $it)
                                     {{-- Show specimen thumbnails only, no images of details --}}
                                     @if(strpos($it->getDetailWhereDataType('_image_title_'), 'Gesamtansicht') !== false)
-                                    <div class="col-auto">
+                                    <div class="col-auto py-2">
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
                                             <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{
                                                 Config::get('media.zoomify_zif_image_path')
@@ -263,14 +260,18 @@
                                             />
                                         @else
                                             <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $it->getDetailWhereDataType('_image_') }}"
-                                            width={{ Config::get('media.preview_width') }}
+                                                width={{ Config::get('media.preview_width') }}
+                                                title="{{ $it->getDetailWhereDataType('_image_title_') }}"
                                             />
                                         @endif
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
                                             </a>
                                         @endif
-                                        <br/><a href="{{ route('item.show.public', $specimen->item_id) }}">
-                                        {{ explode('_', pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME))[0] }}</a>
+                                        <br/>
+                                        <a href="{{ route('item.show.public', $specimen->item_id) }}"
+                                            title="{{ $specimen->title }}">
+                                            {{ Str::limit($specimen->title, 12) }}
+                                        </a>
                                     </div>
                                     @endif
                                 @endforeach
@@ -280,10 +281,10 @@
                     @endif
                     
                     @if($cm->getConfigValue('image_show') == 'specimen')
-                        <div class="container">
-                            <div class="row">
+                        <div class="container-fluid">
+                            <div class="row align-items-end">
                                 @foreach($items->where('parent_fk', $item->item_id)->sortBy('title') as $it)
-                                    <div class="col-auto">
+                                    <div class="col-auto py-2">
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
                                             {{-- Bestikri images have different pathes and types --}}
                                             @if(strpos($it->getDetailWhereDataType('_image_title_'), 'Gesamtansicht') === false)
@@ -316,19 +317,20 @@
                                             $it->getDetailWhereDataType('_image_')))
                                             <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
                                                 $it->getDetailWhereDataType('_image_')) }}"
-                                                width={{ Config::get('media.preview_width') }}
+                                                height={{ Config::get('media.preview_height') }}
                                                 title="{{ $it->getDetailWhereDataType('_image_title_') }}"
                                             />
                                         @else
                                             <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $it->getDetailWhereDataType('_image_') }}"
-                                            width={{ Config::get('media.preview_width') }}
+                                                height={{ Config::get('media.preview_height') }}
+                                                title="{{ $it->getDetailWhereDataType('_image_title_') }}"
                                             />
                                         @endif
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
                                             </a>
                                         @endif
                                         <br/>
-                                        {{ explode('_', pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME))[0] }}
+                                        {{ $it->getDetailWhereDataType('_image_title_') }}
                                     </div>
                                 @endforeach
                             </div>
@@ -403,8 +405,22 @@
                     @endif
                 @endif
                 @if($cm->getConfigValue('map') == 'inline')
-                    <div id="map" class="map"><div id="popup"></div></div>
+                    <div id="map" class="map"
+                        data-colmap="{{ $cm->colmap_id }}"
+                        data-item="{{ $item->item_id }}"
+                        data-map-config="{{ route('map.config', ['colmap' => $cm->colmap_id]) }}"
+                    >
+                        <div id="popup"></div>
+                        <div id="mapError" style="display:none;"><b>@lang("items.no_position_for_map")</b></div>
+                    </div>
                     <script type="text/javascript">
+                        $(document).ready(function () {
+                            var colmapId = $('#map').data('colmap');
+                            var itemId = $('#map').data('item');
+                            var mapConfig = $('#map').data('map-config');
+                            osm_map.init(colmapId, itemId, mapConfig);
+                        });
+                        /*
                         var lon = {{ optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col')))->value_float ?? 0 }};
                         var lat = {{ optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col')))->value_float ?? 0 }};
                         var zoom = {{ $cm->getConfigValue('map_zoom') }};
@@ -439,7 +455,7 @@
                                 osm_map.popup.setPosition(coordinates);
                             });
                         }
-                        
+                        */
                         {{-- Resize the map after un-collapsing the container --}}
                         $('#collapseCG{{ $cm->column_group_fk }}').on('shown.bs.collapse', function () {
                             osm_map.updateSize();

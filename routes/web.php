@@ -18,7 +18,10 @@ Route::get('/', function () {
     return Redirect::to('frontend');
 });
 
-Auth::routes(['verify' => true]);
+Auth::routes([
+    'register' => config('ui.user_registration', false),
+    'verify' => true,
+]);
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/frontend', 'HomeController@frontend')->name('frontend');
@@ -49,8 +52,12 @@ Route::resource('/item', 'ItemController')->except(['index'])->names([
     'destroy' => 'item.destroy.own'
 ]);
 
+Route::get('menu/children', 'AjaxMenuController@getChildren')->name('menu.children');
 Route::get('map/all', 'AjaxMapController@all')->name('map.all');
 Route::get('map/search', 'AjaxMapController@searchResults')->name('map.search');
+Route::get('map/config/', 'AjaxMapController@getConfig')->name('map.config');
+Route::get('map/points/', 'AjaxMapController@getPointFeaturesForItem')->name('map.points');
+Route::get('map/polygons/', 'AjaxMapController@getPolygonFeaturesForItem')->name('map.polygons');
 Route::post('comment/{item}/store', 'AjaxCommentController@store')->name('comment.store');
 Route::post('comment/{comment}/update', 'AjaxCommentController@update')->name('ajax.comment.update');
 Route::post('comment/{comment}/destroy', 'AjaxCommentController@destroy')->name('ajax.comment.destroy');

@@ -3,16 +3,19 @@
 @section('sidebar_menu_items')
     @parent
     
-    @foreach($menu_root as $it)
-        @if($it->public == 1)
-        <li class="nav-item">
-            <a class="nav-link" href="{{ route('item.show.public', [$it->item_id]) }}">
-                {{ $it->title }}
-            </a>
-        </li>
-        @endif
-    @endforeach
+    @include('includes.item_submenu', [
+        'sub' => $menu_root,
+        'path' => $path,
+        'order' => config('menu.sidebar_item_order', []),
+        'exclude' => config('menu.sidebar_exclude_item_type', []),
+    ])
     
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Init the menu
+            menu.init("{{ route('menu.children') }}");
+        });
+    </script>
 @endsection
 
 @section('content')
@@ -163,46 +166,33 @@
             <div class="col-lg-10" id="searchResults">
                 
                 <!-- Search results for details -->
-                @isset($items)
-                    <!-- Portfolio Grid, Gallery with search results -->
-                    @include('includes.item_gallery', [
-                        'items' => $items,
-                        'limit' => Config::get('ui.search_results'),
-                        'heading' => __(config('ui.frontend_layout') . '.search_results_heading'),
-                        'subheading' => __(config('ui.frontend_layout') . '.search_results_subheading')
-                    ])
-                    
-                    @if(count($items))
-                        <!-- Button with link to map showing the search results-->
-                        <div class="container">
-                            <a class="btn btn-primary" href="{{ route('item.map', ['source' => 'search']) }}&{{ $query_str }}">@lang('search.results_map')</a>
-                        </div>
-                    @endif
-                    
-                    @include('includes.modal_login_request')
-                    @include('includes.modal_download')
-                    @include('includes.modal_alert')
-                    @include('includes.modal_cart_remove')
-                    @include('includes.modal_comment_add')
-                @endisset
+                @if($items->count())
+                    @includeIf('includes.' . Config::get('ui.frontend_layout') . '.item_search_results')
+                @endif
                 
                 <!-- Search results for taxa -->
-                @isset($taxa)
+                @if($taxa->count())
                     <ul class="list-group">
                     @foreach($taxa as $taxon)
                         <li class="list-group-item">
                             @auth
-                                <a href="{{ route('taxon.edit', [$taxon->taxon_id]) }}" target="_blank">
+                                <a href="{{ route('taxon.edit', $taxon) }}" target="_blank">
                             @endauth
                                     {{ $taxon->full_name }}
                             @auth
                                 </a>
                             @endauth
                             &nbsp;
-                            <span class="badge badge-secondary">{{ count($taxon->items )}}</span>
-                            @if(count($taxon->items))
+                            <span class="badge badge-secondary">
+                                {{ count($taxon->items->where('item_type_fk', '<>', 188)) }} Belege
+                            </span>
+                            @if(count($taxon->items->where('item_type_fk', '<>', 188)))
                                 <ul class="list-group">
-                                @foreach($taxon->items->sortBy('item_type_fk')->sortBy('title') as $item)
+                                @foreach($taxon->items
+                                    ->where('item_type_fk', '<>', 188)
+                                    ->sortBy('item_type_fk')
+                                    ->sortBy('title')
+                                as $item)
                                     <li class="list-group-item">
                                         <a href="{{ route('item.show.public', [$item->item_id]) }}">
                                             {{ $item->title }}
@@ -214,7 +204,7 @@
                         </li>
                     @endforeach
                     </ul>
-                @endisset
+                @endif
                 
                 @if(env('APP_DEBUG'))
                     [Rendering time: {{ round(microtime(true) - LARAVEL_START, 3) }} seconds]

@@ -31,6 +31,7 @@ class ItemRevision extends Item
         'item_type_fk',
         'taxon_fk',
         'title',
+        'page_title',
         'public',
         'created_by',
         'updated_by',
@@ -54,6 +55,16 @@ class ItemRevision extends Item
     public function getOriginalItemIdAttribute()
     {
         return $this->item_fk;
+    }
+
+    /**
+     * Get the parent of the (original) item.
+     *
+     * This is a replacement for Item::parent() from \Staudenmeir\LaravelAdjacencyList 
+     */
+    public function parent()
+    {
+        return $this->original_parent();
     }
 
     /**

@@ -102980,6 +102980,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var summernote_dist_summernote_bs4__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(summernote_dist_summernote_bs4__WEBPACK_IMPORTED_MODULE_2__);
 /* harmony import */ var _map_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./map.js */ "./resources/js/map.js");
 /* harmony import */ var _diff_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./diff.js */ "./resources/js/diff.js");
+/* harmony import */ var _menu_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./menu.js */ "./resources/js/menu.js");
 window._ = __webpack_require__(/*! lodash */ "./node_modules/lodash/lodash.js");
 /**
  * We'll load jQuery and the Bootstrap jQuery plugin which provides support
@@ -103046,6 +103047,12 @@ window.osm_map = _map_js__WEBPACK_IMPORTED_MODULE_3__["default"];
 
 
 window.itemDiff = _diff_js__WEBPACK_IMPORTED_MODULE_4__["default"];
+/**
+ * Sidebar menu
+ */
+
+
+window.menu = _menu_js__WEBPACK_IMPORTED_MODULE_5__["default"];
 
 /***/ }),
 
@@ -103121,6 +103128,11 @@ var itemDiff = {
     });
   },
   addMapMarker: function addMapMarker() {
+    // Check for existing map object
+    if (!osm_map.map) {
+      return false;
+    }
+
     var columnLat = $('input.location_lat').data('column');
     var columnLon = $('input.location_lon').data('column');
     var imagePath = $('#map').data('image-path');
@@ -103135,7 +103147,7 @@ var itemDiff = {
   startDiff: function startDiff() {
     var t = this; // define variable in this Scope
 
-    var selector = '[name^="fields"][type!="hidden"],[name="title"],[name="public"]';
+    var selector = '[name^="fields"][type!="hidden"],[name="menu_title"],[name="page_title"],[name="public"]';
     $(selector).each(function () {
       var hc = t.getHistoricContent($(this).data('column'), $(this).data('type'), t.historicRevision);
       var cc = t.getcurrentContent($(this).data('column'), $(this).data('type'));
@@ -103175,8 +103187,13 @@ var itemDiff = {
     var content = "";
 
     switch (type) {
-      case "title":
-        selector = 'input[name="title"]';
+      case "menu_title":
+        selector = 'input[name="menu_title"]';
+        content = $(selector).val().trim();
+        break;
+
+      case "page_title":
+        selector = 'input[name="page_title"]';
         content = $(selector).val().trim();
         break;
 
@@ -103302,6 +103319,8 @@ __webpack_require__.r(__webpack_exports__);
 
 var osm_map = {
   map: false,
+  config: false,
+  owner: new Object(),
   popup: false,
   vectorLayer: new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
     source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
@@ -103309,6 +103328,53 @@ var osm_map = {
     })
   }),
   geoJsonLayer: false,
+  // Init
+  init: function init(colmapId, itemId, configUrl) {
+    this.owner.colmapId = colmapId;
+    this.owner.itemId = itemId;
+    this.getConfig(configUrl);
+  },
+  // Get the JSON map config via AJAX from backend
+  getConfig: function getConfig(configUrl) {
+    $.getJSON(configUrl, function (data, status) {
+      //console.log(status);
+      // Store config data to map object
+      osm_map.config = data; // Apply all config options and start creating the map
+
+      osm_map.applyConfig();
+    });
+  },
+  // Apply all config options and add vector layers accordingly
+  applyConfig: function applyConfig() {
+    // Draw the map
+    osm_map.display(this.config.map_lon || 0, this.config.map_lat || 0, this.config.map_zoom || 19); // Add vector layer with polygons
+
+    if (this.config.api_polygons) {
+      this.getPolygonLayers(this.config.api_polygons + '&item=' + this.owner.itemId);
+    } // Add vector layer with points
+
+
+    if (this.config.api_points) {
+      this.addVectorLayer(this.config.api_points + '&item=' + this.owner.itemId, this.config.marker_icon, this.config.marker_color, this.config.marker_scale); // Display error message if no points with valid lat/lon available
+
+      console.log(osm_map.geoJsonLayer.getSource());
+
+      if (this.geoJsonLayer.getSource().getFeatures().length == 'foo') {
+        $('#mapError').css('display', 'block');
+      }
+    } // No lat/lon was given in map config, so we zoom to vector layer extent
+
+
+    if (!this.config.map_lon || !this.config.map_lat) {
+      //console.log('no lon/lat in config: zoom to extent');
+      // Fires but does not give an extent:
+      //this.geoJsonLayer.getSource().on('featuresloadend', function () {
+      this.map.once('rendercomplete', function () {
+        //console.log(osm_map.geoJsonLayer.getSource().getState());
+        osm_map.moveMapToLayerSourceExtent(osm_map.geoJsonLayer, 50, osm_map.config.map.zoom);
+      });
+    }
+  },
   display: function display(lon, lat, zoom) {
     var position = Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]);
     var view = new ol__WEBPACK_IMPORTED_MODULE_0__["View"]({
@@ -103360,6 +103426,20 @@ var osm_map = {
   updatePosition: function updatePosition(lon, lat, zoom) {
     this.map.getView().setCenter(Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]));
   },
+  // Move and zoom the map view to extent of a given layer's source
+  moveMapToLayerSourceExtent: function moveMapToLayerSourceExtent(layer) {
+    var padding = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 50;
+    var maxZoom = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 17;
+    var extent = layer.getSource().getExtent(); //console.log(osm_map.transformExtent(extent));
+
+    if (!ol_extent__WEBPACK_IMPORTED_MODULE_7__["isEmpty"](extent)) {
+      osm_map.map.getView().fit(extent, {
+        padding: [padding, padding, padding, padding],
+        maxZoom: maxZoom
+      });
+    }
+  },
+  // TODO: check if this is beeing used, otherwise remove
   moveMapToFeatureExtent: function moveMapToFeatureExtent() {
     var padding = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 50;
     var maxZoom = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 17;
@@ -103395,6 +103475,89 @@ var osm_map = {
   transformExtent: function transformExtent(extent) {
     return Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
   },
+  // Get all vector layers with polygon features from GeoJSON file
+  getPolygonLayers: function getPolygonLayers(url) {
+    //console.log('get polygon layers');
+    $.getJSON(url, function (data, status) {
+      var polygonLayers = data; //console.log(polygonLayers);
+
+      polygonLayers.forEach(function (l, i) {
+        osm_map.addPolygonLayer(l.polygon_file, l.polygon_color);
+      });
+    });
+  },
+  // Add a vector layer with polygon features from GeoJSON file
+  addPolygonLayer: function addPolygonLayer(url, color) {
+    var _style = new ol_style__WEBPACK_IMPORTED_MODULE_6__["Style"]({
+      fill: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Fill"]({
+        color: '#eeeeee'
+      }),
+      stroke: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Stroke"]({
+        color: '#0000003f',
+        width: 2
+      })
+    });
+
+    var polygonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
+      source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
+        projection: 'EPSG:3857',
+        url: url,
+        format: new ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_5__["default"]()
+      }),
+      zIndex: 20,
+      style: function style(feature) {
+        _style.getFill().setColor(color || '#ffffff');
+
+        return _style;
+      }
+    });
+    this.map.addLayer(polygonLayer);
+  },
+  // Add a vector layer with point features from GeoJSON file
+  addVectorLayer: function addVectorLayer(url, icon, color) {
+    var scale = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 1.0;
+    var label = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
+    var styleCache = {};
+    this.geoJsonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
+      source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
+        projection: 'EPSG:3857',
+        url: url,
+        format: new ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_5__["default"]()
+      }),
+      zIndex: 40,
+      style: function style(feature) {
+        var size = feature.length;
+        var style = styleCache[size];
+
+        if (!style) {
+          style = new ol_style__WEBPACK_IMPORTED_MODULE_6__["Style"]({
+            image: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Icon"]({
+              color: color,
+              crossOrigin: 'anonymous',
+              src: icon,
+              scale: scale
+            }),
+            text: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Text"]({
+              text: feature.get('name'),
+              font: '12px Calibri,sans-serif',
+              offsetY: 20,
+              padding: [2, 2, 2, 2],
+              backgroundFill: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Fill"]({
+                color: '#fff'
+              }),
+              fill: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Fill"]({
+                color: '#000'
+              })
+            })
+          });
+        }
+
+        return style;
+      }
+    });
+    this.map.addLayer(this.geoJsonLayer);
+  },
+  // Add a vector layer with clustered point features from GeoJSON file
   addGeoJsonLayer: function addGeoJsonLayer(url) {
     var styleCache = {};
     this.geoJsonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
@@ -103474,6 +103637,147 @@ var osm_map = {
 
 /***/ }),
 
+/***/ "./resources/js/menu.js":
+/*!******************************!*\
+  !*** ./resources/js/menu.js ***!
+  \******************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+function _createForOfIteratorHelper(o, allowArrayLike) { var it; if (typeof Symbol === "undefined" || o[Symbol.iterator] == null) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = o[Symbol.iterator](); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+var menu = {
+  element: null,
+  level: null,
+  parentId: null,
+  init: function init(ajaxChildrenUrl) {
+    // Scroll to current menu item
+    var sideBar = $('.sidebar-sticky');
+    var parentNavItem = $('.nav-item-current').parent().parent().parent().parent().parent(); // After rendering the page on desktop screens
+
+    sideBar.animate({
+      scrollTop: parentNavItem.offset().top - sideBar.offset().top + sideBar.scrollTop()
+    }, 0); // After un-collapsing the menu on mobile screens
+
+    $('#sidebarMenu').on('shown.bs.collapse', function () {
+      sideBar.animate({
+        scrollTop: parentNavItem.offset().top - sideBar.offset().top + sideBar.scrollTop()
+      }, 500);
+    }); // On click on arrow icon
+
+    $(document).on('click', '.nav-collapse-icon', function () {
+      //console.log(this);
+      var itemLink = $('.nav-link[data-item-id=' + $(this).data('item-id') + ']');
+      var state = $(this).hasClass('active'); //console.log('icon' + $(this).data('item-id') + state);
+      // Parent div element with class 'nav-item-row'
+
+      menu.element = itemLink.parent();
+      menu.level = $(this).data('level');
+      menu.parentId = $(this).data('item-id'); // Check for active state
+
+      if (state) {
+        // Deactivate and hide
+        itemLink.removeClass("active");
+        $(this).removeClass("active");
+        $(this).addClass("collapsed");
+      } else {
+        // Check if submenu content is already available
+        if ($(this).parent().parent().children('ul').length) {//console.log('expanding available menu...');
+        } else {
+          // Otherwise load using AJAX request
+          var url = ajaxChildrenUrl + '?item=' + $(this).data('item-id');
+          url += '&level=' + $(this).data('level');
+          $.getJSON(url, function (data, status) {
+            //console.log(status);
+            //console.log(data);
+            menu.appendChildren(data.data);
+          });
+        } // Activate and unhide
+
+
+        $(this).removeClass("collapsed");
+        $(this).addClass("active");
+        itemLink.addClass("active");
+      }
+    });
+  },
+  appendChildren: function appendChildren(items) {
+    //console.log('append children');
+    //console.log(menu.element);
+    //console.log(items);
+    // Load linked page if no children available
+    if (!items.length) {
+      window.location.href = menu.element.children('.nav-link').attr('href');
+    }
+
+    var itemsHtml = []; // Prepare HTML for all the list elements
+
+    var _iterator = _createForOfIteratorHelper(items),
+        _step;
+
+    try {
+      for (_iterator.s(); !(_step = _iterator.n()).done;) {
+        var i = _step.value;
+        itemsHtml.push(this.prepareMenuItem(i));
+      } // Prepare the HTML for the enclosing unordered list
+
+    } catch (err) {
+      _iterator.e(err);
+    } finally {
+      _iterator.f();
+    }
+
+    var listHtml = this.prepareMenuList(itemsHtml); // Append the complete HTML to the DOM
+
+    menu.element.after(listHtml);
+  },
+  prepareMenuItem: function prepareMenuItem(item) {
+    //console.log('prepare item');
+    var html = '<li class="nav-item">';
+    html += '<div class="nav-item-row d-flex">';
+    html += '<a class="nav-link mr-auto pl-0" href="' + item.route_show_public + '" data-item-id="' + item.item_id + '">';
+    html += item.title + '</a>';
+    html += '<a href="#collapseMI' + item.item_id + '" class="nav-collapse-icon collapsed"';
+    html += ' aria-expanded="false" data-item-id="' + item.item_id + '"';
+    html += ' data-level="' + menu.level + '"';
+    html += ' data-toggle="collapse" role="button"';
+    html += ' aria-controls="collapseMI' + item.item_id + '">';
+    html += '<i class="fa mr-0" aria-hidden="true"></i>';
+    html += '</a></div></li>';
+    return html;
+  },
+  prepareMenuList: function prepareMenuList(itemsHtml) {
+    //console.log('prepare list');
+    var html = '<ul class="collapse show" id="collapseMI' + menu.parentId + '">'; // Include HTML for each list element
+
+    var _iterator2 = _createForOfIteratorHelper(itemsHtml),
+        _step2;
+
+    try {
+      for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+        var i = _step2.value;
+        html += i;
+      }
+    } catch (err) {
+      _iterator2.e(err);
+    } finally {
+      _iterator2.f();
+    }
+
+    html += '</ul>';
+    return html;
+  }
+};
+/* harmony default export */ __webpack_exports__["default"] = (menu);
+
+/***/ }),
+
 /***/ "./resources/sass/app.scss":
 /*!*********************************!*\
   !*** ./resources/sass/app.scss ***!
@@ -103492,8 +103796,8 @@ var osm_map = {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /var/www/html/fotoportal/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /var/www/html/fotoportal/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! /var/www/html/fwp-dev/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /var/www/html/fwp-dev/resources/sass/app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
