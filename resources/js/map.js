@@ -1,4 +1,5 @@
 import {Map, Feature, View, Overlay} from 'ol';
+import {ScaleLine} from 'ol/control';
 import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
@@ -76,6 +77,11 @@ var osm_map = {
                 osm_map.moveMapToLayerSourceExtent(osm_map.geoJsonLayer, 50, osm_map.config.map.zoom);
             });
         }
+
+        // Add scale line
+        if (this.config.scale_line) {
+            this.addScaleLine();
+        }
     },
 
     display: function (lon, lat, zoom) {
@@ -113,6 +119,16 @@ var osm_map = {
     
     updateSize: function () {
         this.map.updateSize();
+    },
+
+    addScaleLine: function () {
+        var scaleLine = new ScaleLine({
+            units: 'metric',
+            bar: true,
+            steps: 4,
+            minWidth: 100,
+        });
+        this.map.addControl(scaleLine);
     },
     
     addMarker: function (lon, lat, icon, color, id) {
