@@ -404,6 +404,15 @@
                 <script type="text/javascript">
                     $(document).ready(function() {
                         $('.summernote').summernote({
+                            toolbar: [
+                                ['style', ['bold', 'italic', 'underline', 'clear']],
+                                ['font', ['strikethrough', 'superscript', 'subscript']],
+                                ['color', ['color']],
+                                ['para', ['ul', 'ol']],
+                                ['table', ['table']],
+                                ['insert', ['link', 'picture', 'video']],
+                                ['view', ['fullscreen', 'codeview', 'help']],
+                            ],
                             tabsize: 4,
                             height: 200
                         });
