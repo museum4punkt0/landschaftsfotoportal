@@ -106455,7 +106455,7 @@ var osm_map = {
 
 
     if (this.config.api_points) {
-      this.addVectorLayer(this.config.api_points + '&item=' + this.owner.itemId, this.config.marker_icon, this.config.marker_color, this.config.marker_scale); // Display error message if no points with valid lat/lon available
+      this.addVectorLayer(this.config.api_points + '&item=' + this.owner.itemId, this.config.marker_icon, this.config.marker_color, this.config.marker_scale, this.config.marker_label); // Display error message if no points with valid lat/lon available
 
       console.log(osm_map.geoJsonLayer.getSource());
 
@@ -106665,7 +106665,7 @@ var osm_map = {
   // Add a vector layer with point features from GeoJSON file
   addVectorLayer: function addVectorLayer(url, icon, color) {
     var scale = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 1.0;
-    var label = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
+    var label = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
     var styleCache = {};
     this.geoJsonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
       source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_4__["default"]({
@@ -106685,8 +106685,11 @@ var osm_map = {
               crossOrigin: 'anonymous',
               src: icon,
               scale: scale
-            }),
-            text: new ol_style__WEBPACK_IMPORTED_MODULE_8__["Text"]({
+            })
+          });
+
+          if (label) {
+            var text = new ol_style__WEBPACK_IMPORTED_MODULE_8__["Text"]({
               text: feature.get('name'),
               font: '12px Calibri,sans-serif',
               offsetY: 20,
@@ -106697,8 +106700,9 @@ var osm_map = {
               fill: new ol_style__WEBPACK_IMPORTED_MODULE_8__["Fill"]({
                 color: '#000'
               })
-            })
-          });
+            });
+            style.setText(text);
+          }
         }
 
         return style;

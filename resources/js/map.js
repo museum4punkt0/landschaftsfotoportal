@@ -59,7 +59,8 @@ var osm_map = {
         // Add vector layer with points
         if (this.config.api_points) {
             this.addVectorLayer(this.config.api_points + '&item=' + this.owner.itemId,
-                this.config.marker_icon, this.config.marker_color, this.config.marker_scale);
+                this.config.marker_icon, this.config.marker_color, this.config.marker_scale,
+                this.config.marker_label);
 
             // Display error message if no points with valid lat/lon available
             console.log(osm_map.geoJsonLayer.getSource());
@@ -278,7 +279,7 @@ var osm_map = {
     },
 
     // Add a vector layer with point features from GeoJSON file
-    addVectorLayer: function (url, icon, color, scale=1.0, label=true) {
+    addVectorLayer: function (url, icon, color, scale=1.0, label=false) {
         var styleCache = {};
         
         this.geoJsonLayer = new VectorLayer({
@@ -299,7 +300,9 @@ var osm_map = {
                             src: icon,
                             scale: scale,
                         }),
-                        text: new Text({
+                    });
+                    if (label) {
+                        var text = new Text({
                             text: feature.get('name'),
                             font: '12px Calibri,sans-serif',
                             offsetY : 20,
@@ -310,8 +313,9 @@ var osm_map = {
                             fill: new Fill({
                                 color: '#000',
                             }),
-                        }),
-                    });
+                        })
+                        style.setText(text);
+                    }
                 }
                 return style;
             },
