@@ -4,6 +4,7 @@ import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import ClusterSource from 'ol/source/Cluster';
+import TileWMS from 'ol/source/TileWMS';
 import GeoJSON from 'ol/format/GeoJSON';
 import {Icon, Style, Circle as CircleStyle, Fill, Stroke, Text} from 'ol/style';
 import * as olExtent from 'ol/extent';
@@ -81,6 +82,24 @@ var osm_map = {
         // Add scale line
         if (this.config.scale_line) {
             this.addScaleLine();
+        }
+
+        // Add WMS layer
+        if (this.config.wms_url) {
+            // String with layer names, concatenated with commas
+            var layers = '';
+            if (this.config.wms_layers) {
+                layers = this.config.wms_layers;
+            }
+            console.log(layers);
+            // Array with 4 float elements representing the extent
+            var extent = false;
+            if (this.config.wms_extent) {
+                extent = this.config.wms_extent;
+            }
+            console.log(extent);
+
+            this.addWmsLayer(this.config.wms_url, layers, extent);
         }
     },
 
@@ -203,6 +222,19 @@ var osm_map = {
     
     transformExtent: function (extent) {
         return transformExtent(extent, 'EPSG:3857','EPSG:4326');
+    },
+
+    addWmsLayer: function (url, layers, extent) {
+        var tileLayer =   new TileLayer({
+            extent: extent,
+            source: new TileWMS({
+                url: url,
+                params: {'LAYERS': layers},
+                // Do not fade tiles:
+                transition: 0,
+            }),
+        });
+        this.map.addLayer(tileLayer);
     },
 
     // Get all vector layers with polygon features from GeoJSON file
