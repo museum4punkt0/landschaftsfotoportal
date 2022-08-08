@@ -1,5 +1,7 @@
 import {Map, Feature, View, Overlay} from 'ol';
 import {ScaleLine} from 'ol/control';
+import MousePosition from 'ol/control/MousePosition';
+import {createStringXY} from 'ol/coordinate';
 import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
@@ -85,6 +87,11 @@ var osm_map = {
             this.addScaleLine();
         }
 
+        // Add mouse position
+        if (this.config.mouse_position) {
+            this.addMousePosition(this.config.mouse_position);
+        }
+
         // Add WMS layer
         if (this.config.wms_url) {
             // String with layer names, concatenated with commas
@@ -141,14 +148,28 @@ var osm_map = {
         this.map.updateSize();
     },
 
+    // Add a control showing a scale line or bar
     addScaleLine: function () {
-        var scaleLine = new ScaleLine({
+        const scaleLine = new ScaleLine({
             units: 'metric',
             bar: true,
             steps: 4,
             minWidth: 100,
         });
         this.map.addControl(scaleLine);
+    },
+
+    // Add a control showing the current position of mouse pointer
+    addMousePosition: function (precision = 4) {
+        const mousePositionControl = new MousePosition({
+            coordinateFormat: createStringXY(precision),
+            projection: 'EPSG:4326',
+            // comment out the following two lines to have the mouse position
+            // be placed outside the map.
+            //className: 'custom-mouse-position',
+            //target: document.getElementById('mouse-position'),
+        });
+        this.map.addControl(mousePositionControl);
     },
     
     addMarker: function (lon, lat, icon, color, id) {

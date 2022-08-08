@@ -106393,17 +106393,21 @@ var itemDiff = {
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var ol__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ol */ "./node_modules/ol/index.js");
 /* harmony import */ var ol_control__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ol/control */ "./node_modules/ol/control.js");
-/* harmony import */ var ol_layer_Tile__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ol/layer/Tile */ "./node_modules/ol/layer/Tile.js");
-/* harmony import */ var ol_layer_Vector__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ol/layer/Vector */ "./node_modules/ol/layer/Vector.js");
-/* harmony import */ var ol_source_Vector__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ol/source/Vector */ "./node_modules/ol/source/Vector.js");
-/* harmony import */ var ol_source_Cluster__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ol/source/Cluster */ "./node_modules/ol/source/Cluster.js");
-/* harmony import */ var ol_source_TileWMS__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ol/source/TileWMS */ "./node_modules/ol/source/TileWMS.js");
-/* harmony import */ var ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ol/format/GeoJSON */ "./node_modules/ol/format/GeoJSON.js");
-/* harmony import */ var ol_style__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ol/style */ "./node_modules/ol/style.js");
-/* harmony import */ var ol_extent__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ol/extent */ "./node_modules/ol/extent.js");
-/* harmony import */ var ol_geom_Point__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ol/geom/Point */ "./node_modules/ol/geom/Point.js");
-/* harmony import */ var ol_source_OSM__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ol/source/OSM */ "./node_modules/ol/source/OSM.js");
-/* harmony import */ var ol_proj__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ol/proj */ "./node_modules/ol/proj.js");
+/* harmony import */ var ol_control_MousePosition__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ol/control/MousePosition */ "./node_modules/ol/control/MousePosition.js");
+/* harmony import */ var ol_coordinate__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ol/coordinate */ "./node_modules/ol/coordinate.js");
+/* harmony import */ var ol_layer_Tile__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ol/layer/Tile */ "./node_modules/ol/layer/Tile.js");
+/* harmony import */ var ol_layer_Vector__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ol/layer/Vector */ "./node_modules/ol/layer/Vector.js");
+/* harmony import */ var ol_source_Vector__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ol/source/Vector */ "./node_modules/ol/source/Vector.js");
+/* harmony import */ var ol_source_Cluster__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ol/source/Cluster */ "./node_modules/ol/source/Cluster.js");
+/* harmony import */ var ol_source_TileWMS__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ol/source/TileWMS */ "./node_modules/ol/source/TileWMS.js");
+/* harmony import */ var ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ol/format/GeoJSON */ "./node_modules/ol/format/GeoJSON.js");
+/* harmony import */ var ol_style__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ol/style */ "./node_modules/ol/style.js");
+/* harmony import */ var ol_extent__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ol/extent */ "./node_modules/ol/extent.js");
+/* harmony import */ var ol_geom_Point__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ol/geom/Point */ "./node_modules/ol/geom/Point.js");
+/* harmony import */ var ol_source_OSM__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ol/source/OSM */ "./node_modules/ol/source/OSM.js");
+/* harmony import */ var ol_proj__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ol/proj */ "./node_modules/ol/proj.js");
+
+
 
 
 
@@ -106422,8 +106426,8 @@ var osm_map = {
   config: false,
   owner: new Object(),
   popup: false,
-  vectorLayer: new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
-    source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_4__["default"]({
+  vectorLayer: new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_5__["default"]({
+    source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_6__["default"]({
       features: false
     })
   }),
@@ -106478,6 +106482,11 @@ var osm_map = {
 
     if (this.config.scale_line) {
       this.addScaleLine();
+    } // Add mouse position
+
+
+    if (this.config.mouse_position) {
+      this.addMousePosition(this.config.mouse_position);
     } // Add WMS layer
 
 
@@ -106502,7 +106511,7 @@ var osm_map = {
     }
   },
   display: function display(lon, lat, zoom) {
-    var position = Object(ol_proj__WEBPACK_IMPORTED_MODULE_12__["fromLonLat"])([lon, lat]);
+    var position = Object(ol_proj__WEBPACK_IMPORTED_MODULE_14__["fromLonLat"])([lon, lat]);
     var view = new ol__WEBPACK_IMPORTED_MODULE_0__["View"]({
       center: position,
       zoom: zoom,
@@ -106510,8 +106519,8 @@ var osm_map = {
     });
     this.map = new ol__WEBPACK_IMPORTED_MODULE_0__["Map"]({
       target: 'map',
-      layers: [new ol_layer_Tile__WEBPACK_IMPORTED_MODULE_2__["default"]({
-        source: new ol_source_OSM__WEBPACK_IMPORTED_MODULE_11__["default"]()
+      layers: [new ol_layer_Tile__WEBPACK_IMPORTED_MODULE_4__["default"]({
+        source: new ol_source_OSM__WEBPACK_IMPORTED_MODULE_13__["default"]()
       }), this.vectorLayer],
       view: view
     });
@@ -106530,6 +106539,7 @@ var osm_map = {
   updateSize: function updateSize() {
     this.map.updateSize();
   },
+  // Add a control showing a scale line or bar
   addScaleLine: function addScaleLine() {
     var scaleLine = new ol_control__WEBPACK_IMPORTED_MODULE_1__["ScaleLine"]({
       units: 'metric',
@@ -106539,17 +106549,30 @@ var osm_map = {
     });
     this.map.addControl(scaleLine);
   },
+  // Add a control showing the current position of mouse pointer
+  addMousePosition: function addMousePosition() {
+    var precision = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 4;
+    var mousePositionControl = new ol_control_MousePosition__WEBPACK_IMPORTED_MODULE_2__["default"]({
+      coordinateFormat: Object(ol_coordinate__WEBPACK_IMPORTED_MODULE_3__["createStringXY"])(precision),
+      projection: 'EPSG:4326' // comment out the following two lines to have the mouse position
+      // be placed outside the map.
+      //className: 'custom-mouse-position',
+      //target: document.getElementById('mouse-position'),
+
+    });
+    this.map.addControl(mousePositionControl);
+  },
   addMarker: function addMarker(lon, lat, icon, color, id) {
     if (typeof id === 'undefined') {
       id = 'defaultMarker';
     }
 
     var marker = new ol__WEBPACK_IMPORTED_MODULE_0__["Feature"]({
-      geometry: new ol_geom_Point__WEBPACK_IMPORTED_MODULE_10__["default"](Object(ol_proj__WEBPACK_IMPORTED_MODULE_12__["fromLonLat"])([lon, lat]))
+      geometry: new ol_geom_Point__WEBPACK_IMPORTED_MODULE_12__["default"](Object(ol_proj__WEBPACK_IMPORTED_MODULE_14__["fromLonLat"])([lon, lat]))
     });
     marker.setId(id);
-    marker.setStyle(new ol_style__WEBPACK_IMPORTED_MODULE_8__["Style"]({
-      image: new ol_style__WEBPACK_IMPORTED_MODULE_8__["Icon"]({
+    marker.setStyle(new ol_style__WEBPACK_IMPORTED_MODULE_10__["Style"]({
+      image: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Icon"]({
         color: color,
         crossOrigin: 'anonymous',
         src: icon,
@@ -106559,7 +106582,7 @@ var osm_map = {
     this.vectorLayer.getSource().addFeature(marker);
   },
   updatePosition: function updatePosition(lon, lat, zoom) {
-    this.map.getView().setCenter(Object(ol_proj__WEBPACK_IMPORTED_MODULE_12__["fromLonLat"])([lon, lat]));
+    this.map.getView().setCenter(Object(ol_proj__WEBPACK_IMPORTED_MODULE_14__["fromLonLat"])([lon, lat]));
   },
   // Move and zoom the map view to extent of a given layer's source
   moveMapToLayerSourceExtent: function moveMapToLayerSourceExtent(layer) {
@@ -106567,7 +106590,7 @@ var osm_map = {
     var maxZoom = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 17;
     var extent = layer.getSource().getExtent(); //console.log(osm_map.transformExtent(extent));
 
-    if (!ol_extent__WEBPACK_IMPORTED_MODULE_9__["isEmpty"](extent)) {
+    if (!ol_extent__WEBPACK_IMPORTED_MODULE_11__["isEmpty"](extent)) {
       osm_map.map.getView().fit(extent, {
         padding: [padding, padding, padding, padding],
         maxZoom: maxZoom
@@ -106590,7 +106613,7 @@ var osm_map = {
       id = 'defaultMarker';
     }
 
-    var coordinates = Object(ol_proj__WEBPACK_IMPORTED_MODULE_12__["fromLonLat"])([lon, lat]);
+    var coordinates = Object(ol_proj__WEBPACK_IMPORTED_MODULE_14__["fromLonLat"])([lon, lat]);
     this.vectorLayer.getSource().getFeatureById(id).getGeometry().setCoordinates(coordinates);
   },
   removeMarker: function removeMarker(id) {
@@ -106605,15 +106628,15 @@ var osm_map = {
     }
   },
   transformCoordinate: function transformCoordinate(coordinate) {
-    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_12__["transform"])(coordinate, 'EPSG:3857', 'EPSG:4326');
+    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_14__["transform"])(coordinate, 'EPSG:3857', 'EPSG:4326');
   },
   transformExtent: function transformExtent(extent) {
-    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_12__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
+    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_14__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
   },
   addWmsLayer: function addWmsLayer(url, layers, extent) {
-    var tileLayer = new ol_layer_Tile__WEBPACK_IMPORTED_MODULE_2__["default"]({
+    var tileLayer = new ol_layer_Tile__WEBPACK_IMPORTED_MODULE_4__["default"]({
       extent: extent,
-      source: new ol_source_TileWMS__WEBPACK_IMPORTED_MODULE_6__["default"]({
+      source: new ol_source_TileWMS__WEBPACK_IMPORTED_MODULE_8__["default"]({
         url: url,
         params: {
           'LAYERS': layers
@@ -106637,21 +106660,21 @@ var osm_map = {
   },
   // Add a vector layer with polygon features from GeoJSON file
   addPolygonLayer: function addPolygonLayer(url, color) {
-    var _style = new ol_style__WEBPACK_IMPORTED_MODULE_8__["Style"]({
-      fill: new ol_style__WEBPACK_IMPORTED_MODULE_8__["Fill"]({
+    var _style = new ol_style__WEBPACK_IMPORTED_MODULE_10__["Style"]({
+      fill: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Fill"]({
         color: '#eeeeee'
       }),
-      stroke: new ol_style__WEBPACK_IMPORTED_MODULE_8__["Stroke"]({
+      stroke: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Stroke"]({
         color: '#0000003f',
         width: 2
       })
     });
 
-    var polygonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
-      source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_4__["default"]({
+    var polygonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_5__["default"]({
+      source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_6__["default"]({
         projection: 'EPSG:3857',
         url: url,
-        format: new ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_7__["default"]()
+        format: new ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_9__["default"]()
       }),
       zIndex: 20,
       style: function style(feature) {
@@ -106667,11 +106690,11 @@ var osm_map = {
     var scale = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 1.0;
     var label = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
     var styleCache = {};
-    this.geoJsonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
-      source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_4__["default"]({
+    this.geoJsonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_5__["default"]({
+      source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_6__["default"]({
         projection: 'EPSG:3857',
         url: url,
-        format: new ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_7__["default"]()
+        format: new ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_9__["default"]()
       }),
       zIndex: 40,
       style: function style(feature) {
@@ -106679,8 +106702,8 @@ var osm_map = {
         var style = styleCache[size];
 
         if (!style) {
-          style = new ol_style__WEBPACK_IMPORTED_MODULE_8__["Style"]({
-            image: new ol_style__WEBPACK_IMPORTED_MODULE_8__["Icon"]({
+          style = new ol_style__WEBPACK_IMPORTED_MODULE_10__["Style"]({
+            image: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Icon"]({
               color: color,
               crossOrigin: 'anonymous',
               src: icon,
@@ -106689,15 +106712,15 @@ var osm_map = {
           });
 
           if (label) {
-            var text = new ol_style__WEBPACK_IMPORTED_MODULE_8__["Text"]({
+            var text = new ol_style__WEBPACK_IMPORTED_MODULE_10__["Text"]({
               text: feature.get('name'),
               font: '12px Calibri,sans-serif',
               offsetY: 20,
               padding: [2, 2, 2, 2],
-              backgroundFill: new ol_style__WEBPACK_IMPORTED_MODULE_8__["Fill"]({
+              backgroundFill: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Fill"]({
                 color: '#fff'
               }),
-              fill: new ol_style__WEBPACK_IMPORTED_MODULE_8__["Fill"]({
+              fill: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Fill"]({
                 color: '#000'
               })
             });
@@ -106713,13 +106736,13 @@ var osm_map = {
   // Add a vector layer with clustered point features from GeoJSON file
   addGeoJsonLayer: function addGeoJsonLayer(url) {
     var styleCache = {};
-    this.geoJsonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
-      source: new ol_source_Cluster__WEBPACK_IMPORTED_MODULE_5__["default"]({
+    this.geoJsonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_5__["default"]({
+      source: new ol_source_Cluster__WEBPACK_IMPORTED_MODULE_7__["default"]({
         distance: 30,
-        source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_4__["default"]({
+        source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_6__["default"]({
           projection: 'EPSG:3857',
           url: url,
-          format: new ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_7__["default"]()
+          format: new ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_9__["default"]()
         })
       }),
       style: function style(feature) {
@@ -106727,20 +106750,20 @@ var osm_map = {
         var style = styleCache[size];
 
         if (!style) {
-          style = new ol_style__WEBPACK_IMPORTED_MODULE_8__["Style"]({
-            image: new ol_style__WEBPACK_IMPORTED_MODULE_8__["Circle"]({
+          style = new ol_style__WEBPACK_IMPORTED_MODULE_10__["Style"]({
+            image: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Circle"]({
               radius: 12,
-              fill: new ol_style__WEBPACK_IMPORTED_MODULE_8__["Fill"]({
+              fill: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Fill"]({
                 color: 'rgba(52, 144, 220, 0.7)'
               }),
-              stroke: new ol_style__WEBPACK_IMPORTED_MODULE_8__["Stroke"]({
+              stroke: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Stroke"]({
                 color: '#000',
                 width: 2
               })
             }),
-            text: new ol_style__WEBPACK_IMPORTED_MODULE_8__["Text"]({
+            text: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Text"]({
               text: size.toString(),
-              fill: new ol_style__WEBPACK_IMPORTED_MODULE_8__["Fill"]({
+              fill: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Fill"]({
                 color: '#000'
               })
             })
@@ -106768,18 +106791,18 @@ var osm_map = {
       var extent = clusteredFeatures[0].getGeometry().getExtent().slice(0);
 
       for (var i = 0; i < clusteredFeatures.length; i++) {
-        ol_extent__WEBPACK_IMPORTED_MODULE_9__["extend"](extent, clusteredFeatures[i].getGeometry().getExtent());
+        ol_extent__WEBPACK_IMPORTED_MODULE_11__["extend"](extent, clusteredFeatures[i].getGeometry().getExtent());
       }
     } else {
       // not a cluster
       var extent = features.getGeometry().getExtent().slice(0);
     }
 
-    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_12__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
+    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_14__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
   },
   getBoundsOfView: function getBoundsOfView() {
     var extent = this.map.getView().calculateExtent(this.map.getSize());
-    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_12__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
+    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_14__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
   },
   wrapLon: function wrapLon(value) {
     var worlds = Math.floor((value + 180) / 360);
