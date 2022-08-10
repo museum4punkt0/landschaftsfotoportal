@@ -106478,7 +106478,12 @@ var osm_map = {
       //this.geoJsonLayer.getSource().on('featuresloadend', function () {
       this.map.once('rendercomplete', function () {
         //console.log(osm_map.geoJsonLayer.getSource().getState());
-        osm_map.moveMapToLayerSourceExtent(osm_map.geoJsonLayer, 50, osm_map.config.map.zoom);
+        osm_map.moveMapToLayerSourceExtent(osm_map.geoJsonLayer, 50, osm_map.config.map.zoom); // Check non-empty for lat/lon form fields to respect old form input
+
+        if ($('input.location_lat').val() || $('input.location_lon').val()) {
+          osm_map.updatePosition($('input.location_lon').val(), $('input.location_lat').val());
+          osm_map.moveMarker($('input.location_lon').val(), $('input.location_lat').val(), osm_map.owner.itemId);
+        }
       });
     } // Add scale line
 
@@ -106763,6 +106768,7 @@ var osm_map = {
     if (layer.getSource().getFeatureById(id)) {
       layer.getSource().getFeatureById(id).getGeometry().setCoordinates(coordinates);
     } else {
+      //console.log('adding new marker because no existing one found for moving');
       this.addMarker(lon, lat, this.config.marker_icon, this.config.marker_color, this.config.marker_scale, '0', layer);
     }
   },
