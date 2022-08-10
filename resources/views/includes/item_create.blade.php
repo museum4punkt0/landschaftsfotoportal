@@ -585,8 +585,26 @@
                     </iframe>
                 @endif
                 @if($cm->getConfigValue('map') == 'inline')
-                    <div id="map" class="map"></div>
+                    <div id="map" class="map"
+                        data-colmap="{{ $cm->colmap_id }}"
+                        data-item="0"
+                        data-map-config="{{ route('map.config', ['colmap' => $cm->colmap_id]) }}"
+                        data-forward-geocoder-url="{{ Config::get('geo.geocoder_url') }}"
+                        data-reverse-geocoder-url="{{ Config::get('geo.reverse_geocoder_url') }}"
+                        data-api-key="{{ Config::get('geo.api_key') }}"
+                        data-image-path="{{ asset('storage/images/') }}"
+                    >
+                        <div id="popup"></div>
+                        <div id="mapError" style="display:none;"><b>@lang("items.no_position_for_map")</b></div>
+                    </div>
                     <script type="text/javascript">
+                        $(document).ready(function () {
+                            var colmapId = $('#map').data('colmap');
+                            var itemId = $('#map').data('item');
+                            var mapConfig = $('#map').data('map-config');
+                            osm_map.init(colmapId, itemId, mapConfig);
+                        });
+                        /*
                         // Default values, used if geolocation API fails or is disabled
                         var lon = {{ floatval(old('fields.'. $cm->getConfigValue('map_lon_col'), Config::get('geo.map_lon', 14.986))) }};
                         var lat = {{ floatval(old('fields.'. $cm->getConfigValue('map_lat_col'), Config::get('geo.map_lat', 51.15))) }};
@@ -607,153 +625,7 @@
                         else {
                             initMap();
                         }
-                        
-                        function initMap() {
-                            // Init and display the map
-                            osm_map.display(lon, lat, zoom);
-                            osm_map.addMarker(lon, lat, '{{ asset("storage/images/dot.svg") }}');
-                            
-                            // Click on map to update position of marker
-                            osm_map.map.on('singleclick', function (evt) {
-                                let coord = osm_map.transformCoordinate(evt.coordinate);
-                                // Update lat/lon form fields
-                                $('input.location_lon').val(coord[0]);
-                                $('input.location_lat').val(coord[1]);
-                                // Update position of marker
-                                osm_map.moveMarker($('input.location_lon').val(), $('input.location_lat').val());
-                                
-                                // Fetch data from geocoder API
-                                $.ajax({
-                                    url: '{{ Config::get("geo.reverse_geocoder_url") }}',
-                                    type: 'get',
-                                    dataType: 'json',
-                                    data: {
-                                        format: 'json',
-                                        'accept-language': 'de',
-                                        lat: coord[1],
-                                        lon: coord[0],
-                                        key: '{{ Config::get("geo.api_key") }}',
-                                    },
-                                    success: function(data) {
-                                        //console.log(data);
-                                        // Update address form input fields with results from geocoder
-                                        $('input.location_country').val(data.address.country);
-                                        $('input.location_state').val(data.address.state);
-                                        $('input.location_county').val(data.address.county);
-                                        $('input.location_city').val(getTownFromAddress(data.address));
-                                        $('input.location_street').val(data.address.road);
-                                        $('input.location_postcode').val(data.address.postcode);
-                                    },
-                                    error:function (xhr) {
-                                        //console.log(xhr);
-                                        // In case of wrong API key, the server responds with HTTP 403, but XHR fails
-                                        // because of missing CORS headers
-                                        if (xhr.status == 0) {
-                                            error_message = '@lang("common.geocoder_api_key_error")';
-                                        }
-                                        // Render the geocoder error message
-                                        $('#alertModalLabel').text('@lang("common.laravel_error")');
-                                        $('#alertModalContent').html('<div class="alert alert-danger">' + error_message + '</div>');
-                                        $('#alertModal').modal('show');
-                                    },
-                                });
-                            });
-                        }
-                        
-                        function getTownFromAddress(address) {
-                            if(address.city) {
-                                return address.city;
-                            }
-                            else {
-                                if(address.town) {
-                                    return address.town;
-                                }
-                                else {
-                                    if(address.village) {
-                                        return address.village;
-                                    }
-                                    else {
-                                        return "?";
-                                    }
-                                }
-                            }
-                        }
-                        
-                        // Autocomplete search for address form input
-                        $('input.location_city').autocomplete( {
-                            disabled: true,
-                            minLength: 5,
-                            source: function(request, response) {
-                                // Fetch data from geocoder API
-                                $.ajax({
-                                    url: '{{ Config::get("geo.geocoder_url") }}',
-                                    type: 'get',
-                                    dataType: 'json',
-                                    data: {
-                                        format: 'json',
-                                        'accept-language': 'de',
-                                        addressdetails: '1',
-                                        q: request.term,
-                                        key: '{{ Config::get("geo.api_key") }}',
-                                    },
-                                    success: function(data) {
-                                        var transformed = $.map(data, function (element) {
-                                            //console.log(element);
-                                            return {
-                                                label: element.display_name + ' (' + element.class + ')',
-                                                value: element.osm_id,
-                                                address: element.address,
-                                                latitude: element.lat,
-                                                longitude: element.lon,
-                                                osm_id: element.osm_id,
-                                            };
-                                        });
-                                        //console.log(transformed);
-                                        response(transformed);
-                                    },
-                                    error:function (xhr) {
-                                        //console.log(xhr);
-                                        // In case of wrong API key, the server responds with HTTP 403, but XHR fails
-                                        // because of missing CORS headers
-                                        if (xhr.status == 0) {
-                                            error_message = '@lang("common.geocoder_api_key_error")';
-                                        }
-                                        // Render the geocoder error message
-                                        $('#alertModalLabel').text('@lang("common.laravel_error")');
-                                        $('#alertModalContent').html('<div class="alert alert-danger">' + error_message + '</div>');
-                                        $('#alertModal').modal('show');
-                                    },
-                                });
-                            },
-                            select: function (event, ui) {
-                                //console.log(ui.item);
-                                event.preventDefault();
-                                $('input.location_city').autocomplete('disable');
-                                
-                                // Update address form input fields with results from geocoder
-                                $('input.location_country').val(ui.item.address.country);
-                                $('input.location_state').val(ui.item.address.state);
-                                $('input.location_county').val(ui.item.address.county);
-                                $('input.location_city').val(getTownFromAddress(ui.item.address));
-                                $('input.location_street').val(ui.item.address.road);
-                                $('input.location_postcode').val(ui.item.address.postcode);
-                                $('input.location_lat').val(ui.item.latitude);
-                                $('input.location_lon').val(ui.item.longitude);
-                                
-                                // Adjust map center to location of selected search result
-                                osm_map.updatePosition($('input.location_lon').val(), $('input.location_lat').val());
-                                osm_map.moveMarker($('input.location_lon').val(), $('input.location_lat').val());
-                                
-                                return false;
-                            }
-                        });
-                        
-                        // Send search request to geocoder API
-                        $('button.searchAddressBtn').click(function(xhr) {
-                            xhr.preventDefault();
-                            $('input.location_city').autocomplete('enable');
-                            $('input.location_city').autocomplete('search');
-                        });
+                        */
                     </script>
                 @endif
                 

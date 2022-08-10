@@ -106237,7 +106237,7 @@ var itemDiff = {
     // Remove old marker if it exists
 
     osm_map.removeMarker('historicMarker');
-    osm_map.addMarker(lon, lat, imagePath + 'dot.svg', '#cce7ff', 'historicMarker');
+    osm_map.addMarker(lon, lat, imagePath + 'dot.svg', '#cce7ff', 1.0, 'historicMarker');
     osm_map.moveMapToFeatureExtent();
   },
   startDiff: function startDiff() {
@@ -106436,6 +106436,9 @@ var osm_map = {
   init: function init(colmapId, itemId, configUrl) {
     this.owner.colmapId = colmapId;
     this.owner.itemId = itemId;
+    this.owner.forwardGeocoderUrl = $('#map').data('forward-geocoder-url');
+    this.owner.reverseGeocoderUrl = $('#map').data('reverse-geocoder-url');
+    this.owner.apiKey = $('#map').data('api-key');
     this.getConfig(configUrl);
   },
   // Get the JSON map config via AJAX from backend
@@ -106508,6 +106511,146 @@ var osm_map = {
 
       console.log(extent);
       this.addWmsLayer(this.config.wms_url, layers, extent);
+    } // TODO: move to new module
+    // Click on map to update position of marker
+
+
+    osm_map.map.on('singleclick', function (evt) {
+      var coord = osm_map.transformCoordinate(evt.coordinate); // Update lat/lon form fields
+
+      $('input.location_lon').val(coord[0]);
+      $('input.location_lat').val(coord[1]); // Update position of marker
+
+      osm_map.moveMarker($('input.location_lon').val(), $('input.location_lat').val(), osm_map.owner.itemId); // Check for missing location input to avoid useless geocoder query
+
+      if (!$('input.location_city').length) {
+        return;
+      } // Fetch data from geocoder API
+
+
+      $.ajax({
+        url: osm_map.owner.reverseGeocoderUrl,
+        type: 'get',
+        dataType: 'json',
+        data: {
+          format: 'json',
+          'accept-language': 'de',
+          lat: coord[1],
+          lon: coord[0],
+          key: osm_map.owner.apiKey
+        },
+        success: function success(data) {
+          //console.log(data);
+          // Update address form input fields with results from geocoder
+          $('input.location_country').val(data.address.country);
+          $('input.location_state').val(data.address.state);
+          $('input.location_county').val(data.address.county);
+          $('input.location_city').val(osm_map.getTownFromAddress(data.address));
+          $('input.location_street').val(data.address.road);
+          $('input.location_postcode').val(data.address.postcode);
+        },
+        error: function error(xhr) {
+          //console.log(xhr);
+          // In case of wrong API key, the server responds with HTTP 403, but XHR fails
+          // because of missing CORS headers
+          if (xhr.status == 0) {
+            error_message = '@lang("common.geocoder_api_key_error")';
+          } // Render the geocoder error message
+
+
+          $('#alertModalLabel').text('@lang("common.laravel_error")');
+          $('#alertModalContent').html('<div class="alert alert-danger">' + error_message + '</div>');
+          $('#alertModal').modal('show');
+        }
+      });
+    }); // Autocomplete search for address form input
+
+    $('input.location_city').autocomplete({
+      disabled: true,
+      minLength: 5,
+      source: function source(request, response) {
+        // Fetch data from geocoder API
+        $.ajax({
+          url: osm_map.owner.forwardGeocoderUrl,
+          type: 'get',
+          dataType: 'json',
+          data: {
+            format: 'json',
+            'accept-language': 'de',
+            addressdetails: '1',
+            q: request.term,
+            key: osm_map.owner.apiKey
+          },
+          success: function success(data) {
+            var transformed = $.map(data, function (element) {
+              //console.log(element);
+              return {
+                label: element.display_name + ' (' + element["class"] + ')',
+                value: element.osm_id,
+                address: element.address,
+                latitude: element.lat,
+                longitude: element.lon,
+                osm_id: element.osm_id
+              };
+            }); //console.log(transformed);
+
+            response(transformed);
+          },
+          error: function error(xhr) {
+            //console.log(xhr);
+            // In case of wrong API key, the server responds with HTTP 403, but XHR fails
+            // because of missing CORS headers
+            if (xhr.status == 0) {
+              error_message = '@lang("common.geocoder_api_key_error")';
+            } // Render the geocoder error message
+
+
+            $('#alertModalLabel').text('@lang("common.laravel_error")');
+            $('#alertModalContent').html('<div class="alert alert-danger">' + error_message + '</div>');
+            $('#alertModal').modal('show');
+          }
+        });
+      },
+      select: function select(event, ui) {
+        //console.log(ui.item);
+        event.preventDefault();
+        $('input.location_city').autocomplete('disable'); // Update address form input fields with results from geocoder
+
+        $('input.location_country').val(ui.item.address.country);
+        $('input.location_state').val(ui.item.address.state);
+        $('input.location_county').val(ui.item.address.county);
+        $('input.location_city').val(osm_map.getTownFromAddress(ui.item.address));
+        $('input.location_street').val(ui.item.address.road);
+        $('input.location_postcode').val(ui.item.address.postcode);
+        $('input.location_lat').val(ui.item.latitude);
+        $('input.location_lon').val(ui.item.longitude); // Adjust map center to location of selected search result
+
+        osm_map.updatePosition($('input.location_lon').val(), $('input.location_lat').val());
+        osm_map.moveMarker($('input.location_lon').val(), $('input.location_lat').val(), osm_map.owner.itemId);
+        return false;
+      }
+    }); // Send search request to geocoder API
+
+    $('button.searchAddressBtn').click(function (xhr) {
+      xhr.preventDefault();
+      $('input.location_city').autocomplete('enable');
+      $('input.location_city').autocomplete('search');
+    });
+  },
+  // Extract name of city/town/village from geocoder address response
+  getTownFromAddress: function getTownFromAddress(address) {
+    if (address.city) {
+      return address.city;
+    } else {
+      if (address.town) {
+        return address.town;
+      } else {
+        if (address.village) {
+          return address.village;
+        } else {
+          return "?";
+        }
+      }
     }
   },
   display: function display(lon, lat, zoom) {
@@ -106562,7 +106705,11 @@ var osm_map = {
     });
     this.map.addControl(mousePositionControl);
   },
-  addMarker: function addMarker(lon, lat, icon, color, id) {
+  addMarker: function addMarker(lon, lat, icon, color) {
+    var scale = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 1.0;
+    var id = arguments.length > 5 ? arguments[5] : undefined;
+    var layer = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : this.vectorLayer;
+
     if (typeof id === 'undefined') {
       id = 'defaultMarker';
     }
@@ -106576,10 +106723,10 @@ var osm_map = {
         color: color,
         crossOrigin: 'anonymous',
         src: icon,
-        scale: 1.0
+        scale: scale
       })
     }));
-    this.vectorLayer.getSource().addFeature(marker);
+    layer.getSource().addFeature(marker);
   },
   updatePosition: function updatePosition(lon, lat, zoom) {
     this.map.getView().setCenter(Object(ol_proj__WEBPACK_IMPORTED_MODULE_14__["fromLonLat"])([lon, lat]));
@@ -106608,23 +106755,28 @@ var osm_map = {
       maxZoom: maxZoom
     });
   },
-  moveMarker: function moveMarker(lon, lat, id) {
-    if (typeof id === 'undefined') {
-      id = 'defaultMarker';
-    }
+  moveMarker: function moveMarker(lon, lat) {
+    var id = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'defaultMarker';
+    var layer = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : this.geoJsonLayer;
+    var coordinates = Object(ol_proj__WEBPACK_IMPORTED_MODULE_14__["fromLonLat"])([lon, lat]); // Check for existing marker, otherwise create new one
 
-    var coordinates = Object(ol_proj__WEBPACK_IMPORTED_MODULE_14__["fromLonLat"])([lon, lat]);
-    this.vectorLayer.getSource().getFeatureById(id).getGeometry().setCoordinates(coordinates);
+    if (layer.getSource().getFeatureById(id)) {
+      layer.getSource().getFeatureById(id).getGeometry().setCoordinates(coordinates);
+    } else {
+      this.addMarker(lon, lat, this.config.marker_icon, this.config.marker_color, this.config.marker_scale, '0', layer);
+    }
   },
   removeMarker: function removeMarker(id) {
+    var layer = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.geoJsonLayer;
+
     if (typeof id === 'undefined') {
       id = 'defaultMarker';
     }
 
-    var feature = this.vectorLayer.getSource().getFeatureById(id);
+    var feature = layer.getSource().getFeatureById(id);
 
     if (feature) {
-      this.vectorLayer.getSource().removeFeature(feature);
+      layer.getSource().removeFeature(feature);
     }
   },
   transformCoordinate: function transformCoordinate(coordinate) {

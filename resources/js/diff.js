@@ -77,7 +77,7 @@ var itemDiff = {
         //console.log(lat + '/' + lon);
         // Remove old marker if it exists
         osm_map.removeMarker('historicMarker');
-        osm_map.addMarker(lon, lat, imagePath + 'dot.svg', '#cce7ff', 'historicMarker');
+        osm_map.addMarker(lon, lat, imagePath + 'dot.svg', '#cce7ff', 1.0, 'historicMarker');
         osm_map.moveMapToFeatureExtent();
     },
 
