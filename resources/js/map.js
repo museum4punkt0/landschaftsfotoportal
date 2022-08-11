@@ -89,6 +89,21 @@ var osm_map = {
                     osm_map.moveMarker($('input.location_lon').val(), $('input.location_lat').val(),
                         osm_map.owner.itemId);
                 }
+                else {
+                    // Use browser's geolocation API if available and enabled in config
+                    if (Boolean(osm_map.config.map_geolocation) && navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(function (position) {
+                            let lon = position.coords.longitude;
+                            let lat = position.coords.latitude;
+                            osm_map.updatePosition(lon, lat);
+                            osm_map.moveMarker(lon, lat, osm_map.owner.itemId);
+                        }, function (error) {
+                            console.log("error using browser's geolocation API");
+                        }, {
+                            timeout:2500
+                        });
+                    }
+                }
             });
         }
 

@@ -847,14 +847,6 @@
                             var mapConfig = $('#map').data('map-config');
                             osm_map.init(colmapId, itemId, mapConfig);
                         });
-                        /*
-                        var lon = {{ floatval(old('fields.'. $cm->getConfigValue('map_lon_col'), optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lon_col')))->value_float)) }};
-                        var lat = {{ floatval(old('fields.'. $cm->getConfigValue('map_lat_col'), optional($details->firstWhere('column_fk', $cm->getConfigValue('map_lat_col')))->value_float)) }};
-                        var zoom = {{ $cm->getConfigValue('map_zoom') }};
-                        // Init and display the map
-                        osm_map.display(lon, lat, zoom);
-                        osm_map.addMarker(lon, lat, '{{ asset("storage/images/dot.svg") }}', '#4a90d9');
-                        */
                     </script>
                 @endif
                 @include('includes.form_input_help')

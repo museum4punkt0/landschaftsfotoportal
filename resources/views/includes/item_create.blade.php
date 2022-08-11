@@ -604,28 +604,6 @@
                             var mapConfig = $('#map').data('map-config');
                             osm_map.init(colmapId, itemId, mapConfig);
                         });
-                        /*
-                        // Default values, used if geolocation API fails or is disabled
-                        var lon = {{ floatval(old('fields.'. $cm->getConfigValue('map_lon_col'), Config::get('geo.map_lon', 14.986))) }};
-                        var lat = {{ floatval(old('fields.'. $cm->getConfigValue('map_lat_col'), Config::get('geo.map_lat', 51.15))) }};
-                        var zoom = {{ $cm->getConfigValue('map_zoom') }};
-                        
-                        // Use browser's geolocation API if available and enabled in config
-                        if (Boolean({{ Config::get('geo.use_geolocation', false) }}) && navigator.geolocation) {
-                            navigator.geolocation.getCurrentPosition(function (position) {
-                                lon = position.coords.longitude;
-                                lat = position.coords.latitude;
-                                initMap();
-                            }, function (error) {
-                                initMap();
-                            }, {
-                                timeout:2500
-                            });
-                        }
-                        else {
-                            initMap();
-                        }
-                        */
                     </script>
                 @endif
                 

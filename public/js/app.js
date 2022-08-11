@@ -106483,6 +106483,20 @@ var osm_map = {
         if ($('input.location_lat').val() || $('input.location_lon').val()) {
           osm_map.updatePosition($('input.location_lon').val(), $('input.location_lat').val());
           osm_map.moveMarker($('input.location_lon').val(), $('input.location_lat').val(), osm_map.owner.itemId);
+        } else {
+          // Use browser's geolocation API if available and enabled in config
+          if (Boolean(osm_map.config.map_geolocation) && navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+              var lon = position.coords.longitude;
+              var lat = position.coords.latitude;
+              osm_map.updatePosition(lon, lat);
+              osm_map.moveMarker(lon, lat, osm_map.owner.itemId);
+            }, function (error) {
+              console.log("error using browser's geolocation API");
+            }, {
+              timeout: 2500
+            });
+          }
         }
       });
     } // Add scale line
