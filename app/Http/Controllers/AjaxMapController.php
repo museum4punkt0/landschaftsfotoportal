@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\ColumnMapping;
 use App\Detail;
+use App\DetailRevision;
 use App\Value;
 use App\Item;
+use App\ItemRevision;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -154,10 +156,18 @@ class AjaxMapController extends Controller
 
             // Get GeoJSON file name and color for each colmap
             foreach ($colmaps as $list_cm) {
-                $element_id = Detail::where('item_fk', $request->query('item'))
-                                    ->where('column_fk', $list_cm->column_fk)
-                                    ->first()
-                                    ->element_fk;
+                if ($request->query('revision')) {
+                    $element_id = DetailRevision::where('item_revision_fk', $request->query('revision'))
+                                        ->where('column_fk', $list_cm->column_fk)
+                                        ->first()
+                                        ->element_fk;
+                }
+                else {
+                    $element_id = Detail::where('item_fk', $request->query('item'))
+                                        ->where('column_fk', $list_cm->column_fk)
+                                        ->first()
+                                        ->element_fk;
+                }
 
                 $filename = $list_cm->getConfigValue('polygon_file');
                 // Include into json file only if element for color is set and filename exists
@@ -196,12 +206,22 @@ class AjaxMapController extends Controller
 
         // Point coordinates from item itself
         if ($cm->getConfigValue('points') == 'self') {
-            $query = Item::where('item_id', $request->query('item'));
+            if ($request->query('revision')) {
+                $query = ItemRevision::where('item_revision_id', $request->query('revision'));
+            }
+            else {
+                $query = Item::where('item_id', $request->query('item'));
+            }
         }
         // Point coordinates from item's children
         if ($cm->getConfigValue('points') == 'children') {
-            $query = Item::find($request->query('item'))
-                        ->descendants();
+            if ($request->query('revision')) {
+                $item_id = ItemRevision::find($request->query('revision'))->item_fk;
+                $query = Item::find($item_id)->descendants();
+            }
+            else {
+                $query = Item::find($request->query('item'))->descendants();
+            }
         }
         // Filter items by item_type, if set
         if ($cm->getConfigValue('item_type')) {

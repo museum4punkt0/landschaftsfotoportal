@@ -836,6 +836,9 @@
                         data-reverse-geocoder-url="{{ Config::get('geo.reverse_geocoder_url') }}"
                         data-api-key="{{ Config::get('geo.api_key') }}"
                         data-image-path="{{ asset('storage/images/') }}"
+                        @if($item instanceof \App\ItemRevision)
+                            data-revision="{{ $item->item_id }}"
+                        @endif
                     >
                         <div id="popup"></div>
                         <div id="mapError" style="display:none;"><b>@lang("items.no_position_for_map")</b></div>

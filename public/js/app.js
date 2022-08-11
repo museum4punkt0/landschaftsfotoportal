@@ -106436,6 +106436,7 @@ var osm_map = {
   init: function init(colmapId, itemId, configUrl) {
     this.owner.colmapId = colmapId;
     this.owner.itemId = itemId;
+    this.owner.revisionId = $('#map').data('revision') || 0;
     this.owner.forwardGeocoderUrl = $('#map').data('forward-geocoder-url');
     this.owner.reverseGeocoderUrl = $('#map').data('reverse-geocoder-url');
     this.owner.apiKey = $('#map').data('api-key');
@@ -106457,12 +106458,17 @@ var osm_map = {
     osm_map.display(this.config.map_lon || 0, this.config.map_lat || 0, this.config.map_zoom || 19); // Add vector layer with polygons
 
     if (this.config.api_polygons) {
-      this.getPolygonLayers(this.config.api_polygons + '&item=' + this.owner.itemId);
+      var url = this.config.api_polygons + '&item=' + this.owner.itemId;
+      url += '&revision=' + this.owner.revisionId;
+      this.getPolygonLayers(url);
     } // Add vector layer with points
 
 
     if (this.config.api_points) {
-      this.addVectorLayer(this.config.api_points + '&item=' + this.owner.itemId, this.config.marker_icon, this.config.marker_color, this.config.marker_scale, this.config.marker_label); // Display error message if no points with valid lat/lon available
+      var _url = this.config.api_points + '&item=' + this.owner.itemId;
+
+      _url += '&revision=' + this.owner.revisionId;
+      this.addVectorLayer(_url, this.config.marker_icon, this.config.marker_color, this.config.marker_scale, this.config.marker_label); // Display error message if no points with valid lat/lon available
 
       console.log(osm_map.geoJsonLayer.getSource());
 
