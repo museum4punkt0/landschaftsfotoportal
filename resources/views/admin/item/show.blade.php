@@ -21,6 +21,11 @@
                 </a>
             @endunless
         @endunless
+        @if($comments->count())
+            <a href="{{route('item.comment.index', $item->item_id)}}" class="btn btn-primary">
+            {{ $comments->count()}} @lang('comments.header')
+            </a>
+        @endif
     </div>
 
     @include('includes.item_show_cards')
