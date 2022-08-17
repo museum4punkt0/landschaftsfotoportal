@@ -192,7 +192,7 @@ class CommentController extends Controller
         }
 
         // Note: route to comments belonging to same item: 'admin/item/'.$comment->item_fk.'/comment'
-        return Redirect::to('admin/comment/unpublished')
+        return redirect()->route('comment.all')
             ->with('success', __('comments.updated'));
     }
 
@@ -206,7 +206,8 @@ class CommentController extends Controller
     {
         $comment->delete();
         
-        return Redirect::to('admin/item/'.$comment->item_fk.'/comment')
+        // Note: route to comments belonging to same item: 'admin/item/'.$comment->item_fk.'/comment'
+        return redirect()->route('comment.all')
             ->with('success', __('comments.deleted'));
     }
 }
