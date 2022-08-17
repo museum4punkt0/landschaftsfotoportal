@@ -169,6 +169,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Enable buttons for publishing comments in backend
+    |--------------------------------------------------------------------------
+    |
+    | This affects 'Publish' per comment and 'Publish all'.
+    | However, changing its state is always possible by editing the comment.
+    |
+    */
+
+    'publish_comment' => false,
+
+    /*
+    |--------------------------------------------------------------------------
     | Enable revisions (versions) for items
     |--------------------------------------------------------------------------
     |

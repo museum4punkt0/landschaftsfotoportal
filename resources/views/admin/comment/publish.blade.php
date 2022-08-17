@@ -11,7 +11,9 @@
         @if (true || Auth::check())
             <div class="card-header">@lang('comments.unpublished')</div>
             <div class="card-body">
+            @if(config('ui.publish_comment'))
                 <a href="{{route('comment.publish')}}" class="btn btn-primary">@lang('common.publish_all')</a>
+            @endif
 
                 <table class="table table-responsive mt-4">
                 <thead>
@@ -75,6 +77,7 @@
                             {{$comment->updated_at}}
                         </td>
                         <td>
+                        @if(config('ui.publish_comment'))
                             <span class="d-md-table-cell fa-btn">
                                 <span class="fa-stack fa-2x">
                                     <a href="{{ route('comment.publish', $comment) }}" title="@lang('common.publish')">
@@ -83,6 +86,7 @@
                                     </a>
                                 </span>
                             </span>
+                        @endif
                             <span class="d-md-table-cell fa-btn">
                                 <span class="fa-stack fa-2x">
                                     <a href="{{ route('comment.edit', $comment) }}" title="@lang('common.edit')">
