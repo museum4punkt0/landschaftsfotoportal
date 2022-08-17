@@ -108,6 +108,9 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('user.index') }}">{{ __('users.header') }}</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('comment.all') }}">{{ __('comments.header') }}</a>
+                            </li>
                         @endcan
                     @endauth
                             <li class="nav-item dropdown">

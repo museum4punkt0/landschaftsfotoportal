@@ -92,6 +92,23 @@ class CommentController extends Controller
     }
 
     /**
+     * Display a listing of all comments.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function list_all()
+    {
+        $this->authorize('vieAny', Comment::class);
+        
+        // Load module containing column's configuration and naming
+        $image_module = ModuleInstance::getByName('gallery');
+
+        $comments = Comment::with('item')->latest('updated_at')->paginate(10);
+        
+        return view('admin.comment.list_all', compact('comments', 'image_module'));
+    }
+
+    /**
      * Display a listing of non-public comments for publishing.
      *
      * @return \Illuminate\Http\Response
