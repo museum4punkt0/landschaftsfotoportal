@@ -2,6 +2,8 @@
 
 @section('content')
 
+@include('includes.modal_confirm_delete')
+
 <div class="container">
     @include('includes.alert_session_div')
 
@@ -11,15 +13,15 @@
             <div class="card-body">
                 @lang('items.list'): <a href="{{route('item.show', $item->item_id)}}">{{ $item->title }}</a>
                 
-                <div class="table-responsive">
-                <table class="table mt-4">
+                <table class="table table-responsive mt-4">
                 <thead>
                     <tr>
                         <th colspan="1">@lang('common.id')</th>
                         <th colspan="1">@lang('comments.message')</th>
                         <th colspan="1">@lang('common.published')</th>
+                        <th colspan="1">@lang('common.created')</th>
                         <th colspan="1">@lang('common.updated')</th>
-                        <th colspan="2">@lang('common.actions')</th>
+                        <th colspan="1">@lang('common.actions')</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -45,27 +47,40 @@
                             @endswitch
                         </td>
                         <td>
+                            {{$comment->creator->name}} (@lang('users.group_'. $comment->editor->group->name)),<br/>
+                            {{$comment->created_at}}
+                        </td>
+                        <td>
                             {{$comment->editor->name}} (@lang('users.group_'. $comment->editor->group->name)),<br/>
                             {{$comment->updated_at}}
                         </td>
                         <td>
-                            <form action="{{route('comment.edit', $comment)}}" method="GET">
-                                {{ csrf_field() }}
-                                <button class="btn btn-primary" type="submit">@lang('common.edit')</button>
-                            </form>
-                        </td>
-                        <td>
-                            <form action="{{route('comment.destroy', $comment)}}" method="POST">
-                                {{ csrf_field() }}
-                                @method('DELETE')
-                                <button class="btn btn-danger" type="submit">@lang('common.delete')</button>
-                            </form>
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
+                                    <a href="{{ route('comment.edit', $comment) }}" title="@lang('common.edit')">
+                                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                        <i class="fas {{ Config::get('ui.icon_edit') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </span>
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
+                                    <a href="#" data-toggle="modal" data-target="#confirmDeleteModal"
+                                        data-href="{{ route('comment.destroy', $comment) }}"
+                                        data-message="@lang('comments.confirm_delete')"
+                                        data-title="@lang('comments.delete')"
+                                        title="@lang('common.delete')"
+                                    >
+                                        <i class="fas fa-circle fa-stack-2x text-danger"></i>
+                                        <i class="fas {{ Config::get('ui.icon_delete') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </span>
                         </td>
                     </tr>
                 @endforeach
                 </tbody>
                 </table>
-                </div>
             </div>
         @else
             <div class="card-body">
