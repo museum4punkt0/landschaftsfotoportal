@@ -17,7 +17,8 @@
                         <th>@lang('import.nextrows')</th>
                         <th>@lang('columns.header')</th>
                     </tr>
-                    
+
+                    <!-- For each column in CSV -->
                     @foreach($csv_data[0] as $csv_header)
                         <tr>
                             <td>
@@ -31,7 +32,14 @@
                                 @endforeach
                             </td>
                             <td>
-                                <select name="fields[{{ $loop->index }}]" @if ($loop->first) autofocus @endif >
+                                <!-- Select the column into which to import -->
+                                <div class="form-group">
+                                <select name="fields[{{ $loop->index }}]"
+                                    class="form-control form-control-sm fields-select"
+                                    data-field-id="{{ $loop->index }}"
+                                    size=1
+                                    @if($loop->first) autofocus @endif
+                                >
                                     <option value="0">@lang('common.ignore')</option>
                                     <option value="-1"
                                         @if(old('fields.'.$loop->index) == -1) selected @endif>
@@ -44,6 +52,10 @@
                                     <option value="-3"
                                         @if(old('fields.'.$loop->index) == -3) selected @endif>
                                         * @lang('common.relation'): @lang('import.taxon_name')
+                                    </option>
+                                    <option value="-4"
+                                        @if(old('fields.'.$loop->index) == -4) selected @endif>
+                                        * @lang('common.relation'): @lang('import.related_item')
                                     </option>
                                     @foreach($colmaps->unique('column_fk') as $colmap)
                                         {{-- Exclude columns with data type 'taxon' --}}
@@ -61,6 +73,35 @@
                                         @endunless
                                     @endforeach
                                 </select>
+                                </div>
+
+                                <!-- Select the item type of related item (record) -->
+                                <div id="relationFormGroup-{{ $loop->index }}"
+                                    class="form-group collapse @if(old('fields.'.$loop->index) == -4) show @endif"
+                                >
+                                <label for="relationSelect-{{ $loop->index }}">@lang('items.item_type')</label>
+                                <select
+                                    id="relationSelect-{{ $loop->index }}"
+                                    name="relations[{{ $loop->index }}]"
+                                    class="form-control form-control-sm"
+                                    size=1
+                                >
+                                @foreach($item_types as $type)
+                                    <option value="{{$type->element_id}}"
+                                        @if(old('relations.'.$loop->parent->index, Arr::get($relation_attr, $loop->parent->index, 0)) == $type->element_id)
+                                            selected
+                                        @endif
+                                        
+                                        @if(old('parent_item_type') == $type->element_id) selected @endif>
+                                        @foreach($type->values as $v)
+                                            @if($v->attribute->name == 'name_'.app()->getLocale())
+                                                {{$v->value}}
+                                            @endif
+                                        @endforeach
+                                    </option>
+                                @endforeach
+                                </select>
+                                </div>
                             </td>
                         </tr>
                     @endforeach
@@ -170,7 +211,7 @@
                     </div>
                 </div>
                 
-                <fieldset id="geocoderFieldset" class="collapse @if(old('geocoder'))show @endif">
+                <fieldset id="geocoderFieldset" class="collapse @if(old('geocoder_enable'))show @endif">
                     <legend>@lang('import.geocoder_use')</legend>
                     
                     <div class="form-group">
@@ -309,6 +350,17 @@
         }
         else {
             $('#geocoderFieldset').collapse('hide');
+        }
+    });
+
+    // Triggered when select for columns changed
+    $('.fields-select').change(function(event) {
+        let fieldId = $(this).data('field-id');
+        if ($(this).val() == -4) {
+            $('#relationFormGroup-'+fieldId).collapse('show');
+        }
+        else {
+            $('#relationFormGroup-'+fieldId).collapse('hide');
         }
     });
 </script>
