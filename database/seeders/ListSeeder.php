@@ -16,6 +16,12 @@ class ListSeeder extends Seeder
      */
     public function run()
     {
+        $this->addInitialLists();
+        $this->addDataTypeRelation();
+    }
+
+    public function addInitialLists()
+    {
         // Create default lists
         $data_type_list = Selectlist::create([
             'name' => '_data_type_',
@@ -349,6 +355,32 @@ class ListSeeder extends Seeder
         $element->attributes()->attach(
             Attribute::where('name', 'name_en')->value('attribute_id'),
             ['value' => 'target for redirection']
+        );
+    }
+
+    public function addDataTypeRelation()
+    {
+        $data_type_list = Selectlist::where([
+            'name' => '_data_type_',
+            'internal' => true,
+        ])->first();
+        // Data type: relation
+        $element = Element::create([
+            'list_fk' => $data_type_list->list_id,
+            'parent_fk' => null,
+            'value_summary' => '',
+        ]);
+        $element->attributes()->attach(
+            Attribute::where('name', 'code')->value('attribute_id'),
+            ['value' => '_relation_']
+        );
+        $element->attributes()->attach(
+            Attribute::where('name', 'name_de')->value('attribute_id'),
+            ['value' => 'Beziehung zu anderem Datensatz']
+        );
+        $element->attributes()->attach(
+            Attribute::where('name', 'name_en')->value('attribute_id'),
+            ['value' => 'relation to other record']
         );
     }
 }
