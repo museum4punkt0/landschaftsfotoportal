@@ -10,6 +10,7 @@ use App\Item;
 use App\Location;
 use App\Selectlist;
 use App\Http\Controllers\Controller;
+use App\Utils\Localization;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
@@ -97,7 +98,6 @@ class ImportItemsController extends Controller
 
         // Get selected attributes from cookie
         $selected_attr = json_decode($request->cookie('import_'. $request->item_type), true);
-        $relation_attr = json_decode($request->cookie('import_relation_'. $request->item_type), true);
         $geocoder_attr = json_decode($request->cookie('import_geocoder_'. $request->item_type), true);
         
         // Get CSV file path from session and
@@ -126,11 +126,17 @@ class ImportItemsController extends Controller
         
         $items = Item::tree()->depthFirst()->get();
         
+        // Get current UI language
+        $lang = app()->getLocale();
+        $item_types_l10n = Localization::getItemTypes($lang);
+        #dd($item_types);
+
+        // TODO: use localized version above
         // Get list of all item types for dropdown menu
         $it_list = Selectlist::where('name', '_item_type_')->first();
         $item_types = Element::where('list_fk', $it_list->list_id)->get();
         
-        return view('admin.import.itemscontent', compact('file_name', 'csv_data', 'colmaps', 'items', 'item_types', 'selected_attr', 'relation_attr', 'geocoder_attr'));
+        return view('admin.import.itemscontent', compact('file_name', 'csv_data', 'colmaps', 'items', 'item_types', 'item_types_l10n', 'selected_attr', 'geocoder_attr'));
     }
     
     /**
@@ -172,7 +178,6 @@ class ImportItemsController extends Controller
                 },
                 'array',
             ],
-            'relations' => 'array',
         ]);
         
         if ($validator->fails()) {
@@ -202,11 +207,6 @@ class ImportItemsController extends Controller
         $cookie_content = json_encode($selected_attr, JSON_FORCE_OBJECT);
         Cookie::queue(Cookie::forever('import_'. $request->input('item_type'), $cookie_content));
         
-        $relation_attr = $request->input('relations.*');
-        // Save to cookie for future usage after session has expired
-        $cookie_content = json_encode($relation_attr, JSON_FORCE_OBJECT);
-        Cookie::queue(Cookie::forever('import_relation_'. $request->input('item_type'), $cookie_content));
-
         $geocoder_attr = $request->input('geocoder');
         // Save to cookie for future usage after session has expired
         $cookie_content = json_encode($geocoder_attr, JSON_FORCE_OBJECT);
@@ -216,7 +216,6 @@ class ImportItemsController extends Controller
         
         // Save selected attributes to session
         $request->session()->put('selected_attr', $selected_attr);
-        $request->session()->put('relation_attr', $relation_attr);
         $request->session()->put('geocoder_attr', $geocoder_attr);
         
         // Save total number of items in CSV to session
@@ -226,7 +225,7 @@ class ImportItemsController extends Controller
         $request->session()->forget(['header', 'geocoder_enable', 'geocoder_interactive']);
         
         // Save all request input data to session
-        session($request->except(['_token', 'fields', 'geocoder', 'relations']));
+        session($request->except(['_token', 'fields', 'geocoder']));
         
         // Get original CSV file name from session
         $file_name = $request->session()->get('file_name');

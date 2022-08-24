@@ -34,7 +34,10 @@
                             <td>
                                 <!-- Select the column into which to import -->
                                 <div class="form-group">
-                                <select name="fields[{{ $loop->index }}]"
+                                <select
+                                    id="fieldsSelect-{{ $loop->index }}"
+                                    name="fields[{{ $loop->index }}]"
+                                    aria-describedby="fieldsSelectHelpBlock-{{ $loop->index }}"
                                     class="form-control form-control-sm fields-select"
                                     data-field-id="{{ $loop->index }}"
                                     size=1
@@ -53,10 +56,6 @@
                                         @if(old('fields.'.$loop->index) == -3) selected @endif>
                                         * @lang('common.relation'): @lang('import.taxon_name')
                                     </option>
-                                    <option value="-4"
-                                        @if(old('fields.'.$loop->index) == -4) selected @endif>
-                                        * @lang('common.relation'): @lang('import.related_item')
-                                    </option>
                                     @foreach($colmaps->unique('column_fk') as $colmap)
                                         {{-- Exclude columns with data type 'taxon' --}}
                                         @unless($colmap->column->data_type->attributes
@@ -64,6 +63,13 @@
                                             <option value="{{ $colmap->column_fk }}"
                                                 @if(old('fields.'.$loop->parent->index, Arr::get($selected_attr, $loop->parent->index, 0)) == $colmap->column_fk)
                                                     selected
+                                                @endif
+                                                data-option-help="{{ $colmap->column->data_type->attributes
+                                                    ->firstWhere('name', 'name_'.app()->getLocale())
+                                                    ->pivot->value }}"
+                                                @if($colmap->column->data_type->attributes
+                                                    ->firstWhere('name', 'code')->pivot->value == '_relation_')
+                                                    data-option-item-type="{{ $item_types_l10n->firstwhere('element_fk', $colmap->getConfigValue('item_type'))->value }}"
                                                 @endif
                                             >
                                                 {{ $colmap->column->translation->attributes
@@ -73,34 +79,8 @@
                                         @endunless
                                     @endforeach
                                 </select>
-                                </div>
-
-                                <!-- Select the item type of related item (record) -->
-                                <div id="relationFormGroup-{{ $loop->index }}"
-                                    class="form-group collapse @if(old('fields.'.$loop->index) == -4) show @endif"
-                                >
-                                <label for="relationSelect-{{ $loop->index }}">@lang('items.item_type')</label>
-                                <select
-                                    id="relationSelect-{{ $loop->index }}"
-                                    name="relations[{{ $loop->index }}]"
-                                    class="form-control form-control-sm"
-                                    size=1
-                                >
-                                @foreach($item_types as $type)
-                                    <option value="{{$type->element_id}}"
-                                        @if(old('relations.'.$loop->parent->index, Arr::get($relation_attr, $loop->parent->index, 0)) == $type->element_id)
-                                            selected
-                                        @endif
-                                        
-                                        @if(old('parent_item_type') == $type->element_id) selected @endif>
-                                        @foreach($type->values as $v)
-                                            @if($v->attribute->name == 'name_'.app()->getLocale())
-                                                {{$v->value}}
-                                            @endif
-                                        @endforeach
-                                    </option>
-                                @endforeach
-                                </select>
+                                <small id="fieldsSelectHelpBlock-{{ $loop->index }}" class="form-text text-muted">
+                                </small>
                                 </div>
                             </td>
                         </tr>
@@ -356,12 +336,13 @@
     // Triggered when select for columns changed
     $('.fields-select').change(function(event) {
         let fieldId = $(this).data('field-id');
-        if ($(this).val() == -4) {
-            $('#relationFormGroup-'+fieldId).collapse('show');
+        let helpText = $('#fieldsSelect-'+fieldId+' option:selected').data('option-help') || '';
+        let itemType = $('#fieldsSelect-'+fieldId+' option:selected').data('option-item-type') || '';
+        // Add localized name of item type if selected column has '_relation_' type
+        if (itemType) {
+            helpText += ': ' + itemType;
         }
-        else {
-            $('#relationFormGroup-'+fieldId).collapse('hide');
-        }
+        $('#fieldsSelectHelpBlock-'+fieldId).text(helpText);
     });
 </script>
 

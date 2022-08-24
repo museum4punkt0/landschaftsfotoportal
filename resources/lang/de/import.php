@@ -28,7 +28,6 @@ return [
     'parent_details' => 'Elternelement mittels Detail',
     'parent_item_type' => 'Datensatztyp des Elternelements',
     'taxon_name' => 'Taxon mittels Vollname',
-    'related_item' => 'anderer Datensatz mittels Detail',
     'attribute_hint' => 'Wählen Sie für jede Spalte der CSV-Datei aus, welchem Anzeigefeld ihr Inhalt zugeordnet werden soll. Ignorierte Spalten werden nicht importiert.',
     'fullname_hint' => 'Wenn "Vollname" nicht ausgewählt wird oder leer ist, wird dieser aus den anderen Namensbestandteilen verkettet.',
     'parent_hint' => 'Wählen Sie optional einen gemeinsamen übergeordneten Menü-Eintrag für alle zu importierenden Datensätze. Falls für eine Spalte der CSV-Datei eine "Beziehung: Elternelement" ausgewählt wurde, so hat jenes Vorrang. Dies ist unabhängig vom übergeordneten Taxon.',
