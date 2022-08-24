@@ -142,6 +142,52 @@ class AjaxImportController extends Controller
                     ];
                     $data_type = Column::find($selected_attr[$colnr])->getDataType();
                     switch ($data_type) {
+                        case '_relation_':
+                            // If CSV cell has content, otherwise ignore
+                            if ($cell) {
+                                // Get item type of related item
+                                $cm = Column::find($selected_attr[$colnr])->column_mapping->first();
+                                if (!$cm) {
+                                    // This should not happen because columns w/o mapping cannot be
+                                    // selected in dropdowns of import preview form
+                                    Log::channel('import')->error(
+                                        __('columns.no_colmap'), [
+                                            'column' => $cell,
+                                            'item' => $item->item_id,
+                                            'line' => $number,
+                                        ]
+                                    );
+                                }
+                                $it = $cm->getConfigValue('item_type');
+                                $related_item = Item::whereHas('details', function (Builder $query) use ($cell, $it) {
+                                    $query->where('value_string', $cell);
+                                })->where('item_type_fk', $it)->first();
+                                // Save foreign key to related item
+                                if (!empty($related_item)) {
+                                    $detail_data['element_fk'] = $related_item->item_id;
+                                    Log::channel('import')->debug(
+                                        __('import.related_item_found', [
+                                            'id' => $related_item->item_id,
+                                            'detail' => $cell
+                                        ]), [
+                                            'item' => $item->item_id,
+                                            'line' => $number,
+                                        ]
+                                    );
+                                }
+                                // No matching related item found
+                                else {
+                                    Log::channel('import')->warning(
+                                        __('import.related_item_not_found', [
+                                            'detail' => $cell
+                                        ]), [
+                                            'item' => $item->item_id,
+                                            'line' => $number,
+                                        ]
+                                    );
+                                }
+                            }
+                            break;
                         case '_list_':
                             // Get element's ID for given value, independent of language
                             $attr = $selected_attr[$colnr];

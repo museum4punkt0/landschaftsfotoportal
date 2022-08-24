@@ -63,6 +63,8 @@ return [
     'taxon_not_found' => 'Der Datensatz für ":full_name" konnte nicht importiert werden, da das Taxon nicht existiert!',
     'parent_taxon_not_found' => 'Dem Datensatz konnte kein individueller Elterndatensatz zugewiesen werden, da keiner mit dem Taxon ":full_name" existiert!',
     'parent_detail_not_found' => 'Dem Datensatz konnte kein individueller Elterndatensatz zugewiesen werden, da keiner mit dem Detail ":detail" existiert!',
+    'related_item_not_found' => 'Dem Datensatz konnte kein verknüpfter Datensatz zugewiesen werden, da keiner mit dem Detail ":detail" existiert!',
+    'related_item_found' => 'Verknüpfung zu Datensatz ID :id mit Detail ":detail" hergestellt.',
     'done' => 'Import wurde abgeschlossen.',
 
 ];
