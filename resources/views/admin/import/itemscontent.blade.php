@@ -69,7 +69,7 @@
                                                     ->pivot->value }}"
                                                 @if($colmap->column->data_type->attributes
                                                     ->firstWhere('name', 'code')->pivot->value == '_relation_')
-                                                    data-option-item-type="{{ $item_types_l10n->firstwhere('element_fk', $colmap->getConfigValue('item_type'))->value }}"
+                                                    data-option-item-type="{{ $item_types->firstwhere('element_fk', $colmap->getConfigValue('item_type'))->value }}"
                                                 @endif
                                             >
                                                 {{ $colmap->column->translation->attributes
@@ -163,13 +163,9 @@
                         aria-describedby="parentItemTypeSelectHelpBlock" class="form-control" size=1
                     >
                         @foreach($item_types as $type)
-                            <option value="{{$type->element_id}}"
-                                @if(old('parent_item_type') == $type->element_id) selected @endif>
-                                @foreach($type->values as $v)
-                                    @if($v->attribute->name == 'name_'.app()->getLocale())
-                                        {{$v->value}}
-                                    @endif
-                                @endforeach
+                            <option value="{{$type->element_fk}}"
+                                @if(old('parent_item_type') == $type->element_fk) selected @endif>
+                                {{$type->value}}
                             </option>
                         @endforeach
                     </select>

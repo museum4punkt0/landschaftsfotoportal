@@ -41,8 +41,9 @@ class ImportItemsController extends Controller
     {
         $this->authorize('import-items');
 
-        $it_list = Selectlist::where('name', '_item_type_')->first();
-        $item_types = Element::where('list_fk', $it_list->list_id)->get();
+        // Get current UI language
+        $lang = app()->getLocale();
+        $item_types = Localization::getItemTypes($lang);
         
         return view('admin.import.itemsupload', compact('item_types'));
     }
@@ -128,15 +129,9 @@ class ImportItemsController extends Controller
         
         // Get current UI language
         $lang = app()->getLocale();
-        $item_types_l10n = Localization::getItemTypes($lang);
-        #dd($item_types);
-
-        // TODO: use localized version above
-        // Get list of all item types for dropdown menu
-        $it_list = Selectlist::where('name', '_item_type_')->first();
-        $item_types = Element::where('list_fk', $it_list->list_id)->get();
+        $item_types = Localization::getItemTypes($lang);
         
-        return view('admin.import.itemscontent', compact('file_name', 'csv_data', 'colmaps', 'items', 'item_types', 'item_types_l10n', 'selected_attr', 'geocoder_attr'));
+        return view('admin.import.itemscontent', compact('file_name', 'csv_data', 'colmaps', 'items', 'item_types', 'selected_attr', 'geocoder_attr'));
     }
     
     /**
