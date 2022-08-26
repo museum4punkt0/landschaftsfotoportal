@@ -96,6 +96,16 @@
         </div>
     @endif
 
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">@lang('items.item_type')</h5>
+        </div>
+        <div class="card card-body">
+            <a href="{{ route('element.show', $item->item_type_fk) }}">
+                {{ optional($item_types->firstWhere('element_fk', $item->item_type_fk))->value }}
+            </a>
+        </div>
+    </div>
     @if($item->parent_fk)
         <div class="card">
             <div class="card-header">

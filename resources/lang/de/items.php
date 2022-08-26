@@ -24,6 +24,7 @@ return [
     'deleted' => 'Datensatz wurde gelöscht.',
     
     'item_type' => 'Datensatztyp',
+    'related_item' => 'Verknüpfter Datensatz',
     'no_title_column' => 'Kein Anzeigefeld als Name definiert.',
     'no_iframe' => 'Ihr Browser kann leider keine eingebetteten Frames anzeigen.',
     'no_position_for_map' => 'Es liegen keine genauen Ortsangaben für die Kartendarstellung vor.',
