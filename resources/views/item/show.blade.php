@@ -213,7 +213,14 @@
             @case('_url_')
                 @include('includes.column_title')
                 <div class="col column-content">
-                    {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string }}
+                @if(optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string)
+                    <a target="_blank" href="{{ 
+                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}">
+                        <i class="fas {{ Config::get('ui.icon_external_link', 'fa-external-link-alt') }}"
+                            title="@lang('common.external_link')"></i>
+                        {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}
+                    </a>
+                @endif
                 </div>
                 @break
             

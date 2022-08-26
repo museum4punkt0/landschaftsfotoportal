@@ -84,6 +84,7 @@ return [
     'info' => 'Info',
     'meta_data' => 'Metadaten',
     'permalink' => 'Permalink',
+    'external_link' => 'Externer Link',
     'created' => 'erstellt',
     'updated' => 'bearbeitet',
     'published' => 'veröffentlicht',

@@ -39,6 +39,7 @@ return [
     'icon_upload' => 'fa-upload',
     'icon_download' => 'fa-download',
     'icon_permalink' => 'fa-link',
+    'icon_external_link' => 'fa-external-link-alt',
     'icon_published' => 'fa-eye',
     'icon_unpublished' => 'fa-eye-slash',
     'icon_description' => 'fa-info',
