@@ -159,6 +159,28 @@
                     @endif
                 </div>
                 @break
+
+            {{-- Data_type of form field is relation --}}
+            @case('_relation_')
+                @include('includes.column_cardheader')
+
+                <div class="card card-body">
+                @if($details->firstWhere('column_fk', $cm->column->column_id))
+                    @if(optional($details->firstWhere('column_fk', $cm->column->column_id))->related_item_fk)
+                        <a href="{{ route('item.show',
+                            optional($details->firstWhere('column_fk', $cm->column->column_id))->related_item) }}">
+                            <i class="fas {{ Config::get('ui.icon_permalink', 'fa-link') }}"
+                                title="@lang('items.related_item')"></i>
+                            {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->related_item->title }}
+                        </a>
+                    @endif
+                @else
+                    <span class="text-danger">
+                        @lang('items.no_detail_for_column', ['column' => $cm->column->column_id])
+                    </span>
+                @endif
+                </div>
+                @break
             
             {{-- Data_type of form field is list --}}
             @case('_list_')

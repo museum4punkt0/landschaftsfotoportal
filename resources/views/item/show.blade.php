@@ -120,6 +120,33 @@
                     @endif
                 </div>
                 @break
+
+            {{-- Data_type of form field is relation --}}
+            @case('_relation_')
+                @include('includes.column_title')
+                <div class="col column-content">
+                @if($details->firstWhere('column_fk', $cm->column->column_id))
+                    @if(optional($details->firstWhere('column_fk', $cm->column->column_id))->related_item_fk)
+                        @if($cm->getConfigValue('show_link'))
+                            <a href="{{ route('item.show.public',
+                                optional($details->firstWhere('column_fk', $cm->column->column_id))->related_item) }}">
+                                <i class="fas {{ Config::get('ui.icon_permalink', 'fa-link') }}"
+                                    title="@lang('items.related_item')"></i>
+                                {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->related_item->title }}
+                            </a>
+                        @else
+                            {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->related_item->title }}
+                        @endif
+                    @endif
+                @else
+                    @can('show-admin')
+                        <span class="text-danger">
+                            @lang('items.no_detail_for_column', ['column' => $cm->column->column_id])
+                        </span>
+                    @endcan
+                @endif
+                </div>
+                @break
             
             {{-- Data_type of form field is list --}}
             @case('_list_')
