@@ -164,7 +164,7 @@ class AjaxImportController extends Controller
                                 })->where('item_type_fk', $it)->first();
                                 // Save foreign key to related item
                                 if (!empty($related_item)) {
-                                    $detail_data['element_fk'] = $related_item->item_id;
+                                    $detail_data['related_item_fk'] = $related_item->item_id;
                                     Log::channel('import')->debug(
                                         __('import.related_item_found', [
                                             'id' => $related_item->item_id,

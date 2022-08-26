@@ -211,6 +211,9 @@ class ItemController extends Controller
                 'column_fk' => $column_id,
             ];
             switch ($data_type) {
+                case '_relation_':
+                    $detail_data['related_item_fk'] = $value == '' ? null : intval($value);
+                    break;
                 case '_list_':
                     $detail_data['element_fk'] = $value == '' ? null : intval($value);
                     break;
@@ -531,6 +534,9 @@ class ItemController extends Controller
             $data_type = Column::find($column_id)->getDataType();
 
             switch ($data_type) {
+                case '_relation_':
+                    $detail->related_item_fk = $value == '' ? null : intval($value);
+                    break;
                 case '_list_':
                     $detail->element_fk = $value == '' ? null : intval($value);
                     break;
@@ -688,6 +694,9 @@ class ItemController extends Controller
 
         $results = Item::select('item_id', 'title', 'item_type_fk')
             ->where('title', 'ILIKE', "%{$request->search}%")
+            ->when($request->item_type, function ($query, $item_type) {
+                return $query->where('item_type_fk', $item_type);
+            })
             ->orderBy('title')
             ->limit(config('ui.autocomplete_results', 5))
             ->get();

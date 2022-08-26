@@ -123,6 +123,14 @@ class Item extends Model
     {
         return $this->hasMany('App\Detail', 'item_fk', 'item_id');
     }
+
+    /**
+     * Get the related details of the item.
+     */
+    public function related_details()
+    {
+        return $this->hasMany('App\Detail', 'related_item_fk', 'item_id');
+    }
     
     /**
      * Get the comments of the item.

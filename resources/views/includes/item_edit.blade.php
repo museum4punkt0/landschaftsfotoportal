@@ -138,6 +138,28 @@
         
         @switch($cm->column->data_type_name)
             
+            {{-- Data_type of form field is relation --}}
+            @case('_relation_')
+                {{-- Input with autocomplete for related item --}}
+                @include('includes.form_item_autocomplete', [
+                    'search_url' => route('item.autocomplete', ['item_type' => $cm->getConfigValue('item_type')]),
+                    'div_class' => 'form-group',
+                    'column' => $cm->column->column_id,
+                    'name' => 'fields',
+                    'input_placeholder' => '',
+                    'input_help' =>  __('items.autocomplete_help'),
+                    'null_label' => __('common.none'),
+                    'item_title' => old('fields_name.' . $cm->column->column_id,
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->related_item->title ?? __('common.none')),
+                    'item_id' => old('fields.' . $cm->column->column_id,
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->related_item_fk),
+                ])
+
+                @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', [
+                    'data_type' => 'relation', 'column_id' => $cm->column->column_id
+                ])
+                @break
+
             {{-- Data_type of form field is list --}}
             @case('_list_')
                 {{-- dd($lists->firstWhere('list_id', $cm->column->list_fk)->elements) --}}
