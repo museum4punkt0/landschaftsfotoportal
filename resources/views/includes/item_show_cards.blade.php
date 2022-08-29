@@ -106,36 +106,42 @@
             </a>
         </div>
     </div>
-    @if($item->parent_fk)
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">@lang('lists.parent')</h5>
-            </div>
-            <div class="card card-body">
-                <a href="{{ route('item.show', $item->parent_fk) }}">
-                    <i class="fas {{ Config::get('ui.icon_permalink', 'fa-link') }}"
-                        title="@lang('items.related_item')"></i>
-                    {{ $item->parent->title }}
-                </a>
-            </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">@lang('items.menu_hierarchy')</h5>
         </div>
-    @endif
-    @if(count($item->children))
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">@lang('lists.children')</h5>
-            </div>
-            <div class="card card-body">
-            @foreach($item->children as $child)
-                <a href="{{ route('item.show', $child->item_id) }}">
-                    <i class="fas {{ Config::get('ui.icon_permalink', 'fa-link') }}"
-                        title="@lang('items.related_item')"></i>
-                    {{ $child->title }}
-                </a>
-            @endforeach
-            </div>
+        <div class="card card-body">
+            <table class="table table-sm table-borderless">
+                <tr>
+                    <td>@lang('lists.parent'):</td>
+                    <td>
+                    @if($item->parent_fk)
+                        <a href="{{ route('item.show', $item->parent_fk) }}">
+                            <i class="fas {{ Config::get('ui.icon_permalink', 'fa-link') }}"
+                                title="@lang('items.related_item')"></i>
+                            {{ $item->parent->title }}
+                        </a>
+                    @endif
+                    </td>
+                </tr>
+                <tr>
+                    <td>@lang('lists.children'):</td>
+                    <td>
+                    @foreach($item->children as $child)
+                        <a href="{{ route('item.show', $child->item_id) }}">
+                            <i class="fas {{ Config::get('ui.icon_permalink', 'fa-link') }}"
+                                title="@lang('items.related_item')"></i>
+                            {{ $child->title }}
+                        </a>
+                        <br>
+                    @endforeach
+                    </td>
+                </tr>
+            </table>
         </div>
-    @endif
+    </div>
+
     @if($item->taxon)
         <div class="card">
             <div class="card-header">
