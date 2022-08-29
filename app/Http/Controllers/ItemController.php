@@ -303,9 +303,13 @@ class ItemController extends Controller
         Debugbar::startMeasure('get-colmaps');
         // Only columns associated with this item's taxon or its descendants
         $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk)
+                ->with('column')
                 ->where('public', 1)
                 ->get();
         Debugbar::stopMeasure('get-colmaps');
+
+        // Check for related items: modify colmap according to config and add related details
+        $colmap = $this->handleRelations($colmap, $details);
         
         Debugbar::startMeasure('list-elements');
         // Load all list elements of lists used by this item's columns
@@ -887,5 +891,60 @@ class ItemController extends Controller
                 }
             }
         }
+    }
+
+    /**
+     * Check columns for related items: modify colmap according to config and add related details.
+     *
+     * @param  Illuminate\Database\Eloquent\Collection  $colmap
+     * @param  integer  &$details
+     * @return Illuminate\Database\Eloquent\Collection
+     */
+    private function handleRelations($colmap, &$details) {
+        $modified_colmap = $colmap;
+        foreach ($colmap as $key => $cm) {
+            // Check for columns of data type "relation"
+            if ($cm->column->getDataType() == '_relation_') {
+                Debugbar::debug('relation: colmap ID' . $cm->column_fk);
+                if ($cm->getConfigValue('embed')) {
+                    // Get related item
+                    $related_item = $details->firstWhere('column_fk', $cm->column_fk)->related_item;
+
+                    // Embed columns of related item depending on item type
+                    $modified_colmap = $this->embedRelatedColumns($modified_colmap, $key, $related_item);
+
+                    // Add details of related item
+                    $related_details = Detail::where('item_fk', $related_item->item_id)->get();
+                    $details = $details->concat($related_details);
+                }
+            }
+        }
+        return $modified_colmap;
+    }
+
+    /**
+     * Embed column mappings of related item into current column mappings.
+     *
+     * @param  Illuminate\Database\Eloquent\Collection  $colmap
+     * @param  integer  $key_to_replace
+     * @param  \App\Item  $item
+     * @return Illuminate\Database\Eloquent\Collection
+     */
+    private function embedRelatedColumns($colmap, $key_to_replace, Item $related_item) {
+        // Get public columns of related item
+        $embedded_cm = ColumnMapping::forItem($related_item->item_type_fk, $related_item->taxon_fk)
+            ->where('public', 1)
+            ->get();
+        // Adjust column groups of embedded columns to the one used by "relation" column
+        $old_cg = $colmap[$key_to_replace]->column_group_fk;
+        $embedded_cm->transform(function ($item, $key) use ($old_cg) {
+            $item->column_group_fk = $old_cg;
+            return $item;
+        });
+        
+        // Embed columns of related item into colmap of original item
+        $colmap->splice($key_to_replace, 1, $embedded_cm);
+
+        return $colmap;
     }
 }
