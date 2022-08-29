@@ -72,7 +72,7 @@ class AjaxImportController extends Controller
             $line = $data[$number - 1];
             $taxon_fk = null;
             // Check if a taxon is associated to item to be imported
-            if (array_search('-3', $selected_attr)) {
+            if (array_search('-3', $selected_attr) !== false) {
                 // Try to match taxon for given full scientific name
                 $taxon = Taxon::where('full_name', trim($line[array_search('-3', $selected_attr)]))->first();
                 if (empty($taxon)) {
@@ -91,6 +91,12 @@ class AjaxImportController extends Controller
                     continue;
                 } else {
                     $taxon_fk = $taxon->taxon_id;
+                    Log::channel('import')->info(__('import.taxon_match', [
+                        'full_name' => $line[array_search('-3', $selected_attr)]
+                        ]), [
+                        'taxon' => $taxon_fk,
+                        'line' => $number,
+                    ]);
                     // Check for already existing items (depending on taxon)
                     $existing_item = Item::where([
                         ['taxon_fk', $taxon_fk],

@@ -58,6 +58,7 @@ return [
     'select_location' => 'Wählen Sie den Eintrag, welcher am besten den Originaldaten entspricht.',
     'item_imported' => 'Datensatz wurde mit ID :id importiert.',
     'element_mismatch' => 'Auswahlliste ":list" enthält kein Element namens ":element"!',
+    'taxon_match' => 'Der Datensatz wurde dem Taxon ":full_name" zugewiesen.',
     'taxon_exists' => 'Der Datensatz für ":full_name" wurde nicht importiert, da das Taxon bereits existiert!',
     'taxon_not_found' => 'Der Datensatz für ":full_name" konnte nicht importiert werden, da das Taxon nicht existiert!',
     'parent_taxon_not_found' => 'Dem Datensatz konnte kein individueller Elterndatensatz zugewiesen werden, da keiner mit dem Taxon ":full_name" existiert!',
