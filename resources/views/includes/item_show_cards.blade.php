@@ -112,8 +112,27 @@
                 <h5 class="mb-0">@lang('lists.parent')</h5>
             </div>
             <div class="card card-body">
-                {{ $item->parent->title}}, Item ID 
-                <a href="{{ route('item.show', $item->parent_fk) }}">{{ $item->parent_fk }}</a>
+                <a href="{{ route('item.show', $item->parent_fk) }}">
+                    <i class="fas {{ Config::get('ui.icon_permalink', 'fa-link') }}"
+                        title="@lang('items.related_item')"></i>
+                    {{ $item->parent->title }}
+                </a>
+            </div>
+        </div>
+    @endif
+    @if(count($item->children))
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">@lang('lists.children')</h5>
+            </div>
+            <div class="card card-body">
+            @foreach($item->children as $child)
+                <a href="{{ route('item.show', $child->item_id) }}">
+                    <i class="fas {{ Config::get('ui.icon_permalink', 'fa-link') }}"
+                        title="@lang('items.related_item')"></i>
+                    {{ $child->title }}
+                </a>
+            @endforeach
             </div>
         </div>
     @endif

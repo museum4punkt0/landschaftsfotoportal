@@ -25,5 +25,6 @@ return [
     'internal_warning' => 'Sie bearbeiten interne Systemlisten. Falsche Handhabung führt zu Fehlern in der Anwendung!',
     'rank' => 'Rang',
     'parent' => 'Elternelement',
+    'children' => 'Kindelemente',
     'attribute' => 'Attribut',
 ];
