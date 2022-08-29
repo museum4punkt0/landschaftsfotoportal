@@ -92,9 +92,10 @@ class ItemController extends Controller
     /**
      * Show the form to select the type of the new resource.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function new()
+    public function new(Request $request)
     {
         $this->authorize('create', Item::class);
 

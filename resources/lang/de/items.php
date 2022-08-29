@@ -25,6 +25,7 @@ return [
     
     'item_type' => 'Datensatztyp',
     'related_item' => 'Verknüpfter Datensatz',
+    'new_related_info' => 'Nach dem Speichern des neu angelegten, verknüpften Datensatzes kann dieser Browser-Tab/Fenster geschlossen werden. Anschließend bearbeiten Sie den ursprünglichen Datensatzes weiter ohne Neuladen.',
     'no_title_column' => 'Kein Anzeigefeld als Name definiert.',
     'no_iframe' => 'Ihr Browser kann leider keine eingebetteten Frames anzeigen.',
     'no_position_for_map' => 'Es liegen keine genauen Ortsangaben für die Kartendarstellung vor.',

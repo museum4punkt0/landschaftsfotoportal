@@ -1,17 +1,25 @@
 <div class="{{ $div_class }}">
     @include('includes.column_label')
-    <input
-        type="text"
-        id="fieldsInput-{{ $column }}"
-        name="fields_name[{{ $column }}]"
-        aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
-        class="form-control autocomplete @if($errors->has('fields.' . $cm->column->column_id)) is-invalid @endif"
-        data-column="{{ $cm->column->column_id }}"
-        data-type="relation"
-        placeholder="{{ $input_placeholder }}"
-        value="{{ $item_title }}"
-    />
-    <input type="hidden" id="fieldsHiddenInput-{{ $column }}" name="fields[{{ $column }}]" value="{{ $item_id }}" />
+    <div class="form-row">
+        <div class="col">
+            <input
+                type="text"
+                id="fieldsInput-{{ $column }}"
+                name="fields_name[{{ $column }}]"
+                aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
+                class="form-control autocomplete @if($errors->has('fields.' . $cm->column->column_id)) is-invalid @endif"
+                data-column="{{ $cm->column->column_id }}"
+                data-type="relation"
+                placeholder="{{ $input_placeholder }}"
+                value="{{ $item_title }}"
+            />
+            <input type="hidden" id="fieldsHiddenInput-{{ $column }}" name="fields[{{ $column }}]" value="{{ $item_id }}" />
+        </div>
+        <div class="col-auto">
+            <a href="{{ route('item.new', ['item_type' => $cm->getConfigValue('item_type'), 'msg' => 'new_related']) }}"
+                target="_blank" class="btn btn-primary">@lang('common.new')</a>
+        </div>
+    </div>
     
     @include('includes.form_input_help')
     <span class="text-danger">{{ $errors->first('fields.' . $cm->column->column_id) }}</span>
