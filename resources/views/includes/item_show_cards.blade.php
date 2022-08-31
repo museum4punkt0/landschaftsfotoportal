@@ -145,11 +145,14 @@
     @if($item->taxon)
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">@lang('taxon.parent')</h5>
+                <h5 class="mb-0">@lang('items.related_taxon')</h5>
             </div>
             <div class="card card-body">
-                {{ $item->taxon->parent->taxon_name }}
-                ({{ $item->taxon->parent->rank_abbr }}, Taxon ID {{ $item->taxon->parent_fk }})
+                <a href="{{ route('taxon.show', $item->taxon_fk) }}">
+                    <i class="fas {{ Config::get('ui.icon_permalink', 'fa-link') }}"
+                        title="@lang('items.related_taxon')"></i>
+                    {{ $item->taxon->full_name }} ({{ $item->taxon->rank_abbr }})
+                </a>
             </div>
         </div>
     @endif

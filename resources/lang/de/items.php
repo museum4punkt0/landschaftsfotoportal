@@ -24,6 +24,7 @@ return [
     'deleted' => 'Datensatz wurde gelöscht.',
     
     'item_type' => 'Datensatztyp',
+    'related_taxon' => 'Verknüpftes Taxon',
     'related_item' => 'Verknüpfter Datensatz',
     'new_related_info' => 'Nach dem Speichern des neu angelegten, verknüpften Datensatzes kann dieser Browser-Tab/Fenster geschlossen werden. Anschließend bearbeiten Sie den ursprünglichen Datensatzes weiter ohne Neuladen.',
     'no_title_column' => 'Kein Anzeigefeld als Name definiert.',
