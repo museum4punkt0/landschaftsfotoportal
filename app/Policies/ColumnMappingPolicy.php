@@ -126,4 +126,15 @@ class ColumnMappingPolicy
     {
         return $user->hasAccess(['sort-colmap']);
     }
+
+    /**
+     * Determine whether the user can change the public visibility.
+     *
+     * @param  \App\User  $user
+     * @return mixed
+     */
+    public function publish(User $user)
+    {
+        return $user->hasAccess(['publish-colmap']);
+    }
 }

@@ -405,6 +405,29 @@ class ColumnMappingController extends Controller
     }
 
     /**
+     * Toggle public visibility using AJAX.
+     *
+     * @param  \App\ColumnMapping  $colmap
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function publish(ColumnMapping $colmap, Request $request)
+    {
+        $this->authorize('publish', $colmap);
+
+        $public = $colmap->public;
+        $colmap->public = $public ? 0 : 1;
+        $colmap->save();
+
+        $response = array(
+            "success" => $colmap->public ? __('colmaps.published') : __('colmaps.unpublished'),
+            "public" => $colmap->public,
+        );
+
+        return response()->json($response);
+    }
+
+    /**
      * Get resource for AJAX autocompletion search field.
      *
      * @param  \Illuminate\Http\Request  $request

@@ -3,6 +3,7 @@
 @section('content')
 
 @include('includes.modal_confirm_delete')
+@include('includes.modal_alert')
 
 <div class="container">
     @include('includes.alert_session_div')
@@ -199,6 +200,21 @@
                         <td>
                             <span class="d-md-table-cell fa-btn">
                                 <span class="fa-stack fa-2x">
+                                    <a href="#" class="publicToggleLink"
+                                        data-url="{{ route('colmap.publish', $colmap) }}"
+                                        data-colmap-id="{{$colmap->colmap_id}}"
+                                        title="@lang('common.toggle_public')">
+                                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                        @if($colmap->public)
+                                            <i class="fas {{ Config::get('ui.icon_published') }} fa-stack-1x fa-inverse"></i>
+                                        @else
+                                            <i class="fas {{ Config::get('ui.icon_unpublished') }} fa-stack-1x fa-inverse"></i>
+                                        @endif
+                                    </a>
+                                </span>
+                            </span>
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
                                     <a href="{{ route('colmap.edit', $colmap) }}" title="@lang('common.edit')">
                                         <i class="fas fa-circle fa-stack-2x text-primary"></i>
                                         <i class="fas {{ Config::get('ui.icon_edit') }} fa-stack-1x fa-inverse"></i>
@@ -243,5 +259,43 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    // Triggered when public visibility button is clicked
+    $('.publicToggleLink').click(function(event) {
+        event.preventDefault();
+        let faIcon = $(this).children('i.fa-inverse');
+        
+        $.ajax({
+            type:'GET',
+            url:$(this).data('url'),
+            success:function (data) {
+                // Show alert model with status message
+                $('#alertModalLabel').text('@lang("common.toggle_public")');
+                $('#alertModalContent').html('<div class="alert alert-success">' + data.success + '</div>');
+                $('#alertModal').modal('show');
+                // Change fa-icon for public visibility
+                if (data.public) {
+                    faIcon.removeClass('fa-eye-slash');
+                    faIcon.addClass('fa-eye');
+                }
+                else {
+                    faIcon.removeClass('fa-eye');
+                    faIcon.addClass('fa-eye-slash');
+                }
+                // Close modal dialog
+                window.setTimeout(function () {
+                    $('#alertModal').modal('hide');
+                }, 5000);
+            },
+            error:function (xhr) {
+                // Render the Laravel error message
+                $('#alertModalLabel').text('@lang("common.laravel_error")');
+                $('#alertModalContent').html('<div class="alert alert-danger">' + xhr.responseJSON.message + '</div>');
+                $('#alertModal').modal('show');
+            },
+        });
+    });
+</script>
 
 @endsection

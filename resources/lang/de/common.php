@@ -30,6 +30,7 @@ return [
     'sort' => 'Sortieren',
     'publish' => 'Veröffentlichen',
     'publish_all' => 'Alle veröffentlichen',
+    'toggle_public' => 'Öffentliche Sichtbarkeit umschalten',
     'export' => 'Exportieren',
     'batch' => 'Stapelverarbeitung',
     'choose' => '- bitte auswählen -',

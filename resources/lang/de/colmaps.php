@@ -22,6 +22,9 @@ return [
     'updated' => 'Feld-Zuordnung wurde bearbeitet.',
     'deleted' => 'Feld-Zuordnung wurde gelöscht.',
     
+    'published' => 'Das Anzeigefeld ist nun öffentlich sichtbar.',
+    'unpublished' => 'Das Anzeigefeld ist nun nicht mehr öffentlich sichtbar.',
+
     'config' => 'Konfiguration (JSON-Format)',
     'api_attribute' => 'Attribute-Name bei Ausgabe über die API',
     'item_type' => 'Datensatztyp',
