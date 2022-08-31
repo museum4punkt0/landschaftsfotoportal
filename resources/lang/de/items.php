@@ -18,7 +18,7 @@ return [
     'new' => 'Neuer Datensatz',
     'edit' => 'Datensatz bearbeiten',
     'delete' => 'Datensatz löschen',
-    'confirm_delete' => 'Möchten Sie diese Datensatz wirklich löschen?',
+    'confirm_delete' => 'Möchten Sie den Datensatz “:name” wirklich löschen?',
     'created' => 'Datensatz wurde angelegt.',
     'updated' => 'Datensatz wurde bearbeitet.',
     'deleted' => 'Datensatz wurde gelöscht.',

@@ -2,6 +2,8 @@
 
 @section('content')
 
+@include('includes.modal_confirm_delete')
+
 <div class="container">
     @include('includes.alert_session_div')
 
@@ -19,7 +21,7 @@
                         <th colspan="1">@lang('users.email')</th>
                         <th colspan="1">@lang('users.group')</th>
                         <th colspan="1">@lang('common.created')</th>
-                        <th colspan="2">@lang('common.actions')</th>
+                        <th colspan="1">@lang('common.actions')</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -43,17 +45,27 @@
                             {{$user->created_at}}
                         </td>
                         <td>
-                            <form action="{{route('user.edit', $user)}}" method="GET">
-                                {{ csrf_field() }}
-                                <button class="btn btn-primary" type="submit">@lang('common.edit')</button>
-                            </form>
-                        </td>
-                        <td>
-                            <form action="{{route('user.destroy', $user)}}" method="POST">
-                                {{ csrf_field() }}
-                                @method('DELETE')
-                                <button class="btn btn-danger" type="submit">@lang('common.delete')</button>
-                            </form>
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
+                                    <a href="{{ route('user.edit', $user) }}" title="@lang('common.edit')">
+                                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                        <i class="fas {{ Config::get('ui.icon_edit') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </span>
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
+                                    <a href="#" data-toggle="modal" data-target="#confirmDeleteModal"
+                                        data-href="{{ route('user.destroy', $user) }}"
+                                        data-message="@lang('users.confirm_delete', ['name' => $user->name])"
+                                        data-title="@lang('users.delete')"
+                                        title="@lang('common.delete')"
+                                    >
+                                        <i class="fas fa-circle fa-stack-2x text-danger"></i>
+                                        <i class="fas {{ Config::get('ui.icon_delete') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </span>
                         </td>
                     </tr>
                 @endforeach

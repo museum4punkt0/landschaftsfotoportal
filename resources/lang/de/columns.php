@@ -15,6 +15,8 @@ return [
     'list' => 'Anzeigefeld',
     'new' => 'Neues Anzeigefeld',
     'edit' => 'Anzeigefeld bearbeiten',
+    'delete' => 'Anzeigefeld löschen',
+    'confirm_delete' => 'Möchten Sie das Anzeigefeld “:name” wirklich löschen?',
     'created' => 'Anzeigefeld wurde angelegt.',
     'updated' => 'Anzeigefeld wurde bearbeitet.',
     'deleted' => 'Anzeigefeld wurde gelöscht.',

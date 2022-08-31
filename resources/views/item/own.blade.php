@@ -40,7 +40,7 @@
                                 <span class="fa-stack fa-2x">
                                     <a href="#" data-toggle="modal" data-target="#confirmDeleteModal"
                                         data-href="{{ route('item.destroy.own', $item->item_id) }}"
-                                        data-message="@lang('items.confirm_delete')"
+                                        data-message="@lang('items.confirm_delete', ['name' => $item->title])"
                                         data-title="@lang('items.delete')"
                                         title="@lang('common.delete')"
                                     >

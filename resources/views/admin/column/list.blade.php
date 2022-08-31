@@ -2,6 +2,8 @@
 
 @section('content')
 
+@include('includes.modal_confirm_delete')
+
 <div class="container">
     @include('includes.alert_session_div')
 
@@ -201,17 +203,27 @@
                             @endif
                         </td>
                         <td>
-                            <form action="{{route('column.edit', $column)}}" method="GET">
-                                {{ csrf_field() }}
-                                <button class="btn btn-primary" type="submit">@lang('common.edit')</button>
-                            </form>
-                        </td>
-                        <td>
-                            <form action="{{route('column.destroy', $column)}}" method="POST">
-                                {{ csrf_field() }}
-                                @method('DELETE')
-                                <button class="btn btn-danger" type="submit">@lang('common.delete')</button>
-                            </form>
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
+                                    <a href="{{ route('column.edit', $column) }}" title="@lang('common.edit')">
+                                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                        <i class="fas {{ Config::get('ui.icon_edit') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </span>
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
+                                    <a href="#" data-toggle="modal" data-target="#confirmDeleteModal"
+                                        data-href="{{ route('column.destroy', $column) }}"
+                                        data-message="@lang('columns.confirm_delete', ['name' => $column->description])"
+                                        data-title="@lang('columns.delete')"
+                                        title="@lang('common.delete')"
+                                    >
+                                        <i class="fas fa-circle fa-stack-2x text-danger"></i>
+                                        <i class="fas {{ Config::get('ui.icon_delete') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </span>
                         </td>
                     </tr>
                 @endforeach

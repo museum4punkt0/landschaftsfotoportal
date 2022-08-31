@@ -2,6 +2,8 @@
 
 @section('content')
 
+@include('includes.modal_confirm_delete')
+
 <div class="container">
     @include('includes.alert_session_div')
 
@@ -34,7 +36,7 @@
                                     @lang('taxon.bfn_namnr')<br/>
                                     @lang('taxon.bfn_sipnr')
                                 </th>
-                                <th colspan="2">@lang('common.actions')</th>
+                                <th colspan="1">@lang('common.actions')</th>
                             </tr>
                             <tr>
                                 <th colspan="1">
@@ -217,17 +219,27 @@
                                     {{$taxon->gsl_id}}<br/>{{$taxon->bfn_namnr}}<br/>{{$taxon->bfn_sipnr}}
                                 </td>
                                 <td>
-                                    <form action="{{route('taxon.edit', $taxon)}}" method="GET">
-                                        {{ csrf_field() }}
-                                        <button class="btn btn-primary" type="submit">@lang('common.edit')</button>
-                                    </form>
-                                </td>
-                                <td>
-                                    <form action="{{route('taxon.destroy', $taxon)}}" method="POST">
-                                        {{ csrf_field() }}
-                                        @method('DELETE')
-                                        <button class="btn btn-danger" type="submit">@lang('common.delete')</button>
-                                    </form>
+                                    <span class="d-md-table-cell fa-btn">
+                                        <span class="fa-stack fa-2x">
+                                            <a href="{{ route('taxon.edit', $taxon) }}" title="@lang('common.edit')">
+                                                <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                                <i class="fas {{ Config::get('ui.icon_edit') }} fa-stack-1x fa-inverse"></i>
+                                            </a>
+                                        </span>
+                                    </span>
+                                    <span class="d-md-table-cell fa-btn">
+                                        <span class="fa-stack fa-2x">
+                                            <a href="#" data-toggle="modal" data-target="#confirmDeleteModal"
+                                                data-href="{{ route('taxon.destroy', $taxon) }}"
+                                                data-message="@lang('taxon.confirm_delete', ['name' => $taxon->full_name])"
+                                                data-title="@lang('taxon.delete')"
+                                                title="@lang('common.delete')"
+                                            >
+                                                <i class="fas fa-circle fa-stack-2x text-danger"></i>
+                                                <i class="fas {{ Config::get('ui.icon_delete') }} fa-stack-1x fa-inverse"></i>
+                                            </a>
+                                        </span>
+                                    </span>
                                 </td>
                             </tr>
                             @endforeach

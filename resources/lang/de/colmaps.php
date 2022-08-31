@@ -15,6 +15,8 @@ return [
     'list' => 'Feld-Zuordnung',
     'new' => 'Neue Feld-Zuordnung',
     'edit' => 'Feld-Zuordnung bearbeiten',
+    'delete' => 'Feld-Zuordnung löschen',
+    'confirm_delete' => 'Möchten Sie die Feld-Zuordnung “:name” wirklich löschen?',
     'created' => 'Feld-Zuordnung wurde angelegt.',
     'created_num' => ':count Feld-Zuordnungen wurden angelegt.',
     'updated' => 'Feld-Zuordnung wurde bearbeitet.',

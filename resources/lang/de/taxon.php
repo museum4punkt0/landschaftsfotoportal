@@ -18,6 +18,8 @@ return [
     'list' => 'Taxon',
     'new' => 'Neues Taxon',
     'edit' => 'Taxon bearbeiten',
+    'delete' => 'Taxon löschen',
+    'confirm_delete' => 'Möchten Sie das Taxon “:name” wirklich löschen?',
     'created' => 'Taxon wurde angelegt.',
     'updated' => 'Taxon wurde bearbeitet.',
     'deleted' => 'Taxon wurde gelöscht.',
