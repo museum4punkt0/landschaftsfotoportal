@@ -197,20 +197,25 @@
                                     {{$taxon->taxon_id}}
                                 </td>
                                 <td>
+                                    {{--
                                     @for ($i = 0; $i < $taxon->depth; $i++)
                                     |___
                                     @endfor
+                                    --}}
                                     {{$taxon->taxon_name}} {{$taxon->taxon_author}} {{$taxon->taxon_suppl}}
                                 </td>
                                 <td>
                                     {{$taxon->native_name}}
                                 </td>
                                 <td>
-                                    @if($taxon->valid_name)
-                                    ID {{$taxon->valid_name}}
-                                    @else
+                                @if($taxon->valid_name)
+                                    <a href="{{ route('taxon.show', $taxon->valid_name) }}"
+                                        title="{{ $taxon->valid_taxon->full_name }}">
+                                        ID {{$taxon->valid_name}}
+                                    </a>
+                                @else
                                     @lang('common.yes')
-                                    @endif
+                                @endif
                                 </td>
                                 <td>
                                     {{$taxon->rank_abbr}}
