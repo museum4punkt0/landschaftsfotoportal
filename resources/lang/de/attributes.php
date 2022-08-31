@@ -15,6 +15,8 @@ return [
     'attribute' => 'Attribut',
     'new' => 'Neues Attribut',
     'edit' => 'Attribut bearbeiten',
+    'delete' => 'Attribut löschen',
+    'confirm_delete' => 'Möchten Sie das Attribut “:name” wirklich löschen?',
     'created' => 'Attribut wurde angelegt.',
     'updated' => 'Attribut wurde bearbeitet.',
     'deleted' => 'Attribut wurde gelöscht.',

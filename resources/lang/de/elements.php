@@ -16,6 +16,8 @@ return [
     'new' => 'Neuer Listen-Eintrag',
     'new_batch' => 'Neue Listen-Einträge (Stapelverarbeitung)',
     'edit' => 'Eintrag bearbeiten',
+    'delete' => 'Listen-Eintrag löschen',
+    'confirm_delete' => 'Möchten Sie den Listen-Eintrag mit der ID “:name” wirklich löschen?',
     'created' => 'Listen-Eintrag wurde angelegt.',
     'updated' => 'Listen-Eintrag wurde bearbeitet.',
     'deleted' => 'Listen-Eintrag wurde gelöscht.',

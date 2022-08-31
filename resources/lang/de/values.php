@@ -15,6 +15,8 @@ return [
     'value' => 'Wert',
     'new' => 'Neuer Einzelwert',
     'edit' => 'Einzelwert bearbeiten',
+    'delete' => 'Einzelwert löschen',
+    'confirm_delete' => 'Möchten Sie den Einzelwert “:name” wirklich löschen?',
     'created' => 'Einzelwert wurde angelegt.',
     'updated' => 'Einzelwert wurde bearbeitet.',
     'deleted' => 'Einzelwert wurde gelöscht.',

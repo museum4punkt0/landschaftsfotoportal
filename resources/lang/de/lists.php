@@ -15,6 +15,8 @@ return [
     'list' => 'Liste',
     'new' => 'Neue Liste',
     'edit' => 'Liste bearbeiten',
+    'delete' => 'Liste löschen',
+    'confirm_delete' => 'Möchten Sie die Auswahl-Liste “:name” wirklich löschen?',
     'created' => 'Liste wurde angelegt.',
     'updated' => 'Liste wurde bearbeitet.',
     'deleted' => 'Liste wurde gelöscht.',
