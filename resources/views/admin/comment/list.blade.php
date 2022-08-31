@@ -67,7 +67,7 @@
                                 <span class="fa-stack fa-2x">
                                     <a href="#" data-toggle="modal" data-target="#confirmDeleteModal"
                                         data-href="{{ route('comment.destroy', $comment) }}"
-                                        data-message="@lang('comments.confirm_delete')"
+                                        data-message="@lang('comments.confirm_delete', ['name' => $comment->message])"
                                         data-title="@lang('comments.delete')"
                                         title="@lang('common.delete')"
                                     >
