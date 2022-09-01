@@ -182,6 +182,8 @@ class ColumnMappingController extends Controller
      */
     public function map(Request  $request)
     {
+        $this->authorize('map', ColumnMapping::class);
+
         $lang = app()->getLocale();
         $column_groups = Localization::getColumnGroups($lang);;
         
@@ -228,6 +230,8 @@ class ColumnMappingController extends Controller
      */
     public function map_store(Request $request)
     {
+        $this->authorize('map', ColumnMapping::class);
+
         $request->validate([
             'column_avail' => 'required|array|min:1',  // at least one column must be selected
             'column_avail.*' => 'required|integer',
@@ -279,6 +283,8 @@ class ColumnMappingController extends Controller
      */
     public function sort(Request $request)
     {
+        $this->authorize('sort', ColumnMapping::class);
+
         $item_type = $request->item_type;
         
         $it_list = Selectlist::where('name', '_item_type_')->first();
@@ -316,6 +322,8 @@ class ColumnMappingController extends Controller
      */
     public function sort_store(Request $request)
     {
+        $this->authorize('sort', ColumnMapping::class);
+
         if ($request->has('ids')) {
             $arr = explode(',', $request->input('ids'));
             

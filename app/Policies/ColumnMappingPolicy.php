@@ -106,7 +106,7 @@ class ColumnMappingPolicy
     }
 
     /**
-     * Determine whether the user can show own models.
+     * Determine whether the user can do batch mapping of models.
      *
      * @param  \App\User  $user
      * @return mixed
@@ -117,7 +117,7 @@ class ColumnMappingPolicy
     }
 
     /**
-     * Determine whether the user can show own models.
+     * Determine whether the user can sort the models.
      *
      * @param  \App\User  $user
      * @return mixed
