@@ -28,11 +28,20 @@
             </option>
         </select>
         <span class="text-danger">{{ $errors->first('translation') }}</span>
-
+    </div>
+    <div class="form-group collapse @if(old('translation') == -1)show @endif" id="translationInputGroup">
+        <label for="translationInput">@lang('columns.new_translation')</label>
         <input type="hidden" name="lang" value="{{$attribute->attribute_id}}" />
-        <input type="text" id="translationInput" name="new_translation" class="form-control" value="{{old('new_translation')}}" />
+        <input
+            type="text"
+            id="translationInput"
+            name="new_translation"
+            class="form-control"
+            value="{{old('new_translation')}}"
+        />
         <span class="text-danger">{{ $errors->first('new_translation') }}</span>
     </div>
+
     <div class="form-group">
         <label for="dataTypeSelect">@lang('columns.data_type')</label>
         <select id="dataTypeSelect" name="data_type" class="form-control" size=1>
@@ -45,7 +54,8 @@
         </select>
         <span class="text-danger">{{ $errors->first('data_type') }}</span>
     </div>
-    <div class="form-group collapse @if(old('data_type') == $data_type_ids['_list_'] || old('data_type') == $data_type_ids['_multi_list_'] || !old('data_type'))show @endif" id="list_group">
+
+    <div class="form-group collapse @if(old('data_type') == $data_type_ids['_list_'] || old('data_type') == $data_type_ids['_multi_list_'] || !old('data_type'))show @endif" id="listSelectGroup">
         <label for="listSelect">@lang('lists.list')</label>
         <select id="listSelect" name="list" class="form-control" size=1>
             @foreach($lists as $list)
@@ -67,30 +77,23 @@
 </div>
 
 <script type="text/javascript">
-    var select_element = document.getElementById("translationSelect");
-    var input_element = document.getElementById("translationInput");
-    // Register event for changing/selecting options
-    select_element.addEventListener("change", TranslationChanged);
-    TranslationChanged();
+    // Triggered when select for 'translation' changed
+    $('#translationSelect').change(function(event) {
+        if ($(this).val() == -1) {
+            $('#translationInputGroup').collapse('show');
+        }
+        else {
+            $('#translationInputGroup').collapse('hide');
+        }
+    });
 
-    function TranslationChanged() {
-        var translation = select_element.options[select_element.selectedIndex].value;
-        // Toggle visibility of text input depending on selected option
-        if (translation == -1) {
-            input_element.style.visibility = "visible";
-        }
-        else {
-            input_element.style.visibility = "hidden";
-        }
-    }
-    
     // Triggered when select for 'data_type' changed
-    $('.form-control[name=data_type]').change(function(event) {
+    $('#dataTypeSelect').change(function(event) {
         if ($(this).val() == {{ $data_type_ids['_list_'] }} || $(this).val() == {{ $data_type_ids['_multi_list_'] }}) {
-            $('#list_group').collapse('show');
+            $('#listSelectGroup').collapse('show');
         }
         else {
-            $('#list_group').collapse('hide');
+            $('#listSelectGroup').collapse('hide');
         }
     });
 </script>
