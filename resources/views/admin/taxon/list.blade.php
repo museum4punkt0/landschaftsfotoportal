@@ -226,6 +226,14 @@
                                 <td>
                                     <span class="d-md-table-cell fa-btn">
                                         <span class="fa-stack fa-2x">
+                                            <a href="{{ route('taxon.show', $taxon) }}" title="@lang('common.show')">
+                                                <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                                <i class="fas {{ Config::get('ui.icon_show') }} fa-stack-1x fa-inverse"></i>
+                                            </a>
+                                        </span>
+                                    </span>
+                                    <span class="d-md-table-cell fa-btn">
+                                        <span class="fa-stack fa-2x">
                                             <a href="{{ route('taxon.edit', $taxon) }}" title="@lang('common.edit')">
                                                 <i class="fas fa-circle fa-stack-2x text-primary"></i>
                                                 <i class="fas {{ Config::get('ui.icon_edit') }} fa-stack-1x fa-inverse"></i>

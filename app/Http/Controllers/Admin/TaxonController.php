@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Taxon;
 use App\Http\Controllers\Controller;
+use App\Utils\Localization;
 use Illuminate\Http\Request;
 use Redirect;
 
@@ -149,11 +150,22 @@ class TaxonController extends Controller
      * Display the specified resource.
      *
      * @param  \App\Taxon  $taxon
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function show(Taxon $taxon)
+    public function show(Taxon $taxon, Request $request)
     {
-        //
+        // Get current UI language
+        $lang = app()->getLocale();
+        $item_types = Localization::getItemTypes($lang);
+
+        // Number of anchestor ranks is taken from request param or config file
+        $anchestors = $taxon->ancestors()
+            ->whereDepth('>=', $request->query('anchestors', config('ui.taxon_anchestors', 5)) * -1)
+            ->orderBy('depth')
+            ->get();
+
+        return view('admin.taxon.show', compact('taxon', 'anchestors', 'item_types'));
     }
 
     /**

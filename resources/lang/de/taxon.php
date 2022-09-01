@@ -24,7 +24,10 @@ return [
     'updated' => 'Taxon wurde bearbeitet.',
     'deleted' => 'Taxon wurde gelöscht.',
     
+    'related_items' => 'Verknüpfte Datensätze',
     'parent' => 'Übergeordnetes Taxon',
+    'anchestors' => 'Übergeordnete Taxa',
+    'anchestors_ranks' => 'Anzahl der anzuzeigenden Ränge',
     'taxon_name' => 'Wissenschaftlicher Name',
     'taxon_author' => 'Autor des Namens',
     'taxon_suppl' => 'Namenszusatz',
@@ -32,6 +35,7 @@ return [
     'native_name' => 'Umgangssprachlicher Name',
     'valid_name' => 'Valides Taxon',
     'valid' => 'Taxon ist valide',
+    'synonyms' => 'Synonyme',
     'rank' => 'Rang',
     'rank_abbr' => 'Rang-Kürzel',
     'gsl_id' => 'GermanSL SPECIES_NR',
