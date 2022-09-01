@@ -198,9 +198,9 @@ class ElementController extends Controller
      */
     public function update(Request $request, Element $element)
     {
-        // This is only available for hierarchical lists, that makes parent_fk to be required
+        // This is only available for hierarchical lists
         $request->validate([
-            'parent_fk' => 'required|integer',
+            'parent_fk' => 'nullable|integer',
         ]);
 
         $element->parent_fk = $request->input('parent_fk');
