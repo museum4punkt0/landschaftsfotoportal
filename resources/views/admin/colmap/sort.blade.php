@@ -2,6 +2,8 @@
 
 @section('content')
 
+@include('includes.modal_alert')
+
 <div class="container">
     @include('includes.alert_session_div')
 
@@ -115,9 +117,16 @@
                 method:'POST',
                 data:{ids:idString},
                 success:function() {
-                    alert('@lang('common.update_success')')
-                }
-            })
+                    // Show alert model with status message
+                    $('#alertModalLabel').text('@lang("common.update_success")');
+                    $('#alertModalContent').html('<div class="alert alert-success">' + '</div>');
+                    $('#alertModal').modal('show');
+                    // Close modal dialog
+                    window.setTimeout(function () {
+                        $('#alertModal').modal('hide');
+                    }, 1500);
+                },
+            });
         }
 
         var target = $('.sort-list');
@@ -126,10 +135,10 @@
             placeholder: 'highlight',
             axis: "y",
             update: function (e, ui) {
-                var sortData = target.sortable('toArray', { attribute: 'data-id'})
-                updateToDatabase(sortData.join(','))
-            }
-        })
-    })
+                var sortData = target.sortable('toArray', { attribute: 'data-id'});
+                updateToDatabase(sortData.join(','));
+            },
+        });
+    });
 </script>
 @endsection
