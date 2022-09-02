@@ -145,7 +145,7 @@ class ColumnController extends Controller
             ],
             'data_type' => 'required|integer',
             'translation' => 'required|integer',
-            'description' => 'required|string|max:255',
+            'description' => 'exclude_if:colmap_enable,1|required|string|max:255',
             'new_translation' => 'exclude_unless:translation,-1|required|string',
             'lang' => 'required|integer',
             // Additional validation rules for column mapping
@@ -161,7 +161,7 @@ class ColumnController extends Controller
             'list_fk' => $this->getListIdFromFormRequest($request),
             'data_type_fk' => $request->input('data_type'),
             'translation_fk' => $request->input('translation'),
-            'description' => $request->input('description'),
+            'description' => $request->input('description') || 'to be auto-filled',
         ];
         
         // Store element and value for new translation
@@ -200,9 +200,17 @@ class ColumnController extends Controller
                 'api_attribute' => $request->input('api_attribute'),
                 'config' => $request->input('config'),
             ];
-            ColumnMapping::create($data);
+            $colmap = ColumnMapping::create($data);
 
             $success_status_msg .= " " . __('colmaps.created');
+
+            // Auto fill column's description if not set by user
+            if (!$request->input('description')) {
+                $cg_name = Element::find($colmap->column_group_fk)->getValueOfAttribute('name_de');
+                $col_name = Element::find($column->translation_fk)->getValueOfAttribute('name_de');
+                $column->description = $cg_name . ' -> ' . $col_name;
+                $column->save();
+            }
 
             // Create missing details for all items
             $count = 0;

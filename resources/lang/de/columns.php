@@ -20,7 +20,8 @@ return [
     'created' => 'Anzeigefeld wurde angelegt.',
     'updated' => 'Anzeigefeld wurde bearbeitet.',
     'deleted' => 'Anzeigefeld wurde gelöscht.',
-    
+
+    'description_help' => 'Die Beschreibung dient zur Unterscheidung und Suche im Backend und kann beliebig benannt werden. Falls gleichzeitig eine neue Feldzuordnung angelegt wird, kann dieses Feld leer bleiben und wird dann automitisch nach folgendem Schema ausgefüllt: "Name des Gliederungspunktes -> Name des Anzeigefeldes".',
     'column_group' => 'Gliederungspunkt',
     'data_type' => 'Datentyp',
     'translated_name' => 'Name in der momentan ausgewählten Sprache',

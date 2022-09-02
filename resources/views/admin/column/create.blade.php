@@ -9,9 +9,12 @@
     
     <div class="form-group">
         <label for="descriptionInput">@lang('common.description')</label>
-        <input type="text" id="descriptionInput" name="description" class="form-control"
-            value="{{old('description')}}" maxlength="255" autofocus
+        <input type="text" id="descriptionInput" name="description" aria-describedby="descriptionHelpBlock"
+            class="form-control" value="{{old('description')}}" maxlength="255" autofocus
         />
+        <small id="descriptionHelpBlock" class="form-text text-muted">
+            @lang('columns.description_help')
+        </small>
         <span class="text-danger">{{ $errors->first('description') }}</span>
     </div>
     <div class="form-group">
