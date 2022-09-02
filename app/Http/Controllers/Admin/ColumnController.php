@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Column;
+use App\ColumnMapping;
+use App\Item;
 use App\Selectlist;
 use App\Element;
 use App\Attribute;
@@ -106,11 +108,18 @@ class ColumnController extends Controller
         // Get data types of columns with localized names
         $data_types = Localization::getDataTypes($lang);
         
+        // Get column groups with localized names
+        $item_types = Localization::getItemTypes($lang);
+
+        // Get column groups with localized names
+        $column_groups = Localization::getColumnGroups($lang);
+
         // Get IDs for data_types
         $data_type_ids['_list_'] = Value::where('value', '_list_')->first()->element_fk;
         $data_type_ids['_multi_list_'] = Value::where('value', '_multi_list_')->first()->element_fk;
-        
-        return view('admin.column.create', compact('lists', 'data_types', 'data_type_ids', 'translations', 'attribute'));
+
+        return view('admin.column.create',
+            compact('lists', 'data_types', 'data_type_ids', 'item_types', 'column_groups', 'translations', 'attribute'));
     }
 
     /**
@@ -139,6 +148,13 @@ class ColumnController extends Controller
             'description' => 'required|string|max:255',
             'new_translation' => 'exclude_unless:translation,-1|required|string',
             'lang' => 'required|integer',
+            // Additional validation rules for column mapping
+            'column_group' => 'required_if:colmap_enable,1|integer',
+            'item_type' => 'required_if:colmap_enable,1|integer',
+            'taxon' => 'nullable|integer',
+            'public' => 'required_if:colmap_enable,1|integer',
+            'api_attribute' => 'nullable|string|max:255',
+            'config' => 'nullable|string|max:4095',
         ]);
         
         $data = [
@@ -170,9 +186,38 @@ class ColumnController extends Controller
         $column = Column::create($data);
         $column->data_type_name = $column->getDataTypeName();
         $column->save();
-        
-        return Redirect::to('admin/column')
-            ->with('success', __('columns.created'));
+
+        $success_status_msg = __('columns.created');
+
+        // Add column group if checkbox is enabled
+        if ($request->input('colmap_enable')) {
+            $data = [
+                'column_fk' => $column->column_id,
+                'column_group_fk' => $request->input('column_group'),
+                'item_type_fk' => $request->input('item_type'),
+                'taxon_fk' => $request->input('taxon'),
+                'public' => $request->input('public'),
+                'api_attribute' => $request->input('api_attribute'),
+                'config' => $request->input('config'),
+            ];
+            ColumnMapping::create($data);
+
+            $success_status_msg .= " " . __('colmaps.created');
+
+            // Create missing details for all items
+            $count = 0;
+            foreach (Item::where('item_type_fk', $data['item_type_fk'])->get() as $item) {
+                Detail::firstOrCreate(['column_fk' => $data['column_fk'], 'item_fk' => $item->item_id]);
+                $count++;
+            }
+            if ($count) {
+                $success_status_msg .= " " . __('colmaps.details_added', ['count' => $count]);
+            }
+        }
+
+        // Redirect to list view, showing newest first
+        return redirect()->route('column.index', ['orderby' => 'column_id', 'sort' => 'desc'])
+            ->with('success', $success_status_msg);
     }
 
     /**

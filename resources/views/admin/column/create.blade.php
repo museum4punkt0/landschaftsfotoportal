@@ -68,6 +68,25 @@
         <span class="text-danger">{{ $errors->first('list') }}</span>
     </div>
     
+    <!-- Form fields for optional creating column mapping -->
+    <div class="form-group">
+        <div class="form-check">
+            <input type="checkbox" id="colmapEnableCheckbox" name="colmap_enable"
+                class="form-check-input" value=1 @if(old('colmap_enable')) checked @endif
+            >
+            <label for="colmapEnableCheckbox" class="form-check-label">
+                @lang('columns.add_colmap')
+            </label>
+        </div>
+    </div>
+    
+    <fieldset id="colmapFieldset" class="collapse @if(old('colmap_enable'))show @endif">
+        <legend>@lang('colmaps.new')</legend>
+
+        @include('includes.colmap_create_fields')
+
+    </fieldset>
+
     <div class="form-group">
         <button type="submit" class="btn btn-primary">@lang('common.save')</button>
     </div>
@@ -96,6 +115,17 @@
             $('#listSelectGroup').collapse('hide');
         }
     });
+
+    // Triggered when checkbox for creating column mapping changed
+    $('#colmapEnableCheckbox').change(function(event) {
+        if ($(this).prop('checked')) {
+            $('#colmapFieldset').collapse('show');
+        }
+        else {
+            $('#colmapFieldset').collapse('hide');
+        }
+    });
+
 </script>
 
 @endsection

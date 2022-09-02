@@ -103,11 +103,14 @@ class ColumnMappingController extends Controller
         #$columns = Column::doesntHave('column_mapping')->orderBy('description')->get();
         $columns = Column::with(['translation.values'])->orderBy('description')->get();
         
+        // Get current UI language
         $lang = app()->getLocale();
+
+        // Get column groups with localized names
         $column_groups = Localization::getColumnGroups($lang);
-        
-        $it_list = Selectlist::where('name', '_item_type_')->first();
-        $item_types = Element::where('list_fk', $it_list->list_id)->get();
+
+        // Get item types with localized names
+        $item_types = Localization::getItemTypes($lang);             
         
         // Check for existing item_type, otherwise redirect back with warning message
         if ($item_types->isEmpty()) {
