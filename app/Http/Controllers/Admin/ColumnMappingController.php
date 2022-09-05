@@ -148,9 +148,14 @@ class ColumnMappingController extends Controller
             'api_attribute' => $request->input('api_attribute'),
             'config' => $request->input('config'),
         ];
-        ColumnMapping::create($data);
+        $colmap = ColumnMapping::create($data);
         
         $success_status_msg =  __('colmaps.created');
+
+        // Sort this mapped column to the end
+        if ($request->input('sort_end')) {
+            $colmap->setHighestColumnOrder();
+        }
         
         // Create missing details for all items
         $count = 0;
@@ -258,8 +263,13 @@ class ColumnMappingController extends Controller
                 'public' => $request->input('public'),
                 'config' => $request->input('config'),
             ];
-            ColumnMapping::create($data);
+            $colmap = ColumnMapping::create($data);
             
+            // Sort this mapped column to the end
+            if ($request->input('sort_end')) {
+                $colmap->setHighestColumnOrder();
+            }
+
             $mapcount++;
             
             // Create missing details for all items

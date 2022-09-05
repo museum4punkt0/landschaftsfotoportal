@@ -164,6 +164,19 @@
                                 <span class="text-danger">{{ $errors->first('public') }}</span>
                             </div>
                             <div class="form-group">
+                                <div class="form-check">
+                                    <input type="checkbox" id="sortEndCheckbox" name="sort_end" aria-describedby="sortEndHelpBlock"
+                                        class="form-check-input" value=1 checked
+                                    >
+                                    <label for="sortEndCheckbox" class="form-check-label">
+                                        @lang('colmaps.sort_end')
+                                    </label>
+                                    <small id="sortEndHelpBlock" class="form-text text-muted">
+                                        @lang('colmaps.sort_end_help')
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="form-group">
                                 <label for="configInput">@lang('colmaps.config')</label>
                                 <input
                                     type="text"

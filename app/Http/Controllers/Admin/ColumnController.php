@@ -161,7 +161,7 @@ class ColumnController extends Controller
             'list_fk' => $this->getListIdFromFormRequest($request),
             'data_type_fk' => $request->input('data_type'),
             'translation_fk' => $request->input('translation'),
-            'description' => $request->input('description') || 'to be auto-filled',
+            'description' => $request->input('description') ?? 'to be auto-filled',
         ];
         
         // Store element and value for new translation
@@ -203,6 +203,11 @@ class ColumnController extends Controller
             $colmap = ColumnMapping::create($data);
 
             $success_status_msg .= " " . __('colmaps.created');
+
+            // Sort this mapped column to the end
+            if ($request->input('sort_end')) {
+                $colmap->setHighestColumnOrder();
+            }
 
             // Auto fill column's description if not set by user
             if (!$request->input('description')) {

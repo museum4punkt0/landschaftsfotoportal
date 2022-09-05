@@ -28,6 +28,8 @@ return [
     'config' => 'Konfiguration (JSON-Format)',
     'api_attribute' => 'Attribute-Name bei Ausgabe über die API',
     'item_type' => 'Datensatztyp',
+    'sort_end' => 'Am Ende einsortieren',
+    'sort_end_help' => 'Das Anzeigefeld wird automatisch nach allen bisher vorhandenen Anzeigefeldern für diesen Datensatztyp einsortiert. Andernfalls erscheint es undefiniert am Anfang.',
     'sort_for' => 'Sortierung von Anzeigefeldern für: ',
     'sort_hint' => 'Die Sortierung der Anzeigefelder kann mittels Drag&Drop vorgenommen werden.',
     'mapping_for' => 'Zuordnung von Anzeigefeldern für: ',
