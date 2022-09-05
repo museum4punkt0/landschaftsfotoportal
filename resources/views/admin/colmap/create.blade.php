@@ -9,7 +9,8 @@
 
     <div class="form-group">
         <label for="columnSelect">@lang('columns.list')</label>
-        <select id="columnSelect" name="column" class="form-control" size=1 autofocus>
+        <select id="columnSelect" name="column" aria-describedby="columnHelpBlock"
+            class="form-control" size=1 autofocus>
             @foreach($columns as $column)
                 <option value="{{$column->column_id}}"
                     @if(old('column') == $column->column_id) selected @endif>
@@ -23,6 +24,9 @@
                 </option>
             @endforeach
         </select>
+        <small id="columnHelpBlock" class="form-text text-muted">
+            @lang('colmaps.column_help')
+        </small>
         <span class="text-danger">{{ $errors->first('column') }}</span>
     </div>
 

@@ -26,6 +26,7 @@ return [
     
     'related_items' => 'Verknüpfte Datensätze',
     'parent' => 'Übergeordnetes Taxon',
+    'parent_help' => 'Das nächst-höhere übergeordnete, valide Taxon.',
     'anchestors' => 'Übergeordnete Taxa',
     'anchestors_ranks' => 'Anzahl der anzuzeigenden Ränge',
     'taxon_name' => 'Wissenschaftlicher Name',
@@ -34,6 +35,7 @@ return [
     'full_name' => 'Vollname inkl. Autor und Zusatz',
     'native_name' => 'Umgangssprachlicher Name',
     'valid_name' => 'Valides Taxon',
+    'valid_name_help' => 'Falls es sich um ein Synonym handelt, geben Sie hier das valide Taxon an.',
     'valid' => 'Taxon ist valide',
     'synonyms' => 'Synonyme',
     'rank' => 'Rang',
@@ -42,6 +44,6 @@ return [
     'bfn_namnr' => 'BfN NAMNR',
     'bfn_sipnr' => 'BfN SIPNR',
     
-    'autocomplete_help' => 'Geben Sie den Anfang des wissenschaftl. oder umgangssprachl. Namens ein. Leer lassen, falls nicht zutreffend.',
+    'autocomplete_help' => 'Geben Sie einen Teil des wissenschaftl. oder umgangssprachl. Namens ein um danach zu suchen. Leer lassen, falls nicht zutreffend.',
     'circular_parent' => 'Das Elternelement kann kein Kindelement dieses Taxons sein.',
 ];

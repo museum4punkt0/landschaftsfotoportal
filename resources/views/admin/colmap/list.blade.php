@@ -35,7 +35,7 @@
                         <th colspan="1" >@lang('common.id')</th>
                         <th colspan="1">@lang('common.description')</th>
                         <th colspan="1">@lang('columns.list')</th>
-                        <th colspan="1">@lang('columns.column_group')</th>
+                        <th colspan="1">@lang('colmaps.column_group')</th>
                         <th colspan="1">@lang('taxon.list')</th>
                         <th colspan="1">@lang('colmaps.item_type')</th>
                         <th colspan="1">@lang('common.actions')</th>
