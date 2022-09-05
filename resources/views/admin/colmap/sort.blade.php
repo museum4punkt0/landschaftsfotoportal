@@ -16,27 +16,17 @@
                 <hr>
                 <div class="card-title">
                 @lang('colmaps.sort_for')
-                @foreach($item_types->find($item_type)->values as $v)
-                    @if($v->attribute->name == 'name_'.app()->getLocale())
-                        {{$v->value}}
-                    @endif
-                @endforeach
-                (Item-ID {{ $item_type }})
                 </div>
                 
                 <form action="{{ route('colmap.sort', $item_type) }}" method="GET">
                     <div class="form-row">
-                        <div class="form-group col-md-8">
+                        <div class="form-group col-md-12">
                             <select id="itemTypeSelect" name="item_type" class="form-control"
                                 data-url="{{ route('colmap.sort') }}" size=1 autofocus>
                                 @foreach($item_types as $type)
-                                    <option value="{{$type->element_id}}"
-                                        @if(old('item_type', $item_type) == $type->element_id) selected @endif>
-                                        @foreach($type->values as $v)
-                                            @if($v->attribute->name == 'name_'.app()->getLocale())
-                                                {{$v->value}}
-                                            @endif
-                                        @endforeach
+                                    <option value="{{ $type->element_fk }}"
+                                        @if(old('item_type', $item_type) == $type->element_fk) selected @endif>
+                                        {{ $type->value }}
                                     </option>
                                 @endforeach
                             </select>
@@ -52,11 +42,7 @@
                             @foreach ($columns_mapped as $column)
                             <li class="list-group-item" data-id="{{$column->colmap_id}}">
                                 <span class="handle"></span>
-                                @foreach($column->translation->values as $t)
-                                    @if($t->attribute->name == 'name_'.app()->getLocale())
-                                        {{$t->value}}
-                                    @endif
-                                @endforeach
+                                {{ optional($translations->firstWhere('element_fk', $column->translation_fk))->value }}
                                 ({{$column->description}}), ID {{$column->column_id}}
                                     @if($column->column_mapping->firstWhere('colmap_id', $column->colmap_id)->taxon)
                                         [{{ $column->column_mapping->firstWhere(

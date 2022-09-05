@@ -36,13 +36,9 @@
         <select id="itemTypeSelect" name="item_type" aria-describedby="itemTypeHelpBlock"
             class="form-control" size=1 disabled>
             @foreach($item_types as $type)
-                <option value="{{$type->element_id}}"
-                    @if(old('item_type', $colmap->item_type_fk) == $type->element_id) selected @endif >
-                    @foreach($type->values as $v)
-                        @if($v->attribute->name == 'name_'.app()->getLocale())
-                            {{$v->value}}
-                        @endif
-                    @endforeach
+                <option value="{{$type->element_fk}}"
+                    @if(old('item_type', $colmap->item_type_fk) == $type->element_fk) selected @endif >
+                    {{$type->value}}
                 </option>
             @endforeach
         </select>

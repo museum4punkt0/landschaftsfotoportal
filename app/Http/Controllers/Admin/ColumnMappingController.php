@@ -192,14 +192,20 @@ class ColumnMappingController extends Controller
     {
         $this->authorize('map', ColumnMapping::class);
 
-        $lang = app()->getLocale();
-        $column_groups = Localization::getColumnGroups($lang);;
-        
         $item_type = $request->item_type;
-        
-        $it_list = Selectlist::where('name', '_item_type_')->first();
-        $item_types = Element::where('list_fk', $it_list->list_id)->get();
-        
+
+        // Get current UI language
+        $lang = app()->getLocale();
+
+        // Get column groups with localized names
+        $column_groups = Localization::getColumnGroups($lang);
+
+        // Get item types with localized names
+        $item_types = Localization::getItemTypes($lang);             
+
+        // Get localized names of columns
+        $translations = Localization::getTranslations($lang, 'name');
+
         // Check for existing item_type, otherwise redirect back with warning message
         if ($item_types->isEmpty()) {
             return redirect()->route('list.internal')
@@ -207,8 +213,8 @@ class ColumnMappingController extends Controller
         }
         
         // Use first item type found in database if ID is invalid
-        if (!$item_types->contains($item_type)) {
-            $item_type = $item_types->first()->element_id;
+        if (!$item_types->firstWhere('element_fk', $item_type)) {
+            $item_type = $item_types->first()->element_fk;
         }
         
         // Get all columns mapped to the given item type
@@ -225,6 +231,7 @@ class ColumnMappingController extends Controller
             'item_type',
             'column_groups',
             'item_types',
+            'translations',
             'columns_mapped',
             'columns_avail'
         ));
@@ -300,9 +307,15 @@ class ColumnMappingController extends Controller
 
         $item_type = $request->item_type;
         
-        $it_list = Selectlist::where('name', '_item_type_')->first();
-        $item_types = Element::where('list_fk', $it_list->list_id)->get();
-        
+        // Get current UI language
+        $lang = app()->getLocale();
+
+        // Get item types with localized names
+        $item_types = Localization::getItemTypes($lang);             
+
+        // Get localized names of columns
+        $translations = Localization::getTranslations($lang, 'name');
+
         // Check for existing item_type, otherwise redirect back with warning message
         if ($item_types->isEmpty()) {
             return Redirect::to('admin/colmap')
@@ -310,8 +323,8 @@ class ColumnMappingController extends Controller
         }
         
         // Use first item type found in database if ID is invalid
-        if (!$item_types->contains($item_type)) {
-            $item_type = $item_types->first()->element_id;
+        if (!$item_types->firstWhere('element_fk', $item_type)) {
+            $item_type = $item_types->first()->element_fk;
         }
         
         // Get all columns mapped to the given item type
@@ -322,7 +335,7 @@ class ColumnMappingController extends Controller
             ->orderBy('column_order')
             ->get();
         
-        return view('admin.colmap.sort', compact('item_type', 'item_types', 'columns_mapped'));
+        return view('admin.colmap.sort', compact('item_type', 'item_types', 'translations', 'columns_mapped'));
     }
 
     /**
@@ -363,12 +376,15 @@ class ColumnMappingController extends Controller
         $columns = Column::with(['translation.values'])->orderBy('description')->get();
         #$columns = Column::doesntHave('column_mapping')->orderBy('description')->get();
         
+        // Get current UI language
         $lang = app()->getLocale();
-        $column_groups = Localization::getColumnGroups($lang);;
-        
-        $it_list = Selectlist::where('name', '_item_type_')->first();
-        $item_types = Element::where('list_fk', $it_list->list_id)->get();
-        
+
+        // Get column groups with localized names
+        $column_groups = Localization::getColumnGroups($lang);
+
+        // Get item types with localized names
+        $item_types = Localization::getItemTypes($lang);             
+
         return view('admin.colmap.edit', compact('colmap', 'columns', 'column_groups', 'item_types'));
     }
 
