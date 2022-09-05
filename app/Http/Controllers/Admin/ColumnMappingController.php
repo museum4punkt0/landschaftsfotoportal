@@ -335,7 +335,7 @@ class ColumnMappingController extends Controller
                 $colmap->column_order = $order;
                 $colmap->save();
             }
-            return ['success'=>true, 'message'=>'Updated'];
+            return response()->json(['success' => __('common.update_success')]);
         }
     }
 
