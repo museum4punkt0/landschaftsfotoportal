@@ -169,6 +169,54 @@ class ListController extends Controller
     }
 
     /**
+     * Display the list of item types.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function showItemTypes()
+    {
+        $list = Selectlist::where('name', '_item_type_')->first();
+
+        $this->authorize('view', $list);
+
+        $elements = $list->elements()->paginate(10);
+
+        return view('admin.lists.list.show', compact('list', 'elements'));
+    }
+
+    /**
+     * Display the list of column groups.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function showColumnGroups()
+    {
+        $list = Selectlist::where('name', '_column_group_')->first();
+
+        $this->authorize('view', $list);
+
+        $elements = $list->elements()->paginate(10);
+
+        return view('admin.lists.list.show', compact('list', 'elements'));
+    }
+
+    /**
+     * Display the list of translations (names/descriptions/placeholders of columns).
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function showTranslations()
+    {
+        $list = Selectlist::where('name', '_translation_')->first();
+
+        $this->authorize('view', $list);
+
+        $elements = $list->elements()->paginate(10);
+
+        return view('admin.lists.list.show', compact('list', 'elements'));
+    }
+
+    /**
      * Display the specified resource as tree.
      *
      * @param  int  $id

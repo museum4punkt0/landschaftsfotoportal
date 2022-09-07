@@ -79,6 +79,15 @@
                                     {{ __('common.config') }} <span class="caret"></span>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="configNavbarDropdown">
+                                    <a class="dropdown-item" href="{{ route('list.item_types') }}">
+                                        {{ __('lists.item_types') }}
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('list.column_groups') }}">
+                                        {{ __('lists.column_groups') }}
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('list.translations') }}">
+                                        {{ __('lists.translations') }}
+                                    </a>
                                     <a class="dropdown-item" href="{{ route('list.index') }}">
                                         {{ __('lists.header') }}
                                     </a>
@@ -98,12 +107,14 @@
                                     {{ __('common.admin_tools') }} <span class="caret"></span>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="adminNavbarDropdown">
+                                @can('show-super-admin')
                                     <a class="dropdown-item" href="{{ route('attribute.index') }}">
                                         {{ __('attributes.header') }}
                                     </a>
                                     <a class="dropdown-item" href="{{ route('list.internal') }}">
                                         {{ __('lists.internal_header') }}
                                     </a>
+                                @endcan
                                     <a class="dropdown-item" href="{{ route('item.titles') }}">
                                         {{ __('items.add_titles') }}
                                     </a>

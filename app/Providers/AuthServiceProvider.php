@@ -14,6 +14,8 @@ class AuthServiceProvider extends ServiceProvider
      */
     protected $policies = [
         // 'App\Model' => 'App\Policies\ModelPolicy',
+        // This one doesn't follow the naming schema
+        'App\Selectlist' => 'App\Policies\ListPolicy',
     ];
 
     /**
@@ -30,6 +32,11 @@ class AuthServiceProvider extends ServiceProvider
             if ($user->inGroup('super-admin')) {
                 return true;
             }
+        });
+
+        // Access denied for all but super-admins (using intercepting gate)
+        Gate::define('show-super-admin', function ($user) {
+            return false;
         });
 
         Gate::define('show-admin', function ($user) {

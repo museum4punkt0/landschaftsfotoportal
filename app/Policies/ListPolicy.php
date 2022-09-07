@@ -113,7 +113,7 @@ class ListPolicy
      */
     public function internal(User $user)
     {
-        return $user->hasAccess(['internal-list']);
+        return false;
     }
 
     /**

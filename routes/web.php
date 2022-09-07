@@ -123,6 +123,9 @@ Route::post('admin/lists/list/{id}/element/store_batch',
 Route::resource('admin/lists/list.element', 'Admin\Lists\ElementController')->shallow();
 Route::resource('admin/lists/element.value', 'Admin\Lists\ValueController')->shallow();
 
+Route::get('admin/list/types', 'Admin\Lists\ListController@showItemTypes')->name('list.item_types');
+Route::get('admin/list/groups', 'Admin\Lists\ListController@showColumnGroups')->name('list.column_groups');
+Route::get('admin/list/translations', 'Admin\Lists\ListController@showTranslations')->name('list.translations');
 Route::get('admin/lists/list/internal', 'Admin\Lists\ListController@internal')->name('list.internal');
 Route::get('admin/lists/list/{id}/tree', 'Admin\Lists\ListController@tree')->name('list.tree');
 Route::get('admin/lists/list/{id}/export', 'Admin\Lists\ListController@export')->name('list.export');
