@@ -24,12 +24,28 @@
                     {{ $trans->value }}
                 </option>
             @endforeach
+            <option value="-1" @if(old('translation') == -1) selected @endif>
+                --- @lang('common.new') ---
+            </option>
         </select>
         <small id="translationHelpBlock" class="form-text text-muted">
             @lang('columns.translated_name_help', ['new' => __('common.new')])
         </small>
         <span class="text-danger">{{ $errors->first('translation') }}</span>
     </div>
+    <div class="form-group collapse @if(old('translation') == -1)show @endif" id="translationInputGroup">
+        <label for="translationInput">@lang('columns.new_translation')</label>
+        <input type="hidden" name="lang" value="{{$attribute->attribute_id}}" />
+        <input
+            type="text"
+            id="translationInput"
+            name="new_translation"
+            class="form-control"
+            value="{{old('new_translation')}}"
+        />
+        <span class="text-danger">{{ $errors->first('new_translation') }}</span>
+    </div>
+
     <div class="form-group">
         <label for="dataTypeSelect">@lang('columns.data_type')</label>
         <select id="dataTypeSelect" name="data_type" aria-describedby="dataTypeHelpBlock"
@@ -72,6 +88,16 @@
 </div>
 
 <script type="text/javascript">
+    // Triggered when select for 'translation' changed
+    $('#translationSelect').change(function(event) {
+        if ($(this).val() == -1) {
+            $('#translationInputGroup').collapse('show');
+        }
+        else {
+            $('#translationInputGroup').collapse('hide');
+        }
+    });
+
     // Triggered when select for 'data_type' changed
     $('#dataTypeSelect').change(function(event) {
         if ($(this).val() == {{ $data_type_ids['_list_'] }} || $(this).val() == {{ $data_type_ids['_multi_list_'] }}) {
