@@ -58,17 +58,46 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('taxon.index') }}">{{ __('taxon.header') }}</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('list.index') }}">{{ __('lists.header') }}</a>
+                            <li class="nav-item dropdown">
+                                <a id="importNavbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
+                                    {{ __('import.header') }} <span class="caret"></span>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="imprtNavbarDropdown">
+                                    <a class="dropdown-item" href="{{ route('import.csv.upload') }}">
+                                        {{ __('lists.header') }}
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('import.items.upload') }}">
+                                        {{ __('items.header') }}
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('import.taxa.upload') }}">
+                                        {{ __('taxon.header') }}
+                                    </a>
+                                </div>
                             </li>
                             <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
-                                    {{ __('common.internal') }} <span class="caret"></span>
+                                <a id="configNavbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
+                                    {{ __('common.config') }} <span class="caret"></span>
                                 </a>
-                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <div class="dropdown-menu" aria-labelledby="configNavbarDropdown">
+                                    <a class="dropdown-item" href="{{ route('list.index') }}">
+                                        {{ __('lists.header') }}
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('column.index') }}">
+                                        {{ __('columns.header') }}
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('colmap.index') }}">
+                                        {{ __('colmaps.header') }}
+                                    </a>
                                     <a class="dropdown-item" href="{{ route('module.index') }}">
                                         {{ __('modules.header') }}
                                     </a>
+                                </div>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a id="adminNavbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
+                                    {{ __('common.admin_tools') }} <span class="caret"></span>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="adminNavbarDropdown">
                                     <a class="dropdown-item" href="{{ route('attribute.index') }}">
                                         {{ __('attributes.header') }}
                                     </a>
@@ -83,38 +112,16 @@
                                     </a>
                                 </div>
                             </li>
-                            <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
-                                    {{ __('import.header') }} <span class="caret"></span>
-                                </a>
-                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="{{ route('import.csv.upload') }}">
-                                        {{ __('lists.header') }}
-                                    </a>
-                                    <a class="dropdown-item" href="{{ route('import.items.upload') }}">
-                                        {{ __('items.header') }}
-                                    </a>
-                                    <a class="dropdown-item" href="{{ route('import.taxa.upload') }}">
-                                        {{ __('taxon.header') }}
-                                    </a>
-                                </div>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('column.index') }}">{{ __('columns.header') }}</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('colmap.index') }}">{{ __('colmaps.header') }}</a>
-                            </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('user.index') }}">{{ __('users.header') }}</a>
                             </li>
                         @endcan
                     @endauth
                             <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
+                                <a id="langNavbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
                                     {{ __('common.language') }} <span class="caret"></span>
                                 </a>
-                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <div class="dropdown-menu" aria-labelledby="langNavbarDropdown">
                                 @foreach(Config::get('languages') as $lang => $language)
                                     <a class="dropdown-item" href="{{ route('locale', $lang) }}">
                                         {{ $language }}

@@ -75,6 +75,8 @@ return [
     'locality' => 'Örtlichkeit',
     
     'actions' => 'Aktionen',
+    'admin_tools' => 'Admin',
+    'config' => 'Konfiguration',
     'language' => 'Sprache',
     'missing_translation' => '[Übersetzung fehlt!]',
     'ordering' => 'Reihenfolge',
