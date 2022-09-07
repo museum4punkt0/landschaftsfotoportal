@@ -168,34 +168,28 @@
                             {{$colmap->column->description}}
                         </td>
                         <td>
-                            @foreach($colmap->column->translation->values as $v)
-                                <b>{{substr($v->attribute->name, 0, -3)}}:</b> {{$v->value}}<br/>
-                            @endforeach
-                            <a href="{{route('column.edit', $colmap->column_fk)}}">ID {{$colmap->column_fk}}</a>
+                            <a href="{{route('column.edit', $colmap->column_fk)}}">
+                                {{ $translations->getLocalizedName($colmap->column->translation_fk) }}
+                            </a>
                         </td>
                         <td>
-                            @foreach($colmap->column_group->values as $v)
-                                @if($v->attribute->name == 'config')
-                                    <b>{{$v->attribute->name, 0}}:</b> {{$v->value}}<br/>
-                                @else
-                                    <b>{{substr($v->attribute->name, 0, -3)}}:</b> {{$v->value}}<br/>
-                                @endif
-                            @endforeach
-                            <a href="{{route('element.show', $colmap->column_group_fk)}}">ID {{$colmap->column_group_fk}}</a>
+                            <a href="{{route('element.show', $colmap->column_group_fk)}}">
+                                {{ $column_groups->getLocalizedName($colmap->column_group_fk) }}
+                            </a>
                         </td>
                         <td>
                             @if($colmap->taxon_fk)
-                                {{$colmap->taxon->taxon_name}}<br/>
-                                <a href="{{route('taxon.edit', $colmap->taxon_fk)}}">ID {{$colmap->taxon_fk}}</a>
+                                <a href="{{ route('taxon.edit', $colmap->taxon_fk) }}">
+                                    {{ $colmap->taxon->taxon_name }}
+                                </a>
                             @else
                                 @lang('common.all')
                             @endif
                         </td>
                         <td>
-                            @foreach($colmap->item_type->values as $v)
-                                {{$v->value}}<br/>
-                            @endforeach
-                            <a href="{{route('element.show', $colmap->item_type_fk)}}">ID {{$colmap->item_type_fk}}</a>
+                            <a href="{{route('element.show', $colmap->item_type_fk)}}">
+                                {{ $item_types->getLocalizedName($colmap->item_type_fk) }}
+                            </a>
                         </td>
                         <td>
                             <span class="d-md-table-cell fa-btn">

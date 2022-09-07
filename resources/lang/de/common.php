@@ -76,6 +76,7 @@ return [
     
     'actions' => 'Aktionen',
     'language' => 'Sprache',
+    'missing_translation' => '[Übersetzung fehlt!]',
     'ordering' => 'Reihenfolge',
     'filter' => 'Filtern',
     'showall' => 'Zeige alle',

@@ -83,7 +83,7 @@ class ItemController extends Controller
 
         // Get current UI language
         $lang = app()->getLocale();
-
+        // Get item types with localized names
         $item_types = Localization::getItemTypes($lang);
         
         return view('admin.item.list', compact('items', 'item_types', 'image_module', 'aFilter'));
@@ -394,7 +394,12 @@ class ItemController extends Controller
 
         $items = Item::where('public', 0)->latest('updated_at')->paginate(10);
 
-        return view('admin.item.publish', compact('items', 'image_module'));
+        // Get current UI language
+        $lang = app()->getLocale();
+        // Get item types with localized names
+        $item_types = Localization::getItemTypes($lang);
+
+        return view('admin.item.publish', compact('items', 'item_types', 'image_module'));
     }
 
     /**

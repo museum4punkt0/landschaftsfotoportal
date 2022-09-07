@@ -177,10 +177,9 @@
                                 </a>
                             </td>
                             <td>
-                                @foreach($item->item_type->values as $v)
-                                    {{$v->value}}<br/>
-                                @endforeach
-                                Typ-ID {{$item->item_type_fk}}
+                                <a href="{{route('element.show', $item->item_type_fk)}}">
+                                    {{ $item_types->getLocalizedName($item->item_type_fk) }}
+                                </a>
                             </td>
                             <td>
                                 <span class="d-md-table-cell fa-btn">

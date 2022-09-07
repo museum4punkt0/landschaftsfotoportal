@@ -85,12 +85,18 @@ class ColumnMappingController extends Controller
               $colmaps = ColumnMapping::orderBy($orderby, $sort)->paginate($limit);
         }
         
+        // Get current UI language
         $lang = app()->getLocale();
+        // Get item types with localized names
         $item_types = Localization::getItemTypes($lang);             
+        // Get column groups with localized names
         $column_groups = Localization::getColumnGroups($lang);
+        // Get localized names of columns
+        $translations = Localization::getTranslations($lang, 'name');
+
         $taxa = Taxon::has('column_mapping')->orderBy('full_name')->get();
         
-        return view('admin.colmap.list', compact('colmaps', 'aFilter', 'item_types', 'column_groups', 'taxa'));
+        return view('admin.colmap.list', compact('colmaps', 'aFilter', 'item_types', 'column_groups', 'translations', 'taxa'));
     }
 
     /**

@@ -80,11 +80,15 @@ class ColumnController extends Controller
         
         //data for the filter-selects
         $lists = Selectlist::where('internal', false)->orderBy('name')->get();
+
+        // Get current UI language
         $lang = app()->getLocale();
+        // Get data types of columns with localized names
         $data_types = Localization::getDataTypes($lang);
-//        dd($data_types);
+        // Get localized names of columns
+        $translations = Localization::getTranslations($lang, 'name');
         
-        return view('admin.column.list', compact('columns', 'aFilter', 'data_types', 'lists'));
+        return view('admin.column.list', compact('columns', 'aFilter', 'data_types', 'translations', 'lists'));
     }
 
     /**

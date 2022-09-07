@@ -185,22 +185,19 @@
                             {{$column->description}}
                         </td>
                         <td>
-                            @foreach($column->translation->values as $v)
-                                <b>{{substr($v->attribute->name, 0, -3)}}:</b> {{$v->value}}<br/>
-                            @endforeach
-                            <a href="{{route('element.show', $column->translation_fk)}}">ID {{$column->translation_fk}}</a>
+                            <a href="{{route('element.show', $column->translation_fk)}}">
+                                {{ $translations->getLocalizedName($column->translation_fk) }}
+                            </a>
                         </td>
                         <td>
-                            @foreach($column->data_type->values as $v)
-                                {{$v->value}}<br/>
-                            @endforeach
-                            <a href="{{route('element.show', $column->data_type_fk)}}">ID {{$column->data_type_fk}}</a>
+                            {{ $data_types->getLocalizedName($column->data_type_fk) }}
                         </td>
                         <td>
-                            @if($column->list_fk)
-                                {{$column->list->name}} ({{$column->list->description}})<br/>
-                                <a href="{{route('list.show', $column->list_fk)}}">ID {{$column->list_fk}}</a>
-                            @endif
+                        @if($column->list_fk)
+                            <a href="{{route('list.show', $column->list_fk)}}">
+                                {{$column->list->name}} ({{$column->list->description}})
+                            </a>
+                        @endif
                         </td>
                         <td>
                             <span class="d-md-table-cell fa-btn">
