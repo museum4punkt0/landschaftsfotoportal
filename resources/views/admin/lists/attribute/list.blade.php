@@ -11,6 +11,7 @@
         @if (true || Auth::check())
             <div class="card-header">@lang('attributes.header')</div>
             <div class="card-body">
+                <div class="alert alert-danger">@lang('attributes.internal_warning')</div>
                 <a href="{{route('attribute.create')}}" class="btn btn-primary">@lang('attributes.new')</a>
                 
                 <div class="table-responsive">
