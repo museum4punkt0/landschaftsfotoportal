@@ -6,6 +6,10 @@ use App\Selectlist;
 use App\Element;
 use App\Value;
 use App\Attribute;
+use App\Column;
+use App\ColumnMapping;
+use App\Detail;
+use App\Item;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -218,6 +222,13 @@ class ElementController extends Controller
      */
     public function destroy(Element $element)
     {
+        // Some checks before deleting
+        $response = $this->checkBeforeDestroy($element);
+        if ($response) {
+            return $response;
+        }
+        #dd('stopped deleting element');
+
         // Delete all values owned by this element
         Value::where('element_fk', $element->element_id)->delete();
         $success_status_msg = __('elements.orphans_deleted');
@@ -240,6 +251,53 @@ class ElementController extends Controller
 
         return Redirect::to('admin/lists/list/' . $element->list_fk)
                         ->with('success', $success_status_msg);
+    }
+
+    /**
+     * Check relations before removing the specified resource from storage.
+     *
+     * @param  \App\Element  $element
+     * @return \Illuminate\Http\Response | false
+     */
+    private function checkBeforeDestroy(Element $element)
+    {
+        // What list belongs the element to
+        switch ($element->list->name) {
+            // Prevent deleting data types
+            case '_data_type_':
+                return back()->with('warning', __('elements.cannot_delete_data_type'));
+            // Do not delete item types used by ...
+            case '_item_type_':
+                if (ColumnMapping::where('item_type_fk', $element->element_id)->count()) {
+                    return back()->with('warning', __('elements.item_type_still_owned_by_cm'));
+                }
+                if (Item::where('item_type_fk', $element->element_id)->count()) {
+                    return back()->with('warning', __('elements.item_type_still_owned_by_it'));
+                }
+                break;
+            // Do not delete column groups used by column mappings
+            case '_column_group_':
+                if (ColumnMapping::where('column_group_fk', $element->element_id)->count()) {
+                    return back()->with('warning', __('elements.column_group_still_owned_by'));
+                }
+                break;
+            // Do not delete translations used by columns
+            case '_translation_':
+                if (Column::where('translation_fk', $element->element_id)->count()) {
+                    return back()->with('warning', __('elements.translation_still_owned_by'));
+                }
+                break;
+            // This seems to be a "normal" list, so check for usage by details
+            default:
+                if (Detail::where('element_fk', $element->element_id)->count()) {
+                    return back()->with('warning', __('elements.still_owned_by_detail'));
+                }
+                // Many-to-many-relation for multi-select-lists
+                if ($element->details->count()) {
+                    return back()->with('warning', __('elements.still_owned_by_detail'));
+                }
+        }
+        return false;
     }
 
     /**
