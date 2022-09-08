@@ -443,8 +443,7 @@ class ColumnMappingController extends Controller
     {
         $colmap->delete();
         
-        return Redirect::to('admin/colmap')
-            ->with('success', __('colmaps.deleted'));
+        return back()->with('success', __('colmaps.deleted'));
     }
 
     /**

@@ -152,8 +152,7 @@ class ValueController extends Controller
                 }
             }
         }
-        
-        return Redirect::to('admin/lists/list/'.$value->element->list_fk)
-            ->with('success', $success_status_msg);
+
+        return back()->with('success', $success_status_msg);
     }
 }

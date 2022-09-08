@@ -327,8 +327,7 @@ class ColumnController extends Controller
         
         $column->delete();
         
-        return Redirect::to('admin/column')
-            ->with('success', __('columns.deleted'));
+        return back()->with('success', __('columns.deleted'));
     }
 
     /**

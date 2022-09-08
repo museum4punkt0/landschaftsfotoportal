@@ -249,8 +249,7 @@ class ElementController extends Controller
             }
         }
 
-        return Redirect::to('admin/lists/list/' . $element->list_fk)
-                        ->with('success', $success_status_msg);
+        return back()->with('success', $success_status_msg);
     }
 
     /**

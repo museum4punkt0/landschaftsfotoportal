@@ -817,8 +817,7 @@ class ItemController extends Controller
         // Delete the item itself
         $item->delete();
 
-        return redirect()->route('item.show.own')
-                        ->with('success', __('items.deleted'));
+        return back()->with('success', __('items.deleted'));
     }
 
     /**

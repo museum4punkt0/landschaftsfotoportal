@@ -116,8 +116,7 @@ class AttributeController extends Controller
     public function destroy(Attribute $attribute)
     {
         $attribute->delete();
-        
-        return Redirect::to('admin/lists/attribute')
-            ->with('success', __('attributes.deleted'));
+
+        return back()->with('success', __('attributes.deleted'));
     }
 }

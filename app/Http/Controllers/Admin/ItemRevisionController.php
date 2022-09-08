@@ -170,19 +170,16 @@ class ItemRevisionController extends Controller
 
         // Don't delete the most current revision which is not a draft
         if ($revision->revision == $latest->revision) {
-            return redirect()->route('revision.index')
-                             ->with('warning', __('revisions.cannot_delete_current'));
+            return back()->with('warning', __('revisions.cannot_delete_current'));
         }
         // Don't delete if this revision is the only one which exists
         elseif ($revision->item->revisions->count() == 1) {
-            return redirect()->route('revision.index')
-                             ->with('warning', __('revisions.cannot_delete_current'));
+            return back()->with('warning', __('revisions.cannot_delete_current'));
         }
         else {
             $revision->deleteRevisionWithDetails();
 
-            return redirect()->route('revision.index')
-                             ->with('success', __('revisions.deleted'));
+            return back()->with('success', __('revisions.deleted'));
         }
     }
 

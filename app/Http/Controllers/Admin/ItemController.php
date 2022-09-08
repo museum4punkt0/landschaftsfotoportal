@@ -665,8 +665,7 @@ class ItemController extends Controller
         // Delete the item itself
         $item->delete();
 
-        return Redirect::to('admin/item')
-                        ->with('success', __('items.deleted'));
+        return back()->with('success', __('items.deleted'));
     }
 
     /**
