@@ -20,6 +20,8 @@ return [
     'created' => 'Liste wurde angelegt.',
     'updated' => 'Liste wurde bearbeitet.',
     'deleted' => 'Liste wurde gelöscht.',
+    'cannot_delete_internal' => 'Eine interne Systemliste kann nicht gelöscht werden!',
+    'still_owned_by' => 'Auswahlliste kann nicht gelöscht werden, da sie in Anzeigefeldern verwendet wird!',
     
     'hierarchical' => 'hierarchisch',
     'internal_header' => 'Systemlisten',

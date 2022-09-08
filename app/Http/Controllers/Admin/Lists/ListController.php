@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Lists;
 
 use App\Selectlist;
 use App\Attribute;
+use App\Column;
 use App\Element;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -331,13 +332,24 @@ class ListController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Selectlist  $list
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Selectlist $list)
     {
-        Selectlist::where('list_id', $id)->delete();
-        
+        // Prevent deleting internal lists
+        if ($list->internal) {
+            return back()->with('warning', __('lists.cannot_delete_internal'));
+        }
+        else {
+            // Check for columns owning this list
+            if (Column::where('list_fk', $list->list_id)->count()) {
+                return back()->with('warning', __('lists.still_owned_by'));
+            }
+        }
+
+        $list->delete();
+
         // TODO: delete orphaned elements and values
         
         return Redirect::to('admin/lists/list')->with('success', __('lists.deleted'));
