@@ -237,6 +237,15 @@ class TaxonController extends Controller
      */
     public function destroy(Taxon $taxon)
     {
+        // Check for column mappings owning this taxon
+        if ($taxon->column_mapping()->count()) {
+            return back()->with('warning', __('taxon.still_owned_by_cm'));
+        }
+        // Check for items owning this taxon
+        if ($taxon->items()->count()) {
+            return back()->with('warning', __('taxon.still_owned_by_it'));
+        }
+
         $taxon->delete();
         $success_status_msg = " ". __('taxon.deleted');
         
@@ -248,9 +257,8 @@ class TaxonController extends Controller
             $success_status_msg .= " ".
                 __('elements.hierarchy_fixed', ['id'=>$descendant->taxon_id]);
         }
-        
-        return Redirect::to('admin/taxon')
-            ->with('success', $success_status_msg);
+
+        return back()->with('success', $success_status_msg);
     }
 
     /**

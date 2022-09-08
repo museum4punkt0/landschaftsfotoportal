@@ -23,7 +23,9 @@ return [
     'created' => 'Taxon wurde angelegt.',
     'updated' => 'Taxon wurde bearbeitet.',
     'deleted' => 'Taxon wurde gelöscht.',
-    
+    'still_owned_by_it' => 'Taxon kann nicht gelöscht werden, da es in Datensätzen verwendet wird!',
+    'still_owned_by_cm' => 'Taxon kann nicht gelöscht werden, da es in Feld-Zurordnungen verwendet wird!',
+
     'related_items' => 'Verknüpfte Datensätze',
     'parent' => 'Übergeordnetes Taxon',
     'parent_help' => 'Das nächst-höhere übergeordnete, valide Taxon.',
