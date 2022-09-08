@@ -127,8 +127,8 @@ Route::get('admin/list/types', 'Admin\Lists\ListController@showItemTypes')->name
 Route::get('admin/list/groups', 'Admin\Lists\ListController@showColumnGroups')->name('list.column_groups');
 Route::get('admin/list/translations', 'Admin\Lists\ListController@showTranslations')->name('list.translations');
 Route::get('admin/lists/list/internal', 'Admin\Lists\ListController@internal')->name('list.internal');
-Route::get('admin/lists/list/{id}/tree', 'Admin\Lists\ListController@tree')->name('list.tree');
-Route::get('admin/lists/list/{id}/export', 'Admin\Lists\ListController@export')->name('list.export');
+Route::get('admin/lists/list/{list}/tree', 'Admin\Lists\ListController@tree')->name('list.tree');
+Route::get('admin/lists/list/{list}/export', 'Admin\Lists\ListController@export')->name('list.export');
 Route::resource('admin/lists/list', 'Admin\Lists\ListController');
 Route::resource('admin/lists/attribute', 'Admin\Lists\AttributeController');
 
