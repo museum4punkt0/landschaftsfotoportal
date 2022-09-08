@@ -348,10 +348,14 @@ class ListController extends Controller
             }
         }
 
+        // Delete orphaned elements and values
+        foreach ($list->elements as $element) {
+            $element->values()->delete();
+        }
+        $list->elements()->delete();
+        // Delete list itself
         $list->delete();
 
-        // TODO: delete orphaned elements and values
-        
-        return Redirect::to('admin/lists/list')->with('success', __('lists.deleted'));
+        return back()->with('success', __('lists.deleted'));
     }
 }
