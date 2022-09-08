@@ -205,9 +205,7 @@ class CommentController extends Controller
     public function destroy(Comment $comment)
     {
         $comment->delete();
-        
-        // Note: route to comments belonging to same item: 'admin/item/'.$comment->item_fk.'/comment'
-        return redirect()->route('comment.all')
-            ->with('success', __('comments.deleted'));
+
+        return back()->with('success', __('comments.deleted'));
     }
 }
