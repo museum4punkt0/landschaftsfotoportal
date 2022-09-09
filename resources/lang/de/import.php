@@ -40,7 +40,9 @@ return [
     'missing_columns' => 'Für mindestens eine Spalte muss der Inhalts-Typ (Anzeigefeld) ausgewählt werden!',
     'missing_id' => 'Es muss eine Spalte mit den Element-IDs ausgewählt werden!',
     'missing_parent' => 'Es muss eine Spalte mit den Parent-IDs ausgewählt werden!',
-    
+    'missing_related_item_type' => 'In der Feld-Zuordnung ":desc" fehlt die Konfiguration für den verknüpften Datensatztyp!',
+    'invalid_related_item_type' => 'In der Feld-Zuordnung ":desc" ist die Konfiguration für den verknüpften Datensatztyp mit ID :id ungültig!',
+
     'column_separator' => 'Trennzeichen für Tabellenspalten',
     'element_separator' => 'Trennzeichen für Elemente von Mehrfachauswahllisten',
     'contains_header' => 'CSV enthält in der ersten Zeile Spaltenüberschriften',

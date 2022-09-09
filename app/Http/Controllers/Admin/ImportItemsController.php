@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
+use Debugbar;
 use Validator;
 use Redirect;
 use File;
@@ -124,7 +125,13 @@ class ImportItemsController extends Controller
             return redirect()->route('import.items.upload')
                 ->with('error', __('colmaps.none_available'));
         }
-        
+
+        // Check for existing 'item_type' config on colmaps for relation columns
+        $response = $this->checkRelationConfig($colmaps);
+        if ($response) {
+            return $response;
+        }
+
         $items = Item::tree()->depthFirst()->get();
         
         // Get current UI language
@@ -251,5 +258,37 @@ class ImportItemsController extends Controller
         
         return Redirect::to('admin/item')
             ->with('success', __('items.file_ext_fixed', ['count' => $count]));
+    }
+
+    /**
+     * Check for existing and valid 'item_type' config on colmaps for columns of data type 'relation'.
+     *
+     * @param  \Illuminate\Database\Eloquent\Collection  $colmaps
+     * @return \Illuminate\Http\Response | false
+     */
+    private function checkRelationConfig($colmaps)
+    {
+        foreach ($colmaps as $cm) {
+            // Check for columns with data type '_relation_'
+            if ($cm->column->data_type_name == '_relation_') {
+                Debugbar::debug('column with relation: ' . $cm->column->description);
+                $item_type = $cm->getConfigValue('item_type');
+                Debugbar::debug('--> related item type: ' . $item_type);
+                if (!$item_type) {
+                    return back()->with('error', __('import.missing_related_item_type',
+                        ['desc' => $cm->column->description]
+                    ));
+                }
+                // Check if item type is valid
+                $element = Element::find($item_type);
+                Debugbar::debug($element);
+                if (!$element || optional($element->list)->name !== '_item_type_') {
+                    return back()->with('error', __('import.invalid_related_item_type',
+                        ['desc' => $cm->column->description, 'id' => $item_type]
+                    ));
+                }
+            }
+        }
+        return false;
     }
 }
