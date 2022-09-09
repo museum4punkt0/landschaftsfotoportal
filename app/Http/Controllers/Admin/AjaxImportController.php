@@ -205,12 +205,15 @@ class AjaxImportController extends Controller
                             // TODO: don't import and add warning if value doesn't exist in list
                             $detail_data['element_fk'] = $value ? $value->element_fk : null;
                             if (!$value) {
-                                Log::channel('import')->warning(__('import.element_mismatch', ['element' => $cell]), [
+                                $list = Selectlist::find(Column::find($attr)->list_fk)->name;
+                                Log::channel('import')->warning(
+                                    __('import.element_mismatch', [
+                                        'element' => $cell, 'list' => $list
+                                    ]), [
                                     'list' => Column::find($attr)->list_fk,
                                     'item' => $item->item_id,
                                     'line' => $number,
                                 ]);
-                                $list = Selectlist::find(Column::find($attr)->list_fk)->name;
                                 $warning_status_msg .= " ". __('import.csv_line', ['line' => $number]) .
                                     __('import.element_mismatch', ['element' => $cell, 'list' => $list]) ."\n";
                             }
@@ -231,12 +234,15 @@ class AjaxImportController extends Controller
                                 if ($value) {
                                     $detail_elements[] = $value->element_fk;
                                 } else {
-                                    Log::channel('import')->warning(__('import.element_mismatch', ['element' => $element]), [
+                                    $list = Selectlist::find(Column::find($attr)->list_fk)->name;
+                                    Log::channel('import')->warning(
+                                        __('import.element_mismatch', [
+                                            'element' => $element, 'list' => $list
+                                        ]), [
                                         'list' => Column::find($attr)->list_fk,
                                         'item' => $item->item_id,
                                         'line' => $number,
                                     ]);
-                                    $list = Selectlist::find(Column::find($attr)->list_fk)->name;
                                     $warning_status_msg .= " ". __('import.csv_line', ['line' => $number]) .
                                         __('import.element_mismatch', ['element' => $element, 'list' => $list]) ."\n";
                                 }
