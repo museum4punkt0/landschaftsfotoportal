@@ -91,12 +91,15 @@ class ColumnMappingController extends Controller
         $item_types = Localization::getItemTypes($lang);             
         // Get column groups with localized names
         $column_groups = Localization::getColumnGroups($lang);
+        // Get data types of columns with localized names
+        $data_types = Localization::getDataTypes($lang);
         // Get localized names of columns
         $translations = Localization::getTranslations($lang, 'name');
 
         $taxa = Taxon::has('column_mapping')->orderBy('full_name')->get();
         
-        return view('admin.colmap.list', compact('colmaps', 'aFilter', 'item_types', 'column_groups', 'translations', 'taxa'));
+        return view('admin.colmap.list',
+            compact('colmaps', 'aFilter', 'item_types', 'data_types', 'column_groups', 'translations', 'taxa'));
     }
 
     /**

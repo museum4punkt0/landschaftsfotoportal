@@ -171,6 +171,8 @@
                             <a href="{{route('column.edit', $colmap->column_fk)}}">
                                 {{ $translations->getLocalizedName($colmap->column->translation_fk) }}
                             </a>
+                            <br>
+                            ({{ $data_types->getLocalizedName($colmap->column->data_type_fk) }})
                         </td>
                         <td>
                             <a href="{{route('element.show', $colmap->column_group_fk)}}">
