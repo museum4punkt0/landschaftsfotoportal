@@ -166,6 +166,7 @@
                 @include('includes.column_cardheader')
                 
                 <div class="card card-body">
+                @if($item->taxon)
                     @if($cm->getConfigValue('taxon_show') == 'full_name')
                         {{ $item->taxon->full_name }}
                     @endif
@@ -185,6 +186,13 @@
                             @lang('common.not_applicable')
                         @endif
                     @endif
+                @else
+                    @can('show-admin')
+                        <span class="text-danger">
+                            @lang('items.no_detail_for_column', ['column' => $cm->column->column_id])
+                        </span>
+                    @endcan
+                @endif
                 </div>
                 @break
 
