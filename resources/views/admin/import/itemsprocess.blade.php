@@ -35,7 +35,7 @@
                         @lang('import.import')
                     </button>
                     <button type="button" id="addTitlesButton" class="btn btn-primary"
-                        data-href="{{ route('item.titles') }}" disabled
+                        data-href="{{ route('titles.create') }}" disabled
                     >
                         @lang('items.add_titles')
                     </button>

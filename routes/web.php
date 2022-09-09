@@ -99,7 +99,8 @@ Route::get('admin/detail/orphans', 'Admin\DetailController@removeOrphans')->name
 Route::resource('admin/detail', 'Admin\DetailController');
 
 Route::get('admin/item/new', 'Admin\ItemController@new')->name('item.new');
-Route::get('admin/item/titles', 'Admin\ItemController@titles')->name('item.titles');
+Route::get('admin/titles/create', 'Admin\ItemController@createTitles')->name('titles.create');
+Route::post('admin/titles/store', 'Admin\ItemController@storeTitles')->name('titles.store');
 Route::get('admin/item/unpublished', 'Admin\ItemController@list_unpublished')->name('item.unpublished');
 Route::get('admin/item/publish/{item?}', 'Admin\ItemController@publish')->name('item.publish');
 Route::get('admin/item/autocomplete', 'Admin\ItemController@autocomplete')->name('item.autocomplete');

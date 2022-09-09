@@ -115,7 +115,7 @@
                                         {{ __('lists.internal_header') }}
                                     </a>
                                 @endcan
-                                    <a class="dropdown-item" href="{{ route('item.titles') }}">
+                                    <a class="dropdown-item" href="{{ route('titles.create') }}">
                                         {{ __('items.add_titles') }}
                                     </a>
                                     <a class="dropdown-item" href="{{ route('detail.orphans') }}">

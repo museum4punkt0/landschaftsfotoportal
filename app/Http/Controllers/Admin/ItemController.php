@@ -346,12 +346,30 @@ class ItemController extends Controller
     }
 
     /**
+     * Show the form for creating or updating titles of items.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function createTitles(Request $request)
+    {
+        $this->authorize('titles', Item::class);
+
+        // Get current UI language
+        $lang = app()->getLocale();
+        // Get item types with localized names
+        $item_types = Localization::getItemTypes($lang);
+
+        return view('admin.item.titles', compact('item_types'));
+    }
+
+    /**
      * Fill title column of items table from details table.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function titles(Request $request)
+    public function storeTitles(Request $request)
     {
         $this->authorize('titles', Item::class);
 
