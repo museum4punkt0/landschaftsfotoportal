@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Column;
 use App\ColumnMapping;
+use App\Detail;
 use App\Item;
 use App\Selectlist;
 use App\Element;
