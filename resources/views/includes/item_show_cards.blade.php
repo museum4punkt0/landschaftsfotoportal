@@ -287,7 +287,15 @@
                 @include('includes.column_cardheader')
                 
                 <div class="card card-body">
+                @if($cm->getConfigValue('scale_factor'))
+                    {{ round(optional($details->firstWhere('column_fk', $cm->column->column_id))->value_float * $cm->getConfigValue('scale_factor'), $cm->getConfigValue('precision')) }}
+                    <span class="text-muted">
+                    @lang('colmaps.option_scale_factor_label'): {{ $cm->getConfigValue('scale_factor') }}, 
+                    @lang('colmaps.option_precision_label'): {{ $cm->getConfigValue('precision') }}
+                    </span>
+                @else
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_float }}
+                @endif
                 </div>
                 @break
             

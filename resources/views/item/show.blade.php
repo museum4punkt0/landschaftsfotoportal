@@ -220,7 +220,11 @@
             @case('_float_')
                 @include('includes.column_title')
                 <div class="col column-content">
+                @if($cm->getConfigValue('scale_factor'))
+                    {{ round(optional($details->firstWhere('column_fk', $cm->column->column_id))->value_float * $cm->getConfigValue('scale_factor'), $cm->getConfigValue('precision')) }}
+                @else
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_float }}
+                @endif
                 </div>
                 @break
             
