@@ -26,6 +26,9 @@
             {{ $comments->count()}} @lang('comments.header')
             </a>
         @endif
+        <a href="{{route('item.comment.create', $item->item_id)}}" class="btn btn-primary">
+        @lang('comments.new')
+        </a>
     </div>
 
     @include('includes.item_show_cards')
