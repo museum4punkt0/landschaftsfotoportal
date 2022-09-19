@@ -410,7 +410,7 @@
                         data-column="{{ $cm->column->column_id }}"
                         data-type="string"
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
-                        rows=5
+                        rows="{{ $cm->getConfigValue('textarea') ?? 5 }}"
                         @if($loop->first && !$options['edit.meta']) autofocus @endif
                     >{!!
                         old('fields.'. $cm->column->column_id, 

@@ -263,7 +263,7 @@
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control summernote @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
-                        rows=5
+                        rows="{{ $cm->getConfigValue('textarea') ?? 5 }}"
                         @if($loop->first && !$options['edit.meta']) autofocus @endif
                     >{!!
                         old('fields.'. $cm->column->column_id)
