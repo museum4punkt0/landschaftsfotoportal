@@ -431,7 +431,7 @@ class ListSeeder extends Seeder
                 "default" => false,
                 "data_type" => "bool",
             ],
-            "item_type" => [
+            "relation_item_type" => [
                 "data_type" => "item_type",
             ],
         ]];
@@ -775,7 +775,7 @@ class ListSeeder extends Seeder
                 "min" => 0,
                 "max" => 6,
             ],
-            "item_type" => [
+            "map_item_type" => [
                 "data_type" => "item_type",
             ],
             "points" => [

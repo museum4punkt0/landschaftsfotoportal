@@ -106,6 +106,12 @@ return [
             'level' => 'debug',
             'days' => 90,
         ],
+
+        'migration' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/migration.log'),
+            'level' => 'debug',
+        ],
     ],
 
 ];

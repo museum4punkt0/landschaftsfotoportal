@@ -69,7 +69,7 @@
                                                     ->pivot->value }}"
                                                 @if($colmap->column->data_type->attributes
                                                     ->firstWhere('name', 'code')->pivot->value == '_relation_')
-                                                    data-option-item-type="{{ $item_types->firstwhere('element_fk', $colmap->getConfigValue('item_type'))->value }}"
+                                                    data-option-item-type="{{ $item_types->firstwhere('element_fk', $colmap->getConfigValue('relation_item_type'))->value }}"
                                                 @endif
                                             >
                                                 {{ $colmap->column->translation->attributes

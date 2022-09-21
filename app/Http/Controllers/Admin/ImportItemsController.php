@@ -272,7 +272,7 @@ class ImportItemsController extends Controller
             // Check for columns with data type '_relation_'
             if ($cm->column->data_type_name == '_relation_') {
                 Debugbar::debug('column with relation: ' . $cm->column->description);
-                $item_type = $cm->getConfigValue('item_type');
+                $item_type = $cm->getConfigValue('relation_item_type');
                 Debugbar::debug('--> related item type: ' . $item_type);
                 if (!$item_type) {
                     return back()->with('error', __('import.missing_related_item_type',

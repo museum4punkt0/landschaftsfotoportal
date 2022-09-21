@@ -16,7 +16,7 @@
             <input type="hidden" id="fieldsHiddenInput-{{ $column }}" name="fields[{{ $column }}]" value="{{ $item_id }}" />
         </div>
         <div class="col-auto">
-            <a href="{{ route('item.new', ['item_type' => $cm->getConfigValue('item_type'), 'msg' => 'new_related']) }}"
+            <a href="{{ route('item.new', ['item_type' => $cm->getConfigValue('relation_item_type'), 'msg' => 'new_related']) }}"
                 target="_blank" class="btn btn-primary">@lang('common.new')</a>
         </div>
     </div>

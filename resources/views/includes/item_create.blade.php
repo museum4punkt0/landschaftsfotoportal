@@ -93,7 +93,7 @@
             @case('_relation_')
                 {{-- Input with autocomplete for related item --}}
                 @include('includes.form_item_autocomplete', [
-                    'search_url' => route('item.autocomplete', ['item_type' => $cm->getConfigValue('item_type')]),
+                    'search_url' => route('item.autocomplete', ['item_type' => $cm->getConfigValue('relation_item_type')]),
                     'div_class' => 'form-group',
                     'column' => $cm->column->column_id,
                     'name' => 'fields',

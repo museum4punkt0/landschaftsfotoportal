@@ -164,7 +164,7 @@ class AjaxImportController extends Controller
                                         ]
                                     );
                                 }
-                                $it = $cm->getConfigValue('item_type');
+                                $it = $cm->getConfigValue('relation_item_type');
                                 $related_item = Item::whereHas('details', function (Builder $query) use ($cell, $it) {
                                     $query->where('value_string', $cell);
                                 })->where('item_type_fk', $it)->first();
