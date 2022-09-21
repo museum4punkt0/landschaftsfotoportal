@@ -34,6 +34,7 @@ class ChangeDataTypeConfigItemType extends Migration
         })->get();
 
         $this->changeConfig($colmaps, 'item_type', 'map_item_type');
+        $this->changeConfig($colmaps, 'title_col', 'map_title_col');
     }
 
     /**
@@ -56,6 +57,7 @@ class ChangeDataTypeConfigItemType extends Migration
         })->get();
 
         $this->changeConfig($colmaps, 'map_item_type', 'item_type');
+        $this->changeConfig($colmaps, 'map_title_col', 'title_col');
     }
 
     /**

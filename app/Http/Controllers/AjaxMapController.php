@@ -284,7 +284,7 @@ class AjaxMapController extends Controller
                         'id' => $item->item_id,
                         'properties' => [
                             'name' => optional($item->details->firstWhere(
-                                    'column_fk', data_get($config, 'title_col')
+                                    'column_fk', data_get($config, 'map_title_col')
                                 ))->value_string,
                             'preview' => $this->getImageSource($item, $config),
                             'details' => route('item.show.public', $item),
