@@ -418,8 +418,31 @@ class ColumnMappingController extends Controller
             'public' => 'required|integer',
             'api_attribute' => 'nullable|string|max:255',
             'config' => 'nullable|string|max:4095',
+            'option.*' => 'nullable|string|max:255',
+            'option_int.*' => 'nullable|integer|numeric',
+            'option_float.*' => 'nullable|numeric',
         ]);
+        #dd($request->input());
         
+        // Get data type dependent config options
+        $config = $request->input('option');
+        if ($request->has('option_int')) {
+            $config = array_merge($config, $request->input('option_int'));
+        }
+        if ($request->has('option_float')) {
+            $config = array_merge($config, $request->input('option_float'));
+        }
+        // Replace strings from input representing a boolean value
+        array_walk($config, function (&$value, $key) {
+            $value = ($value === 'false') ? false : $value;
+            $value = ($value === 'true') ? true : $value;
+        });
+        // Remove elements with value beeing null
+        $config = array_filter($config, function ($value) {
+            return !is_null($value);
+        });
+        #dd($config);
+
         //$colmap->column_fk = $request->input('column');
         $colmap->column_group_fk = $request->input('column_group');
         //$colmap->item_type_fk = $request->input('item_type');
@@ -427,7 +450,7 @@ class ColumnMappingController extends Controller
         $colmap->column_order = $request->input('column_order');
         $colmap->public = $request->input('public');
         $colmap->api_attribute = $request->input('api_attribute');
-        $colmap->config = $request->input('config');
+        $colmap->config = $config;
         $colmap->save();
         
         // TODO: Create missing details for all items, see function store()
