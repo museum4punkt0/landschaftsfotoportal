@@ -67,6 +67,7 @@ return [
     'no_column_for_image_width' => 'Keine Anzeigespalte für Bildbreite konfiguriert!',
     'no_column_for_image_height' => 'Keine Anzeigespalte für Bildhöhe konfiguriert!',
     'no_column_for_image_size' => 'Keine Anzeigespalte für Bildgröße konfiguriert!',
+    'no_config_for_colmap' => 'Fehlende Konfiguration für Feld-Zuordnung #:colmap: ',
     'file_not_found' => 'Datei ":file" nicht vorhanden!',
     'file_max_size' => 'Die Datei darf maximal :max Kilobytes groß sein.',
     'resized_image_created' => 'Bild wurde in geänderter Größe gespeichert: ',

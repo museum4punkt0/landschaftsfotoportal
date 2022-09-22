@@ -286,60 +286,6 @@ class ListSeeder extends Seeder
             Attribute::where('name', 'name_en')->value('attribute_id'),
             ['value' => 'HTML text']
         );
-        // Data type: image title
-        $element = Element::create([
-            'list_fk' => $data_type_list->list_id,
-            'parent_fk' => null,
-            'value_summary' => '',
-        ]);
-        $element->attributes()->attach(
-            Attribute::where('name', 'code')->value('attribute_id'),
-            ['value' => '_image_title_']
-        );
-        $element->attributes()->attach(
-            Attribute::where('name', 'name_de')->value('attribute_id'),
-            ['value' => 'Bildtitel']
-        );
-        $element->attributes()->attach(
-            Attribute::where('name', 'name_en')->value('attribute_id'),
-            ['value' => 'image title']
-        );
-        // Data type: image copyright
-        $element = Element::create([
-            'list_fk' => $data_type_list->list_id,
-            'parent_fk' => null,
-            'value_summary' => '',
-        ]);
-        $element->attributes()->attach(
-            Attribute::where('name', 'code')->value('attribute_id'),
-            ['value' => '_image_copyright_']
-        );
-        $element->attributes()->attach(
-            Attribute::where('name', 'name_de')->value('attribute_id'),
-            ['value' => 'Bildrechte']
-        );
-        $element->attributes()->attach(
-            Attribute::where('name', 'name_en')->value('attribute_id'),
-            ['value' => 'image copyright']
-        );
-        // Data type: image ppi
-        $element = Element::create([
-            'list_fk' => $data_type_list->list_id,
-            'parent_fk' => null,
-            'value_summary' => '',
-        ]);
-        $element->attributes()->attach(
-            Attribute::where('name', 'code')->value('attribute_id'),
-            ['value' => '_image_ppi_']
-        );
-        $element->attributes()->attach(
-            Attribute::where('name', 'name_de')->value('attribute_id'),
-            ['value' => 'Bild-ppi (Pixel pro Zoll)']
-        );
-        $element->attributes()->attach(
-            Attribute::where('name', 'name_en')->value('attribute_id'),
-            ['value' => 'image ppi (pixels per inch)']
-        );
         // Data type: redirect
         $element = Element::create([
             'list_fk' => $data_type_list->list_id,
@@ -679,6 +625,21 @@ class ListSeeder extends Seeder
                     "false" => false,
                     "zoomify" => "zoomify",
                 ],
+            ],
+            "image_title_col" => [
+                "default" => false,
+                "data_type" => "column",
+                "column_data_type" => "_string_",
+            ],
+            "image_copyright_col" => [
+                "default" => false,
+                "data_type" => "column",
+                "column_data_type" => "_string_",
+            ],
+            "image_ppi_col" => [
+                "default" => false,
+                "data_type" => "column",
+                "column_data_type" => "_integer_",
             ],
             "image_size_col" => [
                 "default" => false,

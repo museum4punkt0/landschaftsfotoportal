@@ -203,8 +203,6 @@
             
             {{-- Data_type of form field is integer --}}
             @case('_integer_')
-            {{-- Data_type of form field is image pixel per inch --}}
-            @case('_image_ppi_')
                 @include('includes.column_title')
                 <div class="col column-content">
                     {{-- TODO: move scaling to controller or model --}}
@@ -230,10 +228,6 @@
             
             {{-- Data_type of form field is string --}}
             @case('_string_')
-            {{-- Data_type of form field is image title --}}
-            @case('_image_title_')
-            {{-- Data_type of form field is image copyright --}}
-            @case('_image_copyright_')
                 @include('includes.column_title')
                 <div class="col column-content">
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string }}
@@ -290,11 +284,13 @@
                 <div class="col column-content">
                     @if($cm->getConfigValue('image_show') == 'gallery')
                         <div class="container-fluid">
+                            @include('includes.alert_image_config_div')
+
                             <div class="row align-items-end">
                             @foreach($items->where('parent_fk', $item->item_id)->sortBy('title') as $specimen)
                                 @foreach($items->where('parent_fk', $specimen->item_id) as $it)
                                     {{-- Show specimen thumbnails only, no images of details --}}
-                                    @if(strpos($it->getDetailWhereDataType('_image_title_'), 'Gesamtansicht') !== false)
+                                    @if(strpos(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_title_col')))->value_string, 'Gesamtansicht') !== false)
                                     <div class="col-auto py-2">
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
                                             <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{
@@ -303,10 +299,10 @@
                                             }}.zif&caption={{ rawurlencode($item->taxon->full_name ."; Barcode: ".
                                                 explode('_', pathinfo($it->getDetailWhereDataType('_image_'),
                                                     PATHINFO_FILENAME))[0])
-                                            }}&description={{ rawurlencode($it->getDetailWhereDataType('_image_title_'))
-                                            }}&copyright={{ rawurlencode($it->getDetailWhereDataType('_image_copyright_')) 
+                                            }}&description={{ rawurlencode(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_title_col')))->value_string)
+                                            }}&copyright={{ rawurlencode(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_copyright_col')))->value_string) 
                                             }}&params=zMeasureVisible%3D1%26zUnits%3Dmm%26zPixelsPerUnit%3D{{
-                                                $it->getDetailWhereDataType('_image_ppi_')/25.4
+                                                intval(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_ppi_col')))->value_int)/25.4
                                             }}">
                                         @endif
                                         @if(Storage::exists('public/'. Config::get('media.preview_dir') .
@@ -314,12 +310,12 @@
                                             <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
                                                 $it->getDetailWhereDataType('_image_')) }}"
                                                 width={{ Config::get('media.preview_width') }}
-                                                title="{{ $it->getDetailWhereDataType('_image_title_') }}"
+                                                title="{{ optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_title_col')))->value_string }}"
                                             />
                                         @else
                                             <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $it->getDetailWhereDataType('_image_') }}"
                                                 width={{ Config::get('media.preview_width') }}
-                                                title="{{ $it->getDetailWhereDataType('_image_title_') }}"
+                                                title="{{ optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_title_col')))->value_string }}"
                                             />
                                         @endif
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
@@ -340,22 +336,24 @@
                     
                     @if($cm->getConfigValue('image_show') == 'specimen')
                         <div class="container-fluid">
+                            @include('includes.alert_image_config_div')
+
                             <div class="row align-items-end">
                                 @foreach($items->where('parent_fk', $item->item_id)->sortBy('title') as $it)
                                     <div class="col-auto py-2">
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
                                             {{-- Bestikri images have different pathes and types --}}
-                                            @if(strpos($it->getDetailWhereDataType('_image_title_'), 'Gesamtansicht') === false)
+                                            @if(strpos(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_title_col')))->value_string, 'Gesamtansicht') === false)
                                                 <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{
                                                     Config::get('media.zoomify_jpg_image_path')
                                                 }}{{ pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME)
                                                 }}.jpg&caption={{ rawurlencode($item->taxon->full_name ."; Barcode: ".
                                                     explode('_', pathinfo($it->getDetailWhereDataType('_image_'),
                                                         PATHINFO_FILENAME))[0])
-                                                }}&description={{ rawurlencode($it->getDetailWhereDataType('_image_title_'))
-                                                }}&copyright={{ rawurlencode($it->getDetailWhereDataType('_image_copyright_'))
+                                                }}&description={{ rawurlencode(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_title_col')))->value_string)
+                                                }}&copyright={{ rawurlencode(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_copyright_col')))->value_string)
                                                 }}&params=zMeasureVisible%3D1%26zUnits%3Dmm%26zPixelsPerUnit%3D{{
-                                                    $it->getDetailWhereDataType('_image_ppi_')/25.4
+                                                    intval(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_ppi_col')))->value_int)/25.4
                                                 }}">
                                             @else
                                                 <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{
@@ -364,10 +362,10 @@
                                                 }}.zif&caption={{ rawurlencode($item->taxon->full_name ."; Barcode: ".
                                                     explode('_', pathinfo($it->getDetailWhereDataType('_image_'),
                                                         PATHINFO_FILENAME))[0])
-                                                }}&description={{ rawurlencode($it->getDetailWhereDataType('_image_title_'))
-                                                }}&copyright={{ rawurlencode($it->getDetailWhereDataType('_image_copyright_'))
+                                                }}&description={{ rawurlencode(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_title_col')))->value_string)
+                                                }}&copyright={{ rawurlencode(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_copyright_col')))->value_string)
                                                 }}&params=zMeasureVisible%3D1%26zUnits%3Dmm%26zPixelsPerUnit%3D{{
-                                                    $it->getDetailWhereDataType('_image_ppi_')/25.4
+                                                    intval(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_ppi_col')))->value_int)/25.4
                                                 }}">
                                             @endif
                                         @endif
@@ -376,19 +374,19 @@
                                             <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
                                                 $it->getDetailWhereDataType('_image_')) }}"
                                                 height={{ Config::get('media.preview_height') }}
-                                                title="{{ $it->getDetailWhereDataType('_image_title_') }}"
+                                                title="{{ optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_title_col')))->value_string }}"
                                             />
                                         @else
                                             <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $it->getDetailWhereDataType('_image_') }}"
                                                 height={{ Config::get('media.preview_height') }}
-                                                title="{{ $it->getDetailWhereDataType('_image_title_') }}"
+                                                title="{{ optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_title_col')))->value_string }}"
                                             />
                                         @endif
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
                                             </a>
                                         @endif
                                         <br/>
-                                        {{ $it->getDetailWhereDataType('_image_title_') }}
+                                        {{ optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_title_col')))->value_string }}
                                     </div>
                                 @endforeach
                             </div>

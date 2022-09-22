@@ -265,8 +265,6 @@
             
             {{-- Data_type of form field is integer --}}
             @case('_integer_')
-            {{-- Data_type of form field is image pixel per inch --}}
-            @case('_image_ppi_')
                 @include('includes.column_cardheader')
                 
                 <div class="card card-body">
@@ -303,10 +301,6 @@
             @case('_string_')
             {{-- Data_type of form field is (menu) title --}}
             @case('_title_')
-            {{-- Data_type of form field is image title --}}
-            @case('_image_title_')
-            {{-- Data_type of form field is image copyright --}}
-            @case('_image_copyright_')
                 @include('includes.column_cardheader')
                 
                 <div class="card card-body">

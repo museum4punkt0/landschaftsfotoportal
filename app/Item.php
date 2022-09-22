@@ -422,7 +422,6 @@ class Item extends Model
                         $detail = $column->pivot->value_float;
                         break;
                     case '_integer_':
-                    case '_image_ppi_':
                         $detail = $column->pivot->value_int;
                         break;
                     default:
@@ -453,7 +452,6 @@ class Item extends Model
                         $content = $detail->value_float;
                         break;
                     case '_integer_':
-                    case '_image_ppi_':
                         $content = $detail->value_int;
                         break;
                     default:

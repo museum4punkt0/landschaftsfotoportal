@@ -159,7 +159,6 @@ class ItemController extends Controller
                     break;
                 case '_boolean_':
                 case '_integer_':
-                case '_image_ppi_':
                     $detail_data['value_int'] = $value == '' ? null : intval($value);
                     break;
                 case '_float_':
@@ -173,8 +172,6 @@ class ItemController extends Controller
                     break;
                 case '_string_':
                 case '_title_':
-                case '_image_title_':
-                case '_image_copyright_':
                 case '_redirect_':
                 case '_url_':
                 case '_map_':
@@ -711,7 +708,6 @@ class ItemController extends Controller
                     break;
                 case '_boolean_':
                 case '_integer_':
-                case '_image_ppi_':
                     $detail->value_int = $value == '' ? null : intval($value);
                     break;
                 case '_float_':
@@ -725,8 +721,6 @@ class ItemController extends Controller
                     break;
                 case '_string_':
                 case '_title_':
-                case '_image_title_':
-                case '_image_copyright_':
                 case '_redirect_':
                 case '_url_':
                 case '_map_':

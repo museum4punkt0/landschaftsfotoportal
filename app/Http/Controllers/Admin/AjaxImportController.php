@@ -250,7 +250,6 @@ class AjaxImportController extends Controller
                             break;
                         case '_boolean_':
                         case '_integer_':
-                        case '_image_ppi_':
                             $detail_data['value_int'] = $cell == '' ? null : intval($cell);
                             break;
                         case '_float_':
@@ -301,8 +300,6 @@ class AjaxImportController extends Controller
                             // no break, but fall through
                         case '_string_':
                         case '_title_':
-                        case '_image_title_':
-                        case '_image_copyright_':
                         case '_html_':
                         case '_url_':
                         case '_map_':

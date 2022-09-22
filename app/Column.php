@@ -192,8 +192,6 @@ class Column extends Model
                 return ['numeric'];
             case '_string_':
             case '_title_':
-            case '_image_title_':
-            case '_image_copyright_':
             case '_redirect_':
             case '_map_':
             case '_html_':
