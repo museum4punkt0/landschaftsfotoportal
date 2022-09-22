@@ -90,6 +90,7 @@ return [
     'unpublished' => 'unveröffentlicht',
     
     'laravel_error' => 'System-Fehler!',
+    'module_disabled' => 'Dieses Modul ist deaktiviert!',
     'form_validation_error' => 'Dieses Formular enthält Fehler. Bitte korrigieren Sie die gekennzeichneten Felder!',
     'geocoder_no_result' => 'Der Geocoder konnte den Ort ":location" nicht finden!',
     'geocoder_api_key_error' => 'API-Key für Geocoder ungültig!',

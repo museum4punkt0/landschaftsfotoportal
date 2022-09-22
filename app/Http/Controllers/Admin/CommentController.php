@@ -22,6 +22,9 @@ class CommentController extends Controller
     {
         $this->middleware('verified');
 
+        //Show error if comments are disabled
+        abort_if(!config('ui.comments'), 403, __('common.module_disabled'));
+
         // Use app\Policies\CommentPolicy for authorizing ressource controller
         $this->authorizeResource(Comment::class, 'comment');
     }

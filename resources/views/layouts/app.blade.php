@@ -108,9 +108,11 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('user.index') }}">{{ __('users.header') }}</a>
                             </li>
+                            @if(config('ui.comments'))
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('comment.all') }}">{{ __('comments.header') }}</a>
                             </li>
+                            @endif
                         @endcan
                     @endauth
                             <li class="nav-item dropdown">
