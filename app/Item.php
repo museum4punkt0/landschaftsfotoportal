@@ -380,25 +380,7 @@ class Item extends Model
         
         return $title;
     }
-    
-    /**
-     * Get the element ID of a given data type.
-     *
-     * @param  string  $name
-     * @return int
-     */
-    public function getDataTypeId($name)
-    {
-        // Check all columns of this item for given data type
-        foreach ($this->columns as $col) {
-            if ($col->getDataType() == $name) {
-                return $col->data_type_fk;
-            }
-        }
-        
-        return null;
-    }
-    
+
     /**
      * Get an item's detail with given data type.
      *
@@ -411,22 +393,19 @@ class Item extends Model
     {
         $detail = __('items.no_detail_with_data_type');
         
-        $data_type_id = $this->getDataTypeId($name);
-        if ($data_type_id) {
-            // Get first column with given data type
-            $column = $this->columns->firstWhere('data_type_fk', $data_type_id);
-            if ($column) {
-                // Details can be of different data types
-                switch ($name) {
-                    case '_float_':
-                        $detail = $column->pivot->value_float;
-                        break;
-                    case '_integer_':
-                        $detail = $column->pivot->value_int;
-                        break;
-                    default:
-                        $detail = $column->pivot->value_string;
-                }
+        // Get first column with given data type
+        $column = $this->columns->firstWhere('data_type_name', $name);
+        if ($column) {
+            // Details can be of different data types
+            switch ($name) {
+                case '_float_':
+                    $detail = $column->pivot->value_float;
+                    break;
+                case '_integer_':
+                    $detail = $column->pivot->value_int;
+                    break;
+                default:
+                    $detail = $column->pivot->value_string;
             }
         }
         return $detail;
