@@ -287,8 +287,8 @@
                             @include('includes.alert_image_config_div')
 
                             <div class="row align-items-end">
-                            @foreach($items->where('parent_fk', $item->item_id)->sortBy('title') as $specimen)
-                                @foreach($items->where('parent_fk', $specimen->item_id) as $it)
+                            @foreach($item->children->sortBy('title') as $specimen)
+                                @foreach($specimen->children as $it)
                                     {{-- Show specimen thumbnails only, no images of details --}}
                                     @if(strpos(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_title_col')))->value_string, 'Gesamtansicht') !== false)
                                     <div class="col-auto py-2">
@@ -339,7 +339,7 @@
                             @include('includes.alert_image_config_div')
 
                             <div class="row align-items-end">
-                                @foreach($items->where('parent_fk', $item->item_id)->sortBy('title') as $it)
+                                @foreach($item->children->sortBy('title') as $it)
                                     <div class="col-auto py-2">
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
                                             {{-- Bestikri images have different pathes and types --}}

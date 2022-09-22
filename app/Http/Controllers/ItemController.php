@@ -267,16 +267,6 @@ class ItemController extends Controller
         // Load config of all modules associated with this item
         $modules = ModuleInstance::forItem($item->item_id)->get();
 
-        Debugbar::startMeasure('get-item');
-        // All items for the show blade, used for image galleries
-        $items = Item::find($item->item_id)
-            ->descendantsAndSelf()
-            ->where('public', 1)
-            //->where('item_type_fk', '<>', 188) # TODO: remove hard coded item type
-            ->orderBy('title')
-            ->get();
-        Debugbar::stopMeasure('get-item');
-        
         Debugbar::startMeasure('prepare-menu');
         if (config('menu.sidebar_max_levels')) {
             // First level items for the sidebar menu
@@ -321,7 +311,7 @@ class ItemController extends Controller
         $translations = Localization::getTranslations($lang, 'name');
         Debugbar::stopMeasure('localisation');
         
-        return view('item.show', compact('item', 'items', 'details', 'menu_root', 'path',
+        return view('item.show', compact('item', 'details', 'menu_root', 'path',
             'colmap', 'lists', 'translations', 'modules'));
     }
 

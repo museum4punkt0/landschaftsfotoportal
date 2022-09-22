@@ -385,6 +385,7 @@ class Item extends Model
      * Get an item's detail with given data type.
      *
      * Warning: This function is deprecated and will be removed soon!
+     * TODO: This is quite slow and takes at least 50% of the query time in Bestikri
      *
      * @param  string  $name
      * @return string
