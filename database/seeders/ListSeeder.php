@@ -626,6 +626,11 @@ class ListSeeder extends Seeder
                     "zoomify" => "zoomify",
                 ],
             ],
+            "image_file_col" => [
+                "default" => false,
+                "data_type" => "column",
+                "column_data_type" => "_image_",
+            ],
             "image_title_col" => [
                 "default" => false,
                 "data_type" => "column",

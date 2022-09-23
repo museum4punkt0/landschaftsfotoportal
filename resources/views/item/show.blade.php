@@ -295,9 +295,9 @@
                                         @if($cm->getConfigValue('image_link') == 'zoomify')
                                             <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{
                                                 Config::get('media.zoomify_zif_image_path')
-                                            }}{{ pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME)
+                                            }}{{ pathinfo(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_file_col')))->value_string, PATHINFO_FILENAME)
                                             }}.zif&caption={{ rawurlencode($item->taxon->full_name ."; Barcode: ".
-                                                explode('_', pathinfo($it->getDetailWhereDataType('_image_'),
+                                                explode('_', pathinfo(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_file_col')))->value_string,
                                                     PATHINFO_FILENAME))[0])
                                             }}&description={{ rawurlencode(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_title_col')))->value_string)
                                             }}&copyright={{ rawurlencode(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_copyright_col')))->value_string) 
@@ -306,14 +306,14 @@
                                             }}">
                                         @endif
                                         @if(Storage::exists('public/'. Config::get('media.preview_dir') .
-                                            $it->getDetailWhereDataType('_image_')))
+                                            optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_file_col')))->value_string))
                                             <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                                $it->getDetailWhereDataType('_image_')) }}"
+                                                optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_file_col')))->value_string) }}"
                                                 width={{ Config::get('media.preview_width') }}
                                                 title="{{ optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_title_col')))->value_string }}"
                                             />
                                         @else
-                                            <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $it->getDetailWhereDataType('_image_') }}"
+                                            <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_file_col')))->value_string }}"
                                                 width={{ Config::get('media.preview_width') }}
                                                 title="{{ optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_title_col')))->value_string }}"
                                             />
@@ -346,9 +346,9 @@
                                             @if(strpos(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_title_col')))->value_string, 'Gesamtansicht') === false)
                                                 <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{
                                                     Config::get('media.zoomify_jpg_image_path')
-                                                }}{{ pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME)
+                                                }}{{ pathinfo(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_file_col')))->value_string, PATHINFO_FILENAME)
                                                 }}.jpg&caption={{ rawurlencode($item->taxon->full_name ."; Barcode: ".
-                                                    explode('_', pathinfo($it->getDetailWhereDataType('_image_'),
+                                                    explode('_', pathinfo(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_file_col')))->value_string,
                                                         PATHINFO_FILENAME))[0])
                                                 }}&description={{ rawurlencode(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_title_col')))->value_string)
                                                 }}&copyright={{ rawurlencode(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_copyright_col')))->value_string)
@@ -358,9 +358,9 @@
                                             @else
                                                 <a target="_blank" href="{{ Config::get('media.zoomify_url') }}&image={{
                                                     Config::get('media.zoomify_zif_image_path')
-                                                }}{{ pathinfo($it->getDetailWhereDataType('_image_'), PATHINFO_FILENAME)
+                                                }}{{ pathinfo(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_file_col')))->value_string, PATHINFO_FILENAME)
                                                 }}.zif&caption={{ rawurlencode($item->taxon->full_name ."; Barcode: ".
-                                                    explode('_', pathinfo($it->getDetailWhereDataType('_image_'),
+                                                    explode('_', pathinfo(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_file_col')))->value_string,
                                                         PATHINFO_FILENAME))[0])
                                                 }}&description={{ rawurlencode(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_title_col')))->value_string)
                                                 }}&copyright={{ rawurlencode(optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_copyright_col')))->value_string)
@@ -370,14 +370,14 @@
                                             @endif
                                         @endif
                                         @if(Storage::exists('public/'. Config::get('media.preview_dir') .
-                                            $it->getDetailWhereDataType('_image_')))
+                                            optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_file_col')))->value_string))
                                             <img src="{{ asset('storage/'. Config::get('media.preview_dir') .
-                                                $it->getDetailWhereDataType('_image_')) }}"
+                                                optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_file_col')))->value_string) }}"
                                                 height={{ Config::get('media.preview_height') }}
                                                 title="{{ optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_title_col')))->value_string }}"
                                             />
                                         @else
-                                            <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ $it->getDetailWhereDataType('_image_') }}"
+                                            <img src="https://webapp.senckenberg.de/bestikri/files/images_preview/2/{{ optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_file_col')))->value_string }}"
                                                 height={{ Config::get('media.preview_height') }}
                                                 title="{{ optional($it->details->firstWhere('column_fk', $cm->getConfigValue('image_title_col')))->value_string }}"
                                             />
