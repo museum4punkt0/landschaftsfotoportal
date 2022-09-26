@@ -68,7 +68,7 @@ class HomeController extends Controller
     public function frontend()
     {
         // Get the item which holds the content of the requested page
-        $item = Item::where('title', 'ILIKE', '%'.Route::currentRouteName().'%')->first();
+        $item = Item::where('title', 'ILIKE', Route::currentRouteName().'%')->first();
 
         // Fallback to home page
         if (!$item) {

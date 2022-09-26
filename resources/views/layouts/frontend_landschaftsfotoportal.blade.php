@@ -39,7 +39,7 @@
             <div class="collapse navbar-collapse" id="navbarResponsive">
                 <ul class="navbar-nav text-uppercase ml-auto">
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.gallery') }}">@lang('common.home')</a></li>
-                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('über') }}">@lang('common.about')</a></li>
+                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('über das portal') }}">@lang('common.about')</a></li>
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('search.index') }}">@lang('search.header')</a></li>
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.timeline') }}">@lang('landschaftsfotoportal.timeline')</a></li>
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.map') }}">@lang('landschaftsfotoportal.map')</a></li>
@@ -67,7 +67,7 @@
         <div class="container">
             <div class="masthead-subheading">@lang('landschaftsfotoportal.slogan')</div>
             <div class="masthead-heading text-uppercase">Landschafts&shy;fotoportal</div>
-            <a class="btn btn-primary btn-xl text-uppercase js-scroll-trigger" href="{{ route('über') }}">@lang('landschaftsfotoportal.join')</a>
+            <a class="btn btn-primary btn-xl text-uppercase js-scroll-trigger" href="{{ route('über das portal') }}">@lang('landschaftsfotoportal.join')</a>
         </div>
     </header>
     
