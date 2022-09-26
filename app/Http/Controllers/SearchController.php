@@ -9,6 +9,7 @@ use App\Element;
 use App\Selectlist;
 use App\Value;
 use App\Item;
+use App\ModuleInstance;
 use App\Taxon;
 use App\Utils\Localization;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,6 +26,9 @@ class SearchController extends Controller
      */
     public function index(Request $request)
     {
+        // Load module containing column's configuration and naming
+        $image_module = ModuleInstance::getByName('gallery');
+
         if (config('menu.sidebar_max_levels')) {
             // First level items for the sidebar menu
             $menu_root = Item::whereNull('parent_fk')->where('public', 1)->orderBy('item_id')->get();
@@ -255,6 +259,6 @@ class SearchController extends Controller
         $query_str = http_build_query($request_query);
 
         return view('search.form', compact('menu_root', 'path', 'search_terms', 'lists', 'dateranges',
-            'colmap', 'translations', 'item_types', 'taxa', 'items', 'query_str'));
+            'colmap', 'translations', 'item_types', 'taxa', 'items', 'query_str', 'image_module'));
     }
 }
