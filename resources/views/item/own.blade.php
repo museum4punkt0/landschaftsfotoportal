@@ -60,12 +60,14 @@
                                 @endif
                                     </a>
                                 </span>
-                                <span class="fa-stack fa-2x">
-                                    <a href="#" data-toggle="modal" data-target="#commentModal" data-href="{{ route('comment.store', $item->item_id) }}" title="@lang('comments.new')">
-                                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
-                                        <i class="fas {{ Config::get('ui.icon_comment') }} fa-stack-1x fa-inverse"></i>
-                                    </a>
-                                </span>
+                                @if(config('ui.comments'))
+                                    <span class="fa-stack fa-2x">
+                                        <a href="#" data-toggle="modal" data-target="#commentModal" data-href="{{ route('comment.store', $item->item_id) }}" title="@lang('comments.new')">
+                                            <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                            <i class="fas {{ Config::get('ui.icon_comment') }} fa-stack-1x fa-inverse"></i>
+                                        </a>
+                                    </span>
+                                @endif
                             </div>
                             <!-- Image caption -->
                             @include('includes.item_gallery_image_caption', ['item' => $item])

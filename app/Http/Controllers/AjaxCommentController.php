@@ -20,6 +20,9 @@ class AjaxCommentController extends Controller
     public function __construct()
     {
         $this->middleware('verified');
+
+        //Show error if comments are disabled
+        abort_if(!config('ui.comments'), 403, __('common.module_disabled'));
     }
 
     /**

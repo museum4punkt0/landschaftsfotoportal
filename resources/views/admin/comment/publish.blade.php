@@ -2,6 +2,8 @@
 
 @section('content')
 
+@include('includes.modal_confirm_delete')
+
 <div class="container">
     @include('includes.alert_session_div')
 
@@ -9,8 +11,11 @@
         @if (true || Auth::check())
             <div class="card-header">@lang('comments.unpublished')</div>
             <div class="card-body">
+            @if(config('ui.publish_comment'))
                 <a href="{{route('comment.publish')}}" class="btn btn-primary">@lang('common.publish_all')</a>
-                <table class="table mt-4">
+            @endif
+
+                <table class="table table-responsive mt-4">
                 <thead>
                     <tr>
                         <th colspan="1">@lang('common.id')</th>
@@ -72,18 +77,37 @@
                             {{$comment->updated_at}}
                         </td>
                         <td>
-                            <a href="{{route('comment.publish', $comment->comment_id)}}" class="btn btn-primary">
-                            @lang('common.publish')
-                            </a>
-                            <form action="{{route('comment.edit', $comment)}}" method="GET">
-                                {{ csrf_field() }}
-                                <button class="btn btn-primary" type="submit">@lang('common.edit')</button>
-                            </form>
-                            <form action="{{route('comment.destroy', $comment)}}" method="POST">
-                                {{ csrf_field() }}
-                                @method('DELETE')
-                                <button class="btn btn-danger" type="submit">@lang('common.delete')</button>
-                            </form>
+                        @if(config('ui.publish_comment'))
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
+                                    <a href="{{ route('comment.publish', $comment) }}" title="@lang('common.publish')">
+                                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                        <i class="fas {{ Config::get('ui.icon_published') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </span>
+                        @endif
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
+                                    <a href="{{ route('comment.edit', $comment) }}" title="@lang('common.edit')">
+                                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                        <i class="fas {{ Config::get('ui.icon_edit') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </span>
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
+                                    <a href="#" data-toggle="modal" data-target="#confirmDeleteModal"
+                                        data-href="{{ route('comment.destroy', $comment) }}"
+                                        data-message="@lang('comments.confirm_delete', ['name' => $comment->message])"
+                                        data-title="@lang('comments.delete')"
+                                        title="@lang('common.delete')"
+                                    >
+                                        <i class="fas fa-circle fa-stack-2x text-danger"></i>
+                                        <i class="fas {{ Config::get('ui.icon_delete') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </span>
                         </td>
                     </tr>
                 @endforeach

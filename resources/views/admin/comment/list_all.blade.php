@@ -11,12 +11,13 @@
         @if (true || Auth::check())
             <div class="card-header">@lang('comments.header')</div>
             <div class="card-body">
-                @lang('items.list'): <a href="{{route('item.show', $item->item_id)}}">{{ $item->title }}</a>
-                
+                <a href="{{route('comment.unpublished')}}" class="btn btn-primary">@lang('comments.unpublished')</a>
+
                 <table class="table table-responsive mt-4">
                 <thead>
                     <tr>
                         <th colspan="1">@lang('common.id')</th>
+                        <th colspan="1"></th>
                         <th colspan="1">@lang('comments.message')</th>
                         <th colspan="1">@lang('common.published')</th>
                         <th colspan="1">@lang('common.created')</th>
@@ -29,6 +30,25 @@
                     <tr>
                         <td>
                             {{$comment->comment_id}}
+                        </td>
+                        <td>
+                            <div class="container">
+                            <a href="{{route('item.show.public', $comment->item->item_id)}}#details">
+                            @if($comment->item->details->firstWhere(
+                                'column_fk', $image_module->config['columns']['filename'] ?? 0))
+                                <img class="img-fluid thumbnail-table"
+                                    src="{{ asset('storage/'. Config::get('media.preview_dir') .
+                                        $comment->item->details->firstWhere(
+                                            'column_fk', $image_module->config['columns']['filename'] ?? 0
+                                        )->value_string) }}"
+                                    alt=""
+                                    title="{{ optional($comment->item->details->firstWhere(
+                                        'column_fk', $image_module->config['columns']['caption'] ?? 0)
+                                        )->value_string }}"
+                                />
+                            @endif
+                            </a>
+                            </div>
                         </td>
                         <td>
                             {{$comment->message}}

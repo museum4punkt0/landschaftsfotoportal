@@ -32,12 +32,14 @@
                             <i class="fas {{ Config::get('ui.icon_cart_add') }} fa-stack-1x fa-inverse"></i>
                         </a>
                     </span>
+                @if(config('ui.comments'))
                     <span class="fa-stack fa-2x">
                         <a href="{{ route('comment.index') }}" title="@lang('comments.my_own')">
                             <i class="fas fa-circle fa-stack-2x text-primary"></i>
                             <i class="fas {{ Config::get('ui.icon_comment') }} fa-stack-1x fa-inverse"></i>
                         </a>
                     </span>
+                @endif
                     <span class="fa-stack fa-2x">
                         <a href="{{ route('email.change') }}" title="@lang('users.change_email')">
                             <i class="fas fa-circle fa-stack-2x text-primary"></i>
@@ -75,6 +77,7 @@
                         <a href="{{route('item.unpublished')}}" class="btn btn-primary">@lang('common.show')</a>
                     </div>
                 </div>
+            @if(config('ui.comments'))
                 <div class="row py-1">
                     <div class="col">
                         @lang('comments.unpublished'): {{ $comments }}
@@ -83,6 +86,7 @@
                         <a href="{{route('comment.unpublished')}}" class="btn btn-primary">@lang('common.show')</a>
                     </div>
                 </div>
+            @endif
             </div>
         </div>
     </div>
