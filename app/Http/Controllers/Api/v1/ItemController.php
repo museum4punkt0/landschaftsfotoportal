@@ -150,6 +150,66 @@ class ItemController extends Controller
     }
 
     /**
+     * Get a single chromosome count item.
+     *
+     * @param  Integer  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function showChromosomeCount($id)
+    {
+        $item = Item::find($id);
+        if (!$item) {
+            return response()->json(['error' => 'chromosome count not found'], 404);
+        }
+        if ($item->getItemType() != '_chromosomes_') {
+            return response()->json(['error' => 'invalid ID'], 400);
+        }
+
+        // Get all columns having an API attribute set
+        $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk)
+                ->whereNotNull('api_attribute')
+                ->get();
+
+        // "meta" data of the item
+        $data['id'] = $item->item_id;
+        //$data['barcode'] = $item->title;
+        $data['modified'] = $item->updated_at;
+        $data['scientific_name'] = $item->taxon->full_name;
+        $data['coordinate_reference_system'] = 4326; // WGS84
+        $data['reference'] = route('item.show.public', $item);
+
+        // Data from the details belonging to the item
+        Debugger::startProfiling('processing-colmaps');
+        $details = Detail::with('column')
+            ->where('item_fk', $item->item_id)
+            ->get();
+
+        foreach ($colmap as $cm) {
+            $detail = $details->firstWhere('column_fk', $cm->column_fk);
+
+            if ($detail) {
+                // Details are stored in different columns within database table
+                switch ($detail->column->getDataType()) {
+                    case '_relation_':
+                        $data[$cm->api_attribute] = optional($detail->related_item)->title;
+                        break;
+                    case '_integer_':
+                        $data[$cm->api_attribute] = $detail->value_int;
+                        break;
+                    case '_float_':
+                        $data[$cm->api_attribute] = $detail->value_float;
+                        break;
+                    default:
+                        $data[$cm->api_attribute] = $detail->value_string;
+                }
+            }
+        }
+        Debugger::stopProfiling('processing-colmaps');
+
+        return response()->json(['data' => $data]);
+    }
+
+    /**
      * Get a single random image item.
      *
      * @return \Illuminate\Http\Response

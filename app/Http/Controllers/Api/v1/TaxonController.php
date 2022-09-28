@@ -91,7 +91,7 @@ class TaxonController extends Controller
                 'scientific_name' => $item->taxon->full_name,
                 'modified' => $item->updated_at,
                 'last_crawled' => date(DATE_RFC3339),
-                'reference' => route('api.item.show.specimen', $item),
+                'reference' => route(config('api.items.reference_route'), $item),
                 'link' => route('item.show.public', $item),
             ];
         }

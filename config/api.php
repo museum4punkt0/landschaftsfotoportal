@@ -22,8 +22,9 @@ return [
     */
     
     'items' => [
-        'item_type' => '_specimen_',
-        'basis_of_record' => 'PRESERVED_SPECIMEN',
+        'item_type' => env('API_ITEM_TYPE', '_specimen_'),
+        'basis_of_record' => env('API_BASIS_OF_RECORD', 'PRESERVED_SPECIMEN'),
+        'reference_route' => env('API_ITEM_ROUTE', 'api.item.show.specimen'),
     ],
 
 ];
