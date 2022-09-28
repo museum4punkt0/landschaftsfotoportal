@@ -138,6 +138,28 @@
         
         @switch($cm->column->data_type_name)
             
+            {{-- Data_type of form field is relation --}}
+            @case('_relation_')
+                {{-- Input with autocomplete for related item --}}
+                @include('includes.form_item_autocomplete', [
+                    'search_url' => route('item.autocomplete', ['item_type' => $cm->getConfigValue('relation_item_type')]),
+                    'div_class' => 'form-group',
+                    'column' => $cm->column->column_id,
+                    'name' => 'fields',
+                    'input_placeholder' => '',
+                    'input_help' =>  __('items.autocomplete_help'),
+                    'null_label' => __('common.none'),
+                    'item_title' => old('fields_name.' . $cm->column->column_id,
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->related_item->title ?? __('common.none')),
+                    'item_id' => old('fields.' . $cm->column->column_id,
+                        optional($details->firstWhere('column_fk', $cm->column->column_id))->related_item_fk),
+                ])
+
+                @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', [
+                    'data_type' => 'relation', 'column_id' => $cm->column->column_id
+                ])
+                @break
+
             {{-- Data_type of form field is list --}}
             @case('_list_')
                 {{-- dd($lists->firstWhere('list_id', $cm->column->list_fk)->elements) --}}
@@ -261,8 +283,6 @@
             
             {{-- Data_type of form field is integer --}}
             @case('_integer_')
-            {{-- Data_type of form field is image pixel per inch --}}
-            @case('_image_ppi_')
                 <div class="form-group">
                     @include('includes.column_label')
                     
@@ -321,10 +341,6 @@
             @case('_string_')
             {{-- Data_type of form field is (menu) title --}}
             @case('_title_')
-            {{-- Data_type of form field is image title --}}
-            @case('_image_title_')
-            {{-- Data_type of form field is image copyright --}}
-            @case('_image_copyright_')
             {{-- Data_type of form field is redirect --}}
             @case('_redirect_')
                 <div class="form-group">
@@ -388,7 +404,7 @@
                         data-column="{{ $cm->column->column_id }}"
                         data-type="string"
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
-                        rows=5
+                        rows="{{ $cm->getConfigValue('textarea') ?? 5 }}"
                         @if($loop->first && !$options['edit.meta']) autofocus @endif
                     >{!!
                         old('fields.'. $cm->column->column_id, 

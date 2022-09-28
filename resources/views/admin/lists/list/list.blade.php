@@ -2,6 +2,8 @@
 
 @section('content')
 
+@include('includes.modal_confirm_delete')
+
 <div class="container">
     @include('includes.alert_session_div')
 
@@ -23,7 +25,7 @@
                         <th colspan="1" id="name" class="orderby" title="sortieren" data-bs-column="name" data-bs-sort="asc">@lang('common.name')</th>
                         <th colspan="1" id="description" class="orderby" title="sortieren" data-bs-column="description" data-bs-sort="asc">@lang('common.description')</th>
                         <th colspan="1">@lang('lists.hierarchical')</th>
-                        <th colspan="3">@lang('common.actions')</th>
+                        <th colspan="1">@lang('common.actions')</th>
                     </tr>
                     <tr>
                          <th colspan="1">
@@ -165,25 +167,37 @@
                             @if($list->hierarchical) @lang('common.yes') @else @lang('common.no') @endif
                         </td>
                         <td>
-                            <form action="{{route('list.show', $list->list_id)}}" method="GET">
-                                <button class="btn btn-primary" type="submit">@lang('common.show')</button>
-                            </form>
-                        </td>
-                        <td>
-                            <form action="{{route('list.edit', $list->list_id)}}" method="GET">
-                                {{ csrf_field() }}
-                                <button class="btn btn-primary" type="submit">@lang('common.edit')</button>
-                            </form>
-                        </td>
-                        <td>
-                            <form action="{{route('list.destroy', $list->list_id)}}" method="POST">
-                                {{ csrf_field() }}
-                                @method('DELETE')
-                                <button class="btn btn-danger" type="submit">@lang('common.delete')</button>
-                            </form>
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
+                                    <a href="{{ route('list.show', $list) }}" title="@lang('common.show')">
+                                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                        <i class="fas {{ Config::get('ui.icon_show') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </span>
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
+                                    <a href="{{ route('list.edit', $list) }}" title="@lang('common.edit')">
+                                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                        <i class="fas {{ Config::get('ui.icon_edit') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </span>
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
+                                    <a href="#" data-toggle="modal" data-target="#confirmDeleteModal"
+                                        data-href="{{ route('list.destroy', $list) }}"
+                                        data-message="@lang('lists.confirm_delete', ['name' => $list->name])"
+                                        data-title="@lang('lists.delete')"
+                                        title="@lang('common.delete')"
+                                    >
+                                        <i class="fas fa-circle fa-stack-2x text-danger"></i>
+                                        <i class="fas {{ Config::get('ui.icon_delete') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </span>
                         </td>
                     </tr>
-                   
                 @endforeach
                 </tbody>
                 </table>

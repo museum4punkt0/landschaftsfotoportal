@@ -96,25 +96,63 @@
         </div>
     @endif
 
-    @if($item->parent_fk)
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">@lang('lists.parent')</h5>
-            </div>
-            <div class="card card-body">
-                {{ $item->parent->title}}, Item ID 
-                <a href="{{ route('item.show', $item->parent_fk) }}">{{ $item->parent_fk }}</a>
-            </div>
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">@lang('items.item_type')</h5>
         </div>
-    @endif
+        <div class="card card-body">
+            <a href="{{ route('element.show', $item->item_type_fk) }}">
+                {{ optional($item_types->firstWhere('element_fk', $item->item_type_fk))->value }}
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">@lang('items.menu_hierarchy')</h5>
+        </div>
+        <div class="card card-body">
+            <table class="table table-sm table-borderless">
+                <tr>
+                    <td>@lang('lists.parent'):</td>
+                    <td>
+                    @if($item->parent_fk)
+                        <a href="{{ route('item.show', $item->parent_fk) }}">
+                            <i class="fas {{ Config::get('ui.icon_permalink', 'fa-link') }}"
+                                title="@lang('items.related_item')"></i>
+                            {{ $item->parent->title }}
+                        </a>
+                    @endif
+                    </td>
+                </tr>
+                <tr>
+                    <td>@lang('lists.children'):</td>
+                    <td>
+                    @foreach($item->children as $child)
+                        <a href="{{ route('item.show', $child->item_id) }}">
+                            <i class="fas {{ Config::get('ui.icon_permalink', 'fa-link') }}"
+                                title="@lang('items.related_item')"></i>
+                            {{ $child->title }}
+                        </a>
+                        <br>
+                    @endforeach
+                    </td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
     @if($item->taxon)
         <div class="card">
             <div class="card-header">
-                <h5 class="mb-0">@lang('taxon.parent')</h5>
+                <h5 class="mb-0">@lang('items.related_taxon')</h5>
             </div>
             <div class="card card-body">
-                {{ $item->taxon->parent->taxon_name }}
-                ({{ $item->taxon->parent->rank_abbr }}, Taxon ID {{ $item->taxon->parent_fk }})
+                <a href="{{ route('taxon.show', $item->taxon_fk) }}">
+                    <i class="fas {{ Config::get('ui.icon_permalink', 'fa-link') }}"
+                        title="@lang('items.related_taxon')"></i>
+                    {{ $item->taxon->full_name }} ({{ $item->taxon->rank_abbr }})
+                </a>
             </div>
         </div>
     @endif
@@ -128,6 +166,7 @@
                 @include('includes.column_cardheader')
                 
                 <div class="card card-body">
+                @if($item->taxon)
                     @if($cm->getConfigValue('taxon_show') == 'full_name')
                         {{ $item->taxon->full_name }}
                     @endif
@@ -147,6 +186,35 @@
                             @lang('common.not_applicable')
                         @endif
                     @endif
+                @else
+                    @can('show-admin')
+                        <span class="text-danger">
+                            @lang('items.no_detail_for_column', ['column' => $cm->column->column_id])
+                        </span>
+                    @endcan
+                @endif
+                </div>
+                @break
+
+            {{-- Data_type of form field is relation --}}
+            @case('_relation_')
+                @include('includes.column_cardheader')
+
+                <div class="card card-body">
+                @if($details->firstWhere('column_fk', $cm->column->column_id))
+                    @if(optional($details->firstWhere('column_fk', $cm->column->column_id))->related_item_fk)
+                        <a href="{{ route('item.show',
+                            optional($details->firstWhere('column_fk', $cm->column->column_id))->related_item) }}">
+                            <i class="fas {{ Config::get('ui.icon_permalink', 'fa-link') }}"
+                                title="@lang('items.related_item')"></i>
+                            {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->related_item->title }}
+                        </a>
+                    @endif
+                @else
+                    <span class="text-danger">
+                        @lang('items.no_detail_for_column', ['column' => $cm->column->column_id])
+                    </span>
+                @endif
                 </div>
                 @break
             
@@ -197,12 +265,18 @@
             
             {{-- Data_type of form field is integer --}}
             @case('_integer_')
-            {{-- Data_type of form field is image pixel per inch --}}
-            @case('_image_ppi_')
                 @include('includes.column_cardheader')
                 
                 <div class="card card-body">
+                @if($cm->getConfigValue('scale_factor'))
+                    {{ round(optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int * $cm->getConfigValue('scale_factor'), $cm->getConfigValue('precision')) }}
+                    <span class="text-muted">
+                    @lang('colmaps.option_scale_factor_label'): {{ $cm->getConfigValue('scale_factor') }}, 
+                    @lang('colmaps.option_precision_label'): {{ $cm->getConfigValue('precision') }}
+                    </span>
+                @else
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_int }}
+                @endif
                 </div>
                 @break
             
@@ -211,7 +285,15 @@
                 @include('includes.column_cardheader')
                 
                 <div class="card card-body">
+                @if($cm->getConfigValue('scale_factor'))
+                    {{ round(optional($details->firstWhere('column_fk', $cm->column->column_id))->value_float * $cm->getConfigValue('scale_factor'), $cm->getConfigValue('precision')) }}
+                    <span class="text-muted">
+                    @lang('colmaps.option_scale_factor_label'): {{ $cm->getConfigValue('scale_factor') }}, 
+                    @lang('colmaps.option_precision_label'): {{ $cm->getConfigValue('precision') }}
+                    </span>
+                @else
                     {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_float }}
+                @endif
                 </div>
                 @break
             
@@ -219,10 +301,6 @@
             @case('_string_')
             {{-- Data_type of form field is (menu) title --}}
             @case('_title_')
-            {{-- Data_type of form field is image title --}}
-            @case('_image_title_')
-            {{-- Data_type of form field is image copyright --}}
-            @case('_image_copyright_')
                 @include('includes.column_cardheader')
                 
                 <div class="card card-body">
@@ -244,7 +322,14 @@
                 @include('includes.column_cardheader')
                 
                 <div class="card card-body">
-                    {{ optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string }}
+                @if(optional($details->firstWhere('column_fk', $cm->column->column_id))->value_string)
+                    <a target="_blank" href="{{
+                        $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}">
+                        <i class="fas {{ Config::get('ui.icon_external_link', 'fa-external-link-alt') }}"
+                            title="@lang('common.external_link')"></i>
+                        {{ $details->firstWhere('column_fk', $cm->column->column_id)->value_string }}
+                    </a>
+                @endif
                 </div>
                 @break
             

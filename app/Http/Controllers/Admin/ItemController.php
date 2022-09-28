@@ -83,7 +83,7 @@ class ItemController extends Controller
 
         // Get current UI language
         $lang = app()->getLocale();
-
+        // Get item types with localized names
         $item_types = Localization::getItemTypes($lang);
         
         return view('admin.item.list', compact('items', 'item_types', 'image_module', 'aFilter'));
@@ -92,9 +92,10 @@ class ItemController extends Controller
     /**
      * Show the form to select the type of the new resource.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function new()
+    public function new(Request $request)
     {
         $this->authorize('create', Item::class);
 
@@ -211,6 +212,9 @@ class ItemController extends Controller
                 'column_fk' => $column_id,
             ];
             switch ($data_type) {
+                case '_relation_':
+                    $detail_data['related_item_fk'] = $value == '' ? null : intval($value);
+                    break;
                 case '_list_':
                     $detail_data['element_fk'] = $value == '' ? null : intval($value);
                     break;
@@ -221,7 +225,6 @@ class ItemController extends Controller
                     break;
                 case '_boolean_':
                 case '_integer_':
-                case '_image_ppi_':
                     $detail_data['value_int'] = $value == '' ? null : intval($value);
                     break;
                 case '_float_':
@@ -235,8 +238,6 @@ class ItemController extends Controller
                     break;
                 case '_string_':
                 case '_title_':
-                case '_image_title_':
-                case '_image_copyright_':
                 case '_redirect_':
                 case '_url_':
                 case '_map_':
@@ -337,9 +338,29 @@ class ItemController extends Controller
 
         // Get localized names of columns
         $translations = Localization::getTranslations($lang, 'name');
+        // Get item types with localized names
+        $item_types = Localization::getItemTypes($lang);
 
         return view('admin.item.show',
-            compact('item', 'revisions', 'details', 'comments', 'colmap', 'lists', 'translations'));
+            compact('item', 'revisions', 'details', 'comments', 'colmap', 'lists', 'item_types', 'translations'));
+    }
+
+    /**
+     * Show the form for creating or updating titles of items.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function createTitles(Request $request)
+    {
+        $this->authorize('titles', Item::class);
+
+        // Get current UI language
+        $lang = app()->getLocale();
+        // Get item types with localized names
+        $item_types = Localization::getItemTypes($lang);
+
+        return view('admin.item.titles', compact('item_types'));
     }
 
     /**
@@ -348,7 +369,7 @@ class ItemController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function titles(Request $request)
+    public function storeTitles(Request $request)
     {
         $this->authorize('titles', Item::class);
 
@@ -391,7 +412,12 @@ class ItemController extends Controller
 
         $items = Item::where('public', 0)->latest('updated_at')->paginate(10);
 
-        return view('admin.item.publish', compact('items', 'image_module'));
+        // Get current UI language
+        $lang = app()->getLocale();
+        // Get item types with localized names
+        $item_types = Localization::getItemTypes($lang);
+
+        return view('admin.item.publish', compact('items', 'item_types', 'image_module'));
     }
 
     /**
@@ -534,6 +560,9 @@ class ItemController extends Controller
             $data_type = Column::find($column_id)->getDataType();
 
             switch ($data_type) {
+                case '_relation_':
+                    $detail->related_item_fk = $value == '' ? null : intval($value);
+                    break;
                 case '_list_':
                     $detail->element_fk = $value == '' ? null : intval($value);
                     break;
@@ -544,7 +573,6 @@ class ItemController extends Controller
                     break;
                 case '_boolean_':
                 case '_integer_':
-                case '_image_ppi_':
                     $detail->value_int = $value == '' ? null : intval($value);
                     break;
                 case '_float_':
@@ -558,8 +586,6 @@ class ItemController extends Controller
                     break;
                 case '_string_':
                 case '_title_':
-                case '_image_title_':
-                case '_image_copyright_':
                 case '_redirect_':
                 case '_url_':
                 case '_map_':
@@ -654,8 +680,7 @@ class ItemController extends Controller
         // Delete the item itself
         $item->delete();
 
-        return Redirect::to('admin/item')
-                        ->with('success', __('items.deleted'));
+        return back()->with('success', __('items.deleted'));
     }
 
     /**
@@ -691,6 +716,9 @@ class ItemController extends Controller
 
         $results = Item::select('item_id', 'title', 'item_type_fk')
             ->where('title', 'ILIKE', "%{$request->search}%")
+            ->when($request->item_type, function ($query, $item_type) {
+                return $query->where('item_type_fk', $item_type);
+            })
             ->orderBy('title')
             ->limit(config('ui.autocomplete_results', 5))
             ->get();

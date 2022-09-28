@@ -2,6 +2,8 @@
 
 @section('content')
 
+@include('includes.modal_confirm_delete')
+
 <div class="container">
     @include('includes.alert_session_div')
 
@@ -183,35 +185,42 @@
                             {{$column->description}}
                         </td>
                         <td>
-                            @foreach($column->translation->values as $v)
-                                <b>{{substr($v->attribute->name, 0, -3)}}:</b> {{$v->value}}<br/>
-                            @endforeach
-                            <a href="{{route('element.show', $column->translation_fk)}}">ID {{$column->translation_fk}}</a>
+                            <a href="{{route('element.show', $column->translation_fk)}}">
+                                {{ $translations->getLocalizedName($column->translation_fk) }}
+                            </a>
                         </td>
                         <td>
-                            @foreach($column->data_type->values as $v)
-                                {{$v->value}}<br/>
-                            @endforeach
-                            <a href="{{route('element.show', $column->data_type_fk)}}">ID {{$column->data_type_fk}}</a>
+                            {{ $data_types->getLocalizedName($column->data_type_fk) }}
                         </td>
                         <td>
-                            @if($column->list_fk)
-                                {{$column->list->name}} ({{$column->list->description}})<br/>
-                                <a href="{{route('list.show', $column->list_fk)}}">ID {{$column->list_fk}}</a>
-                            @endif
+                        @if($column->list_fk)
+                            <a href="{{route('list.show', $column->list_fk)}}">
+                                {{$column->list->name}} ({{$column->list->description}})
+                            </a>
+                        @endif
                         </td>
                         <td>
-                            <form action="{{route('column.edit', $column)}}" method="GET">
-                                {{ csrf_field() }}
-                                <button class="btn btn-primary" type="submit">@lang('common.edit')</button>
-                            </form>
-                        </td>
-                        <td>
-                            <form action="{{route('column.destroy', $column)}}" method="POST">
-                                {{ csrf_field() }}
-                                @method('DELETE')
-                                <button class="btn btn-danger" type="submit">@lang('common.delete')</button>
-                            </form>
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
+                                    <a href="{{ route('column.edit', $column) }}" title="@lang('common.edit')">
+                                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                        <i class="fas {{ Config::get('ui.icon_edit') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </span>
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
+                                    <a href="#" data-toggle="modal" data-target="#confirmDeleteModal"
+                                        data-href="{{ route('column.destroy', $column) }}"
+                                        data-message="@lang('columns.confirm_delete', ['name' => $column->description])"
+                                        data-title="@lang('columns.delete')"
+                                        title="@lang('common.delete')"
+                                    >
+                                        <i class="fas fa-circle fa-stack-2x text-danger"></i>
+                                        <i class="fas {{ Config::get('ui.icon_delete') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </span>
                         </td>
                     </tr>
                 @endforeach

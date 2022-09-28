@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Taxon;
 use App\Http\Controllers\Controller;
+use App\Utils\Localization;
 use Illuminate\Http\Request;
 use Redirect;
 
@@ -149,11 +150,22 @@ class TaxonController extends Controller
      * Display the specified resource.
      *
      * @param  \App\Taxon  $taxon
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function show(Taxon $taxon)
+    public function show(Taxon $taxon, Request $request)
     {
-        //
+        // Get current UI language
+        $lang = app()->getLocale();
+        $item_types = Localization::getItemTypes($lang);
+
+        // Number of anchestor ranks is taken from request param or config file
+        $anchestors = $taxon->ancestors()
+            ->whereDepth('>=', $request->query('anchestors', config('ui.taxon_anchestors', 5)) * -1)
+            ->orderBy('depth')
+            ->get();
+
+        return view('admin.taxon.show', compact('taxon', 'anchestors', 'item_types'));
     }
 
     /**
@@ -225,6 +237,15 @@ class TaxonController extends Controller
      */
     public function destroy(Taxon $taxon)
     {
+        // Check for column mappings owning this taxon
+        if ($taxon->column_mapping()->count()) {
+            return back()->with('warning', __('taxon.still_owned_by_cm'));
+        }
+        // Check for items owning this taxon
+        if ($taxon->items()->count()) {
+            return back()->with('warning', __('taxon.still_owned_by_it'));
+        }
+
         $taxon->delete();
         $success_status_msg = " ". __('taxon.deleted');
         
@@ -236,9 +257,8 @@ class TaxonController extends Controller
             $success_status_msg .= " ".
                 __('elements.hierarchy_fixed', ['id'=>$descendant->taxon_id]);
         }
-        
-        return Redirect::to('admin/taxon')
-            ->with('success', $success_status_msg);
+
+        return back()->with('success', $success_status_msg);
     }
 
     /**

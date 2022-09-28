@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Lists;
 
 use App\Selectlist;
 use App\Attribute;
+use App\Column;
 use App\Element;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -152,74 +153,117 @@ class ListController extends Controller
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Selectlist  $list
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Selectlist $list)
     {
-        $data['list'] = Selectlist::find($id);
-        #$data['elements'] = Selectlist::find($id)->elements;
+        $id = $list->list_id;
         $constraint = function (Builder $query) use ($id) {
             $query->where('parent_fk', null)->where('list_fk', $id);
         };
+        $elements = Element::treeOf($constraint)->depthFirst()->paginate(10);
 
-        $data['elements'] = Element::treeOf($constraint)->depthFirst()->paginate(10);
-        
-        return view('admin.lists.list.show', $data);
+        return view('admin.lists.list.show', compact('list', 'elements'));
+    }
+
+    /**
+     * Display the list of item types.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function showItemTypes()
+    {
+        $list = Selectlist::where('name', '_item_type_')->first();
+
+        $this->authorize('view', $list);
+
+        $elements = $list->elements()->paginate(10);
+
+        return view('admin.lists.list.show', compact('list', 'elements'));
+    }
+
+    /**
+     * Display the list of column groups.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function showColumnGroups()
+    {
+        $list = Selectlist::where('name', '_column_group_')->first();
+
+        $this->authorize('view', $list);
+
+        $elements = $list->elements()->paginate(10);
+
+        return view('admin.lists.list.show', compact('list', 'elements'));
+    }
+
+    /**
+     * Display the list of translations (names/descriptions/placeholders of columns).
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function showTranslations()
+    {
+        $list = Selectlist::where('name', '_translation_')->first();
+
+        $this->authorize('view', $list);
+
+        $elements = $list->elements()->paginate(10);
+
+        return view('admin.lists.list.show', compact('list', 'elements'));
     }
 
     /**
      * Display the specified resource as tree.
      *
-     * @param  int  $id
+     * @param  \App\Selectlist  $list
      * @return \Illuminate\Http\Response
      */
-    public function tree($id)
+    public function tree(Selectlist $list)
     {
-        $this->authorize('tree', Selectlist::find($id));
+        $this->authorize('tree', $list);
 
-        $data['list'] = Selectlist::find($id);
-        
+        $id = $list->list_id;
         $constraint = function (Builder $query) use ($id) {
             $query->where('parent_fk', null)->where('list_fk', $id);
         };
+        $elements = Element::treeOf($constraint)->depthFirst()->paginate(10);
 
-        $data['elements'] = Element::treeOf($constraint)->depthFirst()->paginate(10);
-        
-        return view('admin.lists.list.tree', $data);
+        return view('admin.lists.list.tree', compact('list', 'elements'));
     }
 
     /**
      * Export the specified resource as CSV file.
      *
-     * @param  int  $id
+     * @param  \App\Selectlist  $list
      * @return \Illuminate\Http\Response
      */
-    public function export($id)
+    public function export(Selectlist $list)
     {
-        $this->authorize('export', Selectlist::find($id));
+        $this->authorize('export', $list);
 
-        $data['list'] = Selectlist::find($id);
-        $data['attributes'] = Attribute::orderBy('attribute_id')->get();
-        
+        $attributes = Attribute::orderBy('attribute_id')->get();
+
+        $id = $list->list_id;
         $constraint = function (Builder $query) use ($id) {
             $query->where('parent_fk', null)->where('list_fk', $id);
         };
-        
-        $data['elements'] = Element::treeOf($constraint)->depthFirst()->get();
-        
+        $elements = Element::treeOf($constraint)->depthFirst()->get();
+
         $attributeMap = null;
         
         // Create heading (1st line) of CSV file
         $csvContent = "id;parent_id;";
-        foreach ($data['attributes'] as $attribute) {
+        foreach ($attributes as $attribute) {
             $attributeMap[$attribute->attribute_id] = '';
             $csvContent .= $attribute->name .";";
         }
         $csvContent .= "\n";
         
         // Create all the content lines
-        foreach ($data['elements'] as $element) {
+        foreach ($elements as $element) {
             $values = $attributeMap;
             
             foreach ($element->values as $value) {
@@ -232,7 +276,7 @@ class ListController extends Controller
         }
         
         // Set file name for download
-        $exportFileName = sprintf('list_%d_%s_%s.csv', $id, $data['list']->name, date('Y-m-d'));
+        $exportFileName = sprintf('list_%d_%s_%s.csv', $id, $list->name, date('Y-m-d'));
         
         return response()->streamDownload(function () use ($csvContent) {
             echo $csvContent;
@@ -242,24 +286,22 @@ class ListController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  \App\Selectlist  $list
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Selectlist $list)
     {
-        $data['list'] = Selectlist::find($id);
-        
-        return view('admin.lists.list.edit', $data);
+        return view('admin.lists.list.edit', compact('list'));
     }
 
     /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \App\Selectlist  $list
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Selectlist $list)
     {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -275,23 +317,39 @@ class ListController extends Controller
             'internal' => $request->boolean('internal'),
             'attribute_order' => $request->input('attribute_order'),
         ];
-        Selectlist::where('list_id', $id)->update($update);
-        
+
+        $list->update($update);
+
         return Redirect::to('admin/lists/list')->with('success', __('lists.updated'));
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  \App\Selectlist  $list
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Selectlist $list)
     {
-        Selectlist::where('list_id', $id)->delete();
-        
-        // TODO: delete orphaned elements and values
-        
-        return Redirect::to('admin/lists/list')->with('success', __('lists.deleted'));
+        // Prevent deleting internal lists
+        if ($list->internal) {
+            return back()->with('warning', __('lists.cannot_delete_internal'));
+        }
+        else {
+            // Check for columns owning this list
+            if (Column::where('list_fk', $list->list_id)->count()) {
+                return back()->with('warning', __('lists.still_owned_by'));
+            }
+        }
+
+        // Delete orphaned elements and values
+        foreach ($list->elements as $element) {
+            $element->values()->delete();
+        }
+        $list->elements()->delete();
+        // Delete list itself
+        $list->delete();
+
+        return back()->with('success', __('lists.deleted'));
     }
 }

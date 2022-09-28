@@ -83,7 +83,7 @@ var itemDiff = {
 
     startDiff: function () {
         var t = this; // define variable in this Scope
-        var selector = '[name^="fields"][type!="hidden"],[name="menu_title"],[name="page_title"],[name="public"]';
+        var selector = '[id^="fieldsInput"][type!="hidden"],[name="menu_title"],[name="page_title"],[name="public"]';
         $(selector).each(function () {
             var hc = t.getHistoricContent($(this).data('column'), $(this).data('type'), t.historicRevision);
             var cc = t.getcurrentContent($(this).data('column'), $(this).data('type'));
@@ -133,6 +133,14 @@ var itemDiff = {
             case "public":
                 selector = 'select[name="public"] :selected';
                 content = $(selector).val();
+                break;
+            case "relation":
+                if ($('#fieldsHiddenInput-' + column).val() == '') {
+                    content = '';
+                }
+                else {
+                    content = $(selector).val().trim();
+                }
                 break;
             case "list":
                 selector += ' :selected';

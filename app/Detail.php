@@ -27,6 +27,7 @@ class Detail extends Model
         'item_fk',
         'column_fk',
         'element_fk',
+        'related_item_fk',
         'value_int',
         'value_float',
         'value_date',
@@ -51,6 +52,14 @@ class Detail extends Model
     public function item()
     {
         return $this->belongsTo('App\Item', 'item_fk', 'item_id');
+    }
+
+    /**
+     * Get the related item.
+     */
+    public function related_item()
+    {
+        return $this->belongsTo('App\Item', 'related_item_fk', 'item_id');
     }
     
     /**
@@ -99,6 +108,7 @@ class Detail extends Model
             'item_fk' => $this->item_fk,
             'column_fk' => $this->column_fk,
             'element_fk' => $this->element_fk,
+            'related_item_fk' => $this->related_item_fk,
             'value_int' => $this->value_int,
             'value_float' => $this->value_float,
             'value_date' => $this->value_date,

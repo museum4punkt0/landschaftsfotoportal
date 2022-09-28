@@ -7,8 +7,8 @@
 {{-- At last, if config values are not set, sane default values are used, see code below. --}}
 <fieldset>
     <div id="startDate-{{ $cm->column->column_id }}" class="form-row">
-        <legend class="col-form-label col-1">@lang('common.date_period_start')</legend>
-        <div class="form-group col-1">
+        <legend class="col-form-label col-2 col-md-1">@lang('common.date_period_start')</legend>
+        <div class="form-group col-3 col-md-2 col-xl-1">
             <label for="startDay-{{ $cm->column->column_id }}">@lang('common.day')</label>
             <select name="start_day" id="startDay-{{ $cm->column->column_id }}" data-column="{{ $cm->column->column_id }}" class="form-control">
                 @for ($i = 1; $i <= 31; $i++)
@@ -16,7 +16,7 @@
                 @endfor
             </select>
         </div>
-        <div class="form-group col-1">
+        <div class="form-group col-3 col-md-2 col-xl-1">
             <label for="startMonth-{{ $cm->column->column_id }}">@lang('common.month')</label>
             <select name="start_month" id="startMonth-{{ $cm->column->column_id }}" data-column="{{ $cm->column->column_id }}" class="form-control">
                 <option value="1" @if(1 == old('start_month'. $cm->column->column_id, $start_date[1])) selected @endif >@lang('common.january')</option>
@@ -33,7 +33,7 @@
                 <option value="12" @if(12 == old('start_month'. $cm->column->column_id, $start_date[1])) selected @endif >@lang('common.december')</option>
             </select>
         </div>
-        <div class="form-group col-1">
+        <div class="form-group col-3 col-md-2 col-xl-1">
             <label for="startYear-{{ $cm->column->column_id }}">@lang('common.year')</label>
             <select name="start_year" id="startYear-{{ $cm->column->column_id }}" data-column="{{ $cm->column->column_id }}" class="form-control">
                 @for ($i = ($start_year ?? config('ui.start_year', 1900)); $i <= ($end_year ?? config('ui.end_year', 2020) ?? date('Y')); $i++)
@@ -45,8 +45,8 @@
 </fieldset>
 <fieldset>
     <div id="endDate-{{ $cm->column->column_id }}" class="form-row">
-        <legend class="col-form-label col-1">@lang('common.date_period_end')</legend>
-        <div class="form-group col-1">
+        <legend class="col-form-label col-2 col-md-1">@lang('common.date_period_end')</legend>
+        <div class="form-group col-3 col-md-2 col-xl-1">
             <label for="endDay-{{ $cm->column->column_id }}">@lang('common.day')</label>
             <select name="end_day" id="endDay-{{ $cm->column->column_id }}" data-column="{{ $cm->column->column_id }}" class="form-control">
                 @for ($i = 1; $i <= 31; $i++)
@@ -54,7 +54,7 @@
                 @endfor
             </select>
         </div>
-        <div class="form-group col-1">
+        <div class="form-group col-3 col-md-2 col-xl-1">
             <label for="endMonth-{{ $cm->column->column_id }}">@lang('common.month')</label>
             <select name="end_month" id="endMonth-{{ $cm->column->column_id }}" data-column="{{ $cm->column->column_id }}" class="form-control">
                 <option value="1" @if(1 == old('end_month'. $cm->column->column_id, $end_date[1])) selected @endif >@lang('common.january')</option>
@@ -71,7 +71,7 @@
                 <option value="12" @if(12 == old('end_month'. $cm->column->column_id, $end_date[1])) selected @endif  >@lang('common.december')</option>
             </select>
         </div>
-        <div class="form-group col-1">
+        <div class="form-group col-3 col-md-2 col-xl-1">
             <label for="endYear-{{ $cm->column->column_id }}">@lang('common.year')</label>
             <select name="end_year" id="endYear-{{ $cm->column->column_id }}" data-column="{{ $cm->column->column_id }}" class="form-control">
                 @for ($i = ($start_year ?? config('ui.start_year', 1900)); $i <= ($end_year ?? config('ui.end_year', 2020) ?? date('Y')); $i++)

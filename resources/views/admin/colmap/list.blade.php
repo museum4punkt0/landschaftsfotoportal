@@ -2,6 +2,9 @@
 
 @section('content')
 
+@include('includes.modal_confirm_delete')
+@include('includes.modal_alert')
+
 <div class="container">
     @include('includes.alert_session_div')
 
@@ -32,7 +35,7 @@
                         <th colspan="1" >@lang('common.id')</th>
                         <th colspan="1">@lang('common.description')</th>
                         <th colspan="1">@lang('columns.list')</th>
-                        <th colspan="1">@lang('columns.column_group')</th>
+                        <th colspan="1">@lang('colmaps.column_group')</th>
                         <th colspan="1">@lang('taxon.list')</th>
                         <th colspan="1">@lang('colmaps.item_type')</th>
                         <th colspan="1">@lang('common.actions')</th>
@@ -165,41 +168,68 @@
                             {{$colmap->column->description}}
                         </td>
                         <td>
-                            @foreach($colmap->column->translation->values as $v)
-                                <b>{{substr($v->attribute->name, 0, -3)}}:</b> {{$v->value}}<br/>
-                            @endforeach
-                            <a href="{{route('column.edit', $colmap->column_fk)}}">ID {{$colmap->column_fk}}</a>
+                            <a href="{{route('column.edit', $colmap->column_fk)}}">
+                                {{ $translations->getLocalizedName($colmap->column->translation_fk) }}
+                            </a>
+                            <br>
+                            ({{ $data_types->getLocalizedName($colmap->column->data_type_fk) }})
                         </td>
                         <td>
-                            @foreach($colmap->column_group->values as $v)
-                                @if($v->attribute->name == 'config')
-                                    <b>{{$v->attribute->name, 0}}:</b> {{$v->value}}<br/>
-                                @else
-                                    <b>{{substr($v->attribute->name, 0, -3)}}:</b> {{$v->value}}<br/>
-                                @endif
-                            @endforeach
-                            <a href="{{route('element.show', $colmap->column_group_fk)}}">ID {{$colmap->column_group_fk}}</a>
+                            <a href="{{route('element.show', $colmap->column_group_fk)}}">
+                                {{ $column_groups->getLocalizedName($colmap->column_group_fk) }}
+                            </a>
                         </td>
                         <td>
                             @if($colmap->taxon_fk)
-                                {{$colmap->taxon->taxon_name}}<br/>
-                                <a href="{{route('taxon.edit', $colmap->taxon_fk)}}">ID {{$colmap->taxon_fk}}</a>
+                                <a href="{{ route('taxon.edit', $colmap->taxon_fk) }}">
+                                    {{ $colmap->taxon->taxon_name }}
+                                </a>
                             @else
                                 @lang('common.all')
                             @endif
                         </td>
                         <td>
-                            @foreach($colmap->item_type->values as $v)
-                                {{$v->value}}<br/>
-                            @endforeach
-                            <a href="{{route('element.show', $colmap->item_type_fk)}}">ID {{$colmap->item_type_fk}}</a>
+                            <a href="{{route('element.show', $colmap->item_type_fk)}}">
+                                {{ $item_types->getLocalizedName($colmap->item_type_fk) }}
+                            </a>
                         </td>
                         <td>
-                            <form action="{{route('colmap.destroy', $colmap)}}" method="POST">
-                                {{ csrf_field() }}
-                                @method('DELETE')
-                                <button class="btn btn-danger" type="submit">@lang('common.delete')</button>
-                            </form>
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
+                                    <a href="#" class="publicToggleLink"
+                                        data-url="{{ route('colmap.publish', $colmap) }}"
+                                        data-colmap-id="{{$colmap->colmap_id}}"
+                                        title="@lang('common.toggle_public')">
+                                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                        @if($colmap->public)
+                                            <i class="fas {{ Config::get('ui.icon_published') }} fa-stack-1x fa-inverse"></i>
+                                        @else
+                                            <i class="fas {{ Config::get('ui.icon_unpublished') }} fa-stack-1x fa-inverse"></i>
+                                        @endif
+                                    </a>
+                                </span>
+                            </span>
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
+                                    <a href="{{ route('colmap.edit', $colmap) }}" title="@lang('common.edit')">
+                                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                        <i class="fas {{ Config::get('ui.icon_edit') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </span>
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
+                                    <a href="#" data-toggle="modal" data-target="#confirmDeleteModal"
+                                        data-href="{{ route('colmap.destroy', $colmap) }}"
+                                        data-message="@lang('colmaps.confirm_delete', ['name' => $colmap->column->description])"
+                                        data-title="@lang('colmaps.delete')"
+                                        title="@lang('common.delete')"
+                                    >
+                                        <i class="fas fa-circle fa-stack-2x text-danger"></i>
+                                        <i class="fas {{ Config::get('ui.icon_delete') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </span>
                         </td>
                     </tr>
                 @endforeach
@@ -225,5 +255,43 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    // Triggered when public visibility button is clicked
+    $('.publicToggleLink').click(function(event) {
+        event.preventDefault();
+        let faIcon = $(this).children('i.fa-inverse');
+        
+        $.ajax({
+            type:'GET',
+            url:$(this).data('url'),
+            success:function (data) {
+                // Show alert model with status message
+                $('#alertModalLabel').text('@lang("common.toggle_public")');
+                $('#alertModalContent').html('<div class="alert alert-success">' + data.success + '</div>');
+                $('#alertModal').modal('show');
+                // Change fa-icon for public visibility
+                if (data.public) {
+                    faIcon.removeClass('fa-eye-slash');
+                    faIcon.addClass('fa-eye');
+                }
+                else {
+                    faIcon.removeClass('fa-eye');
+                    faIcon.addClass('fa-eye-slash');
+                }
+                // Close modal dialog
+                window.setTimeout(function () {
+                    $('#alertModal').modal('hide');
+                }, 5000);
+            },
+            error:function (xhr) {
+                // Render the Laravel error message
+                $('#alertModalLabel').text('@lang("common.laravel_error")');
+                $('#alertModalContent').html('<div class="alert alert-danger">' + xhr.responseJSON.message + '</div>');
+                $('#alertModal').modal('show');
+            },
+        });
+    });
+</script>
 
 @endsection

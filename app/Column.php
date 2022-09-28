@@ -126,6 +126,24 @@ class Column extends Model
     
     
     /**
+     * Get the config template of a column's data type.
+     *
+     * @param  String  $name
+     * @return Array
+     */
+    public function getDataTypeConfig($name)
+    {
+        $config = $this->data_type->values()->whereHas('attribute', function ($query) {
+            $query->where('name', 'config');
+        })->first();
+
+        // Decode JSON to array if value with attribute 'config' exists
+        $options = $config ? json_decode($config->value, true) : null;
+
+        return $options[$name] ?? [];
+    }
+
+    /**
      * Get the data type of the column.
      *
      * @return String
@@ -174,8 +192,6 @@ class Column extends Model
                 return ['numeric'];
             case '_string_':
             case '_title_':
-            case '_image_title_':
-            case '_image_copyright_':
             case '_redirect_':
             case '_map_':
             case '_html_':

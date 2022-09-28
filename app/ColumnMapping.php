@@ -103,6 +103,35 @@ class ColumnMapping extends Model
             ->with('column')
             ->orderBy('column_order');
     }
+
+    /**
+     * Scope a query to only include column mappings for a given item type.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @param  mixed  $item_type_id
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function scopeForItemType($query, $item_type_id)
+    {
+        return $query->where('item_type_fk', $item_type_id);
+    }
+
+    /**
+     * Set the column order to the highest value (sort to the end) regarding a certain item type.
+     *
+     * @return int
+     */
+    public function setHighestColumnOrder()
+    {
+        $column_order = ColumnMapping::forItemType($this->item_type_fk)
+            ->orderBy('column_order', 'desc')
+            ->first()
+            ->column_order;
+        $this->column_order = $column_order + 1;
+        $this->save();
+
+        return $column_order + 1;
+    }
     
     
     /**

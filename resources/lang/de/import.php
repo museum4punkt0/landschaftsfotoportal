@@ -40,7 +40,9 @@ return [
     'missing_columns' => 'Für mindestens eine Spalte muss der Inhalts-Typ (Anzeigefeld) ausgewählt werden!',
     'missing_id' => 'Es muss eine Spalte mit den Element-IDs ausgewählt werden!',
     'missing_parent' => 'Es muss eine Spalte mit den Parent-IDs ausgewählt werden!',
-    
+    'missing_related_item_type' => 'In der Feld-Zuordnung ":desc" fehlt die Konfiguration für den verknüpften Datensatztyp!',
+    'invalid_related_item_type' => 'In der Feld-Zuordnung ":desc" ist die Konfiguration für den verknüpften Datensatztyp mit ID :id ungültig!',
+
     'column_separator' => 'Trennzeichen für Tabellenspalten',
     'element_separator' => 'Trennzeichen für Elemente von Mehrfachauswahllisten',
     'contains_header' => 'CSV enthält in der ersten Zeile Spaltenüberschriften',
@@ -58,10 +60,13 @@ return [
     'select_location' => 'Wählen Sie den Eintrag, welcher am besten den Originaldaten entspricht.',
     'item_imported' => 'Datensatz wurde mit ID :id importiert.',
     'element_mismatch' => 'Auswahlliste ":list" enthält kein Element namens ":element"!',
+    'taxon_match' => 'Der Datensatz wurde dem Taxon ":full_name" zugewiesen.',
     'taxon_exists' => 'Der Datensatz für ":full_name" wurde nicht importiert, da das Taxon bereits existiert!',
     'taxon_not_found' => 'Der Datensatz für ":full_name" konnte nicht importiert werden, da das Taxon nicht existiert!',
     'parent_taxon_not_found' => 'Dem Datensatz konnte kein individueller Elterndatensatz zugewiesen werden, da keiner mit dem Taxon ":full_name" existiert!',
     'parent_detail_not_found' => 'Dem Datensatz konnte kein individueller Elterndatensatz zugewiesen werden, da keiner mit dem Detail ":detail" existiert!',
+    'related_item_not_found' => 'Dem Datensatz konnte kein verknüpfter Datensatz zugewiesen werden, da keiner mit dem Detail ":detail" existiert!',
+    'related_item_found' => 'Verknüpfung zu Datensatz ID :id mit Detail ":detail" hergestellt.',
     'done' => 'Import wurde abgeschlossen.',
 
 ];

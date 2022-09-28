@@ -3,6 +3,14 @@
 @section('content')
 
 <div class="container">
+@if (request('msg'))
+    <div class="alert alert-info">
+    @if (request('msg') == 'new_related')
+        @lang('items.new_related_info')
+    @endif
+    </div>
+@endif
+
 <h2>@lang('items.new')</h2>
 
 <form action="{{ route('item.create') }}" method="GET">
@@ -12,7 +20,7 @@
         <select id="itemTypeSelect" name="item_type" class="form-control" size=1 autofocus>
             @foreach($item_types as $type)
                 <option value="{{$type->element_id}}"
-                    @if(old('item_type') == $type->element_id) selected @endif>
+                    @if(old('item_type', request('item_type')) == $type->element_id) selected @endif>
                     @foreach($type->values as $v)
                         @if($v->attribute->name == 'name_'.app()->getLocale())
                             {{$v->value}}

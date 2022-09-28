@@ -42,13 +42,9 @@
                         <label for="itemTypeSelect">@lang('colmaps.item_type')</label>
                         <select id="itemTypeSelect" name="item_type" class="form-control" size=1 autofocus>
                             @foreach($item_types as $type)
-                                <option value="{{$type->element_id}}"
-                                    @if(old('item_type') == $type->element_id) selected @endif>
-                                    @foreach($type->values as $v)
-                                        @if($v->attribute->name == 'name_'.app()->getLocale())
-                                            {{$v->value}}
-                                        @endif
-                                    @endforeach
+                                <option value="{{$type->element_fk}}"
+                                    @if(old('item_type') == $type->element_fk) selected @endif>
+                                    {{ $type->value }}
                                 </option>
                             @endforeach
                         </select>

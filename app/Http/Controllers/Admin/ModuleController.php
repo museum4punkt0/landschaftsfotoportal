@@ -186,7 +186,6 @@ class ModuleController extends Controller
     {
         $module->delete();
 
-        return redirect()->route('module.index')
-            ->with('success', __('modules.deleted'));
+        return back()->with('success', __('modules.deleted'));
     }
 }

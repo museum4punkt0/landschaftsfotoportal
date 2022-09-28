@@ -17,7 +17,8 @@
                         <th>@lang('import.nextrows')</th>
                         <th>@lang('columns.header')</th>
                     </tr>
-                    
+
+                    <!-- For each column in CSV -->
                     @foreach($csv_data[0] as $csv_header)
                         <tr>
                             <td>
@@ -31,7 +32,17 @@
                                 @endforeach
                             </td>
                             <td>
-                                <select name="fields[{{ $loop->index }}]" @if ($loop->first) autofocus @endif >
+                                <!-- Select the column into which to import -->
+                                <div class="form-group">
+                                <select
+                                    id="fieldsSelect-{{ $loop->index }}"
+                                    name="fields[{{ $loop->index }}]"
+                                    aria-describedby="fieldsSelectHelpBlock-{{ $loop->index }}"
+                                    class="form-control form-control-sm fields-select"
+                                    data-field-id="{{ $loop->index }}"
+                                    size=1
+                                    @if($loop->first) autofocus @endif
+                                >
                                     <option value="0">@lang('common.ignore')</option>
                                     <option value="-1"
                                         @if(old('fields.'.$loop->index) == -1) selected @endif>
@@ -53,6 +64,13 @@
                                                 @if(old('fields.'.$loop->parent->index, Arr::get($selected_attr, $loop->parent->index, 0)) == $colmap->column_fk)
                                                     selected
                                                 @endif
+                                                data-option-help="{{ $colmap->column->data_type->attributes
+                                                    ->firstWhere('name', 'name_'.app()->getLocale())
+                                                    ->pivot->value }}"
+                                                @if($colmap->column->data_type->attributes
+                                                    ->firstWhere('name', 'code')->pivot->value == '_relation_')
+                                                    data-option-item-type="{{ $item_types->firstwhere('element_fk', $colmap->getConfigValue('relation_item_type'))->value }}"
+                                                @endif
                                             >
                                                 {{ $colmap->column->translation->attributes
                                                     ->firstWhere('name', 'name_'.app()->getLocale())
@@ -61,6 +79,9 @@
                                         @endunless
                                     @endforeach
                                 </select>
+                                <small id="fieldsSelectHelpBlock-{{ $loop->index }}" class="form-text text-muted">
+                                </small>
+                                </div>
                             </td>
                         </tr>
                     @endforeach
@@ -142,13 +163,9 @@
                         aria-describedby="parentItemTypeSelectHelpBlock" class="form-control" size=1
                     >
                         @foreach($item_types as $type)
-                            <option value="{{$type->element_id}}"
-                                @if(old('parent_item_type') == $type->element_id) selected @endif>
-                                @foreach($type->values as $v)
-                                    @if($v->attribute->name == 'name_'.app()->getLocale())
-                                        {{$v->value}}
-                                    @endif
-                                @endforeach
+                            <option value="{{$type->element_fk}}"
+                                @if(old('parent_item_type') == $type->element_fk) selected @endif>
+                                {{$type->value}}
                             </option>
                         @endforeach
                     </select>
@@ -170,7 +187,7 @@
                     </div>
                 </div>
                 
-                <fieldset id="geocoderFieldset" class="collapse @if(old('geocoder'))show @endif">
+                <fieldset id="geocoderFieldset" class="collapse @if(old('geocoder_enable'))show @endif">
                     <legend>@lang('import.geocoder_use')</legend>
                     
                     <div class="form-group">
@@ -310,6 +327,18 @@
         else {
             $('#geocoderFieldset').collapse('hide');
         }
+    });
+
+    // Triggered when select for columns changed
+    $('.fields-select').change(function(event) {
+        let fieldId = $(this).data('field-id');
+        let helpText = $('#fieldsSelect-'+fieldId+' option:selected').data('option-help') || '';
+        let itemType = $('#fieldsSelect-'+fieldId+' option:selected').data('option-item-type') || '';
+        // Add localized name of item type if selected column has '_relation_' type
+        if (itemType) {
+            helpText += ': ' + itemType;
+        }
+        $('#fieldsSelectHelpBlock-'+fieldId).text(helpText);
     });
 </script>
 

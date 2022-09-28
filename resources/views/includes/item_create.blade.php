@@ -89,6 +89,23 @@
         
         @switch($cm->column->data_type_name)
             
+            {{-- Data_type of form field is relation --}}
+            @case('_relation_')
+                {{-- Input with autocomplete for related item --}}
+                @include('includes.form_item_autocomplete', [
+                    'search_url' => route('item.autocomplete', ['item_type' => $cm->getConfigValue('relation_item_type')]),
+                    'div_class' => 'form-group',
+                    'column' => $cm->column->column_id,
+                    'name' => 'fields',
+                    'input_placeholder' => '',
+                    'input_help' =>  __('items.autocomplete_help'),
+                    'null_label' => __('common.none'),
+                    'item_title' => old('fields_name.' . $cm->column->column_id, __('common.none')),
+                    'item_id' => old('fields.' . $cm->column->column_id),
+                ])
+                {{-- TODO include form_history_detail --}}
+                @break
+
             {{-- Data_type of form field is list --}}
             @case('_list_')
                 {{-- dd($lists->firstWhere('list_id', $cm->column->list_fk)->elements) --}}
@@ -182,18 +199,12 @@
             
             {{-- Data_type of form field is integer --}}
             @case('_integer_')
-            {{-- Data_type of form field is image pixel per inch --}}
-            @case('_image_ppi_')
             {{-- Data_type of form field is float --}}
             @case('_float_')
             {{-- Data_type of form field is string --}}
             @case('_string_')
             {{-- Data_type of form field is (menu) title --}}
             @case('_title_')
-            {{-- Data_type of form field is image title --}}
-            @case('_image_title_')
-            {{-- Data_type of form field is image copyright --}}
-            @case('_image_copyright_')
             {{-- Data_type of form field is redirect --}}
             @case('_redirect_')
                 <div class="form-group">
@@ -246,7 +257,7 @@
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control summernote @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                         placeholder="{{ optional($placeholders->firstWhere('element_fk', $cm->column->translation_fk))->value }}"
-                        rows=5
+                        rows="{{ $cm->getConfigValue('textarea') ?? 5 }}"
                         @if($loop->first && !$options['edit.meta']) autofocus @endif
                     >{!!
                         old('fields.'. $cm->column->column_id)

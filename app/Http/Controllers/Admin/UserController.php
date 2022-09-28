@@ -131,8 +131,7 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         $user->delete();
-        
-        return Redirect::to('admin/user')
-            ->with('success', __('users.deleted'));
+
+        return back()->with('success', __('users.deleted'));
     }
 }

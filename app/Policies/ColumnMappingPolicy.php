@@ -106,7 +106,7 @@ class ColumnMappingPolicy
     }
 
     /**
-     * Determine whether the user can show own models.
+     * Determine whether the user can do batch mapping of models.
      *
      * @param  \App\User  $user
      * @return mixed
@@ -117,7 +117,7 @@ class ColumnMappingPolicy
     }
 
     /**
-     * Determine whether the user can show own models.
+     * Determine whether the user can sort the models.
      *
      * @param  \App\User  $user
      * @return mixed
@@ -125,5 +125,16 @@ class ColumnMappingPolicy
     public function sort(User $user)
     {
         return $user->hasAccess(['sort-colmap']);
+    }
+
+    /**
+     * Determine whether the user can change the public visibility.
+     *
+     * @param  \App\User  $user
+     * @return mixed
+     */
+    public function publish(User $user)
+    {
+        return $user->hasAccess(['publish-colmap']);
     }
 }

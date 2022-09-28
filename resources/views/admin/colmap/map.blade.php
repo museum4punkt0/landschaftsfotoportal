@@ -14,17 +14,11 @@
                 <hr>
                 <div class="card-title">
                 @lang('colmaps.mapping_for')
-                @foreach($item_types->find($item_type)->values as $v)
-                    @if($v->attribute->name == 'name_'.app()->getLocale())
-                        {{$v->value}}
-                    @endif
-                @endforeach
-                (Item-ID {{ $item_type }})
                 </div>
                 
                 <form action="{{ route('colmap.map', $item_type) }}" method="GET">
                     <div class="form-row">
-                        <div class="form-group col-md-8">
+                        <div class="form-group col-md-12">
                             <label for="itemTypeSelect">@lang('colmaps.item_type')</label>
                             <select
                                 id="itemTypeSelect"
@@ -34,13 +28,9 @@
                                 autofocus
                             >
                                 @foreach($item_types as $type)
-                                    <option value="{{$type->element_id}}"
-                                        @if(old('item_type', $item_type) == $type->element_id) selected @endif>
-                                        @foreach($type->values as $v)
-                                            @if($v->attribute->name == 'name_'.app()->getLocale())
-                                                {{$v->value}}
-                                            @endif
-                                        @endforeach
+                                    <option value="{{ $type->element_fk }}"
+                                        @if(old('item_type', $item_type) == $type->element_fk) selected @endif>
+                                        {{ $type->value }}
                                     </option>
                                 @endforeach
                             </select>
@@ -66,11 +56,7 @@
                             >
                             @foreach($columns_mapped as $column)
                                 <option value="{{$column->column_id}}">
-                                    @foreach($column->translation->values as $t)
-                                        @if($t->attribute->name == 'name_'.app()->getLocale())
-                                            {{$t->value}}
-                                        @endif
-                                    @endforeach
+                                    {{ optional($translations->firstWhere('element_fk', $column->translation_fk))->value }}
                                     ({{$column->description}})
                                     @if($column->column_mapping->firstWhere('colmap_id', $column->colmap_id)->taxon)
                                         [{{ $column->column_mapping->firstWhere(
@@ -101,11 +87,7 @@
                                         selected
                                     @endif
                                 >
-                                    @foreach($column->translation->values as $t)
-                                        @if($t->attribute->name == 'name_'.app()->getLocale())
-                                            {{$t->value}}
-                                        @endif
-                                    @endforeach
+                                    {{ optional($translations->firstWhere('element_fk', $column->translation_fk))->value }}
                                     ({{$column->description}})
                                 </option>
                             @endforeach
@@ -127,16 +109,18 @@
                                 'div_class' => 'form-group',
                                 'name' => 'taxon',
                                 'input_placeholder' => '',
-                                'input_label' => __('taxon.list'),
+                                'input_label' => __('colmaps.taxon'),
+                                'input_help' => __('colmaps.taxon_help') . " " . __('taxon.autocomplete_help'),
                                 'null_label' => __('common.all'),
                                 'taxon_name' => old('taxon_name', __('common.all')),
                                 'taxon_id' => old('taxon'),
                             ])
                             <div class="form-group">
-                                <label for="columnGroupSelect">@lang('columns.column_group')</label>
+                                <label for="columnGroupSelect">@lang('colmaps.column_group')</label>
                                 <select
                                     id="columnGroupSelect"
                                     name="column_group"
+                                    aria-describedby="sortEndHelpBlock"
                                     class="form-control"
                                     size=1
                                 >
@@ -147,11 +131,20 @@
                                         </option>
                                     @endforeach
                                 </select>
+                                <small id="columnGroupHelpBlock" class="form-text text-muted">
+                                    @lang('colmaps.column_group_help')
+                                </small>
                                 <span class="text-danger">{{ $errors->first('column_group') }}</span>
                             </div>
                             <div class="form-group">
                                 <label for="publicSelect">@lang('common.published')</label>
-                                <select id="publicSelect" name="public" class="form-control" size=1>
+                                <select
+                                    id="publicSelect"
+                                    name="public"
+                                    aria-describedby="sortEndHelpBlock"
+                                    class="form-control"
+                                    size=1
+                                >
                                     <option value="1"
                                         @if(old('public') == 1) selected @endif>
                                         @lang('common.yes')
@@ -161,7 +154,24 @@
                                         @lang('common.no')
                                     </option>
                                 </select>
+                                <small id="publicHelpBlock" class="form-text text-muted">
+                                    @lang('colmaps.public_help')
+                                </small>
                                 <span class="text-danger">{{ $errors->first('public') }}</span>
+                            </div>
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <input type="checkbox" id="sortEndCheckbox" name="sort_end"
+                                        aria-describedby="sortEndHelpBlock"
+                                        class="form-check-input" value=1 checked
+                                    >
+                                    <label for="sortEndCheckbox" class="form-check-label">
+                                        @lang('colmaps.sort_end')
+                                    </label>
+                                </div>
+                                <small id="sortEndHelpBlock" class="form-text text-muted">
+                                    @lang('colmaps.sort_end_help')
+                                </small>
                             </div>
                             <div class="form-group">
                                 <label for="configInput">@lang('colmaps.config')</label>

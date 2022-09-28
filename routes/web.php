@@ -91,6 +91,7 @@ Route::post('admin/colmap/map/store', 'Admin\ColumnMappingController@map_store')
 Route::get('admin/colmap/sort/{item_type?}', 'Admin\ColumnMappingController@sort')->name('colmap.sort');
 Route::post('admin/colmap/sort/store', 'Admin\ColumnMappingController@sort_store')->name('colmap.sort.store');
 Route::get('admin/colmap/autocomplete', 'Admin\ColumnMappingController@autocomplete')->name('colmap.autocomplete');
+Route::get('admin/colmap/publish/{colmap?}', 'Admin\ColumnMappingController@publish')->name('colmap.publish');
 Route::resource('admin/colmap', 'Admin\ColumnMappingController');
 Route::get('admin/column/autocomplete', 'Admin\ColumnController@autocomplete')->name('column.autocomplete');
 Route::resource('admin/column', 'Admin\ColumnController');
@@ -98,7 +99,8 @@ Route::get('admin/detail/orphans', 'Admin\DetailController@removeOrphans')->name
 Route::resource('admin/detail', 'Admin\DetailController');
 
 Route::get('admin/item/new', 'Admin\ItemController@new')->name('item.new');
-Route::get('admin/item/titles', 'Admin\ItemController@titles')->name('item.titles');
+Route::get('admin/titles/create', 'Admin\ItemController@createTitles')->name('titles.create');
+Route::post('admin/titles/store', 'Admin\ItemController@storeTitles')->name('titles.store');
 Route::get('admin/item/unpublished', 'Admin\ItemController@list_unpublished')->name('item.unpublished');
 Route::get('admin/item/publish/{item?}', 'Admin\ItemController@publish')->name('item.publish');
 Route::get('admin/item/autocomplete', 'Admin\ItemController@autocomplete')->name('item.autocomplete');
@@ -123,9 +125,12 @@ Route::post('admin/lists/list/{id}/element/store_batch',
 Route::resource('admin/lists/list.element', 'Admin\Lists\ElementController')->shallow();
 Route::resource('admin/lists/element.value', 'Admin\Lists\ValueController')->shallow();
 
+Route::get('admin/list/types', 'Admin\Lists\ListController@showItemTypes')->name('list.item_types');
+Route::get('admin/list/groups', 'Admin\Lists\ListController@showColumnGroups')->name('list.column_groups');
+Route::get('admin/list/translations', 'Admin\Lists\ListController@showTranslations')->name('list.translations');
 Route::get('admin/lists/list/internal', 'Admin\Lists\ListController@internal')->name('list.internal');
-Route::get('admin/lists/list/{id}/tree', 'Admin\Lists\ListController@tree')->name('list.tree');
-Route::get('admin/lists/list/{id}/export', 'Admin\Lists\ListController@export')->name('list.export');
+Route::get('admin/lists/list/{list}/tree', 'Admin\Lists\ListController@tree')->name('list.tree');
+Route::get('admin/lists/list/{list}/export', 'Admin\Lists\ListController@export')->name('list.export');
 Route::resource('admin/lists/list', 'Admin\Lists\ListController');
 Route::resource('admin/lists/attribute', 'Admin\Lists\AttributeController');
 

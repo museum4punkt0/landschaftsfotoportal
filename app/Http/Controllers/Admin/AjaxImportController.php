@@ -72,7 +72,7 @@ class AjaxImportController extends Controller
             $line = $data[$number - 1];
             $taxon_fk = null;
             // Check if a taxon is associated to item to be imported
-            if (array_search('-3', $selected_attr)) {
+            if (array_search('-3', $selected_attr) !== false) {
                 // Try to match taxon for given full scientific name
                 $taxon = Taxon::where('full_name', trim($line[array_search('-3', $selected_attr)]))->first();
                 if (empty($taxon)) {
@@ -91,6 +91,12 @@ class AjaxImportController extends Controller
                     continue;
                 } else {
                     $taxon_fk = $taxon->taxon_id;
+                    Log::channel('import')->info(__('import.taxon_match', [
+                        'full_name' => $line[array_search('-3', $selected_attr)]
+                        ]), [
+                        'taxon' => $taxon_fk,
+                        'line' => $number,
+                    ]);
                     // Check for already existing items (depending on taxon)
                     $existing_item = Item::where([
                         ['taxon_fk', $taxon_fk],
@@ -142,6 +148,52 @@ class AjaxImportController extends Controller
                     ];
                     $data_type = Column::find($selected_attr[$colnr])->getDataType();
                     switch ($data_type) {
+                        case '_relation_':
+                            // If CSV cell has content, otherwise ignore
+                            if ($cell) {
+                                // Get item type of related item
+                                $cm = Column::find($selected_attr[$colnr])->column_mapping->first();
+                                if (!$cm) {
+                                    // This should not happen because columns w/o mapping cannot be
+                                    // selected in dropdowns of import preview form
+                                    Log::channel('import')->error(
+                                        __('columns.no_colmap'), [
+                                            'column' => $cell,
+                                            'item' => $item->item_id,
+                                            'line' => $number,
+                                        ]
+                                    );
+                                }
+                                $it = $cm->getConfigValue('relation_item_type');
+                                $related_item = Item::whereHas('details', function (Builder $query) use ($cell, $it) {
+                                    $query->where('value_string', $cell);
+                                })->where('item_type_fk', $it)->first();
+                                // Save foreign key to related item
+                                if (!empty($related_item)) {
+                                    $detail_data['related_item_fk'] = $related_item->item_id;
+                                    Log::channel('import')->debug(
+                                        __('import.related_item_found', [
+                                            'id' => $related_item->item_id,
+                                            'detail' => $cell
+                                        ]), [
+                                            'item' => $item->item_id,
+                                            'line' => $number,
+                                        ]
+                                    );
+                                }
+                                // No matching related item found
+                                else {
+                                    Log::channel('import')->warning(
+                                        __('import.related_item_not_found', [
+                                            'detail' => $cell
+                                        ]), [
+                                            'item' => $item->item_id,
+                                            'line' => $number,
+                                        ]
+                                    );
+                                }
+                            }
+                            break;
                         case '_list_':
                             // Get element's ID for given value, independent of language
                             $attr = $selected_attr[$colnr];
@@ -153,12 +205,15 @@ class AjaxImportController extends Controller
                             // TODO: don't import and add warning if value doesn't exist in list
                             $detail_data['element_fk'] = $value ? $value->element_fk : null;
                             if (!$value) {
-                                Log::channel('import')->warning(__('import.element_mismatch', ['element' => $cell]), [
+                                $list = Selectlist::find(Column::find($attr)->list_fk)->name;
+                                Log::channel('import')->warning(
+                                    __('import.element_mismatch', [
+                                        'element' => $cell, 'list' => $list
+                                    ]), [
                                     'list' => Column::find($attr)->list_fk,
                                     'item' => $item->item_id,
                                     'line' => $number,
                                 ]);
-                                $list = Selectlist::find(Column::find($attr)->list_fk)->name;
                                 $warning_status_msg .= " ". __('import.csv_line', ['line' => $number]) .
                                     __('import.element_mismatch', ['element' => $cell, 'list' => $list]) ."\n";
                             }
@@ -179,12 +234,15 @@ class AjaxImportController extends Controller
                                 if ($value) {
                                     $detail_elements[] = $value->element_fk;
                                 } else {
-                                    Log::channel('import')->warning(__('import.element_mismatch', ['element' => $element]), [
+                                    $list = Selectlist::find(Column::find($attr)->list_fk)->name;
+                                    Log::channel('import')->warning(
+                                        __('import.element_mismatch', [
+                                            'element' => $element, 'list' => $list
+                                        ]), [
                                         'list' => Column::find($attr)->list_fk,
                                         'item' => $item->item_id,
                                         'line' => $number,
                                     ]);
-                                    $list = Selectlist::find(Column::find($attr)->list_fk)->name;
                                     $warning_status_msg .= " ". __('import.csv_line', ['line' => $number]) .
                                         __('import.element_mismatch', ['element' => $element, 'list' => $list]) ."\n";
                                 }
@@ -192,7 +250,6 @@ class AjaxImportController extends Controller
                             break;
                         case '_boolean_':
                         case '_integer_':
-                        case '_image_ppi_':
                             $detail_data['value_int'] = $cell == '' ? null : intval($cell);
                             break;
                         case '_float_':
@@ -243,8 +300,6 @@ class AjaxImportController extends Controller
                             // no break, but fall through
                         case '_string_':
                         case '_title_':
-                        case '_image_title_':
-                        case '_image_copyright_':
                         case '_html_':
                         case '_url_':
                         case '_map_':

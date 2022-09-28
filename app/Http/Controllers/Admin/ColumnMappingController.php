@@ -85,12 +85,21 @@ class ColumnMappingController extends Controller
               $colmaps = ColumnMapping::orderBy($orderby, $sort)->paginate($limit);
         }
         
+        // Get current UI language
         $lang = app()->getLocale();
+        // Get item types with localized names
         $item_types = Localization::getItemTypes($lang);             
+        // Get column groups with localized names
         $column_groups = Localization::getColumnGroups($lang);
+        // Get data types of columns with localized names
+        $data_types = Localization::getDataTypes($lang);
+        // Get localized names of columns
+        $translations = Localization::getTranslations($lang, 'name');
+
         $taxa = Taxon::has('column_mapping')->orderBy('full_name')->get();
         
-        return view('admin.colmap.list', compact('colmaps', 'aFilter', 'item_types', 'column_groups', 'taxa'));
+        return view('admin.colmap.list',
+            compact('colmaps', 'aFilter', 'item_types', 'data_types', 'column_groups', 'translations', 'taxa'));
     }
 
     /**
@@ -103,11 +112,14 @@ class ColumnMappingController extends Controller
         #$columns = Column::doesntHave('column_mapping')->orderBy('description')->get();
         $columns = Column::with(['translation.values'])->orderBy('description')->get();
         
+        // Get current UI language
         $lang = app()->getLocale();
+
+        // Get column groups with localized names
         $column_groups = Localization::getColumnGroups($lang);
-        
-        $it_list = Selectlist::where('name', '_item_type_')->first();
-        $item_types = Element::where('list_fk', $it_list->list_id)->get();
+
+        // Get item types with localized names
+        $item_types = Localization::getItemTypes($lang);             
         
         // Check for existing item_type, otherwise redirect back with warning message
         if ($item_types->isEmpty()) {
@@ -145,9 +157,14 @@ class ColumnMappingController extends Controller
             'api_attribute' => $request->input('api_attribute'),
             'config' => $request->input('config'),
         ];
-        ColumnMapping::create($data);
+        $colmap = ColumnMapping::create($data);
         
         $success_status_msg =  __('colmaps.created');
+
+        // Sort this mapped column to the end
+        if ($request->input('sort_end')) {
+            $colmap->setHighestColumnOrder();
+        }
         
         // Create missing details for all items
         $count = 0;
@@ -182,14 +199,22 @@ class ColumnMappingController extends Controller
      */
     public function map(Request  $request)
     {
-        $lang = app()->getLocale();
-        $column_groups = Localization::getColumnGroups($lang);;
-        
+        $this->authorize('map', ColumnMapping::class);
+
         $item_type = $request->item_type;
-        
-        $it_list = Selectlist::where('name', '_item_type_')->first();
-        $item_types = Element::where('list_fk', $it_list->list_id)->get();
-        
+
+        // Get current UI language
+        $lang = app()->getLocale();
+
+        // Get column groups with localized names
+        $column_groups = Localization::getColumnGroups($lang);
+
+        // Get item types with localized names
+        $item_types = Localization::getItemTypes($lang);             
+
+        // Get localized names of columns
+        $translations = Localization::getTranslations($lang, 'name');
+
         // Check for existing item_type, otherwise redirect back with warning message
         if ($item_types->isEmpty()) {
             return redirect()->route('list.internal')
@@ -197,8 +222,8 @@ class ColumnMappingController extends Controller
         }
         
         // Use first item type found in database if ID is invalid
-        if (!$item_types->contains($item_type)) {
-            $item_type = $item_types->first()->element_id;
+        if (!$item_types->firstWhere('element_fk', $item_type)) {
+            $item_type = $item_types->first()->element_fk;
         }
         
         // Get all columns mapped to the given item type
@@ -215,6 +240,7 @@ class ColumnMappingController extends Controller
             'item_type',
             'column_groups',
             'item_types',
+            'translations',
             'columns_mapped',
             'columns_avail'
         ));
@@ -228,6 +254,8 @@ class ColumnMappingController extends Controller
      */
     public function map_store(Request $request)
     {
+        $this->authorize('map', ColumnMapping::class);
+
         $request->validate([
             'column_avail' => 'required|array|min:1',  // at least one column must be selected
             'column_avail.*' => 'required|integer',
@@ -251,8 +279,13 @@ class ColumnMappingController extends Controller
                 'public' => $request->input('public'),
                 'config' => $request->input('config'),
             ];
-            ColumnMapping::create($data);
+            $colmap = ColumnMapping::create($data);
             
+            // Sort this mapped column to the end
+            if ($request->input('sort_end')) {
+                $colmap->setHighestColumnOrder();
+            }
+
             $mapcount++;
             
             // Create missing details for all items
@@ -279,11 +312,19 @@ class ColumnMappingController extends Controller
      */
     public function sort(Request $request)
     {
+        $this->authorize('sort', ColumnMapping::class);
+
         $item_type = $request->item_type;
         
-        $it_list = Selectlist::where('name', '_item_type_')->first();
-        $item_types = Element::where('list_fk', $it_list->list_id)->get();
-        
+        // Get current UI language
+        $lang = app()->getLocale();
+
+        // Get item types with localized names
+        $item_types = Localization::getItemTypes($lang);             
+
+        // Get localized names of columns
+        $translations = Localization::getTranslations($lang, 'name');
+
         // Check for existing item_type, otherwise redirect back with warning message
         if ($item_types->isEmpty()) {
             return Redirect::to('admin/colmap')
@@ -291,8 +332,8 @@ class ColumnMappingController extends Controller
         }
         
         // Use first item type found in database if ID is invalid
-        if (!$item_types->contains($item_type)) {
-            $item_type = $item_types->first()->element_id;
+        if (!$item_types->firstWhere('element_fk', $item_type)) {
+            $item_type = $item_types->first()->element_fk;
         }
         
         // Get all columns mapped to the given item type
@@ -303,7 +344,7 @@ class ColumnMappingController extends Controller
             ->orderBy('column_order')
             ->get();
         
-        return view('admin.colmap.sort', compact('item_type', 'item_types', 'columns_mapped'));
+        return view('admin.colmap.sort', compact('item_type', 'item_types', 'translations', 'columns_mapped'));
     }
 
     /**
@@ -316,6 +357,8 @@ class ColumnMappingController extends Controller
      */
     public function sort_store(Request $request)
     {
+        $this->authorize('sort', ColumnMapping::class);
+
         if ($request->has('ids')) {
             $arr = explode(',', $request->input('ids'));
             
@@ -324,7 +367,7 @@ class ColumnMappingController extends Controller
                 $colmap->column_order = $order;
                 $colmap->save();
             }
-            return ['success'=>true, 'message'=>'Updated'];
+            return response()->json(['success' => __('common.update_success')]);
         }
     }
 
@@ -342,12 +385,15 @@ class ColumnMappingController extends Controller
         $columns = Column::with(['translation.values'])->orderBy('description')->get();
         #$columns = Column::doesntHave('column_mapping')->orderBy('description')->get();
         
+        // Get current UI language
         $lang = app()->getLocale();
-        $column_groups = Localization::getColumnGroups($lang);;
-        
-        $it_list = Selectlist::where('name', '_item_type_')->first();
-        $item_types = Element::where('list_fk', $it_list->list_id)->get();
-        
+
+        // Get column groups with localized names
+        $column_groups = Localization::getColumnGroups($lang);
+
+        // Get item types with localized names
+        $item_types = Localization::getItemTypes($lang);             
+
         return view('admin.colmap.edit', compact('colmap', 'columns', 'column_groups', 'item_types'));
     }
 
@@ -372,8 +418,31 @@ class ColumnMappingController extends Controller
             'public' => 'required|integer',
             'api_attribute' => 'nullable|string|max:255',
             'config' => 'nullable|string|max:4095',
+            'option.*' => 'nullable|string|max:255',
+            'option_int.*' => 'nullable|integer|numeric',
+            'option_float.*' => 'nullable|numeric',
         ]);
+        #dd($request->input());
         
+        // Get data type dependent config options
+        $config = $request->input('option');
+        if ($request->has('option_int')) {
+            $config = array_merge($config, $request->input('option_int'));
+        }
+        if ($request->has('option_float')) {
+            $config = array_merge($config, $request->input('option_float'));
+        }
+        // Replace strings from input representing a boolean value
+        array_walk($config, function (&$value, $key) {
+            $value = ($value === 'false') ? false : $value;
+            $value = ($value === 'true') ? true : $value;
+        });
+        // Remove elements with value beeing null
+        $config = array_filter($config, function ($value) {
+            return !is_null($value);
+        });
+        #dd($config);
+
         //$colmap->column_fk = $request->input('column');
         $colmap->column_group_fk = $request->input('column_group');
         //$colmap->item_type_fk = $request->input('item_type');
@@ -381,7 +450,7 @@ class ColumnMappingController extends Controller
         $colmap->column_order = $request->input('column_order');
         $colmap->public = $request->input('public');
         $colmap->api_attribute = $request->input('api_attribute');
-        $colmap->config = $request->input('config');
+        $colmap->config = $config;
         $colmap->save();
         
         // TODO: Create missing details for all items, see function store()
@@ -400,8 +469,30 @@ class ColumnMappingController extends Controller
     {
         $colmap->delete();
         
-        return Redirect::to('admin/colmap')
-            ->with('success', __('colmaps.deleted'));
+        return back()->with('success', __('colmaps.deleted'));
+    }
+
+    /**
+     * Toggle public visibility using AJAX.
+     *
+     * @param  \App\ColumnMapping  $colmap
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function publish(ColumnMapping $colmap, Request $request)
+    {
+        $this->authorize('publish', $colmap);
+
+        $public = $colmap->public;
+        $colmap->public = $public ? 0 : 1;
+        $colmap->save();
+
+        $response = array(
+            "success" => $colmap->public ? __('colmaps.published') : __('colmaps.unpublished'),
+            "public" => $colmap->public,
+        );
+
+        return response()->json($response);
     }
 
     /**

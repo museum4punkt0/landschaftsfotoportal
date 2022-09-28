@@ -29,7 +29,7 @@ class AjaxMapController extends Controller
         }
         $config = $cm->config_array;
 
-        $items = Item::where('public', 1)->where('item_type_fk', intval($cm->getConfigValue('item_type')))
+        $items = Item::where('public', 1)->where('item_type_fk', intval($cm->getConfigValue('map_item_type')))
             // Exclude items without latitude/longitude
             ->whereHas('details', function ($query) use ($cm) {
                 $query->where('column_fk', intval($cm->getConfigValue('map_lat_col')))
@@ -70,7 +70,7 @@ class AjaxMapController extends Controller
         if (session('search_results')) {
             // Get the items (which were saved by search controller to session)
             $items = Item::where('public', 1)
-                ->where('item_type_fk', intval($cm->getConfigValue('item_type')))
+                ->where('item_type_fk', intval($cm->getConfigValue('map_item_type')))
                 ->whereIn('item_id', session('search_results'))
                 ->with('details')
                 ->get();
@@ -224,8 +224,8 @@ class AjaxMapController extends Controller
             }
         }
         // Filter items by item_type, if set
-        if ($cm->getConfigValue('item_type')) {
-            $query = $query->where('item_type_fk', intval($cm->getConfigValue('item_type')));
+        if ($cm->getConfigValue('map_item_type')) {
+            $query = $query->where('item_type_fk', intval($cm->getConfigValue('map_item_type')));
         }
         // Filter by public items depending on user
         if (!Gate::allows('view', Item::find($request->query('item')))) {
@@ -284,7 +284,7 @@ class AjaxMapController extends Controller
                         'id' => $item->item_id,
                         'properties' => [
                             'name' => optional($item->details->firstWhere(
-                                    'column_fk', data_get($config, 'title_col')
+                                    'column_fk', data_get($config, 'map_title_col')
                                 ))->value_string,
                             'preview' => $this->getImageSource($item, $config),
                             'details' => route('item.show.public', $item),

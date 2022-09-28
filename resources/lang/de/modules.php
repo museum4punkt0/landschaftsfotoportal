@@ -16,7 +16,7 @@ return [
     'new' => 'Neues Modul',
     'edit' => 'Modul bearbeiten',
     'delete' => 'Modul löschen',
-    'confirm_delete' => 'Möchten Sie dieses Modul wirklich löschen?',
+    'confirm_delete' => 'Möchten Sie das Modul “:name” wirklich löschen?',
     'created' => 'Modul wurde angelegt.',
     'updated' => 'Modul wurde bearbeitet.',
     'deleted' => 'Modul wurde gelöscht.',

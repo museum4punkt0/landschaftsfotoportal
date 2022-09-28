@@ -10,11 +10,13 @@ use App\Item;
 use App\Location;
 use App\Selectlist;
 use App\Http\Controllers\Controller;
+use App\Utils\Localization;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\MessageBag;
+use Debugbar;
 use Validator;
 use Redirect;
 use File;
@@ -40,8 +42,9 @@ class ImportItemsController extends Controller
     {
         $this->authorize('import-items');
 
-        $it_list = Selectlist::where('name', '_item_type_')->first();
-        $item_types = Element::where('list_fk', $it_list->list_id)->get();
+        // Get current UI language
+        $lang = app()->getLocale();
+        $item_types = Localization::getItemTypes($lang);
         
         return view('admin.import.itemsupload', compact('item_types'));
     }
@@ -122,12 +125,18 @@ class ImportItemsController extends Controller
             return redirect()->route('import.items.upload')
                 ->with('error', __('colmaps.none_available'));
         }
-        
+
+        // Check for existing 'item_type' config on colmaps for relation columns
+        $response = $this->checkRelationConfig($colmaps);
+        if ($response) {
+            return $response;
+        }
+
         $items = Item::tree()->depthFirst()->get();
         
-        // Get list of all item types for dropdown menu
-        $it_list = Selectlist::where('name', '_item_type_')->first();
-        $item_types = Element::where('list_fk', $it_list->list_id)->get();
+        // Get current UI language
+        $lang = app()->getLocale();
+        $item_types = Localization::getItemTypes($lang);
         
         return view('admin.import.itemscontent', compact('file_name', 'csv_data', 'colmaps', 'items', 'item_types', 'selected_attr', 'geocoder_attr'));
     }
@@ -169,6 +178,7 @@ class ImportItemsController extends Controller
                         $fail(__('import.missing_columns'));
                     }
                 },
+                'array',
             ],
         ]);
         
@@ -248,5 +258,37 @@ class ImportItemsController extends Controller
         
         return Redirect::to('admin/item')
             ->with('success', __('items.file_ext_fixed', ['count' => $count]));
+    }
+
+    /**
+     * Check for existing and valid 'item_type' config on colmaps for columns of data type 'relation'.
+     *
+     * @param  \Illuminate\Database\Eloquent\Collection  $colmaps
+     * @return \Illuminate\Http\Response | false
+     */
+    private function checkRelationConfig($colmaps)
+    {
+        foreach ($colmaps as $cm) {
+            // Check for columns with data type '_relation_'
+            if ($cm->column->data_type_name == '_relation_') {
+                Debugbar::debug('column with relation: ' . $cm->column->description);
+                $item_type = $cm->getConfigValue('relation_item_type');
+                Debugbar::debug('--> related item type: ' . $item_type);
+                if (!$item_type) {
+                    return back()->with('error', __('import.missing_related_item_type',
+                        ['desc' => $cm->column->description]
+                    ));
+                }
+                // Check if item type is valid
+                $element = Element::find($item_type);
+                Debugbar::debug($element);
+                if (!$element || optional($element->list)->name !== '_item_type_') {
+                    return back()->with('error', __('import.invalid_related_item_type',
+                        ['desc' => $cm->column->description, 'id' => $item_type]
+                    ));
+                }
+            }
+        }
+        return false;
     }
 }

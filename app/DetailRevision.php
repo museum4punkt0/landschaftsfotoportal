@@ -30,6 +30,7 @@ class DetailRevision extends Detail
         'item_fk',  // used for mutuator only
         'column_fk',
         'element_fk',
+        'related_item_fk',
         'value_int',
         'value_float',
         'value_date',
@@ -86,6 +87,14 @@ class DetailRevision extends Detail
     public function item()
     {
         return $this->belongsTo('App\ItemRevision', 'item_revision_fk', 'item_revision_id');
+    }
+
+    /**
+     * Get the related item.
+     */
+    public function related_item()
+    {
+        return $this->belongsTo('App\Item', 'related_item_fk', 'item_id');
     }
 
     /**

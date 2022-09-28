@@ -106243,7 +106243,7 @@ var itemDiff = {
   startDiff: function startDiff() {
     var t = this; // define variable in this Scope
 
-    var selector = '[name^="fields"][type!="hidden"],[name="menu_title"],[name="page_title"],[name="public"]';
+    var selector = '[id^="fieldsInput"][type!="hidden"],[name="menu_title"],[name="page_title"],[name="public"]';
     $(selector).each(function () {
       var hc = t.getHistoricContent($(this).data('column'), $(this).data('type'), t.historicRevision);
       var cc = t.getcurrentContent($(this).data('column'), $(this).data('type'));
@@ -106296,6 +106296,15 @@ var itemDiff = {
       case "public":
         selector = 'select[name="public"] :selected';
         content = $(selector).val();
+        break;
+
+      case "relation":
+        if ($('#fieldsHiddenInput-' + column).val() == '') {
+          content = '';
+        } else {
+          content = $(selector).val().trim();
+        }
+
         break;
 
       case "list":
@@ -107150,8 +107159,8 @@ var menu = {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /var/www/html/fwp-dev/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /var/www/html/fwp-dev/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! /var/www/html/chromosomes/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /var/www/html/chromosomes/resources/sass/app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

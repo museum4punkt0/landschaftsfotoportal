@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Column;
+use App\ColumnMapping;
+use App\Detail;
+use App\Item;
 use App\Selectlist;
 use App\Element;
 use App\Attribute;
@@ -78,11 +81,15 @@ class ColumnController extends Controller
         
         //data for the filter-selects
         $lists = Selectlist::where('internal', false)->orderBy('name')->get();
+
+        // Get current UI language
         $lang = app()->getLocale();
+        // Get data types of columns with localized names
         $data_types = Localization::getDataTypes($lang);
-//        dd($data_types);
+        // Get localized names of columns
+        $translations = Localization::getTranslations($lang, 'name');
         
-        return view('admin.column.list', compact('columns', 'aFilter', 'data_types', 'lists'));
+        return view('admin.column.list', compact('columns', 'aFilter', 'data_types', 'translations', 'lists'));
     }
 
     /**
@@ -106,11 +113,18 @@ class ColumnController extends Controller
         // Get data types of columns with localized names
         $data_types = Localization::getDataTypes($lang);
         
+        // Get column groups with localized names
+        $item_types = Localization::getItemTypes($lang);
+
+        // Get column groups with localized names
+        $column_groups = Localization::getColumnGroups($lang);
+
         // Get IDs for data_types
         $data_type_ids['_list_'] = Value::where('value', '_list_')->first()->element_fk;
         $data_type_ids['_multi_list_'] = Value::where('value', '_multi_list_')->first()->element_fk;
-        
-        return view('admin.column.create', compact('lists', 'data_types', 'data_type_ids', 'translations', 'attribute'));
+
+        return view('admin.column.create',
+            compact('lists', 'data_types', 'data_type_ids', 'item_types', 'column_groups', 'translations', 'attribute'));
     }
 
     /**
@@ -136,43 +150,79 @@ class ColumnController extends Controller
             ],
             'data_type' => 'required|integer',
             'translation' => 'required|integer',
-            'description' => 'required|string|max:255',
+            'description' => 'exclude_if:colmap_enable,1|required|string|max:255',
             'new_translation' => 'exclude_unless:translation,-1|required|string',
             'lang' => 'required|integer',
+            // Additional validation rules for column mapping
+            'column_group' => 'required_if:colmap_enable,1|integer',
+            'item_type' => 'required_if:colmap_enable,1|integer',
+            'taxon' => 'nullable|integer',
+            'public' => 'required_if:colmap_enable,1|integer',
+            'api_attribute' => 'nullable|string|max:255',
+            'config' => 'nullable|string|max:4095',
         ]);
         
         $data = [
             'list_fk' => $this->getListIdFromFormRequest($request),
             'data_type_fk' => $request->input('data_type'),
             'translation_fk' => $request->input('translation'),
-            'description' => $request->input('description'),
+            'description' => $request->input('description') ?? 'to be auto-filled',
         ];
         
         // Store element and value for new translation
         if ($request->input('translation') == -1) {
-            $element_data = [
-                'parent_fk' => null,
-                'list_fk' => Selectlist::where('name', '_translation_')->first()->list_id,
-                'value_summary' => '',
-            ];
-            $element = Element::create($element_data);
-            
-            $value_data = [
-                'element_fk' => $element->element_id,
-                'attribute_fk' => $request->input('lang'),
-                'value' => $request->input('new_translation'),
-            ];
-            Value::create($value_data);
-            
+            $element = $this->storeTranslationElement($request);
             $data['translation_fk'] = $element->element_id;
         }
         
         $column = Column::create($data);
         $column->data_type_name = $column->getDataTypeName();
         $column->save();
-        
-        return Redirect::to('admin/column')
-            ->with('success', __('columns.created'));
+
+        $success_status_msg = __('columns.created');
+
+        // Add column group if checkbox is enabled
+        if ($request->input('colmap_enable')) {
+            $data = [
+                'column_fk' => $column->column_id,
+                'column_group_fk' => $request->input('column_group'),
+                'item_type_fk' => $request->input('item_type'),
+                'taxon_fk' => $request->input('taxon'),
+                'public' => $request->input('public'),
+                'api_attribute' => $request->input('api_attribute'),
+                'config' => $request->input('config'),
+            ];
+            $colmap = ColumnMapping::create($data);
+
+            $success_status_msg .= " " . __('colmaps.created');
+
+            // Sort this mapped column to the end
+            if ($request->input('sort_end')) {
+                $colmap->setHighestColumnOrder();
+            }
+
+            // Auto fill column's description if not set by user
+            if (!$request->input('description')) {
+                $cg_name = Element::find($colmap->column_group_fk)->getValueOfAttribute('name_de');
+                $col_name = Element::find($column->translation_fk)->getValueOfAttribute('name_de');
+                $column->description = $cg_name . ' -> ' . $col_name;
+                $column->save();
+            }
+
+            // Create missing details for all items
+            $count = 0;
+            foreach (Item::where('item_type_fk', $data['item_type_fk'])->get() as $item) {
+                Detail::firstOrCreate(['column_fk' => $data['column_fk'], 'item_fk' => $item->item_id]);
+                $count++;
+            }
+            if ($count) {
+                $success_status_msg .= " " . __('colmaps.details_added', ['count' => $count]);
+            }
+        }
+
+        // Redirect to list view, showing newest first
+        return redirect()->route('column.index', ['orderby' => 'column_id', 'sort' => 'desc'])
+            ->with('success', $success_status_msg);
     }
 
     /**
@@ -199,6 +249,9 @@ class ColumnController extends Controller
         // Get current UI language
         $lang = app()->getLocale();
         
+        // Get name attribute for current language
+        $attribute = Attribute::where('name', 'name_'. $lang)->first();
+
         // Get localized names of columns
         $translations = Localization::getTranslations($lang, 'name');
         
@@ -209,7 +262,8 @@ class ColumnController extends Controller
         $data_type_ids['_list_'] = Value::where('value', '_list_')->first()->element_fk;
         $data_type_ids['_multi_list_'] = Value::where('value', '_multi_list_')->first()->element_fk;
         
-        return view('admin.column.edit', compact('column', 'lists', 'data_types', 'data_type_ids', 'translations'));
+        return view('admin.column.edit',
+            compact('column', 'lists', 'data_types', 'data_type_ids', 'translations', 'attribute'));
     }
 
     /**
@@ -237,6 +291,8 @@ class ColumnController extends Controller
             'data_type' => 'required|integer',
             'translation' => 'required|integer',
             'description' => 'required|string|max:255',
+            'new_translation' => 'exclude_unless:translation,-1|required|string',
+            'lang' => 'required|integer',
         ]);
         
         $column->list_fk = $this->getListIdFromFormRequest($request);
@@ -244,6 +300,12 @@ class ColumnController extends Controller
         $column->translation_fk = $request->input('translation');
         $column->description = $request->input('description');
         $column->data_type_name = $column->getDataTypeName();
+
+        // Store element and value for new translation
+        if ($request->input('translation') == -1) {
+            $element = $this->storeTranslationElement($request);
+            $column->translation_fk = $element->element_id;
+        }
         $column->save();
         
         return Redirect::to('admin/column')
@@ -266,8 +328,7 @@ class ColumnController extends Controller
         
         $column->delete();
         
-        return Redirect::to('admin/column')
-            ->with('success', __('columns.deleted'));
+        return back()->with('success', __('columns.deleted'));
     }
 
     /**
@@ -294,6 +355,31 @@ class ColumnController extends Controller
         }
         
         return response()->json($response);
+    }
+
+    /**
+     * Store new element containing a translated name of a column.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \App\Element
+     */
+    private function storeTranslationElement(Request $request)
+    {
+        $element_data = [
+            'parent_fk' => null,
+            'list_fk' => Selectlist::where('name', '_translation_')->first()->list_id,
+            'value_summary' => '',
+        ];
+        $element = Element::create($element_data);
+
+        $value_data = [
+            'element_fk' => $element->element_id,
+            'attribute_fk' => $request->input('lang'),
+            'value' => $request->input('new_translation'),
+        ];
+        Value::create($value_data);
+
+        return $element;
     }
 
     /**

@@ -12,10 +12,6 @@
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}"></script>
 
-    <!-- Fonts -->
-    <link rel="dns-prefetch" href="//fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
-
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     
@@ -58,36 +54,11 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('taxon.index') }}">{{ __('taxon.header') }}</a>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('list.index') }}">{{ __('lists.header') }}</a>
-                            </li>
                             <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
-                                    {{ __('common.internal') }} <span class="caret"></span>
-                                </a>
-                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="{{ route('module.index') }}">
-                                        {{ __('modules.header') }}
-                                    </a>
-                                    <a class="dropdown-item" href="{{ route('attribute.index') }}">
-                                        {{ __('attributes.header') }}
-                                    </a>
-                                    <a class="dropdown-item" href="{{ route('list.internal') }}">
-                                        {{ __('lists.internal_header') }}
-                                    </a>
-                                    <a class="dropdown-item" href="{{ route('item.titles') }}">
-                                        {{ __('items.add_titles') }}
-                                    </a>
-                                    <a class="dropdown-item" href="{{ route('detail.orphans') }}">
-                                        {{ __('items.remove_orphans') }}
-                                    </a>
-                                </div>
-                            </li>
-                            <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
+                                <a id="importNavbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
                                     {{ __('import.header') }} <span class="caret"></span>
                                 </a>
-                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <div class="dropdown-menu" aria-labelledby="imprtNavbarDropdown">
                                     <a class="dropdown-item" href="{{ route('import.csv.upload') }}">
                                         {{ __('lists.header') }}
                                     </a>
@@ -99,11 +70,54 @@
                                     </a>
                                 </div>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('column.index') }}">{{ __('columns.header') }}</a>
+                            <li class="nav-item dropdown">
+                                <a id="configNavbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
+                                    {{ __('common.config') }} <span class="caret"></span>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="configNavbarDropdown">
+                                    <a class="dropdown-item" href="{{ route('list.item_types') }}">
+                                        {{ __('lists.item_types') }}
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('list.column_groups') }}">
+                                        {{ __('lists.column_groups') }}
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('list.translations') }}">
+                                        {{ __('lists.translations') }}
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('list.index') }}">
+                                        {{ __('lists.header') }}
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('column.index') }}">
+                                        {{ __('columns.header') }}
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('colmap.index') }}">
+                                        {{ __('colmaps.header') }}
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('module.index') }}">
+                                        {{ __('modules.header') }}
+                                    </a>
+                                </div>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('colmap.index') }}">{{ __('colmaps.header') }}</a>
+                            <li class="nav-item dropdown">
+                                <a id="adminNavbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
+                                    {{ __('common.admin_tools') }} <span class="caret"></span>
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="adminNavbarDropdown">
+                                @can('show-super-admin')
+                                    <a class="dropdown-item" href="{{ route('attribute.index') }}">
+                                        {{ __('attributes.header') }}
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('list.internal') }}">
+                                        {{ __('lists.internal_header') }}
+                                    </a>
+                                @endcan
+                                    <a class="dropdown-item" href="{{ route('titles.create') }}">
+                                        {{ __('items.add_titles') }}
+                                    </a>
+                                    <a class="dropdown-item" href="{{ route('detail.orphans') }}">
+                                        {{ __('items.remove_orphans') }}
+                                    </a>
+                                </div>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('user.index') }}">{{ __('users.header') }}</a>
@@ -116,10 +130,10 @@
                         @endcan
                     @endauth
                             <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
+                                <a id="langNavbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
                                     {{ __('common.language') }} <span class="caret"></span>
                                 </a>
-                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                <div class="dropdown-menu" aria-labelledby="langNavbarDropdown">
                                 @foreach(Config::get('languages') as $lang => $language)
                                     <a class="dropdown-item" href="{{ route('locale', $lang) }}">
                                         {{ $language }}

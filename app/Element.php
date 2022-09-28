@@ -146,4 +146,15 @@ class Element extends Model
         }
         return $lists;
     }
+
+    /**
+     * Get value with a given attribute name.
+     *
+     * @param  string  $attribute
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    public function getValueOfAttribute($attribute)
+    {
+        return $this->attributes()->firstWhere('name', $attribute)->pivot->value;
+    }
 }

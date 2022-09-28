@@ -15,6 +15,8 @@ return [
     'list' => 'Benutzer',
     'new' => 'Neuer Benutzer',
     'edit' => 'Benutzer bearbeiten',
+    'delete' => 'Benutzer löschen',
+    'confirm_delete' => 'Möchten Sie den Benutzer “:name” wirklich löschen?',
     'created' => 'Benutzer wurde angelegt.',
     'updated' => 'Benutzer wurde bearbeitet.',
     'deleted' => 'Benutzer wurde gelöscht.',

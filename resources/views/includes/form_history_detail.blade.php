@@ -9,6 +9,11 @@
                                 @foreach($details->firstWhere('column_fk', $cm->column->column_id)->detail->revisions->sortByDesc('updated_at') as $drev)
                                     <option value="{{ $drev->item->revision }}" data-content="
                                         @switch($data_type)
+                                            @case('relation')
+                                                @if($drev->related_item_fk)
+                                                    {{ $drev->related_item->title }}
+                                                @endif
+                                                @break
                                             @case('list')
                                                 @if($drev->element)
                                                     {{ $drev->element->attributes->firstWhere(

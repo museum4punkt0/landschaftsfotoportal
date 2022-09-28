@@ -1,4 +1,76 @@
-@import url(https://fonts.googleapis.com/css?family=Nunito);/*!
+/* nunito-latin-400-normal*/
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(/fonts/vendor/@fontsource/nunito/files/nunito-latin-400-normal.woff2?aacf0f4f8b5d693087b4d8ac6c86d2ae) format('woff2'), url(/fonts/vendor/@fontsource/nunito/files/nunito-latin-400-normal.woff?d02558401b11be7895f3529d349fcc57) format('woff');
+  
+}
+/* nunito-latin-400-italic*/
+@font-face {
+  font-family: 'Nunito';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 400;
+  src: url(/fonts/vendor/@fontsource/nunito/files/nunito-latin-400-italic.woff2?bfbfe7f18ed866e0ab39b902450196d4) format('woff2'), url(/fonts/vendor/@fontsource/nunito/files/nunito-latin-400-italic.woff?cdf3173f7438fbe13708760247f00d3b) format('woff');
+  
+}
+/* nunito-latin-700-normal*/
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(/fonts/vendor/@fontsource/nunito/files/nunito-latin-700-normal.woff2?c9e884975975e032087d471b1b6a5cc2) format('woff2'), url(/fonts/vendor/@fontsource/nunito/files/nunito-latin-700-normal.woff?95e249ade64ad2d5e3faaeeed91c7c9d) format('woff');
+  
+}
+/* nunito-latin-700-italic*/
+@font-face {
+  font-family: 'Nunito';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 700;
+  src: url(/fonts/vendor/@fontsource/nunito/files/nunito-latin-700-italic.woff2?dc321e2b47473bedddd7b28d3451752e) format('woff2'), url(/fonts/vendor/@fontsource/nunito/files/nunito-latin-700-italic.woff?92fdc60424bef4a34eb8621baf2e6e46) format('woff');
+  
+}
+/* open-sans-latin-400-normal*/
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(/fonts/vendor/@fontsource/open-sans/files/open-sans-latin-400-normal.woff2?c416910cae8fe4258cdf8c35933e9f4c) format('woff2'), url(/fonts/vendor/@fontsource/open-sans/files/open-sans-latin-400-normal.woff?685ff80c19db69f72b364920720be393) format('woff');
+  
+}
+/* open-sans-latin-400-italic*/
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 400;
+  src: url(/fonts/vendor/@fontsource/open-sans/files/open-sans-latin-400-italic.woff2?f9de6527002787670dc12cd709e15b54) format('woff2'), url(/fonts/vendor/@fontsource/open-sans/files/open-sans-latin-400-italic.woff?a8dcbc314fd7dddfa8a377d2bf3eefb3) format('woff');
+  
+}
+/* open-sans-latin-700-normal*/
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(/fonts/vendor/@fontsource/open-sans/files/open-sans-latin-700-normal.woff2?4333f8c1f02dee549bdb7353a3b48e82) format('woff2'), url(/fonts/vendor/@fontsource/open-sans/files/open-sans-latin-700-normal.woff?721039d0bf97cb281ca8854bf15fa3de) format('woff');
+  
+}
+/* open-sans-latin-700-italic*/
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 700;
+  src: url(/fonts/vendor/@fontsource/open-sans/files/open-sans-latin-700-italic.woff2?9bd6b9c1af5ddeb3ea386c31083eb6ab) format('woff2'), url(/fonts/vendor/@fontsource/open-sans/files/open-sans-latin-700-italic.woff?85fc187f434cd35578bc84d09d26d488) format('woff');
+  
+}
+/*!
  * 
  * Super simple wysiwyg editor v0.8.18
  * https://summernote.org
