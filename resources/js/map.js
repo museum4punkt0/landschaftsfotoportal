@@ -1,8 +1,12 @@
 import {Map, Feature, View, Overlay} from 'ol';
+import {ScaleLine} from 'ol/control';
+import MousePosition from 'ol/control/MousePosition';
+import {createStringXY} from 'ol/coordinate';
 import TileLayer from 'ol/layer/Tile';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import ClusterSource from 'ol/source/Cluster';
+import TileWMS from 'ol/source/TileWMS';
 import GeoJSON from 'ol/format/GeoJSON';
 import {Icon, Style, Circle as CircleStyle, Fill, Stroke, Text} from 'ol/style';
 import * as olExtent from 'ol/extent';
@@ -28,6 +32,10 @@ var osm_map = {
     init: function (colmapId, itemId, configUrl) {
         this.owner.colmapId = colmapId;
         this.owner.itemId = itemId;
+        this.owner.revisionId = ($('#map').data('revision') || 0);
+        this.owner.forwardGeocoderUrl = $('#map').data('forward-geocoder-url');
+        this.owner.reverseGeocoderUrl = $('#map').data('reverse-geocoder-url');
+        this.owner.apiKey = $('#map').data('api-key');
 
         this.getConfig(configUrl);
     },
@@ -51,13 +59,21 @@ var osm_map = {
 
         // Add vector layer with polygons
         if (this.config.api_polygons) {
-            this.getPolygonLayers(this.config.api_polygons + '&item=' + this.owner.itemId);
+            let url = this.config.api_polygons + '&item=' + this.owner.itemId;
+            url += '&revision=' + this.owner.revisionId;
+            this.getPolygonLayers(url);
         }
 
         // Add vector layer with points
         if (this.config.api_points) {
-            this.addVectorLayer(this.config.api_points + '&item=' + this.owner.itemId,
-                this.config.marker_icon, this.config.marker_color, this.config.marker_scale);
+            let url = this.config.api_points + '&item=' + this.owner.itemId;
+            url += '&revision=' + this.owner.revisionId;
+            this.addVectorLayer(url,
+                this.config.marker_icon,
+                this.config.marker_color,
+                this.config.marker_scale,
+                this.config.marker_label
+            );
 
             // Display error message if no points with valid lat/lon available
             console.log(osm_map.geoJsonLayer.getSource());
@@ -74,7 +90,207 @@ var osm_map = {
             this.map.once('rendercomplete', function () {
                 //console.log(osm_map.geoJsonLayer.getSource().getState());
                 osm_map.moveMapToLayerSourceExtent(osm_map.geoJsonLayer, 50, osm_map.config.map.zoom);
+
+                // Check non-empty for lat/lon form fields to respect old form input
+                if ($('input.location_lat').val() || $('input.location_lon').val()) {
+                    osm_map.updatePosition($('input.location_lon').val(), $('input.location_lat').val());
+                    osm_map.moveMarker($('input.location_lon').val(), $('input.location_lat').val(),
+                        osm_map.owner.itemId);
+                }
+                else {
+                    // Use browser's geolocation API if available and enabled in config
+                    if (Boolean(osm_map.config.map_geolocation) && navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(function (position) {
+                            let lon = position.coords.longitude;
+                            let lat = position.coords.latitude;
+                            osm_map.updatePosition(lon, lat);
+                            osm_map.moveMarker(lon, lat, osm_map.owner.itemId);
+                        }, function (error) {
+                            console.log("error using browser's geolocation API");
+                        }, {
+                            timeout:2500
+                        });
+                    }
+                }
             });
+        }
+
+        // Add scale line
+        if (this.config.scale_line) {
+            this.addScaleLine();
+        }
+
+        // Add mouse position
+        if (this.config.mouse_position) {
+            this.addMousePosition(this.config.mouse_position);
+        }
+
+        // Add WMS layer
+        if (this.config.wms_url) {
+            // String with layer names, concatenated with commas
+            var layers = '';
+            if (this.config.wms_layers) {
+                layers = this.config.wms_layers;
+            }
+            console.log(layers);
+            // Array with 4 float elements representing the extent
+            var extent = false;
+            if (this.config.wms_extent) {
+                extent = this.config.wms_extent;
+            }
+            console.log(extent);
+
+            this.addWmsLayer(this.config.wms_url, layers, extent);
+        }
+
+        // TODO: move to new module
+        // Click on map to update position of marker
+        osm_map.map.on('singleclick', function (evt) {
+            let coord = osm_map.transformCoordinate(evt.coordinate);
+            // Update lat/lon form fields
+            $('input.location_lon').val(coord[0]);
+            $('input.location_lat').val(coord[1]);
+            // Update position of marker
+            osm_map.moveMarker($('input.location_lon').val(), $('input.location_lat').val(),
+                osm_map.owner.itemId);
+            
+            // Check for missing location input to avoid useless geocoder query
+            if (!$('input.location_city').length) {
+                return;
+            }
+
+            // Fetch data from geocoder API
+            $.ajax({
+                url: osm_map.owner.reverseGeocoderUrl,
+                type: 'get',
+                dataType: 'json',
+                data: {
+                    format: 'json',
+                    'accept-language': 'de',
+                    lat: coord[1],
+                    lon: coord[0],
+                    key: osm_map.owner.apiKey,
+                },
+                success: function(data) {
+                    //console.log(data);
+                    // Update address form input fields with results from geocoder
+                    $('input.location_country').val(data.address.country);
+                    $('input.location_state').val(data.address.state);
+                    $('input.location_county').val(data.address.county);
+                    $('input.location_city').val(osm_map.getTownFromAddress(data.address));
+                    $('input.location_street').val(data.address.road);
+                    $('input.location_postcode').val(data.address.postcode);
+                },
+                error:function (xhr) {
+                    //console.log(xhr);
+                    // In case of wrong API key, the server responds with HTTP 403, but XHR fails
+                    // because of missing CORS headers
+                    if (xhr.status == 0) {
+                        error_message = '@lang("common.geocoder_api_key_error")';
+                    }
+                    // Render the geocoder error message
+                    $('#alertModalLabel').text('@lang("common.laravel_error")');
+                    $('#alertModalContent').html('<div class="alert alert-danger">' + error_message + '</div>');
+                    $('#alertModal').modal('show');
+                },
+            });
+        });
+
+        // Autocomplete search for address form input
+        $('input.location_city').autocomplete( {
+            disabled: true,
+            minLength: 5,
+            source: function(request, response) {
+                // Fetch data from geocoder API
+                $.ajax({
+                    url: osm_map.owner.forwardGeocoderUrl,
+                    type: 'get',
+                    dataType: 'json',
+                    data: {
+                        format: 'json',
+                        'accept-language': 'de',
+                        addressdetails: '1',
+                        q: request.term,
+                        key: osm_map.owner.apiKey,
+                    },
+                    success: function(data) {
+                        var transformed = $.map(data, function (element) {
+                            //console.log(element);
+                            return {
+                                label: element.display_name + ' (' + element.class + ')',
+                                value: element.osm_id,
+                                address: element.address,
+                                latitude: element.lat,
+                                longitude: element.lon,
+                                osm_id: element.osm_id,
+                            };
+                        });
+                        //console.log(transformed);
+                        response(transformed);
+                    },
+                    error:function (xhr) {
+                        //console.log(xhr);
+                        // In case of wrong API key, the server responds with HTTP 403, but XHR fails
+                        // because of missing CORS headers
+                        if (xhr.status == 0) {
+                            error_message = '@lang("common.geocoder_api_key_error")';
+                        }
+                        // Render the geocoder error message
+                        $('#alertModalLabel').text('@lang("common.laravel_error")');
+                        $('#alertModalContent').html('<div class="alert alert-danger">' + error_message + '</div>');
+                        $('#alertModal').modal('show');
+                    },
+                });
+            },
+            select: function (event, ui) {
+                //console.log(ui.item);
+                event.preventDefault();
+                $('input.location_city').autocomplete('disable');
+                
+                // Update address form input fields with results from geocoder
+                $('input.location_country').val(ui.item.address.country);
+                $('input.location_state').val(ui.item.address.state);
+                $('input.location_county').val(ui.item.address.county);
+                $('input.location_city').val(osm_map.getTownFromAddress(ui.item.address));
+                $('input.location_street').val(ui.item.address.road);
+                $('input.location_postcode').val(ui.item.address.postcode);
+                $('input.location_lat').val(ui.item.latitude);
+                $('input.location_lon').val(ui.item.longitude);
+                
+                // Adjust map center to location of selected search result
+                osm_map.updatePosition($('input.location_lon').val(), $('input.location_lat').val());
+                osm_map.moveMarker($('input.location_lon').val(), $('input.location_lat').val(),
+                    osm_map.owner.itemId);
+                
+                return false;
+            }
+        });
+        
+        // Send search request to geocoder API
+        $('button.searchAddressBtn').click(function(xhr) {
+            xhr.preventDefault();
+            $('input.location_city').autocomplete('enable');
+            $('input.location_city').autocomplete('search');
+        });
+    },
+
+    // Extract name of city/town/village from geocoder address response
+    getTownFromAddress: function (address) {
+        if(address.city) {
+            return address.city;
+        }
+        else {
+            if(address.town) {
+                return address.town;
+            }
+            else {
+                if(address.village) {
+                    return address.village;
+                }
+                else {
+                    return "?";
+                }
+            }
         }
     },
 
@@ -114,8 +330,32 @@ var osm_map = {
     updateSize: function () {
         this.map.updateSize();
     },
+
+    // Add a control showing a scale line or bar
+    addScaleLine: function () {
+        const scaleLine = new ScaleLine({
+            units: 'metric',
+            bar: true,
+            steps: 4,
+            minWidth: 100,
+        });
+        this.map.addControl(scaleLine);
+    },
+
+    // Add a control showing the current position of mouse pointer
+    addMousePosition: function (precision = 4) {
+        const mousePositionControl = new MousePosition({
+            coordinateFormat: createStringXY(precision),
+            projection: 'EPSG:4326',
+            // comment out the following two lines to have the mouse position
+            // be placed outside the map.
+            //className: 'custom-mouse-position',
+            //target: document.getElementById('mouse-position'),
+        });
+        this.map.addControl(mousePositionControl);
+    },
     
-    addMarker: function (lon, lat, icon, color, id) {
+    addMarker: function (lon, lat, icon, color, scale=1.0, id, layer = this.vectorLayer) {
         if (typeof id === 'undefined') {
             id = 'defaultMarker';
         }
@@ -130,11 +370,11 @@ var osm_map = {
                     color: color,
                     crossOrigin: 'anonymous',
                     src: icon,
-                    scale: 1.0,
+                    scale: scale,
                 }),
             })
         );
-        this.vectorLayer.getSource().addFeature(marker);
+        layer.getSource().addFeature(marker);
     },
     
     updatePosition: function (lon, lat, zoom) {
@@ -162,22 +402,28 @@ var osm_map = {
             maxZoom: maxZoom,
         });
     },
-    
-    moveMarker: function (lon, lat, id) {
-        if (typeof id === 'undefined') {
-            id = 'defaultMarker';
-        }
+
+    moveMarker: function (lon, lat, id = 'defaultMarker', layer = this.geoJsonLayer) {
         var coordinates = fromLonLat([lon, lat]);
-        this.vectorLayer.getSource().getFeatureById(id).getGeometry().setCoordinates(coordinates);
+        // Check for existing marker, otherwise create new one
+        if (layer.getSource().getFeatureById(id)) {
+            layer.getSource().getFeatureById(id).getGeometry().setCoordinates(coordinates);
+        }
+        else {
+            //console.log('adding new marker because no existing one found for moving');
+            this.addMarker(lon, lat,
+                this.config.marker_icon, this.config.marker_color, this.config.marker_scale,
+                '0', layer);
+        }
     },
     
-    removeMarker: function (id) {
+    removeMarker: function (id, layer = this.geoJsonLayer) {
         if (typeof id === 'undefined') {
             id = 'defaultMarker';
         }
-        var feature = this.vectorLayer.getSource().getFeatureById(id);
+        var feature = layer.getSource().getFeatureById(id);
         if (feature) {
-            this.vectorLayer.getSource().removeFeature(feature);
+            layer.getSource().removeFeature(feature);
         }
     },
     
@@ -187,6 +433,19 @@ var osm_map = {
     
     transformExtent: function (extent) {
         return transformExtent(extent, 'EPSG:3857','EPSG:4326');
+    },
+
+    addWmsLayer: function (url, layers, extent) {
+        var tileLayer =   new TileLayer({
+            extent: extent,
+            source: new TileWMS({
+                url: url,
+                params: {'LAYERS': layers},
+                // Do not fade tiles:
+                transition: 0,
+            }),
+        });
+        this.map.addLayer(tileLayer);
     },
 
     // Get all vector layers with polygon features from GeoJSON file
@@ -230,7 +489,7 @@ var osm_map = {
     },
 
     // Add a vector layer with point features from GeoJSON file
-    addVectorLayer: function (url, icon, color, scale=1.0, label=true) {
+    addVectorLayer: function (url, icon, color, scale=1.0, label=false) {
         var styleCache = {};
         
         this.geoJsonLayer = new VectorLayer({
@@ -251,7 +510,9 @@ var osm_map = {
                             src: icon,
                             scale: scale,
                         }),
-                        text: new Text({
+                    });
+                    if (label) {
+                        var text = new Text({
                             text: feature.get('name'),
                             font: '12px Calibri,sans-serif',
                             offsetY : 20,
@@ -262,8 +523,9 @@ var osm_map = {
                             fill: new Fill({
                                 color: '#000',
                             }),
-                        }),
-                    });
+                        })
+                        style.setText(text);
+                    }
                 }
                 return style;
             },

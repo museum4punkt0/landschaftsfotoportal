@@ -2171,10 +2171,10 @@ module.exports = {
 /*!*****************************************!*\
   !*** ./node_modules/axios/package.json ***!
   \*****************************************/
-/*! exports provided: _from, _id, _inBundle, _integrity, _location, _phantomChildren, _requested, _requiredBy, _resolved, _shasum, _spec, _where, author, browser, bugs, bundleDependencies, bundlesize, dependencies, deprecated, description, devDependencies, homepage, jsdelivr, keywords, license, main, name, repository, scripts, typings, unpkg, version, default */
+/*! exports provided: name, version, description, main, scripts, repository, keywords, author, license, bugs, homepage, devDependencies, browser, jsdelivr, unpkg, typings, dependencies, bundlesize, _resolved, _integrity, _from, default */
 /***/ (function(module) {
 
-module.exports = JSON.parse("{\"_from\":\"axios@0.21.4\",\"_id\":\"axios@0.21.4\",\"_inBundle\":false,\"_integrity\":\"sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==\",\"_location\":\"/axios\",\"_phantomChildren\":{},\"_requested\":{\"type\":\"version\",\"registry\":true,\"raw\":\"axios@0.21.4\",\"name\":\"axios\",\"escapedName\":\"axios\",\"rawSpec\":\"0.21.4\",\"saveSpec\":null,\"fetchSpec\":\"0.21.4\"},\"_requiredBy\":[\"#DEV:/\",\"#USER\"],\"_resolved\":\"https://registry.npmjs.org/axios/-/axios-0.21.4.tgz\",\"_shasum\":\"c67b90dc0568e5c1cf2b0b858c43ba28e2eda575\",\"_spec\":\"axios@0.21.4\",\"_where\":\"/var/www/html/fotoportal\",\"author\":{\"name\":\"Matt Zabriskie\"},\"browser\":{\"./lib/adapters/http.js\":\"./lib/adapters/xhr.js\"},\"bugs\":{\"url\":\"https://github.com/axios/axios/issues\"},\"bundleDependencies\":false,\"bundlesize\":[{\"path\":\"./dist/axios.min.js\",\"threshold\":\"5kB\"}],\"dependencies\":{\"follow-redirects\":\"^1.14.0\"},\"deprecated\":false,\"description\":\"Promise based HTTP client for the browser and node.js\",\"devDependencies\":{\"coveralls\":\"^3.0.0\",\"es6-promise\":\"^4.2.4\",\"grunt\":\"^1.3.0\",\"grunt-banner\":\"^0.6.0\",\"grunt-cli\":\"^1.2.0\",\"grunt-contrib-clean\":\"^1.1.0\",\"grunt-contrib-watch\":\"^1.0.0\",\"grunt-eslint\":\"^23.0.0\",\"grunt-karma\":\"^4.0.0\",\"grunt-mocha-test\":\"^0.13.3\",\"grunt-ts\":\"^6.0.0-beta.19\",\"grunt-webpack\":\"^4.0.2\",\"istanbul-instrumenter-loader\":\"^1.0.0\",\"jasmine-core\":\"^2.4.1\",\"karma\":\"^6.3.2\",\"karma-chrome-launcher\":\"^3.1.0\",\"karma-firefox-launcher\":\"^2.1.0\",\"karma-jasmine\":\"^1.1.1\",\"karma-jasmine-ajax\":\"^0.1.13\",\"karma-safari-launcher\":\"^1.0.0\",\"karma-sauce-launcher\":\"^4.3.6\",\"karma-sinon\":\"^1.0.5\",\"karma-sourcemap-loader\":\"^0.3.8\",\"karma-webpack\":\"^4.0.2\",\"load-grunt-tasks\":\"^3.5.2\",\"minimist\":\"^1.2.0\",\"mocha\":\"^8.2.1\",\"sinon\":\"^4.5.0\",\"terser-webpack-plugin\":\"^4.2.3\",\"typescript\":\"^4.0.5\",\"url-search-params\":\"^0.10.0\",\"webpack\":\"^4.44.2\",\"webpack-dev-server\":\"^3.11.0\"},\"homepage\":\"https://axios-http.com\",\"jsdelivr\":\"dist/axios.min.js\",\"keywords\":[\"xhr\",\"http\",\"ajax\",\"promise\",\"node\"],\"license\":\"MIT\",\"main\":\"index.js\",\"name\":\"axios\",\"repository\":{\"type\":\"git\",\"url\":\"git+https://github.com/axios/axios.git\"},\"scripts\":{\"build\":\"NODE_ENV=production grunt build\",\"coveralls\":\"cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js\",\"examples\":\"node ./examples/server.js\",\"fix\":\"eslint --fix lib/**/*.js\",\"postversion\":\"git push && git push --tags\",\"preversion\":\"npm test\",\"start\":\"node ./sandbox/server.js\",\"test\":\"grunt test\",\"version\":\"npm run build && grunt version && git add -A dist && git add CHANGELOG.md bower.json package.json\"},\"typings\":\"./index.d.ts\",\"unpkg\":\"dist/axios.min.js\",\"version\":\"0.21.4\"}");
+module.exports = JSON.parse("{\"name\":\"axios\",\"version\":\"0.21.4\",\"description\":\"Promise based HTTP client for the browser and node.js\",\"main\":\"index.js\",\"scripts\":{\"test\":\"grunt test\",\"start\":\"node ./sandbox/server.js\",\"build\":\"NODE_ENV=production grunt build\",\"preversion\":\"npm test\",\"version\":\"npm run build && grunt version && git add -A dist && git add CHANGELOG.md bower.json package.json\",\"postversion\":\"git push && git push --tags\",\"examples\":\"node ./examples/server.js\",\"coveralls\":\"cat coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js\",\"fix\":\"eslint --fix lib/**/*.js\"},\"repository\":{\"type\":\"git\",\"url\":\"https://github.com/axios/axios.git\"},\"keywords\":[\"xhr\",\"http\",\"ajax\",\"promise\",\"node\"],\"author\":\"Matt Zabriskie\",\"license\":\"MIT\",\"bugs\":{\"url\":\"https://github.com/axios/axios/issues\"},\"homepage\":\"https://axios-http.com\",\"devDependencies\":{\"coveralls\":\"^3.0.0\",\"es6-promise\":\"^4.2.4\",\"grunt\":\"^1.3.0\",\"grunt-banner\":\"^0.6.0\",\"grunt-cli\":\"^1.2.0\",\"grunt-contrib-clean\":\"^1.1.0\",\"grunt-contrib-watch\":\"^1.0.0\",\"grunt-eslint\":\"^23.0.0\",\"grunt-karma\":\"^4.0.0\",\"grunt-mocha-test\":\"^0.13.3\",\"grunt-ts\":\"^6.0.0-beta.19\",\"grunt-webpack\":\"^4.0.2\",\"istanbul-instrumenter-loader\":\"^1.0.0\",\"jasmine-core\":\"^2.4.1\",\"karma\":\"^6.3.2\",\"karma-chrome-launcher\":\"^3.1.0\",\"karma-firefox-launcher\":\"^2.1.0\",\"karma-jasmine\":\"^1.1.1\",\"karma-jasmine-ajax\":\"^0.1.13\",\"karma-safari-launcher\":\"^1.0.0\",\"karma-sauce-launcher\":\"^4.3.6\",\"karma-sinon\":\"^1.0.5\",\"karma-sourcemap-loader\":\"^0.3.8\",\"karma-webpack\":\"^4.0.2\",\"load-grunt-tasks\":\"^3.5.2\",\"minimist\":\"^1.2.0\",\"mocha\":\"^8.2.1\",\"sinon\":\"^4.5.0\",\"terser-webpack-plugin\":\"^4.2.3\",\"typescript\":\"^4.0.5\",\"url-search-params\":\"^0.10.0\",\"webpack\":\"^4.44.2\",\"webpack-dev-server\":\"^3.11.0\"},\"browser\":{\"./lib/adapters/http.js\":\"./lib/adapters/xhr.js\"},\"jsdelivr\":\"dist/axios.min.js\",\"unpkg\":\"dist/axios.min.js\",\"typings\":\"./index.d.ts\",\"dependencies\":{\"follow-redirects\":\"^1.14.0\"},\"bundlesize\":[{\"path\":\"./dist/axios.min.js\",\"threshold\":\"5kB\"}],\"_resolved\":\"https://registry.npmjs.org/axios/-/axios-0.21.4.tgz\",\"_integrity\":\"sha512-ut5vewkiu8jjGBdqpM44XxjuCjq9LAKeHVmoVfHVzy8eHgxxq8SbAVQNovDA8mVi05kP0Ea/n/UzcSHcTJQfNg==\",\"_from\":\"axios@0.21.4\"}");
 
 /***/ }),
 
@@ -85089,6 +85089,446 @@ function defaultTileLoadFunction(imageTile, src) {
 
 /***/ }),
 
+/***/ "./node_modules/ol/source/TileWMS.js":
+/*!*******************************************!*\
+  !*** ./node_modules/ol/source/TileWMS.js ***!
+  \*******************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _TileImage_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./TileImage.js */ "./node_modules/ol/source/TileImage.js");
+/* harmony import */ var _wms_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./wms.js */ "./node_modules/ol/source/wms.js");
+/* harmony import */ var _uri_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../uri.js */ "./node_modules/ol/uri.js");
+/* harmony import */ var _asserts_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../asserts.js */ "./node_modules/ol/asserts.js");
+/* harmony import */ var _obj_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../obj.js */ "./node_modules/ol/obj.js");
+/* harmony import */ var _extent_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../extent.js */ "./node_modules/ol/extent.js");
+/* harmony import */ var _size_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../size.js */ "./node_modules/ol/size.js");
+/* harmony import */ var _reproj_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../reproj.js */ "./node_modules/ol/reproj.js");
+/* harmony import */ var _string_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../string.js */ "./node_modules/ol/string.js");
+/* harmony import */ var _proj_js__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ../proj.js */ "./node_modules/ol/proj.js");
+/* harmony import */ var _math_js__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ../math.js */ "./node_modules/ol/math.js");
+/* harmony import */ var _tilecoord_js__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ../tilecoord.js */ "./node_modules/ol/tilecoord.js");
+/**
+ * @module ol/source/TileWMS
+ */
+var __extends = (undefined && undefined.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        if (typeof b !== "function" && b !== null)
+            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * @typedef {Object} Options
+ * @property {import("./Source.js").AttributionLike} [attributions] Attributions.
+ * @property {boolean} [attributionsCollapsible=true] Attributions are collapsible.
+ * @property {number} [cacheSize] Initial tile cache size. Will auto-grow to hold at least the number of tiles in the viewport.
+ * @property {null|string} [crossOrigin] The `crossOrigin` attribute for loaded images.  Note that
+ * you must provide a `crossOrigin` value if you want to access pixel data with the Canvas renderer.
+ * See https://developer.mozilla.org/en-US/docs/Web/HTML/CORS_enabled_image for more detail.
+ * @property {boolean} [imageSmoothing=true] Deprecated.  Use the `interpolate` option instead.
+ * @property {boolean} [interpolate=true] Use interpolated values when resampling.  By default,
+ * linear interpolation is used when resampling.  Set to false to use the nearest neighbor instead.
+ * @property {Object<string,*>} params WMS request parameters.
+ * At least a `LAYERS` param is required. `STYLES` is
+ * `''` by default. `VERSION` is `1.3.0` by default. `WIDTH`, `HEIGHT`, `BBOX`
+ * and `CRS` (`SRS` for WMS version < 1.3.0) will be set dynamically.
+ * @property {number} [gutter=0]
+ * The size in pixels of the gutter around image tiles to ignore. By setting
+ * this property to a non-zero value, images will be requested that are wider
+ * and taller than the tile size by a value of `2 x gutter`.
+ * Using a non-zero value allows artifacts of rendering at tile edges to be
+ * ignored. If you control the WMS service it is recommended to address
+ * "artifacts at tile edges" issues by properly configuring the WMS service. For
+ * example, MapServer has a `tile_map_edge_buffer` configuration parameter for
+ * this. See https://mapserver.org/output/tile_mode.html.
+ * @property {boolean} [hidpi=true] Use the `ol/Map#pixelRatio` value when requesting
+ * the image from the remote server.
+ * @property {import("../proj.js").ProjectionLike} [projection] Projection. Default is the view projection.
+ * @property {number} [reprojectionErrorThreshold=0.5] Maximum allowed reprojection error (in pixels).
+ * Higher values can increase reprojection performance, but decrease precision.
+ * @property {typeof import("../ImageTile.js").default} [tileClass] Class used to instantiate image tiles.
+ * Default is {@link module:ol/ImageTile~ImageTile}.
+ * @property {import("../tilegrid/TileGrid.js").default} [tileGrid] Tile grid. Base this on the resolutions,
+ * tilesize and extent supported by the server.
+ * If this is not defined, a default grid will be used: if there is a projection
+ * extent, the grid will be based on that; if not, a grid based on a global
+ * extent with origin at 0,0 will be used.
+ * @property {import("./wms.js").ServerType} [serverType] The type of
+ * the remote WMS server: `mapserver`, `geoserver`, `carmentaserver`, or `qgis`.
+ * Only needed if `hidpi` is `true`.
+ * @property {import("../Tile.js").LoadFunction} [tileLoadFunction] Optional function to load a tile given a URL. The default is
+ * ```js
+ * function(imageTile, src) {
+ *   imageTile.getImage().src = src;
+ * };
+ * ```
+ * @property {string} [url] WMS service URL.
+ * @property {Array<string>} [urls] WMS service urls.
+ * Use this instead of `url` when the WMS supports multiple urls for GetMap requests.
+ * @property {boolean} [wrapX=true] Whether to wrap the world horizontally.
+ * When set to `false`, only one world
+ * will be rendered. When `true`, tiles will be requested for one world only,
+ * but they will be wrapped horizontally to render multiple worlds.
+ * @property {number} [transition] Duration of the opacity transition for rendering.
+ * To disable the opacity transition, pass `transition: 0`.
+ * @property {number|import("../array.js").NearestDirectionFunction} [zDirection=0]
+ * Choose whether to use tiles with a higher or lower zoom level when between integer
+ * zoom levels. See {@link module:ol/tilegrid/TileGrid~TileGrid#getZForResolution}.
+ */
+/**
+ * @classdesc
+ * Layer source for tile data from WMS servers.
+ * @api
+ */
+var TileWMS = /** @class */ (function (_super) {
+    __extends(TileWMS, _super);
+    /**
+     * @param {Options} [opt_options] Tile WMS options.
+     */
+    function TileWMS(opt_options) {
+        var _this = this;
+        var options = opt_options ? opt_options : /** @type {Options} */ ({});
+        var interpolate = options.imageSmoothing !== undefined ? options.imageSmoothing : true;
+        if (options.interpolate !== undefined) {
+            interpolate = options.interpolate;
+        }
+        var params = options.params || {};
+        var transparent = 'TRANSPARENT' in params ? params['TRANSPARENT'] : true;
+        _this = _super.call(this, {
+            attributions: options.attributions,
+            attributionsCollapsible: options.attributionsCollapsible,
+            cacheSize: options.cacheSize,
+            crossOrigin: options.crossOrigin,
+            interpolate: interpolate,
+            opaque: !transparent,
+            projection: options.projection,
+            reprojectionErrorThreshold: options.reprojectionErrorThreshold,
+            tileClass: options.tileClass,
+            tileGrid: options.tileGrid,
+            tileLoadFunction: options.tileLoadFunction,
+            url: options.url,
+            urls: options.urls,
+            wrapX: options.wrapX !== undefined ? options.wrapX : true,
+            transition: options.transition,
+            zDirection: options.zDirection,
+        }) || this;
+        /**
+         * @private
+         * @type {number}
+         */
+        _this.gutter_ = options.gutter !== undefined ? options.gutter : 0;
+        /**
+         * @private
+         * @type {!Object}
+         */
+        _this.params_ = params;
+        /**
+         * @private
+         * @type {boolean}
+         */
+        _this.v13_ = true;
+        /**
+         * @private
+         * @type {import("./wms.js").ServerType}
+         */
+        _this.serverType_ = options.serverType;
+        /**
+         * @private
+         * @type {boolean}
+         */
+        _this.hidpi_ = options.hidpi !== undefined ? options.hidpi : true;
+        /**
+         * @private
+         * @type {import("../extent.js").Extent}
+         */
+        _this.tmpExtent_ = Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["createEmpty"])();
+        _this.updateV13_();
+        _this.setKey(_this.getKeyForParams_());
+        return _this;
+    }
+    /**
+     * Return the GetFeatureInfo URL for the passed coordinate, resolution, and
+     * projection. Return `undefined` if the GetFeatureInfo URL cannot be
+     * constructed.
+     * @param {import("../coordinate.js").Coordinate} coordinate Coordinate.
+     * @param {number} resolution Resolution.
+     * @param {import("../proj.js").ProjectionLike} projection Projection.
+     * @param {!Object} params GetFeatureInfo params. `INFO_FORMAT` at least should
+     *     be provided. If `QUERY_LAYERS` is not provided then the layers specified
+     *     in the `LAYERS` parameter will be used. `VERSION` should not be
+     *     specified here.
+     * @return {string|undefined} GetFeatureInfo URL.
+     * @api
+     */
+    TileWMS.prototype.getFeatureInfoUrl = function (coordinate, resolution, projection, params) {
+        var projectionObj = Object(_proj_js__WEBPACK_IMPORTED_MODULE_9__["get"])(projection);
+        var sourceProjectionObj = this.getProjection();
+        var tileGrid = this.getTileGrid();
+        if (!tileGrid) {
+            tileGrid = this.getTileGridForProjection(projectionObj);
+        }
+        var z = tileGrid.getZForResolution(resolution, this.zDirection);
+        var tileCoord = tileGrid.getTileCoordForCoordAndZ(coordinate, z);
+        if (tileGrid.getResolutions().length <= tileCoord[0]) {
+            return undefined;
+        }
+        var tileResolution = tileGrid.getResolution(tileCoord[0]);
+        var tileExtent = tileGrid.getTileCoordExtent(tileCoord, this.tmpExtent_);
+        var tileSize = Object(_size_js__WEBPACK_IMPORTED_MODULE_6__["toSize"])(tileGrid.getTileSize(tileCoord[0]), this.tmpSize);
+        var gutter = this.gutter_;
+        if (gutter !== 0) {
+            tileSize = Object(_size_js__WEBPACK_IMPORTED_MODULE_6__["buffer"])(tileSize, gutter, this.tmpSize);
+            tileExtent = Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["buffer"])(tileExtent, tileResolution * gutter, tileExtent);
+        }
+        if (sourceProjectionObj && sourceProjectionObj !== projectionObj) {
+            tileResolution = Object(_reproj_js__WEBPACK_IMPORTED_MODULE_7__["calculateSourceResolution"])(sourceProjectionObj, projectionObj, coordinate, tileResolution);
+            tileExtent = Object(_proj_js__WEBPACK_IMPORTED_MODULE_9__["transformExtent"])(tileExtent, projectionObj, sourceProjectionObj);
+            coordinate = Object(_proj_js__WEBPACK_IMPORTED_MODULE_9__["transform"])(coordinate, projectionObj, sourceProjectionObj);
+        }
+        var baseParams = {
+            'SERVICE': 'WMS',
+            'VERSION': _wms_js__WEBPACK_IMPORTED_MODULE_1__["DEFAULT_VERSION"],
+            'REQUEST': 'GetFeatureInfo',
+            'FORMAT': 'image/png',
+            'TRANSPARENT': true,
+            'QUERY_LAYERS': this.params_['LAYERS'],
+        };
+        Object(_obj_js__WEBPACK_IMPORTED_MODULE_4__["assign"])(baseParams, this.params_, params);
+        var x = Math.floor((coordinate[0] - tileExtent[0]) / tileResolution);
+        var y = Math.floor((tileExtent[3] - coordinate[1]) / tileResolution);
+        baseParams[this.v13_ ? 'I' : 'X'] = x;
+        baseParams[this.v13_ ? 'J' : 'Y'] = y;
+        return this.getRequestUrl_(tileCoord, tileSize, tileExtent, 1, sourceProjectionObj || projectionObj, baseParams);
+    };
+    /**
+     * Return the GetLegendGraphic URL, optionally optimized for the passed
+     * resolution and possibly including any passed specific parameters. Returns
+     * `undefined` if the GetLegendGraphic URL cannot be constructed.
+     *
+     * @param {number} [resolution] Resolution. If set to undefined, `SCALE`
+     *     will not be calculated and included in URL.
+     * @param {Object} [params] GetLegendGraphic params. If `LAYER` is set, the
+     *     request is generated for this wms layer, else it will try to use the
+     *     configured wms layer. Default `FORMAT` is `image/png`.
+     *     `VERSION` should not be specified here.
+     * @return {string|undefined} GetLegendGraphic URL.
+     * @api
+     */
+    TileWMS.prototype.getLegendUrl = function (resolution, params) {
+        if (this.urls[0] === undefined) {
+            return undefined;
+        }
+        var baseParams = {
+            'SERVICE': 'WMS',
+            'VERSION': _wms_js__WEBPACK_IMPORTED_MODULE_1__["DEFAULT_VERSION"],
+            'REQUEST': 'GetLegendGraphic',
+            'FORMAT': 'image/png',
+        };
+        if (params === undefined || params['LAYER'] === undefined) {
+            var layers = this.params_.LAYERS;
+            var isSingleLayer = !Array.isArray(layers) || layers.length === 1;
+            if (!isSingleLayer) {
+                return undefined;
+            }
+            baseParams['LAYER'] = layers;
+        }
+        if (resolution !== undefined) {
+            var mpu = this.getProjection()
+                ? this.getProjection().getMetersPerUnit()
+                : 1;
+            var pixelSize = 0.00028;
+            baseParams['SCALE'] = (resolution * mpu) / pixelSize;
+        }
+        Object(_obj_js__WEBPACK_IMPORTED_MODULE_4__["assign"])(baseParams, params);
+        return Object(_uri_js__WEBPACK_IMPORTED_MODULE_2__["appendParams"])(/** @type {string} */ (this.urls[0]), baseParams);
+    };
+    /**
+     * @return {number} Gutter.
+     */
+    TileWMS.prototype.getGutter = function () {
+        return this.gutter_;
+    };
+    /**
+     * Get the user-provided params, i.e. those passed to the constructor through
+     * the "params" option, and possibly updated using the updateParams method.
+     * @return {Object} Params.
+     * @api
+     */
+    TileWMS.prototype.getParams = function () {
+        return this.params_;
+    };
+    /**
+     * @param {import("../tilecoord.js").TileCoord} tileCoord Tile coordinate.
+     * @param {import("../size.js").Size} tileSize Tile size.
+     * @param {import("../extent.js").Extent} tileExtent Tile extent.
+     * @param {number} pixelRatio Pixel ratio.
+     * @param {import("../proj/Projection.js").default} projection Projection.
+     * @param {Object} params Params.
+     * @return {string|undefined} Request URL.
+     * @private
+     */
+    TileWMS.prototype.getRequestUrl_ = function (tileCoord, tileSize, tileExtent, pixelRatio, projection, params) {
+        var urls = this.urls;
+        if (!urls) {
+            return undefined;
+        }
+        params['WIDTH'] = tileSize[0];
+        params['HEIGHT'] = tileSize[1];
+        params[this.v13_ ? 'CRS' : 'SRS'] = projection.getCode();
+        if (!('STYLES' in this.params_)) {
+            params['STYLES'] = '';
+        }
+        if (pixelRatio != 1) {
+            switch (this.serverType_) {
+                case 'geoserver':
+                    var dpi = (90 * pixelRatio + 0.5) | 0;
+                    if ('FORMAT_OPTIONS' in params) {
+                        params['FORMAT_OPTIONS'] += ';dpi:' + dpi;
+                    }
+                    else {
+                        params['FORMAT_OPTIONS'] = 'dpi:' + dpi;
+                    }
+                    break;
+                case 'mapserver':
+                    params['MAP_RESOLUTION'] = 90 * pixelRatio;
+                    break;
+                case 'carmentaserver':
+                case 'qgis':
+                    params['DPI'] = 90 * pixelRatio;
+                    break;
+                default: // Unknown `serverType` configured
+                    Object(_asserts_js__WEBPACK_IMPORTED_MODULE_3__["assert"])(false, 52);
+                    break;
+            }
+        }
+        var axisOrientation = projection.getAxisOrientation();
+        var bbox = tileExtent;
+        if (this.v13_ && axisOrientation.substr(0, 2) == 'ne') {
+            var tmp = void 0;
+            tmp = tileExtent[0];
+            bbox[0] = tileExtent[1];
+            bbox[1] = tmp;
+            tmp = tileExtent[2];
+            bbox[2] = tileExtent[3];
+            bbox[3] = tmp;
+        }
+        params['BBOX'] = bbox.join(',');
+        var url;
+        if (urls.length == 1) {
+            url = urls[0];
+        }
+        else {
+            var index = Object(_math_js__WEBPACK_IMPORTED_MODULE_10__["modulo"])(Object(_tilecoord_js__WEBPACK_IMPORTED_MODULE_11__["hash"])(tileCoord), urls.length);
+            url = urls[index];
+        }
+        return Object(_uri_js__WEBPACK_IMPORTED_MODULE_2__["appendParams"])(url, params);
+    };
+    /**
+     * Get the tile pixel ratio for this source.
+     * @param {number} pixelRatio Pixel ratio.
+     * @return {number} Tile pixel ratio.
+     */
+    TileWMS.prototype.getTilePixelRatio = function (pixelRatio) {
+        return !this.hidpi_ || this.serverType_ === undefined ? 1 : pixelRatio;
+    };
+    /**
+     * @private
+     * @return {string} The key for the current params.
+     */
+    TileWMS.prototype.getKeyForParams_ = function () {
+        var i = 0;
+        var res = [];
+        for (var key in this.params_) {
+            res[i++] = key + '-' + this.params_[key];
+        }
+        return res.join('/');
+    };
+    /**
+     * Update the user-provided params.
+     * @param {Object} params Params.
+     * @api
+     */
+    TileWMS.prototype.updateParams = function (params) {
+        Object(_obj_js__WEBPACK_IMPORTED_MODULE_4__["assign"])(this.params_, params);
+        this.updateV13_();
+        this.setKey(this.getKeyForParams_());
+    };
+    /**
+     * @private
+     */
+    TileWMS.prototype.updateV13_ = function () {
+        var version = this.params_['VERSION'] || _wms_js__WEBPACK_IMPORTED_MODULE_1__["DEFAULT_VERSION"];
+        this.v13_ = Object(_string_js__WEBPACK_IMPORTED_MODULE_8__["compareVersions"])(version, '1.3') >= 0;
+    };
+    /**
+     * @param {import("../tilecoord.js").TileCoord} tileCoord The tile coordinate
+     * @param {number} pixelRatio The pixel ratio
+     * @param {import("../proj/Projection.js").default} projection The projection
+     * @return {string|undefined} The tile URL
+     * @override
+     */
+    TileWMS.prototype.tileUrlFunction = function (tileCoord, pixelRatio, projection) {
+        var tileGrid = this.getTileGrid();
+        if (!tileGrid) {
+            tileGrid = this.getTileGridForProjection(projection);
+        }
+        if (tileGrid.getResolutions().length <= tileCoord[0]) {
+            return undefined;
+        }
+        if (pixelRatio != 1 && (!this.hidpi_ || this.serverType_ === undefined)) {
+            pixelRatio = 1;
+        }
+        var tileResolution = tileGrid.getResolution(tileCoord[0]);
+        var tileExtent = tileGrid.getTileCoordExtent(tileCoord, this.tmpExtent_);
+        var tileSize = Object(_size_js__WEBPACK_IMPORTED_MODULE_6__["toSize"])(tileGrid.getTileSize(tileCoord[0]), this.tmpSize);
+        var gutter = this.gutter_;
+        if (gutter !== 0) {
+            tileSize = Object(_size_js__WEBPACK_IMPORTED_MODULE_6__["buffer"])(tileSize, gutter, this.tmpSize);
+            tileExtent = Object(_extent_js__WEBPACK_IMPORTED_MODULE_5__["buffer"])(tileExtent, tileResolution * gutter, tileExtent);
+        }
+        if (pixelRatio != 1) {
+            tileSize = Object(_size_js__WEBPACK_IMPORTED_MODULE_6__["scale"])(tileSize, pixelRatio, this.tmpSize);
+        }
+        var baseParams = {
+            'SERVICE': 'WMS',
+            'VERSION': _wms_js__WEBPACK_IMPORTED_MODULE_1__["DEFAULT_VERSION"],
+            'REQUEST': 'GetMap',
+            'FORMAT': 'image/png',
+            'TRANSPARENT': true,
+        };
+        Object(_obj_js__WEBPACK_IMPORTED_MODULE_4__["assign"])(baseParams, this.params_);
+        return this.getRequestUrl_(tileCoord, tileSize, tileExtent, pixelRatio, projection, baseParams);
+    };
+    return TileWMS;
+}(_TileImage_js__WEBPACK_IMPORTED_MODULE_0__["default"]));
+/* harmony default export */ __webpack_exports__["default"] = (TileWMS);
+//# sourceMappingURL=TileWMS.js.map
+
+/***/ }),
+
 /***/ "./node_modules/ol/source/UrlTile.js":
 /*!*******************************************!*\
   !*** ./node_modules/ol/source/UrlTile.js ***!
@@ -86630,6 +87070,37 @@ var XYZ = /** @class */ (function (_super) {
 }(_TileImage_js__WEBPACK_IMPORTED_MODULE_0__["default"]));
 /* harmony default export */ __webpack_exports__["default"] = (XYZ);
 //# sourceMappingURL=XYZ.js.map
+
+/***/ }),
+
+/***/ "./node_modules/ol/source/wms.js":
+/*!***************************************!*\
+  !*** ./node_modules/ol/source/wms.js ***!
+  \***************************************/
+/*! exports provided: DEFAULT_VERSION */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DEFAULT_VERSION", function() { return DEFAULT_VERSION; });
+/**
+ * @module ol/source/wms
+ */
+/**
+ * Default WMS version.
+ * @type {string}
+ */
+var DEFAULT_VERSION = '1.3.0';
+/**
+ * @api
+ * @typedef {'carmentaserver' | 'geoserver' | 'mapserver' | 'qgis'} ServerType
+ * Set the server type to use implementation-specific parameters beyond the WMS specification.
+ *  - `'carmentaserver'`: HiDPI support for [Carmenta Server](https://www.carmenta.com/en/products/carmenta-server)
+ *  - `'geoserver'`: HiDPI support for [GeoServer](https://geoserver.org/)
+ *  - `'mapserver'`: HiDPI support for [MapServer](https://mapserver.org/)
+ *  - `'qgis'`: HiDPI support for [QGIS](https://qgis.org/)
+ */
+//# sourceMappingURL=wms.js.map
 
 /***/ }),
 
@@ -92344,6 +92815,46 @@ function toString(mat) {
     return node.style.transform;
 }
 //# sourceMappingURL=transform.js.map
+
+/***/ }),
+
+/***/ "./node_modules/ol/uri.js":
+/*!********************************!*\
+  !*** ./node_modules/ol/uri.js ***!
+  \********************************/
+/*! exports provided: appendParams */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "appendParams", function() { return appendParams; });
+/**
+ * @module ol/uri
+ */
+/**
+ * Appends query parameters to a URI.
+ *
+ * @param {string} uri The original URI, which may already have query data.
+ * @param {!Object} params An object where keys are URI-encoded parameter keys,
+ *     and the values are arbitrary types or arrays.
+ * @return {string} The new URI.
+ */
+function appendParams(uri, params) {
+    var keyParams = [];
+    // Skip any null or undefined parameter values
+    Object.keys(params).forEach(function (k) {
+        if (params[k] !== null && params[k] !== undefined) {
+            keyParams.push(k + '=' + encodeURIComponent(params[k]));
+        }
+    });
+    var qs = keyParams.join('&');
+    // remove any trailing ? or &
+    uri = uri.replace(/[?&]$/, '');
+    // append ? or & depending on whether uri has existing parameters
+    uri = uri.indexOf('?') === -1 ? uri + '?' : uri + '&';
+    return uri + qs;
+}
+//# sourceMappingURL=uri.js.map
 
 /***/ }),
 
@@ -105726,7 +106237,7 @@ var itemDiff = {
     // Remove old marker if it exists
 
     osm_map.removeMarker('historicMarker');
-    osm_map.addMarker(lon, lat, imagePath + 'dot.svg', '#cce7ff', 'historicMarker');
+    osm_map.addMarker(lon, lat, imagePath + 'dot.svg', '#cce7ff', 1.0, 'historicMarker');
     osm_map.moveMapToFeatureExtent();
   },
   startDiff: function startDiff() {
@@ -105881,16 +106392,24 @@ var itemDiff = {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var ol__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ol */ "./node_modules/ol/index.js");
-/* harmony import */ var ol_layer_Tile__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ol/layer/Tile */ "./node_modules/ol/layer/Tile.js");
-/* harmony import */ var ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ol/layer/Vector */ "./node_modules/ol/layer/Vector.js");
-/* harmony import */ var ol_source_Vector__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ol/source/Vector */ "./node_modules/ol/source/Vector.js");
-/* harmony import */ var ol_source_Cluster__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ol/source/Cluster */ "./node_modules/ol/source/Cluster.js");
-/* harmony import */ var ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ol/format/GeoJSON */ "./node_modules/ol/format/GeoJSON.js");
-/* harmony import */ var ol_style__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ol/style */ "./node_modules/ol/style.js");
-/* harmony import */ var ol_extent__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ol/extent */ "./node_modules/ol/extent.js");
-/* harmony import */ var ol_geom_Point__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ol/geom/Point */ "./node_modules/ol/geom/Point.js");
-/* harmony import */ var ol_source_OSM__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ol/source/OSM */ "./node_modules/ol/source/OSM.js");
-/* harmony import */ var ol_proj__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ol/proj */ "./node_modules/ol/proj.js");
+/* harmony import */ var ol_control__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ol/control */ "./node_modules/ol/control.js");
+/* harmony import */ var ol_control_MousePosition__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ol/control/MousePosition */ "./node_modules/ol/control/MousePosition.js");
+/* harmony import */ var ol_coordinate__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ol/coordinate */ "./node_modules/ol/coordinate.js");
+/* harmony import */ var ol_layer_Tile__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ol/layer/Tile */ "./node_modules/ol/layer/Tile.js");
+/* harmony import */ var ol_layer_Vector__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ol/layer/Vector */ "./node_modules/ol/layer/Vector.js");
+/* harmony import */ var ol_source_Vector__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ol/source/Vector */ "./node_modules/ol/source/Vector.js");
+/* harmony import */ var ol_source_Cluster__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ol/source/Cluster */ "./node_modules/ol/source/Cluster.js");
+/* harmony import */ var ol_source_TileWMS__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ol/source/TileWMS */ "./node_modules/ol/source/TileWMS.js");
+/* harmony import */ var ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! ol/format/GeoJSON */ "./node_modules/ol/format/GeoJSON.js");
+/* harmony import */ var ol_style__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! ol/style */ "./node_modules/ol/style.js");
+/* harmony import */ var ol_extent__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! ol/extent */ "./node_modules/ol/extent.js");
+/* harmony import */ var ol_geom_Point__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! ol/geom/Point */ "./node_modules/ol/geom/Point.js");
+/* harmony import */ var ol_source_OSM__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! ol/source/OSM */ "./node_modules/ol/source/OSM.js");
+/* harmony import */ var ol_proj__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! ol/proj */ "./node_modules/ol/proj.js");
+
+
+
+
 
 
 
@@ -105907,8 +106426,8 @@ var osm_map = {
   config: false,
   owner: new Object(),
   popup: false,
-  vectorLayer: new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
-    source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
+  vectorLayer: new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_5__["default"]({
+    source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_6__["default"]({
       features: false
     })
   }),
@@ -105917,6 +106436,10 @@ var osm_map = {
   init: function init(colmapId, itemId, configUrl) {
     this.owner.colmapId = colmapId;
     this.owner.itemId = itemId;
+    this.owner.revisionId = $('#map').data('revision') || 0;
+    this.owner.forwardGeocoderUrl = $('#map').data('forward-geocoder-url');
+    this.owner.reverseGeocoderUrl = $('#map').data('reverse-geocoder-url');
+    this.owner.apiKey = $('#map').data('api-key');
     this.getConfig(configUrl);
   },
   // Get the JSON map config via AJAX from backend
@@ -105935,12 +106458,17 @@ var osm_map = {
     osm_map.display(this.config.map_lon || 0, this.config.map_lat || 0, this.config.map_zoom || 19); // Add vector layer with polygons
 
     if (this.config.api_polygons) {
-      this.getPolygonLayers(this.config.api_polygons + '&item=' + this.owner.itemId);
+      var url = this.config.api_polygons + '&item=' + this.owner.itemId;
+      url += '&revision=' + this.owner.revisionId;
+      this.getPolygonLayers(url);
     } // Add vector layer with points
 
 
     if (this.config.api_points) {
-      this.addVectorLayer(this.config.api_points + '&item=' + this.owner.itemId, this.config.marker_icon, this.config.marker_color, this.config.marker_scale); // Display error message if no points with valid lat/lon available
+      var _url = this.config.api_points + '&item=' + this.owner.itemId;
+
+      _url += '&revision=' + this.owner.revisionId;
+      this.addVectorLayer(_url, this.config.marker_icon, this.config.marker_color, this.config.marker_scale, this.config.marker_label); // Display error message if no points with valid lat/lon available
 
       console.log(osm_map.geoJsonLayer.getSource());
 
@@ -105956,12 +106484,202 @@ var osm_map = {
       //this.geoJsonLayer.getSource().on('featuresloadend', function () {
       this.map.once('rendercomplete', function () {
         //console.log(osm_map.geoJsonLayer.getSource().getState());
-        osm_map.moveMapToLayerSourceExtent(osm_map.geoJsonLayer, 50, osm_map.config.map.zoom);
+        osm_map.moveMapToLayerSourceExtent(osm_map.geoJsonLayer, 50, osm_map.config.map.zoom); // Check non-empty for lat/lon form fields to respect old form input
+
+        if ($('input.location_lat').val() || $('input.location_lon').val()) {
+          osm_map.updatePosition($('input.location_lon').val(), $('input.location_lat').val());
+          osm_map.moveMarker($('input.location_lon').val(), $('input.location_lat').val(), osm_map.owner.itemId);
+        } else {
+          // Use browser's geolocation API if available and enabled in config
+          if (Boolean(osm_map.config.map_geolocation) && navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function (position) {
+              var lon = position.coords.longitude;
+              var lat = position.coords.latitude;
+              osm_map.updatePosition(lon, lat);
+              osm_map.moveMarker(lon, lat, osm_map.owner.itemId);
+            }, function (error) {
+              console.log("error using browser's geolocation API");
+            }, {
+              timeout: 2500
+            });
+          }
+        }
       });
+    } // Add scale line
+
+
+    if (this.config.scale_line) {
+      this.addScaleLine();
+    } // Add mouse position
+
+
+    if (this.config.mouse_position) {
+      this.addMousePosition(this.config.mouse_position);
+    } // Add WMS layer
+
+
+    if (this.config.wms_url) {
+      // String with layer names, concatenated with commas
+      var layers = '';
+
+      if (this.config.wms_layers) {
+        layers = this.config.wms_layers;
+      }
+
+      console.log(layers); // Array with 4 float elements representing the extent
+
+      var extent = false;
+
+      if (this.config.wms_extent) {
+        extent = this.config.wms_extent;
+      }
+
+      console.log(extent);
+      this.addWmsLayer(this.config.wms_url, layers, extent);
+    } // TODO: move to new module
+    // Click on map to update position of marker
+
+
+    osm_map.map.on('singleclick', function (evt) {
+      var coord = osm_map.transformCoordinate(evt.coordinate); // Update lat/lon form fields
+
+      $('input.location_lon').val(coord[0]);
+      $('input.location_lat').val(coord[1]); // Update position of marker
+
+      osm_map.moveMarker($('input.location_lon').val(), $('input.location_lat').val(), osm_map.owner.itemId); // Check for missing location input to avoid useless geocoder query
+
+      if (!$('input.location_city').length) {
+        return;
+      } // Fetch data from geocoder API
+
+
+      $.ajax({
+        url: osm_map.owner.reverseGeocoderUrl,
+        type: 'get',
+        dataType: 'json',
+        data: {
+          format: 'json',
+          'accept-language': 'de',
+          lat: coord[1],
+          lon: coord[0],
+          key: osm_map.owner.apiKey
+        },
+        success: function success(data) {
+          //console.log(data);
+          // Update address form input fields with results from geocoder
+          $('input.location_country').val(data.address.country);
+          $('input.location_state').val(data.address.state);
+          $('input.location_county').val(data.address.county);
+          $('input.location_city').val(osm_map.getTownFromAddress(data.address));
+          $('input.location_street').val(data.address.road);
+          $('input.location_postcode').val(data.address.postcode);
+        },
+        error: function error(xhr) {
+          //console.log(xhr);
+          // In case of wrong API key, the server responds with HTTP 403, but XHR fails
+          // because of missing CORS headers
+          if (xhr.status == 0) {
+            error_message = '@lang("common.geocoder_api_key_error")';
+          } // Render the geocoder error message
+
+
+          $('#alertModalLabel').text('@lang("common.laravel_error")');
+          $('#alertModalContent').html('<div class="alert alert-danger">' + error_message + '</div>');
+          $('#alertModal').modal('show');
+        }
+      });
+    }); // Autocomplete search for address form input
+
+    $('input.location_city').autocomplete({
+      disabled: true,
+      minLength: 5,
+      source: function source(request, response) {
+        // Fetch data from geocoder API
+        $.ajax({
+          url: osm_map.owner.forwardGeocoderUrl,
+          type: 'get',
+          dataType: 'json',
+          data: {
+            format: 'json',
+            'accept-language': 'de',
+            addressdetails: '1',
+            q: request.term,
+            key: osm_map.owner.apiKey
+          },
+          success: function success(data) {
+            var transformed = $.map(data, function (element) {
+              //console.log(element);
+              return {
+                label: element.display_name + ' (' + element["class"] + ')',
+                value: element.osm_id,
+                address: element.address,
+                latitude: element.lat,
+                longitude: element.lon,
+                osm_id: element.osm_id
+              };
+            }); //console.log(transformed);
+
+            response(transformed);
+          },
+          error: function error(xhr) {
+            //console.log(xhr);
+            // In case of wrong API key, the server responds with HTTP 403, but XHR fails
+            // because of missing CORS headers
+            if (xhr.status == 0) {
+              error_message = '@lang("common.geocoder_api_key_error")';
+            } // Render the geocoder error message
+
+
+            $('#alertModalLabel').text('@lang("common.laravel_error")');
+            $('#alertModalContent').html('<div class="alert alert-danger">' + error_message + '</div>');
+            $('#alertModal').modal('show');
+          }
+        });
+      },
+      select: function select(event, ui) {
+        //console.log(ui.item);
+        event.preventDefault();
+        $('input.location_city').autocomplete('disable'); // Update address form input fields with results from geocoder
+
+        $('input.location_country').val(ui.item.address.country);
+        $('input.location_state').val(ui.item.address.state);
+        $('input.location_county').val(ui.item.address.county);
+        $('input.location_city').val(osm_map.getTownFromAddress(ui.item.address));
+        $('input.location_street').val(ui.item.address.road);
+        $('input.location_postcode').val(ui.item.address.postcode);
+        $('input.location_lat').val(ui.item.latitude);
+        $('input.location_lon').val(ui.item.longitude); // Adjust map center to location of selected search result
+
+        osm_map.updatePosition($('input.location_lon').val(), $('input.location_lat').val());
+        osm_map.moveMarker($('input.location_lon').val(), $('input.location_lat').val(), osm_map.owner.itemId);
+        return false;
+      }
+    }); // Send search request to geocoder API
+
+    $('button.searchAddressBtn').click(function (xhr) {
+      xhr.preventDefault();
+      $('input.location_city').autocomplete('enable');
+      $('input.location_city').autocomplete('search');
+    });
+  },
+  // Extract name of city/town/village from geocoder address response
+  getTownFromAddress: function getTownFromAddress(address) {
+    if (address.city) {
+      return address.city;
+    } else {
+      if (address.town) {
+        return address.town;
+      } else {
+        if (address.village) {
+          return address.village;
+        } else {
+          return "?";
+        }
+      }
     }
   },
   display: function display(lon, lat, zoom) {
-    var position = Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]);
+    var position = Object(ol_proj__WEBPACK_IMPORTED_MODULE_14__["fromLonLat"])([lon, lat]);
     var view = new ol__WEBPACK_IMPORTED_MODULE_0__["View"]({
       center: position,
       zoom: zoom,
@@ -105969,8 +106687,8 @@ var osm_map = {
     });
     this.map = new ol__WEBPACK_IMPORTED_MODULE_0__["Map"]({
       target: 'map',
-      layers: [new ol_layer_Tile__WEBPACK_IMPORTED_MODULE_1__["default"]({
-        source: new ol_source_OSM__WEBPACK_IMPORTED_MODULE_9__["default"]()
+      layers: [new ol_layer_Tile__WEBPACK_IMPORTED_MODULE_4__["default"]({
+        source: new ol_source_OSM__WEBPACK_IMPORTED_MODULE_13__["default"]()
       }), this.vectorLayer],
       view: view
     });
@@ -105989,27 +106707,54 @@ var osm_map = {
   updateSize: function updateSize() {
     this.map.updateSize();
   },
-  addMarker: function addMarker(lon, lat, icon, color, id) {
+  // Add a control showing a scale line or bar
+  addScaleLine: function addScaleLine() {
+    var scaleLine = new ol_control__WEBPACK_IMPORTED_MODULE_1__["ScaleLine"]({
+      units: 'metric',
+      bar: true,
+      steps: 4,
+      minWidth: 100
+    });
+    this.map.addControl(scaleLine);
+  },
+  // Add a control showing the current position of mouse pointer
+  addMousePosition: function addMousePosition() {
+    var precision = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 4;
+    var mousePositionControl = new ol_control_MousePosition__WEBPACK_IMPORTED_MODULE_2__["default"]({
+      coordinateFormat: Object(ol_coordinate__WEBPACK_IMPORTED_MODULE_3__["createStringXY"])(precision),
+      projection: 'EPSG:4326' // comment out the following two lines to have the mouse position
+      // be placed outside the map.
+      //className: 'custom-mouse-position',
+      //target: document.getElementById('mouse-position'),
+
+    });
+    this.map.addControl(mousePositionControl);
+  },
+  addMarker: function addMarker(lon, lat, icon, color) {
+    var scale = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 1.0;
+    var id = arguments.length > 5 ? arguments[5] : undefined;
+    var layer = arguments.length > 6 && arguments[6] !== undefined ? arguments[6] : this.vectorLayer;
+
     if (typeof id === 'undefined') {
       id = 'defaultMarker';
     }
 
     var marker = new ol__WEBPACK_IMPORTED_MODULE_0__["Feature"]({
-      geometry: new ol_geom_Point__WEBPACK_IMPORTED_MODULE_8__["default"](Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]))
+      geometry: new ol_geom_Point__WEBPACK_IMPORTED_MODULE_12__["default"](Object(ol_proj__WEBPACK_IMPORTED_MODULE_14__["fromLonLat"])([lon, lat]))
     });
     marker.setId(id);
-    marker.setStyle(new ol_style__WEBPACK_IMPORTED_MODULE_6__["Style"]({
-      image: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Icon"]({
+    marker.setStyle(new ol_style__WEBPACK_IMPORTED_MODULE_10__["Style"]({
+      image: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Icon"]({
         color: color,
         crossOrigin: 'anonymous',
         src: icon,
-        scale: 1.0
+        scale: scale
       })
     }));
-    this.vectorLayer.getSource().addFeature(marker);
+    layer.getSource().addFeature(marker);
   },
   updatePosition: function updatePosition(lon, lat, zoom) {
-    this.map.getView().setCenter(Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]));
+    this.map.getView().setCenter(Object(ol_proj__WEBPACK_IMPORTED_MODULE_14__["fromLonLat"])([lon, lat]));
   },
   // Move and zoom the map view to extent of a given layer's source
   moveMapToLayerSourceExtent: function moveMapToLayerSourceExtent(layer) {
@@ -106017,7 +106762,7 @@ var osm_map = {
     var maxZoom = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 17;
     var extent = layer.getSource().getExtent(); //console.log(osm_map.transformExtent(extent));
 
-    if (!ol_extent__WEBPACK_IMPORTED_MODULE_7__["isEmpty"](extent)) {
+    if (!ol_extent__WEBPACK_IMPORTED_MODULE_11__["isEmpty"](extent)) {
       osm_map.map.getView().fit(extent, {
         padding: [padding, padding, padding, padding],
         maxZoom: maxZoom
@@ -106035,30 +106780,50 @@ var osm_map = {
       maxZoom: maxZoom
     });
   },
-  moveMarker: function moveMarker(lon, lat, id) {
-    if (typeof id === 'undefined') {
-      id = 'defaultMarker';
-    }
+  moveMarker: function moveMarker(lon, lat) {
+    var id = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'defaultMarker';
+    var layer = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : this.geoJsonLayer;
+    var coordinates = Object(ol_proj__WEBPACK_IMPORTED_MODULE_14__["fromLonLat"])([lon, lat]); // Check for existing marker, otherwise create new one
 
-    var coordinates = Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["fromLonLat"])([lon, lat]);
-    this.vectorLayer.getSource().getFeatureById(id).getGeometry().setCoordinates(coordinates);
+    if (layer.getSource().getFeatureById(id)) {
+      layer.getSource().getFeatureById(id).getGeometry().setCoordinates(coordinates);
+    } else {
+      //console.log('adding new marker because no existing one found for moving');
+      this.addMarker(lon, lat, this.config.marker_icon, this.config.marker_color, this.config.marker_scale, '0', layer);
+    }
   },
   removeMarker: function removeMarker(id) {
+    var layer = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : this.geoJsonLayer;
+
     if (typeof id === 'undefined') {
       id = 'defaultMarker';
     }
 
-    var feature = this.vectorLayer.getSource().getFeatureById(id);
+    var feature = layer.getSource().getFeatureById(id);
 
     if (feature) {
-      this.vectorLayer.getSource().removeFeature(feature);
+      layer.getSource().removeFeature(feature);
     }
   },
   transformCoordinate: function transformCoordinate(coordinate) {
-    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["transform"])(coordinate, 'EPSG:3857', 'EPSG:4326');
+    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_14__["transform"])(coordinate, 'EPSG:3857', 'EPSG:4326');
   },
   transformExtent: function transformExtent(extent) {
-    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
+    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_14__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
+  },
+  addWmsLayer: function addWmsLayer(url, layers, extent) {
+    var tileLayer = new ol_layer_Tile__WEBPACK_IMPORTED_MODULE_4__["default"]({
+      extent: extent,
+      source: new ol_source_TileWMS__WEBPACK_IMPORTED_MODULE_8__["default"]({
+        url: url,
+        params: {
+          'LAYERS': layers
+        },
+        // Do not fade tiles:
+        transition: 0
+      })
+    });
+    this.map.addLayer(tileLayer);
   },
   // Get all vector layers with polygon features from GeoJSON file
   getPolygonLayers: function getPolygonLayers(url) {
@@ -106073,21 +106838,21 @@ var osm_map = {
   },
   // Add a vector layer with polygon features from GeoJSON file
   addPolygonLayer: function addPolygonLayer(url, color) {
-    var _style = new ol_style__WEBPACK_IMPORTED_MODULE_6__["Style"]({
-      fill: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Fill"]({
+    var _style = new ol_style__WEBPACK_IMPORTED_MODULE_10__["Style"]({
+      fill: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Fill"]({
         color: '#eeeeee'
       }),
-      stroke: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Stroke"]({
+      stroke: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Stroke"]({
         color: '#0000003f',
         width: 2
       })
     });
 
-    var polygonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
-      source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
+    var polygonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_5__["default"]({
+      source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_6__["default"]({
         projection: 'EPSG:3857',
         url: url,
-        format: new ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_5__["default"]()
+        format: new ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_9__["default"]()
       }),
       zIndex: 20,
       style: function style(feature) {
@@ -106101,13 +106866,13 @@ var osm_map = {
   // Add a vector layer with point features from GeoJSON file
   addVectorLayer: function addVectorLayer(url, icon, color) {
     var scale = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 1.0;
-    var label = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : true;
+    var label = arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : false;
     var styleCache = {};
-    this.geoJsonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
-      source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
+    this.geoJsonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_5__["default"]({
+      source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_6__["default"]({
         projection: 'EPSG:3857',
         url: url,
-        format: new ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_5__["default"]()
+        format: new ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_9__["default"]()
       }),
       zIndex: 40,
       style: function style(feature) {
@@ -106115,26 +106880,30 @@ var osm_map = {
         var style = styleCache[size];
 
         if (!style) {
-          style = new ol_style__WEBPACK_IMPORTED_MODULE_6__["Style"]({
-            image: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Icon"]({
+          style = new ol_style__WEBPACK_IMPORTED_MODULE_10__["Style"]({
+            image: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Icon"]({
               color: color,
               crossOrigin: 'anonymous',
               src: icon,
               scale: scale
-            }),
-            text: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Text"]({
+            })
+          });
+
+          if (label) {
+            var text = new ol_style__WEBPACK_IMPORTED_MODULE_10__["Text"]({
               text: feature.get('name'),
               font: '12px Calibri,sans-serif',
               offsetY: 20,
               padding: [2, 2, 2, 2],
-              backgroundFill: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Fill"]({
+              backgroundFill: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Fill"]({
                 color: '#fff'
               }),
-              fill: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Fill"]({
+              fill: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Fill"]({
                 color: '#000'
               })
-            })
-          });
+            });
+            style.setText(text);
+          }
         }
 
         return style;
@@ -106145,13 +106914,13 @@ var osm_map = {
   // Add a vector layer with clustered point features from GeoJSON file
   addGeoJsonLayer: function addGeoJsonLayer(url) {
     var styleCache = {};
-    this.geoJsonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_2__["default"]({
-      source: new ol_source_Cluster__WEBPACK_IMPORTED_MODULE_4__["default"]({
+    this.geoJsonLayer = new ol_layer_Vector__WEBPACK_IMPORTED_MODULE_5__["default"]({
+      source: new ol_source_Cluster__WEBPACK_IMPORTED_MODULE_7__["default"]({
         distance: 30,
-        source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_3__["default"]({
+        source: new ol_source_Vector__WEBPACK_IMPORTED_MODULE_6__["default"]({
           projection: 'EPSG:3857',
           url: url,
-          format: new ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_5__["default"]()
+          format: new ol_format_GeoJSON__WEBPACK_IMPORTED_MODULE_9__["default"]()
         })
       }),
       style: function style(feature) {
@@ -106159,20 +106928,20 @@ var osm_map = {
         var style = styleCache[size];
 
         if (!style) {
-          style = new ol_style__WEBPACK_IMPORTED_MODULE_6__["Style"]({
-            image: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Circle"]({
+          style = new ol_style__WEBPACK_IMPORTED_MODULE_10__["Style"]({
+            image: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Circle"]({
               radius: 12,
-              fill: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Fill"]({
+              fill: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Fill"]({
                 color: 'rgba(52, 144, 220, 0.7)'
               }),
-              stroke: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Stroke"]({
+              stroke: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Stroke"]({
                 color: '#000',
                 width: 2
               })
             }),
-            text: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Text"]({
+            text: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Text"]({
               text: size.toString(),
-              fill: new ol_style__WEBPACK_IMPORTED_MODULE_6__["Fill"]({
+              fill: new ol_style__WEBPACK_IMPORTED_MODULE_10__["Fill"]({
                 color: '#000'
               })
             })
@@ -106200,18 +106969,18 @@ var osm_map = {
       var extent = clusteredFeatures[0].getGeometry().getExtent().slice(0);
 
       for (var i = 0; i < clusteredFeatures.length; i++) {
-        ol_extent__WEBPACK_IMPORTED_MODULE_7__["extend"](extent, clusteredFeatures[i].getGeometry().getExtent());
+        ol_extent__WEBPACK_IMPORTED_MODULE_11__["extend"](extent, clusteredFeatures[i].getGeometry().getExtent());
       }
     } else {
       // not a cluster
       var extent = features.getGeometry().getExtent().slice(0);
     }
 
-    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
+    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_14__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
   },
   getBoundsOfView: function getBoundsOfView() {
     var extent = this.map.getView().calculateExtent(this.map.getSize());
-    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_10__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
+    return Object(ol_proj__WEBPACK_IMPORTED_MODULE_14__["transformExtent"])(extent, 'EPSG:3857', 'EPSG:4326');
   },
   wrapLon: function wrapLon(value) {
     var worlds = Math.floor((value + 180) / 360);
@@ -106381,8 +107150,8 @@ var menu = {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /var/www/html/fotoportal/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /var/www/html/fotoportal/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! /var/www/html/fwp-dev/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /var/www/html/fwp-dev/resources/sass/app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

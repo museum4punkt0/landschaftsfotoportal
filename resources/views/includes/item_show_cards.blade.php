@@ -344,6 +344,9 @@
                         data-colmap="{{ $cm->colmap_id }}"
                         data-item="{{ $item->item_id }}"
                         data-map-config="{{ route('map.config', ['colmap' => $cm->colmap_id]) }}"
+                        @if($item instanceof \App\ItemRevision)
+                            data-revision="{{ $item->item_id }}"
+                        @endif
                     >
                         <div id="popup"></div>
                         <div id="mapError" style="display:none;"><b>@lang("items.no_position_for_map")</b></div>
