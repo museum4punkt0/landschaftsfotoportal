@@ -19,6 +19,9 @@ class TaxonController extends Controller
     {
         $this->middleware('verified');
 
+        //Show error if comments are disabled
+        abort_if(!config('ui.taxa'), 403, __('common.module_disabled'));
+
         // Use app\Policies\TaxonPolicy for authorizing ressource controller
         $this->authorizeResource(Taxon::class, 'taxon');
     }

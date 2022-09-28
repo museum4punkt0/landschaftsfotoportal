@@ -68,6 +68,7 @@
         'taxon_name' => old('parent_name', __('common.none')),
         'taxon_id' => old('parent'),
     ])
+    @if(config('ui.taxa'))
     <div class="form-group">
         <label for="taxonNameInput">@lang('taxon.list')</label>
         <input
@@ -80,6 +81,7 @@
         />
         <input type="hidden" name="taxon" value="{{optional($taxon)->taxon_id}}" />
     </div>
+    @endif
 @endif
     
     @foreach($colmap as $cm)

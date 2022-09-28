@@ -31,6 +31,7 @@
         </select>
         <span class="text-danger">{{ $errors->first('item_type') }}</span>
     </div>
+    @if(config('ui.taxa'))
     @include('includes.form_taxon_autocomplete', [
         'search_url' => route('taxon.autocomplete', ['valid' => true]),
         'div_class' => 'form-group',
@@ -41,6 +42,7 @@
         'taxon_name' => old('taxon_name', __('common.none')),
         'taxon_id' => old('taxon'),
     ])
+    @endif
     
     <div class="form-group">
         <button type="submit" class="btn btn-primary">@lang('common.next')</button>

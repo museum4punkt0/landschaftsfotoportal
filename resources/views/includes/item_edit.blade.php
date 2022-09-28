@@ -118,6 +118,7 @@
     @includeWhen(isset($options['edit.revision']), 'includes.form_history_meta', [
         'data_type' => 'parent', 'column_id' => -103
     ])
+    @if(config('ui.taxa'))
     <div class="form-group">
         <label for="taxonNameInput">@lang('taxon.list')</label>
         <input
@@ -130,6 +131,7 @@
         />
         <input type="hidden" name="taxon" value="{{optional($taxon)->taxon_id}}" />
     </div>
+    @endif
 @endif
     
     @foreach($colmap as $cm)
