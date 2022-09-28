@@ -9,9 +9,8 @@
     
     <div class="form-group">
         <label for="messageInput">@lang('comments.message')</label>
-        <input type="text" id="messageInput" name="message" class="form-control"
-            value="{{old('message', $comment->message)}}" maxlength="4095" autofocus
-        />
+        <textarea id="messageInput" name="message" class="form-control"
+            rows="3" maxlength="4095" autofocus>{{ old('message', $comment->message) }}</textarea>
         <span class="text-danger">{{ $errors->first('message') }}</span>
     </div>
     <div class="form-group">

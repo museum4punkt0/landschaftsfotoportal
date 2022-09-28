@@ -324,6 +324,9 @@ class ItemController extends Controller
             $revisions = $item->revisions()->latest()->get();
         }
 
+        // Load comments belonging to this item
+        $comments = $item->comments;
+
         // Only columns associated with this item's taxon or its descendants
         $colmap = ColumnMapping::forItem($item->item_type_fk, $item->taxon_fk)->get();
 
@@ -339,7 +342,7 @@ class ItemController extends Controller
         $item_types = Localization::getItemTypes($lang);
 
         return view('admin.item.show',
-            compact('item', 'revisions', 'details', 'colmap', 'lists', 'item_types', 'translations'));
+            compact('item', 'revisions', 'details', 'comments', 'colmap', 'lists', 'item_types', 'translations'));
     }
 
     /**

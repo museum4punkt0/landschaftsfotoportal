@@ -111,6 +111,7 @@
                     <h4 class="my-3">@lang('cart.my_own')</h4>
                     <p class="text-muted">@lang('landschaftsfotoportal.cart_teaser')</p>
                 </div>
+                @if(config('ui.comments'))
                 <div class="col-md-4">
                 @guest
                     <a href="#" data-toggle="modal" data-target="#requestLoginModal" title="@lang('comments.my_own')">
@@ -125,6 +126,7 @@
                     <h4 class="my-3">@lang('comments.my_own')</h4>
                     <p class="text-muted">@lang('landschaftsfotoportal.comment_teaser')</p>
                 </div>
+                @endif
             </div>
         </div>
     </section>

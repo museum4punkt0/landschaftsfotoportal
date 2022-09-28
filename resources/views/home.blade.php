@@ -47,6 +47,7 @@
                                     </span>
                                     <h4 class="my-3">@lang('cart.my_own')</h4>
                                 </div>
+                            @if(config('ui.comments'))
                                 <div class="col">
                                     <span class="fa-stack fa-4x">
                                         <a href="{{ route('comment.index') }}" title="@lang('comments.my_own')">
@@ -56,6 +57,7 @@
                                     </span>
                                     <h4 class="my-3">@lang('comments.my_own')</h4>
                                 </div>
+                            @endif
                                 <div class="col">
                                     <span class="fa-stack fa-4x">
                                         <a href="{{ route('email.change') }}" title="@lang('users.change_email')">

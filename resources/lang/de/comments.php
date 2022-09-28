@@ -21,7 +21,7 @@ return [
     'new' => 'Neuer Kommentar',
     'edit' => 'Kommentar bearbeiten',
     'delete' => 'Kommentar löschen',
-    'confirm_delete' => 'Möchten Sie diesen Kommentar wirklich löschen?',
+    'confirm_delete' => 'Möchten Sie den Kommentar “:name” wirklich löschen?',
     'created' => 'Kommentar wurde angelegt.',
     'updated' => 'Kommentar wurde bearbeitet.',
     'deleted' => 'Kommentar wurde gelöscht.',

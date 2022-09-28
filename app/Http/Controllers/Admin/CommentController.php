@@ -22,6 +22,9 @@ class CommentController extends Controller
     {
         $this->middleware('verified');
 
+        //Show error if comments are disabled
+        abort_if(!config('ui.comments'), 403, __('common.module_disabled'));
+
         // Use app\Policies\CommentPolicy for authorizing ressource controller
         $this->authorizeResource(Comment::class, 'comment');
     }
@@ -89,6 +92,23 @@ class CommentController extends Controller
     public function show(Comment $comment)
     {
         //
+    }
+
+    /**
+     * Display a listing of all comments.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function list_all()
+    {
+        $this->authorize('vieAny', Comment::class);
+        
+        // Load module containing column's configuration and naming
+        $image_module = ModuleInstance::getByName('gallery');
+
+        $comments = Comment::with('item')->latest('updated_at')->paginate(10);
+        
+        return view('admin.comment.list_all', compact('comments', 'image_module'));
     }
 
     /**
@@ -175,7 +195,7 @@ class CommentController extends Controller
         }
 
         // Note: route to comments belonging to same item: 'admin/item/'.$comment->item_fk.'/comment'
-        return Redirect::to('admin/comment/unpublished')
+        return redirect()->route('comment.all')
             ->with('success', __('comments.updated'));
     }
 
@@ -188,8 +208,7 @@ class CommentController extends Controller
     public function destroy(Comment $comment)
     {
         $comment->delete();
-        
-        return Redirect::to('admin/item/'.$comment->item_fk.'/comment')
-            ->with('success', __('comments.deleted'));
+
+        return back()->with('success', __('comments.deleted'));
     }
 }

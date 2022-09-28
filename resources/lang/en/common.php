@@ -34,4 +34,6 @@ return [
     'language' => 'language',
     'ordering' => 'ordering',
     'rowsperpage' => 'Rows per Page:',
+
+    'module_disabled' => 'This module is disabled!',
 ];
