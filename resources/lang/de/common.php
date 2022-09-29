@@ -97,6 +97,7 @@ return [
     'laravel_error' => 'System-Fehler!',
     'module_disabled' => 'Dieses Modul ist deaktiviert!',
     'form_validation_error' => 'Dieses Formular enthält Fehler. Bitte korrigieren Sie die gekennzeichneten Felder!',
+    'invalid_daterange' => 'Das Enddatum darf nicht vor dem Anfangsdatum liegen!',
     'geocoder_no_result' => 'Der Geocoder konnte den Ort ":location" nicht finden!',
     'geocoder_api_key_error' => 'API-Key für Geocoder ungültig!',
     'get_latlon' => 'Koordinaten bestimmen',
