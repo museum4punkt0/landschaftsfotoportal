@@ -174,7 +174,7 @@ class ItemController extends Controller
         // Validation rules for all fields associated with columns
         foreach ($request->input('fields') as $column_id => $value) {
             $required = $colmap->firstWhere('column_fk', $column_id)->getRequiredRule();
-            $rule = Column::find($column_id)->getValidationRule();
+            $rule = $colmap->firstWhere('column_fk', $column_id)->getValidationRule();
             $validation_rules['fields.' . $column_id] = $required . $rule[0];
 
             // Special treatment for arrays
@@ -529,7 +529,7 @@ class ItemController extends Controller
             else {
                 $required = $colmap->firstWhere('column_fk', $column_id)->getRequiredRule();
             }
-            $rule = Column::find($column_id)->getValidationRule();
+            $rule = $colmap->firstWhere('column_fk', $column_id)->getValidationRule();
             $validation_rules['fields.' . $column_id] = $required . $rule[0];
 
             // Special treatment for arrays
@@ -539,6 +539,7 @@ class ItemController extends Controller
                 }
             }
         }
+        #dd($validation_rules);
 
         $request->validate($validation_rules);
 

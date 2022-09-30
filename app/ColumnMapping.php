@@ -135,6 +135,25 @@ class ColumnMapping extends Model
     
     
     /**
+     * Get the bound/limit for a date from config.
+     *
+     * @param  string  $boundary
+     * @return mixed
+     */
+    public function getDateBoundConfig($boundary)
+    {
+        switch ($this->getConfigValue('date_' . $boundary)) {
+            case 'date':
+                return $this->getConfigValue('date_' . $boundary . '_date') ?? '';
+            case 'current':
+                return date('Y-m-d');
+            // Might be 'false' or not set at all
+            default:
+                return '';
+        }
+    }
+
+    /**
      * Get the configuration value for a given key from the JSON key/value store.
      *
      * @param  string  $key
@@ -152,6 +171,61 @@ class ColumnMapping extends Model
             return null;
         }
     }
+
+    /**
+     * Get the name of the validation rule for the column.
+     *
+     * @return array
+     */
+    public function getValidationRule()
+    {
+        switch ($this->column->getDataType()) {
+            case '_boolean_':
+                return ['boolean'];
+            case '_date_range_':
+                $min_bound = $this->getDateBoundConfig('min');
+                $max_bound = $this->getDateBoundConfig('max');
+                return ['array', [
+                    '*' => 'date',
+                    'start' =>
+                        ($this->getConfigValue('lower_bound_required') ? 'required' : 'nullable') .
+                        ($min_bound ? '|after_or_equal:' . $min_bound : ''),
+                    'end' =>
+                        ($this->getConfigValue('upper_bound_required') ? 'required' : 'nullable') .
+                        '|after_or_equal:fields.'.$this->column_fk . '.start' .
+                        ($max_bound ? '|before_or_equal:' . $max_bound : ''),
+                ]];
+            case '_multi_list_':
+                return ['array|min:2', ['*' => 'integer']];
+            case '_list_':
+            case '_integer_':
+                return ['integer'];
+            case '_float_':
+                return ['numeric'];
+            case '_string_':
+            case '_title_':
+            case '_redirect_':
+            case '_map_':
+            case '_html_':
+                return ['string'];
+            case '_date_':
+                $min_bound = $this->getDateBoundConfig('min');
+                $max_bound = $this->getDateBoundConfig('max');
+                return ['date' .
+                    ($max_bound ? '|before_or_equal:' . $max_bound : '') .
+                    ($min_bound ? '|after_or_equal:' . $min_bound : '')
+                ];
+            case '_url_':
+                return ['url'];
+            case '_image_':
+                return ['', [
+                    'file' => 'image|mimes:jpeg|max:' . config('media.image_max_size', 2048),
+                    'filename' => 'string',
+                ]];
+            default:
+                return [''];
+        }
+    }
     
     /**
      * Get the part of the validation rule which defines if this column is required or not.
@@ -160,6 +234,10 @@ class ColumnMapping extends Model
      */
     public function getRequiredRule()
     {
+        // For data type date range the requirement rule is handled by getValidationRule()
+        if ($this->column->getDataType() == '_date_range_') {
+            return '';
+        }
         if ($this->getConfigValue('required')) {
             return 'required|';
         } else {

@@ -175,6 +175,8 @@ class Column extends Model
     
     /**
      * Get the name of the validation rule for the column.
+     *
+     * DEPRECATED! Use \App\ColumnMapping::getValidationRule() instead!
      */
     public function getValidationRule()
     {

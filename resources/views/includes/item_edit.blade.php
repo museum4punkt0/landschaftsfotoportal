@@ -478,6 +478,8 @@
                         class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                         data-column="{{ $cm->column->column_id }}"
                         data-type="date"
+                        min="{{ $cm->getDateBoundConfig('min') }}"
+                        max="{{ $cm->getDateBoundConfig('max') }}"
                         value="{{ old('fields.'. $cm->column->column_id, 
                         optional($details->firstWhere('column_fk', $cm->column->column_id))->value_date) }}"
                         @if($loop->first && !$options['edit.meta']) autofocus @endif
@@ -537,6 +539,8 @@
                                 class="form-control @if($errors->has('fields.'.$cm->column->column_id.'.start')) is-invalid @endif"
                                 data-column="{{ $cm->column->column_id }}"
                                 data-type="daterange"
+                                min="{{ $cm->getDateBoundConfig('min') }}"
+                                max="{{ $cm->getDateBoundConfig('max') }}"
                                 value="{{ old('fields.'. $cm->column->column_id .'.start', 
                                 optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from())->toDateString()) }}"
                             />
@@ -559,6 +563,8 @@
                                 class="form-control @if($errors->has('fields.'.$cm->column->column_id.'.end')) is-invalid @endif"
                                 data-column="{{ $cm->column->column_id }}"
                                 data-type="daterange"
+                                min="{{ $cm->getDateBoundConfig('min') }}"
+                                max="{{ $cm->getDateBoundConfig('max') }}"
                                 data-msg-invalid="@lang('common.invalid_daterange')"
                                 value="{{ old('fields.'. $cm->column->column_id .'.end', 
                                 optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to())->toDateString()) }}"

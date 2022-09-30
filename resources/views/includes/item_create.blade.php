@@ -319,6 +319,8 @@
                         name="fields[{{ $cm->column->column_id }}]"
                         aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
                         class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
+                        min="{{ $cm->getDateBoundConfig('min') }}"
+                        max="{{ $cm->getDateBoundConfig('max') }}"
                         value="{{old('fields.'. $cm->column->column_id)}}"
                         @if($loop->first && !$options['edit.meta']) autofocus @endif
                     />
@@ -374,6 +376,8 @@
                                 class="form-control @if($errors->has('fields.'.$cm->column->column_id.'.start')) is-invalid @endif"
                                 data-column="{{ $cm->column->column_id }}"
                                 data-type="daterange"
+                                min="{{ $cm->getDateBoundConfig('min') }}"
+                                max="{{ $cm->getDateBoundConfig('max') }}"
                                 value="{{ old('fields.'. $cm->column->column_id .'.start') }}"
                             />
                             <span class="text-danger">
@@ -396,6 +400,8 @@
                                 data-column="{{ $cm->column->column_id }}"
                                 data-type="daterange"
                                 data-msg-invalid="@lang('common.invalid_daterange')"
+                                min="{{ $cm->getDateBoundConfig('min') }}"
+                                max="{{ $cm->getDateBoundConfig('max') }}"
                                 value="{{ old('fields.'. $cm->column->column_id .'.end') }}"
                             />
                             <span class="text-danger">

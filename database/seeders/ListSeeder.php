@@ -584,7 +584,37 @@ class ListSeeder extends Seeder
         ]);
 
         // Data type: date
-        // Use same options as for url
+        $options = ["available_options" => [
+            "show_title" => $show_title,
+            "required" => $required,
+            "editable" => $editable,
+            "date_min" => [
+                "default" => false,
+                "data_type" => "select",
+                "select_options" => [
+                    "false" => false,
+                    "current" => "current",
+                    "date" => "date",
+                ],
+            ],
+            "date_min_date" => [
+                "default" => false,
+                "data_type" => "date",
+            ],
+            "date_max" => [
+                "default" => false,
+                "data_type" => "select",
+                "select_options" => [
+                    "false" => false,
+                    "current" => "current",
+                    "date" => "date",
+                ],
+            ],
+            "date_max_date" => [
+                "default" => false,
+                "data_type" => "date",
+            ],
+        ]];
         $element = Element::whereHas('values', function (Builder $query) {
             $query->where('value', '_date_');
         })->firstWhere('list_fk', $data_type_list->list_id);
@@ -594,7 +624,44 @@ class ListSeeder extends Seeder
         ]);
 
         // Data type: date range
-        // Use same options as for date
+        $options = ["available_options" => [
+            "show_title" => $show_title,
+            "lower_bound_required" => [
+                "default" => false,
+                "data_type" => "bool",
+            ],
+            "upper_bound_required" => [
+                "default" => false,
+                "data_type" => "bool",
+            ],
+            "editable" => $editable,
+            "date_min" => [
+                "default" => false,
+                "data_type" => "select",
+                "select_options" => [
+                    "false" => false,
+                    "current" => "current",
+                    "date" => "date",
+                ],
+            ],
+            "date_min_date" => [
+                "default" => false,
+                "data_type" => "date",
+            ],
+            "date_max" => [
+                "default" => false,
+                "data_type" => "select",
+                "select_options" => [
+                    "false" => false,
+                    "current" => "current",
+                    "date" => "date",
+                ],
+            ],
+            "date_max_date" => [
+                "default" => false,
+                "data_type" => "date",
+            ],
+        ]];
         $element = Element::whereHas('values', function (Builder $query) {
             $query->where('value', '_date_range_');
         })->firstWhere('list_fk', $data_type_list->list_id);
