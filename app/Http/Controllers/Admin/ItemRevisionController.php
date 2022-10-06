@@ -91,9 +91,11 @@ class ItemRevisionController extends Controller
 
         // Get localized names of columns
         $translations = Localization::getTranslations($lang, 'name');
+        // Get item types with localized names
+        $item_types = Localization::getItemTypes($lang);
 
         return view('admin.revision.show',
-            compact('item', 'revisions', 'details', 'colmap','lists', 'translations'));
+            compact('item', 'revisions', 'details', 'colmap','lists', 'item_types', 'translations'));
     }
 
     /**
