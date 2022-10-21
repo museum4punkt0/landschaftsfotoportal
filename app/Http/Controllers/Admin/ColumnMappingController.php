@@ -421,11 +421,15 @@ class ColumnMappingController extends Controller
             'option.*' => 'nullable|string|max:255',
             'option_int.*' => 'nullable|integer|numeric',
             'option_float.*' => 'nullable|numeric',
+            'option_date.*' => 'nullable|date',
         ]);
         #dd($request->input());
         
         // Get data type dependent config options
         $config = $request->input('option');
+        if ($request->has('option_date')) {
+            $config = array_merge($config, $request->input('option_date'));
+        }
         if ($request->has('option_int')) {
             $config = array_merge($config, $request->input('option_int'));
         }

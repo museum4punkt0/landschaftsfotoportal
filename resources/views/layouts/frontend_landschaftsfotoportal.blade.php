@@ -13,11 +13,6 @@
     <script src="{{ asset('js/app.js') }}"></script>
     <script src="{{ asset('js/landschaftsfotoportal.js') }}" defer ></script>
 
-    <!-- Google fonts-->
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css" />
-    <link href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic,700italic" rel="stylesheet" type="text/css" />
-    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700" rel="stylesheet" type="text/css" />
-
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     
@@ -44,7 +39,7 @@
             <div class="collapse navbar-collapse" id="navbarResponsive">
                 <ul class="navbar-nav text-uppercase ml-auto">
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.gallery') }}">@lang('common.home')</a></li>
-                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('über') }}">@lang('common.about')</a></li>
+                    <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('über das portal') }}">@lang('common.about')</a></li>
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('search.index') }}">@lang('search.header')</a></li>
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.timeline') }}">@lang('landschaftsfotoportal.timeline')</a></li>
                     <li class="nav-item"><a class="nav-link js-scroll-trigger" href="{{ route('item.map') }}">@lang('landschaftsfotoportal.map')</a></li>
@@ -72,7 +67,7 @@
         <div class="container">
             <div class="masthead-subheading">@lang('landschaftsfotoportal.slogan')</div>
             <div class="masthead-heading text-uppercase">Landschafts&shy;fotoportal</div>
-            <a class="btn btn-primary btn-xl text-uppercase js-scroll-trigger" href="{{ route('über') }}">@lang('landschaftsfotoportal.join')</a>
+            <a class="btn btn-primary btn-xl text-uppercase js-scroll-trigger" href="{{ route('über das portal') }}">@lang('landschaftsfotoportal.join')</a>
         </div>
     </header>
     

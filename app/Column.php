@@ -175,6 +175,8 @@ class Column extends Model
     
     /**
      * Get the name of the validation rule for the column.
+     *
+     * DEPRECATED! Use \App\ColumnMapping::getValidationRule() instead!
      */
     public function getValidationRule()
     {
@@ -182,7 +184,7 @@ class Column extends Model
             case '_boolean_':
                 return ['boolean'];
             case '_date_range_':
-                return ['array', ['*' => 'date']];
+                return ['array', ['*' => 'date', 'end' => 'after_or_equal:fields.'.$this->column_id.'.start']];
             case '_multi_list_':
                 return ['array|min:2', ['*' => 'integer']];
             case '_list_':

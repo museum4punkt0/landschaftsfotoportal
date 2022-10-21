@@ -68,7 +68,7 @@
                         <a href="{{route('revision.index')}}" class="btn btn-primary">@lang('common.show')</a>
                     </div>
                 </div>
-            @endif
+            @else
                 <div class="row py-1">
                     <div class="col">
                         @lang('items.unpublished'): {{ $items }}
@@ -77,6 +77,7 @@
                         <a href="{{route('item.unpublished')}}" class="btn btn-primary">@lang('common.show')</a>
                     </div>
                 </div>
+            @endif
             @if(config('ui.comments'))
                 <div class="row py-1">
                     <div class="col">

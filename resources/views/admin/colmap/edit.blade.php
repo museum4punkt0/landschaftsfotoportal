@@ -174,6 +174,22 @@
                         <span class="text-danger">{{ $errors->first('option.'.$name) }}</span>
                         @break
 
+                    @case('date')
+                        <input
+                            type="date"
+                            id="{{$name}}Select"
+                            name="option_date[{{$name}}]"
+                            aria-describedby="{{$name}}HelpBlock"
+                            class="form-control"
+                            value="{{ old('option_date.'.$name, $colmap->getConfigValue($name) ?? '') }}"
+                            maxlength="255"
+                        />
+                        <small id="{{$name}}HelpBlock" class="form-text text-muted">
+                            @lang('colmaps.option_' . $name . '_help')
+                        </small>
+                        <span class="text-danger">{{ $errors->first('option_int.'.$name) }}</span>
+                        @break
+
                     @case('integer')
                         <input
                             type="number"

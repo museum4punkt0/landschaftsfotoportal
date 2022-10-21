@@ -140,6 +140,9 @@ return [
             'required' => 'Dieses Feld muss ausgefüllt werden.',
             'min'      => 'In diesem Feld muss mindestens ein Element ausgewählt werden.',
         ],
+        'fields.*.end' => [
+            'after_or_equal'  => 'Das Enddatum darf nicht vor dem Anfangsdatum liegen.',
+        ],
         'fields.*.file' => [
             'max'       => 'Die Datei darf maximal :max Kilobytes groß sein.',
             'mimes'     => 'Die Datei muss den Dateityp :values haben.',

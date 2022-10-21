@@ -51,9 +51,11 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('item.index') }}">{{ __('items.header') }}</a>
                             </li>
+                            @if(config('ui.taxa'))
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('taxon.index') }}">{{ __('taxon.header') }}</a>
                             </li>
+                            @endif
                             <li class="nav-item dropdown">
                                 <a id="importNavbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" >
                                     {{ __('import.header') }} <span class="caret"></span>

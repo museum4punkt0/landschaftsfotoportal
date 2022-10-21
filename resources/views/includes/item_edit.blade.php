@@ -118,6 +118,7 @@
     @includeWhen(isset($options['edit.revision']), 'includes.form_history_meta', [
         'data_type' => 'parent', 'column_id' => -103
     ])
+    @if(config('ui.taxa'))
     <div class="form-group">
         <label for="taxonNameInput">@lang('taxon.list')</label>
         <input
@@ -130,6 +131,7 @@
         />
         <input type="hidden" name="taxon" value="{{optional($taxon)->taxon_id}}" />
     </div>
+    @endif
 @endif
     
     @foreach($colmap as $cm)
@@ -476,6 +478,8 @@
                         class="form-control @if($errors->has('fields.'.$cm->column->column_id)) is-invalid @endif"
                         data-column="{{ $cm->column->column_id }}"
                         data-type="date"
+                        min="{{ $cm->getDateBoundConfig('min') }}"
+                        max="{{ $cm->getDateBoundConfig('max') }}"
                         value="{{ old('fields.'. $cm->column->column_id, 
                         optional($details->firstWhere('column_fk', $cm->column->column_id))->value_date) }}"
                         @if($loop->first && !$options['edit.meta']) autofocus @endif
@@ -523,163 +527,119 @@
                         >
                         <label class="form-check-label" for="datePeriodRadio-{{ $cm->column->column_id }}">@lang('common.date_period')</label>
                     </div>
-                    <!-- Form field for the date (point in time) -->
-                    @if(old('date_type') == 'point' || !old('date_type') && $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from() == $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to())
-                        <div class="collapse show date-point" data-column="{{ $cm->column->column_id }}">
-                    @else
-                        <div class="collapse date-point" data-column="{{ $cm->column->column_id }}">
-                    @endif
-                        <input
-                            type="date"
-                            id="fieldsInput-{{ $cm->column->column_id }}"
-                            name="fields[{{ $cm->column->column_id }}]"
-                            aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
-                            class="form-control @if($errors->has('fields.'.$cm->column->column_id.'.start')) is-invalid @endif"
-                            data-column="{{ $cm->column->column_id }}"
-                            data-type="daterange"
-                            value="{{ old('fields.'. $cm->column->column_id .'.start', 
-                            optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from())->toDateString()) }}"
-                        />
-                        @include('includes.form_input_help')
-                        <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id .'.start') }}</span>
-                        @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', [
-                            'data_type' => 'daterange', 'column_id' => $cm->column->column_id
-                        ])
-                    </div>
-                    <!-- Form fields for the date (period of time) -->
+                    <div class="row">
+                    <!-- Form field for the date (of beginning) -->
+                        <div class="col-12 col-sm-6 date" data-column="{{ $cm->column->column_id }}">
+                            <label for="fieldsInput-{{ $cm->column->column_id }}">@lang('common.date_period_start')</label>
+                            <input
+                                type="date"
+                                id="fieldsInput-{{ $cm->column->column_id }}"
+                                name="fields[{{ $cm->column->column_id }}][start]"
+                                aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }}"
+                                class="form-control @if($errors->has('fields.'.$cm->column->column_id.'.start')) is-invalid @endif"
+                                data-column="{{ $cm->column->column_id }}"
+                                data-type="daterange"
+                                min="{{ $cm->getDateBoundConfig('min') }}"
+                                max="{{ $cm->getDateBoundConfig('max') }}"
+                                value="{{ old('fields.'. $cm->column->column_id .'.start', 
+                                optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from())->toDateString()) }}"
+                            />
+                            <span class="text-danger">
+                                {{ $errors->first('fields.'. $cm->column->column_id .'.start') }}
+                            </span>
+                        </div>
+                    <!-- Form fields for the date (of ending) -->
                     @if(old('date_type') == 'period' || !old('date_type') && $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from() != $details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to())
-                        <div class="collapse show date-period" data-column="{{ $cm->column->column_id }}">
+                        <div class="col-12 col-sm-6 collapse show date date-period" data-column="{{ $cm->column->column_id }}">
                     @else
-                        <div class="collapse date-period" data-column="{{ $cm->column->column_id }}">
+                        <div class="col-12 col-sm-6 collapse date date-period" data-column="{{ $cm->column->column_id }}">
                     @endif
-                        @include('includes.form_date_range', [
-                            'start_date' => [
-                                old('start_year', optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from())->year),
-                                old('start_month', optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from())->month),
-                                old('start_day', optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from())->day),
-                            ],
-                            'end_date' => [
-                                old('end_year', optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to())->year),
-                                old('end_month', optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to())->month),
-                                old('end_day', optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to())->day),
-                            ],
-                        ])
-                        @include('includes.form_input_help')
-                        <span class="text-danger">{{ $errors->first('fields.'. $cm->column->column_id .'.start') }}</span>
-                        @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', [
-                            'data_type' => 'daterange', 'column_id' => $cm->column->column_id
-                        ])
-                        <br/>
-                        <input
-                            type="button"
-                            class="btn btn-primary"
-                            onClick="checkDateRange({{ $cm->column->column_id }});"
-                            value="@lang('common.apply')"
-                        />
+                            <label for="fieldsInput-{{ $cm->column->column_id }}-end">@lang('common.date_period_end')</label>
+                            <input
+                                type="date"
+                                id="fieldsInput-{{ $cm->column->column_id }}-end"
+                                name="fields[{{ $cm->column->column_id }}][end]"
+                                aria-describedby="fieldsHelpBlock-{{ $cm->column->column_id }} fieldsFeedback-{{ $cm->column->column_id }}"
+                                class="form-control @if($errors->has('fields.'.$cm->column->column_id.'.end')) is-invalid @endif"
+                                data-column="{{ $cm->column->column_id }}"
+                                data-type="daterange"
+                                min="{{ $cm->getDateBoundConfig('min') }}"
+                                max="{{ $cm->getDateBoundConfig('max') }}"
+                                data-msg-invalid="@lang('common.invalid_daterange')"
+                                value="{{ old('fields.'. $cm->column->column_id .'.end', 
+                                optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to())->toDateString()) }}"
+                            />
+                            <span class="text-danger">
+                                {{ $errors->first('fields.'. $cm->column->column_id .'.end') }}
+                            </span>
+                        </div>
                     </div>
-                    <!-- Hidden form fields for time range passed to laravel controller -->
-                    <input
-                        type="hidden"
-                        id="fieldsInput-{{ $cm->column->column_id }}-start"
-                        name="fields[{{ $cm->column->column_id }}][start]"
-                        class="form-control date-period-start" 
-                        data-column="{{ $cm->column->column_id }}"
-                        value="{{ old('fields.'. $cm->column->column_id .'.start', 
-                        optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->from())->toDateString()) }}"
-                    />
-                    <input
-                        type="hidden"
-                        id="fieldsInput-{{ $cm->column->column_id }}-end"
-                        name="fields[{{ $cm->column->column_id }}][end]"
-                        class="form-control date-period-end"
-                        data-column="{{ $cm->column->column_id }}"
-                        value="{{ old('fields.'. $cm->column->column_id .'.end', 
-                        optional($details->firstWhere('column_fk', $cm->column->column_id)->value_daterange->to())->toDateString()) }}"
-                    />
+                    <span id="fieldsFeedback-{{ $cm->column->column_id }}" class="text-danger"></span>
+                    @include('includes.form_input_help')
+                    @includeWhen(isset($options['edit.revision']), 'includes.form_history_detail', [
+                        'data_type' => 'daterange', 'column_id' => $cm->column->column_id
+                    ])
                 </div>
                 <script type="text/javascript">
                     // Triggered when radio changed
                     $('.form-check input[name=date_type][value=point]').click(function(event) {
                         var column = $(this).data('column');
                         //alert('point ' + column);
-                        $('.date-point[data-column='+column+']').collapse('show');
                         $('.date-period[data-column='+column+']').collapse('hide');
+                        // Set end date to the same as start date
+                        $('#fieldsInput-'+column+'-end').val($('#fieldsInput-'+column).val());
+                        // Remove invalid decoration of input field
+                        $('#fieldsFeedback-'+column).text('');
+                        $('#fieldsInput-'+column+'-end').removeClass('is-invalid');
                     });
                     $('.form-check input[name=date_type][value=period]').click(function(event) {
                         var column = $(this).data('column');
                         //alert('period ' + column);
-                        $('.date-point').filter(function () {
-                            return $(this).data("column") === column;
-                        }).collapse('hide');
                         $('.date-period').filter(function () {
                             return $(this).data("column") === column;
                         }).collapse('show');
                     });
-                    // Triggered when date (point in time) was edited
-                    $('.date-point [type=date]').blur(function(event) {
+                    // Triggered when date was edited
+                    $('.date [type=date]').change(function(event) {
                         var column = $(this).data('column');
-                        //alert('point blur ' + column + ' ' + $(this).val());
-                        var date_start = $('.date-period-start').filter(function () {
-                            return $(this).data("column") === column;
-                        });
-                        var date_end = $('.date-period-end').filter(function () {
-                            return $(this).data("column") === column;
-                        });
-                        // Set hidden form fields to be sent to laravel controller
-                        date_start.val($(this).val());
-                        date_end.val($(this).val());
+                        //alert('date changed ' + column + ': ' + $(this).val());
+                        // Check period, otherwise set end date to start date
+                        if ($('#datePeriodRadio-'+column).prop('checked')) {
+                            checkValidDateRange(column);
+                        }
+                        else {
+                            $('#fieldsInput-'+column+'-end').val($('#fieldsInput-'+column).val());
+                        }
                     });
-                    // Perform checks on date range and merge values from all six single-value fields
-                    // to two date fields, to be sent to laravel controller
-                    function checkDateRange(column) {
-                        //var column = $(this).data('column');
-                        var date_start = $(".date-period-start").filter(function () {
-                            return $(this).data("column") === column;
+                    $('form').submit(function(event) {
+                        var errors = 0;
+                        $('.date-period').each(function () {
+                            //console.log($(this).data('column'));
+                            errors += checkValidDateRange($(this).data('column'));
                         });
-                        var date_end = $(".date-period-end").filter(function () {
-                            return $(this).data("column") === column;
-                        });
-                        var start_day = $("select[name='start_day']").filter(function () {
-                            return $(this).data("column") === column;
-                        });
-                        var start_month = $("select[name='start_month']").filter(function () {
-                            return $(this).data("column") === column;
-                        });
-                        var start_year = $("select[name='start_year']").filter(function () {
-                            return $(this).data("column") === column;
-                        });
-                        var end_day = $("select[name='end_day']").filter(function () {
-                            return $(this).data("column") === column;
-                        });
-                        var end_month = $("select[name='end_month']").filter(function () {
-                            return $(this).data("column") === column;
-                        });
-                        var end_year = $("select[name='end_year']").filter(function () {
-                            return $(this).data("column") === column;
-                        });
-                        // Check for invalid dates and adjust the day if necessary
-                        checkValidDate(start_day, start_month);
-                        checkValidDate(end_day, end_month);
-                        checkValidRange(start_day, start_month, start_year, end_day, end_month, end_year);
-                        // Set hidden form fields to be sent to laravel controller
-                        date_start.val(start_year.val() + "-" + start_month.val() + "-" + start_day.val());
-                        date_end.val(end_year.val() + "-" + end_month.val() + "-" + end_day.val());
-                    }
-                    // Check for invalid day values. Each month has a different amount of days
-                    function checkValidDate(day, month) {
-                        if (month.val() == 2 && day.val() > 28) {
-                            day.val("28");
+                        if(errors) {
+                            // Prevent submitting the form
+                            event.preventDefault();
+                            event.stopPropagation();
                         }
-                        if ((month.val() == 4 || month.val() == 6 || month.val() == 9 || month.val() == 11) && day.val() > 30) {
-                            day.val("30");
-                        }
-                    }
+                    });
                     // Check for end date to be later than start date
-                    function checkValidRange(d1, m1, y1, d2, m2, y2) {
-                        var start = new Date(y1.val(), m1.val(), d1.val());
-                        var end = new Date(y2.val(), m2.val(), d2.val());
+                    function checkValidDateRange(column) {
+                        var start = new Date($('#fieldsInput-'+column).val());
+                        var end = new Date($('#fieldsInput-'+column+'-end').val());
                         if ((end.getTime() - start.getTime()) < 0) {
-                            y2.val(parseInt(y1.val())+1);
+                            var error_message = $('#fieldsInput-'+column+'-end').data('msg-invalid');
+                            // Decorate input as invalid
+                            $('#fieldsFeedback-'+column).text(error_message);
+                            $('#fieldsInput-'+column+'-end').addClass('is-invalid');
+                            $('#fieldsInput-'+column+'-end').focus();
+                            return 1;
+                        }
+                        else {
+                            // Remove invalid decoration of input field
+                            $('#fieldsFeedback-'+column).text('');
+                            $('#fieldsInput-'+column+'-end').removeClass('is-invalid');
+                            return 0;
                         }
                     }
                 </script>

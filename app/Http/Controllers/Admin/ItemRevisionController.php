@@ -42,7 +42,12 @@ class ItemRevisionController extends Controller
                             ->orderBy('updated_at', 'desc')
                             ->paginate(10);
 
-        return view('admin.revision.list', compact('items'));
+        // Get current UI language
+        $lang = app()->getLocale();
+        // Get item types with localized names
+        $item_types = Localization::getItemTypes($lang);
+
+        return view('admin.revision.list', compact('items', 'item_types'));
     }
 
     /**
@@ -91,9 +96,11 @@ class ItemRevisionController extends Controller
 
         // Get localized names of columns
         $translations = Localization::getTranslations($lang, 'name');
+        // Get item types with localized names
+        $item_types = Localization::getItemTypes($lang);
 
         return view('admin.revision.show',
-            compact('item', 'revisions', 'details', 'colmap','lists', 'translations'));
+            compact('item', 'revisions', 'details', 'colmap','lists', 'item_types', 'translations'));
     }
 
     /**

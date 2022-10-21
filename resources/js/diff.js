@@ -95,8 +95,7 @@ var itemDiff = {
                     break;
                 case "daterange":
                     selector2 = '#fieldsInput-' + $(this).data('column');
-                    selector2 += ',#startDate-' + $(this).data('column');
-                    selector2 += ',#endDate-' + $(this).data('column');
+                    selector2 += ',#fieldsInput-' + $(this).data('column') + '-end';
                     break;
                 case "image":
                     // Change image and link for compared revision
@@ -176,7 +175,7 @@ var itemDiff = {
                 content = $(selector).val().trim();
                 break;
             case "daterange":
-                content = $(selector + '-start').val() + '-' + $(selector + '-end').val();
+                content = $(selector).val() + '-' + $(selector + '-end').val();
                 //console.log(content);
                 break;
             case "image":

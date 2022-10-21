@@ -139,24 +139,7 @@ return [
     */
     
     'import_batch_size' => 10,
-    
-    /*
-    |--------------------------------------------------------------------------
-    | Boundaries for date ranges / time spans
-    |--------------------------------------------------------------------------
-    |
-    | Set the first and last year for form inputs representing a date range.
-    | To make the upper boundary the current year, set 'end_year' to 'null',
-    | without any quotes!
-    | The boundary values could be overwritten for for any call of the included
-    | blade view, please see explanation in
-    | resources/views/includes/form_date_range.blade.php
-    |
-    */
-    
-    'start_year' => 1930,
-    'end_year' => null,
-    
+
     /*
     |--------------------------------------------------------------------------
     | Accepting terms is required for downloading
@@ -201,6 +184,17 @@ return [
     */
 
     'comments' => true,
+
+    /*
+    |--------------------------------------------------------------------------
+    | Enable taxa management
+    |--------------------------------------------------------------------------
+    |
+    | Disabling removes all the taxa features at all.
+    |
+    */
+
+    'taxa' => true,
 
     /*
     |--------------------------------------------------------------------------

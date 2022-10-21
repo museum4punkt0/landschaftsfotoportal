@@ -106256,8 +106256,7 @@ var itemDiff = {
 
         case "daterange":
           selector2 = '#fieldsInput-' + $(this).data('column');
-          selector2 += ',#startDate-' + $(this).data('column');
-          selector2 += ',#endDate-' + $(this).data('column');
+          selector2 += ',#fieldsInput-' + $(this).data('column') + '-end';
           break;
 
         case "image":
@@ -106347,7 +106346,7 @@ var itemDiff = {
         break;
 
       case "daterange":
-        content = $(selector + '-start').val() + '-' + $(selector + '-end').val(); //console.log(content);
+        content = $(selector).val() + '-' + $(selector + '-end').val(); //console.log(content);
 
         break;
 
@@ -107159,8 +107158,8 @@ var menu = {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! /var/www/html/chromosomes/resources/js/app.js */"./resources/js/app.js");
-module.exports = __webpack_require__(/*! /var/www/html/chromosomes/resources/sass/app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! /var/www/html/fotoportal/resources/js/app.js */"./resources/js/app.js");
+module.exports = __webpack_require__(/*! /var/www/html/fotoportal/resources/sass/app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

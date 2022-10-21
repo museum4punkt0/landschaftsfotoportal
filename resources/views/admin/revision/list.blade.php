@@ -2,6 +2,8 @@
 
 @section('content')
 
+@include('includes.modal_confirm_delete')
+
 <div class="container">
     @include('includes.alert_session_div')
 
@@ -19,7 +21,7 @@
                         <th colspan="1">@lang('common.name')</th>
                         <th colspan="1">@lang('items.item_type')</th>
                         <th colspan="1">@lang('common.updated')</th>
-                        <th colspan="4">@lang('common.actions')</th>
+                        <th colspan="1">@lang('common.actions')</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -48,10 +50,9 @@
                             </a>
                         </td>
                         <td>
-                            @foreach($item->item_type->values as $v)
-                                {{$v->value}}<br/>
-                            @endforeach
-                            Typ-ID {{$item->item_type_fk}}
+                            <a href="{{route('element.show', $item->item_type_fk)}}">
+                                {{ $item_types->getLocalizedName($item->item_type_fk) }}
+                            </a>
                         </td>
                         <td>
                             {{$item->editor->name}}, @lang('revisions.revision'):
@@ -59,22 +60,35 @@
                             {{$item->updated_at}}
                         </td>
                         <td>
-                            <form action="{{route('revision.show', $item->item_id)}}" method="GET">
-                                <button class="btn btn-primary" type="submit">@lang('common.show')</button>
-                            </form>
-                        </td>
-                        <td>
-                            <form action="{{route('revision.edit', $item)}}" method="GET">
-                                {{ csrf_field() }}
-                                <button class="btn btn-primary" type="submit">@lang('common.edit')</button>
-                            </form>
-                        </td>
-                        <td>
-                            <form action="{{route('revision.destroy.draft', $item)}}" method="POST">
-                                {{ csrf_field() }}
-                                @method('DELETE')
-                                <button class="btn btn-danger" type="submit">@lang('common.delete')</button>
-                            </form>
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
+                                    <a href="{{ route('revision.show', $item) }}" title="@lang('common.show')">
+                                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                        <i class="fas {{ Config::get('ui.icon_show') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </span>
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
+                                    <a href="{{ route('revision.edit', $item) }}" title="@lang('common.edit')">
+                                        <i class="fas fa-circle fa-stack-2x text-primary"></i>
+                                        <i class="fas {{ Config::get('ui.icon_edit') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </span>
+                            <span class="d-md-table-cell fa-btn">
+                                <span class="fa-stack fa-2x">
+                                    <a href="#" data-toggle="modal" data-target="#confirmDeleteModal"
+                                        data-href="{{ route('revision.destroy.draft', $item) }}"
+                                        data-message="@lang('revisions.confirm_delete', ['name' => $item->title])"
+                                        data-title="@lang('revisions.delete')"
+                                        title="@lang('common.delete')"
+                                    >
+                                        <i class="fas fa-circle fa-stack-2x text-danger"></i>
+                                        <i class="fas {{ Config::get('ui.icon_delete') }} fa-stack-1x fa-inverse"></i>
+                                    </a>
+                                </span>
+                            </span>
                         </td>
                     </tr>
                 @endforeach
