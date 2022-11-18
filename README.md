@@ -5,7 +5,7 @@
 * [Kurzbeschreibung](#Kurzbeschreibung)
 * [Entstehungskontext & Förderhinweis](#Entstehungskontext & Förderhinweis)
 * [Installation](#Installation)
-* [Benutzung / Usage](#Benutzung/Usage)
+* [Benutzung/Usage](#Benutzung/Usage)
 * [Beteiligung / Contributing](#Beteiligung / Contributing)
 * [Credits](#Credits)
 * [Lizenz](#Lizenz)
