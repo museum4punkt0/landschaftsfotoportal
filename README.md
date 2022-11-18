@@ -6,7 +6,6 @@
 * [Entstehungskontext & Förderhinweis](#Entstehungskontext & Förderhinweis)
 * [Installation](#Installation)
 * [Benutzung/Usage](#Benutzung/Usage)
-* [Beteiligung / Contributing](#Beteiligung / Contributing)
 * [Credits](#Credits)
 * [Lizenz](#Lizenz)
 
@@ -75,10 +74,6 @@ Weitere Informationen: www.museum4punkt0.de
 ## Benutzung / Usage
 
 Konfiguration und Nutzung der Anwendung sind im [Online-Handbuch](https://landschaftsfotoportal.senckenberg.de/handbuch/) beschrieben (wird stetig erweitert).
-
-## Beteiligung / Contributing
-
-wird derzeit noch intern abgestimmt und ergänzt...
 
 ## Credits
 
