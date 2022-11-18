@@ -34,7 +34,7 @@ Bereits unterstützte Features/Module:
 * Profil mit "Eigener Sammlung" für registrierte Nutzer
 * Taxonomie-Modul für Botanik-Webportale
 
-# Entstehungskontext & Förderhinweis
+## Entstehungskontext & Förderhinweis
 
 Das Landschaftsfotoportal ist entstanden im Verbundprojekt museum4punkt0 – Digitale Strategien für das Museum der Zukunft, Teilprojekt "Forschung in Museen erklären, verstehen, mitmachen".
 Das Projekt museum4punkt0 wird gefördert durch die Beauftragte der Bundesregierung für Kultur und Medien aufgrund eines Beschlusses des Deutschen Bundestages.
