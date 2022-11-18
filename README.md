@@ -1,5 +1,13 @@
 # Landschaftsfotoportal
 
+## Inhaltsverzeichnis
+
+* [Kurzbeschreibung](#Kurzbeschreibung)
+* [Installation](#Installation)
+* [Benutzung](#Benutzung)
+* [Credits](#Credits)
+* [Lizenz](#Lizenz)
+
 ## Kurzbeschreibung
 
 Das [Landschaftsfotoportal](https://www.senckenberg.de/de/engagement/buergerwissenschaften/erhalten-erschliessen-nutzbar-machen/) ist ein Citizen-Science-Angebot. Es ermöglicht den partizipativen Aufbau einer Bilddatenbank. Über eine benutzungsfreundliche [Webanwendung](https://landschaftsfotoportal.senckenberg.de/) werden Landschaftsfotografien aus privaten Beständen und deren Metadaten erfasst, erhalten und nutzbar gemacht. Die digitale Fotosammlung dokumentiert den Wandel der Lebensräume im vergangenen Jahrhundert und ist damit für viele Forschungsfragen wissenschaftlich wertvoll. Alle Bilddatensätze und Metadaten stehen für Forschungszwecke frei zur Verfügung und können von Nutzer\*innen ergänzt werden. Bürgerwissenschaftler\*innen können auf diese Weise einen wichtigen Beitrag zur Biodiversitätsforschung leisten.
