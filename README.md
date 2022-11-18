@@ -5,7 +5,7 @@
 * [Kurzbeschreibung](#Kurzbeschreibung)
 * [Installation](#Installation)
 * [Credits](#Credits)
-* [Lizenz](#Lizenz)
+* [Lizenz / License](#Lizenz/License)
 
 ## Kurzbeschreibung
 
