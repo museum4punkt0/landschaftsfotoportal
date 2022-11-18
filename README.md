@@ -4,7 +4,6 @@
 
 * [Kurzbeschreibung](#Kurzbeschreibung)
 * [Installation](#Installation)
-* [Benutzung/Usage](#Benutzung/Usage)
 * [Credits](#Credits)
 * [Lizenz](#Lizenz)
 
