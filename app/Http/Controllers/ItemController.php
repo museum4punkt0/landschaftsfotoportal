@@ -523,9 +523,15 @@ class ItemController extends Controller
     public function map(Request $request)
     {
         $column_ids['lon'] = Column::ofDataType('_float_')->ofItemType('_image_')->ofSubType('location_lon')
-            ->first()->column_id;
+            ->first()->column_id ?? null;
         $column_ids['lat'] = Column::ofDataType('_float_')->ofItemType('_image_')->ofSubType('location_lat')
-            ->first()->column_id;
+            ->first()->column_id ?? null;
+        // TODO: implement map module and improve error handling
+        throw_if(
+            !$column_ids['lon'] || !$column_ids['lat'],
+            ModuleNotFoundException::class,
+            __('modules.not_found', ['name' => 'map'])
+        );
         $column_ids['colmap'] = Column::ofDataType('_map_')->ofItemType('_image_')->first()->column_mapping()
             ->first()->colmap_id;
         Debugbar::debug($column_ids);
