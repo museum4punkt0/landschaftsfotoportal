@@ -53,9 +53,10 @@ Weitere Informationen: www.museum4punkt0.de
 * Application-Key erzeugen:
 `$ php artisan key:generate`
 * Datenbank-Tabellen erzeugen und mit Vorlagen füllen:
-`$ php artisan migrate:fresh --seed`
+`$ php artisan migrate:fresh`
 * Symbolischen Link für Storage erzeugen:
 `$ php artisan storage:link`
+* Die Installation ist nun beendet. Es sollte nun ein erster Nutzer angelegt werden um das System weiter einzurichten, wie im Kapitel "Ersteinrichtung" des Handbuches beschrieben.
 
 ## Benutzung / Usage
 
