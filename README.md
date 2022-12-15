@@ -47,7 +47,7 @@ Weitere Informationen: www.museum4punkt0.de
 
 ### Vorgehen am Beispiel von Debian 11 Bullseye
 * Installation der Basis-Software:
-`$ sudo apt install apache2 php php-gd php-xml php-pgsql postgresql composer`
+`$ sudo apt install apache2 php php-gd php-mbstring php-xml php-pgsql postgresql composer`
 * Apache-Module aktivieren:
 `$ sudo a2enmod rewrite && service apache2 restart`
 * Es wird empfohlen, Node.js and npm von [NodeSource](https://github.com/nodesource/distributions#debmanual) zu installieren, da die Paketversionen von Debian Stable versions veraltet sind.
